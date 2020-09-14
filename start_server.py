@@ -1,21 +1,19 @@
-import os, sys, time, shutil
-from os.path import join
+import os
 
-java_path = '/mnt/c/Program Files/Java/jre1.8.0_261/bin/java.exe'
+# A simple script that starts minecraft java server in a detached tmux session
+
 server_path = '/mnt/c/Users/DT/Desktop/MC/server'
 server_jar = f'{server_path}/server.jar'
-start_tmux = 'tmux new -d -s mcserver'
+start_new_tmux = 'tmux new -d -s mcserver'
 run_args = f'java -Xmx2G -Xms1G -jar {server_jar} nogui java'
-start_server_command = f'tmux send-keys -t mcserver.0 "{run_args}" ENTER'
-
-process = None
-
-def server_command(cmd):
-    process.stdin.write(f'{cmd}\n')
+start_server_command = f'tmux send-keys -t mcserver:1.0 "{run_args}" ENTER'
 
 def start_server():
     os.chdir(server_path)
-    os.system(start_tmux)
-    os.system(start_server_command)
+    #tmux_status = os.system(start_tmux)
+    if not os.system(start_server_command):
+        return True
 
-start_server()
+
+if __name__ == '__main__':
+    start_server()
