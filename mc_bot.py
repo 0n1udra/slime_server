@@ -1,4 +1,4 @@
-import discord, asyncio, os, time, json
+import discord, asyncio, os, time, json, csv
 from discord.ext import commands, tasks
 from datetime import datetime
 
@@ -12,10 +12,9 @@ if not TOKEN:
 
 bot = commands.Bot(command_prefix='?')
 
-def sprint(msg):
-    print(f'{datetime.today()} | {msg}')
+def sprint(msg): print(f'{datetime.today()} | {msg}')
 
-async def mc_command(command):
+async def mc_command(command): 
     os.system(f'tmux send-keys -t mcserver "{command}" ENTER')
 
 def format_args(args):
@@ -25,6 +24,11 @@ def format_args(args):
 def get_json(json_file):
     with open(mc_server_dir + '/' + json_file) as file: 
         return [i for i in json.load(file)]
+
+def get_csv(csv_file):
+    with open(csv_file) as file: 
+        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
+
 
 @bot.event
 async def on_ready():
@@ -76,7 +80,7 @@ async def server_pardon(ctx, player, *reason):
 @bot.command(aliases=['banlist', 'blist'])
 async def server_ban_list(ctx):
     embed = discord.Embed(title='Banned Players')
-    for player in [i for i in get_json('banned-players.json')]:
+    for player in [i for i in get_json('banned-players.json')]: 
         embed.add_field(name=player['name'], value=player['reason'])
     await ctx.send(embed=embed)
 
@@ -113,7 +117,8 @@ async def server_teleport(ctx, player, target, *reason):
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
     embed = discord.Embed(title='Help')
-    embed.add_field(name='ban', value='`?ban <player>`\nAfter 5s bans player')
+    for i in get_csv('command_info.csv'):
+        embed.add_field(name=i[0], value=f"`{i[1]}`\n{i[2]}")
     await ctx.send(embed=embed)
 
 bot.run(TOKEN)

@@ -1,0 +1,2 @@
+help, ?help, Shows this help page.
+ban, ?ban <user> [reason], After 5s bans a user, providing reason is optional.
