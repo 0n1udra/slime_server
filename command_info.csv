@@ -1,2 +1,14 @@
-help, ?help, Shows this help page.
-ban, ?ban <user> [reason], After 5s bans a user, providing reason is optional.
+Command name, ?command <required> [optional], Description.
+Help, ?help, Shows this help page.
+Save World, ?save, Save current world file.
+Server Say, ?say <message>, Server sends message to all active players.
+Whisper, ?tell <player> <message>, Whispers message to player.
+Kick, ?kick <player> [reason], Kick player after 5s, reason is optional.
+Ban, ?ban <player> [reason], After 5s bans player, providing reason is optional.
+Pardon, ?pardon <player> [reason], Pardons (unbans) player, optional reason can be provided.
+Kill, ?kill, <target> [reason], Kill player, default reason 'No reason given'.
+Delayed Kill, ?dkill <target> <seconds> [reason], Kills target after x seconds.
+Weather, ?weather <clear/rain/thunder> [minutes], Sets weather for x minutes, 0 for random.
+Show Banned, ?banlist, Shows banned players with the reason why.
+Show Server Operators, ?oplist, Shows list of server operators.
+Teleport, ?tp <select_user> <target_user> [reason], After 5s teleports selected player to targeted player.

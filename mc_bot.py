@@ -18,7 +18,7 @@ async def mc_command(command):
     os.system(f'tmux send-keys -t mcserver "{command}" ENTER')
 
 def format_args(args):
-    if not args: return "No reason given.."
+    if not args: return "No reason given"
     else: return ' '.join(args)
 
 def get_json(json_file):
@@ -113,12 +113,20 @@ async def server_teleport(ctx, player, target, *reason):
     await mc_command(f"/tp {player} {target}")
     await ctx.send(f"Teleported {player}.")
 
+
+# ========== World weather, etc
+@bot.command(aliases=['weather'])
+async def server_weather(ctx, state, duration=0):
+    await mc_command(f'/weather {state} {duration*60}')
+    await ctx.send("Weather set for {state} for {duration*60}.")
+
+
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
     embed = discord.Embed(title='Help')
     for i in get_csv('command_info.csv'):
-        embed.add_field(name=i[0], value=f"`{i[1]}`\n{i[2]}")
+        embed.add_field(name=i[0], value=f"`{i[1]}`\n{', '.join(i[2:])}", inline=False)
     await ctx.send(embed=embed)
 
 bot.run(TOKEN)
