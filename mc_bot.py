@@ -167,7 +167,7 @@ async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
     time.sleep(duration)
     await mc_command(f"/gamemode survival {player}")
     await ctx.send(f"{player} is back to survival.")
-    lprint("Set gamemode: {player} for {duration}")
+    lprint(f"Set gamemode: {player} for {duration}")
 
 
 # ========== World weather, time, etc
@@ -198,7 +198,7 @@ async def server_status(ctx):
 
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
-    if mc_start.start_server():
+    if mc_funcs.start_server():
         await ctx.send("Starting server...\nPlease wait 5s for status...")
     else:
         await ctx.send("Error starting server, contact administrator.")
