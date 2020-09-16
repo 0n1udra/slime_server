@@ -1,6 +1,6 @@
 import discord, asyncio, os, psutil, time, json, csv, datetime, mc_funcs
 from discord.ext import commands, tasks
-from mc_funcs import lprint, server_path
+from mc_funcs import lprint, server_path, file_path
 
 # Exits script if no token.
 with open('/home/slime/mc_bot_token.txt', 'r') as file: TOKEN = file.readline()
@@ -20,12 +20,12 @@ def format_args(args):
 
 # Gets data from json files in same local.
 def get_json(json_file):
-    os.chdir(os.getcwd())
+    os.chdir(file_path)
     with open(server_path + '/' + json_file) as file: 
         return [i for i in json.load(file)]
 
 def get_csv(csv_file):
-    os.chdir(os.getcwd())
+    os.chdir(file_path)
     with open(csv_file) as file: 
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
@@ -184,6 +184,7 @@ async def server_weather(ctx, state, duration=0):
 async def help_page(ctx):
     embed = discord.Embed(title='Help')
     for i in get_csv('command_info.csv'):
+        if not i: continue
         embed.add_field(name=i[0], value=f"`{i[1]}`\n{', '.join(i[2:])}", inline=False)
     await ctx.send(embed=embed)
     lprint("Fetching help page.")
@@ -192,8 +193,8 @@ async def help_page(ctx):
 @bot.command(aliases=['status', 'serverstatus'])
 async def server_status(ctx):
     if get_server_status():
-        await ctx.send("Server is now __**ACTIVE**__.\nYou can use `?stop` to halt server.")
-    else: await ctx.send("Server is __**INACTIVE**__.\nYou can use `?start` or `?restart` to activate server.")
+        await ctx.send("Server is now __**ACTIVE**__.")
+    else: await ctx.send("Server is __**INACTIVE**__.")
     lprint("Fetching server status.")
 
 @bot.command(aliases=['start', 'activate'])

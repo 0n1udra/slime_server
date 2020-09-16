@@ -3,7 +3,7 @@ Help, ?help/?h, Shows this help page.
 Server Status, ?status/?serverstatus, Shows server's running status.
 Start Server, ?start, Starts Minecraft server up.
 Stop Server, ?stop/?halt, Messages all players the server will be halted in 15s. Then will save the world and halt the server.
-Restart Server, ?restart/?reboot, Uses the ?stop command first then ?start command.
+Restart Server, ?restart/?reboot, Uses the `?stop` command first then ?start command.
 Save World, ?save/?sa, Save current world file.
 Server Say, ?say/?s <message>, Server sends message to all active players.
 Whisper, ?tell/?t <player> <message>, Whispers message to player.
@@ -20,3 +20,9 @@ Show Banned, ?banlist/?blist/?bl, Shows banned players with the reason why.
 Show Server Operators, ?oplist/?ops/?ol, Shows list of server operators.
 Add Server Operator, ?opadd <player>, Sets player as server operator.
 Remove Server Operator, ?opremove <player>, Remove players OP privileges.
+Get Backups, ?saves/?worlds/?backups, Shows list of created backups along with corresponding index number.
+Backup, ?backup/?clone <codename>, Create a new backup, need to provide a name or keywords.
+Restore, ?restore <index>, Restore to a saved backup, need to input a index number you get from `?saves`.
+Delete Save, ?delete/?rmsave <index>, Delete a backup.
+Project Rebirth, ?rebirth, Deleted current world save (does not make a backup!), creates a new world on next start.
+
