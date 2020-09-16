@@ -10,19 +10,19 @@ file_path = os.path.dirname(__file__)
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 server_path = f"{mc_path}/server"
 backups_path = f"{mc_path}/backups"
+server_jar_path = f'{server_path}/server.jar'
 
-server_jar = f'{server_path}/server.jar'
+new_bot = "tmux send-keys -t mcserver:2.2 {bot_file_path} ENTER"
 new_tmux = 'tmux new -d -s mcserver'
-java_args = f'java -Xmx2G -Xms1G -jar {server_jar} nogui java'
+java_args = f'java -Xmx2G -Xms1G -jar {server_jar_path} nogui java'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
-popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar, 'nogui', 'java']
+popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 'java']
 
 
 def start_server():
     os.chdir(server_path)
     try: os.system(new_tmux)
-    except:
-        lprint("Error starting detached tmux session with name: mcserver")
+    except: lprint("Error starting detached tmux session with name: mcserver")
 
     if not os.system(start_server_command): return True
 
@@ -77,7 +77,6 @@ def delete_world(world):
 
 
 if __name__ == '__main__':
-    pass
     print(get_world_from_index(2))
     #backup_world(
     #restore_world(0)
