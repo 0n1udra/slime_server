@@ -20,9 +20,9 @@ popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar, 'nogui', 'java
 
 def start_server():
     os.chdir(server_path)
-    if os.system(new_tmux):
+    try: os.system(new_tmux)
+    except:
         lprint("Error starting detached tmux session with name: mcserver")
-        return False
 
     if not os.system(start_server_command): return True
 
@@ -43,15 +43,42 @@ def backup_world(name='backup', mc_version='1.16.3'):
         return False
 
 def fetch_worlds(amount=5):
+    # Yields index and world folder name.
     os.chdir(backups_path)
     for index, world in enumerate(os.listdir(backups_path)[:amount]):
         yield f"{index})", world
 
-def restore_world(index):
-    pass
+def get_world_from_index(index):
+    os.chdir(backups_path)
+    return os.listdir(backups_path)[index]
+
+def restore_world(world=None, reset=False):
+    os.chdir(backups_path)
+
+    try: shutil.rmtree(server_path + '/world')
+    except: 
+        lprint("Error deleting current world folder at: " + server_path)
+        return False
+
+    # This function is used in ?rebirth discord command to create a new world.
+    if reset: return True
+
+    try: shutil.copytree(world, server_path + '/world')
+    except:
+        lprint("Error restoring: " + str(world))
+    
+
+def delete_world(world):
+    os.chdir(backups_path)
+    try: shutil.rmtree(world)
+    except: 
+        lprint("Error deleting current world folder at: " + str(backups_path))
+        return False
 
 
 if __name__ == '__main__':
     pass
+    print(get_world_from_index(2))
     #backup_world(
-    #star_server()
+    #restore_world(0)
+
