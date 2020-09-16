@@ -1,4 +1,4 @@
-import discord, asyncio, os, psutil, time, json, csv, datetime, mc_funcs
+import discord, asyncio, os, sys, psutil, time, json, csv, datetime, mc_funcs
 from discord.ext import commands, tasks
 from mc_funcs import lprint, server_path, file_path
 
@@ -153,8 +153,7 @@ async def player_gamemode(ctx, player, state, *reason):
 
 @bot.command(aliases=['timedgamemode', 'timedgm', 'tgm'])
 async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
-    try: 
-        duration = int(duration)
+    try: duration = int(duration)
     except: 
         await ctx.send("You buffoon, I need a number to set the duration!")
         return
@@ -182,13 +181,52 @@ async def server_weather(ctx, state, duration=0):
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
-    embed = discord.Embed(title='Help')
+    x, embed_page, contents = 0, 1, []
+    def new_embed(page): return discord.Embed(title=f'Help Page {page}')
+
+    embed = new_embed(embed_page)
     for i in get_csv('command_info.csv'):
         if not i: continue
         embed.add_field(name=i[0], value=f"`{i[1]}`\n{', '.join(i[2:])}", inline=False)
-    await ctx.send(embed=embed)
-    lprint("Fetching help page.")
+        x += 1
+        if not x % 25:
+            embed_page += 1
+            contents.append(embed)
+            embed = new_embed(embed_page)
+    contents.append(embed)
 
+    pages = 2
+    current_page = 1
+
+    # getting the message object for editing and reacting
+    print(contents)
+    message = await ctx.send(embed=contents[0])
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+
+    # This makes sure nobody except the command sender can interact with the "menu"
+    def check(reaction, user): return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+
+    while True:
+        try:
+            # waiting for a reaction to be added - times out after x seconds, 60 in this
+            reaction, user = await bot.wait_for("reaction_add", timeout=60, check=check)
+
+            if str(reaction.emoji) == "▶️" and current_page != pages:
+                current_page += 1
+                await message.edit(embed=contents[current_page -1])
+                await message.remove_reaction(reaction, user)
+            elif str(reaction.emoji) == "◀️" and current_page > 1:
+                current_page -= 1
+                await message.edit(embed=contents[current_page - 1])
+                await message.remove_reaction(reaction, user)
+
+            # removes reactions if the user tries to go forward on the last page or backwards on the first page
+            else: await message.remove_reaction(reaction, user)
+        # end loop if user doesn't react after x seconds
+        except asyncio.TimeoutError:
+            await message.delete()
+            break
 
 @bot.command(aliases=['status', 'serverstatus'])
 async def server_status(ctx):
@@ -292,15 +330,17 @@ async def delete_world(ctx, index):
 
 @bot.command(aliases=['newworld', 'startover', 'rebirth'])
 async def new_world(ctx):
-    mc_command("/say WARNING | Commencing project Rebirth in 5s!")
-    await ctx.send("Deleted current world, New world will be born on next start.")
-    await ctx.send("**NOTE:** Next startup will take longer, to create new world. Also, server settings will be preserved, this does not include things like player's gamemode status, inventory, etc.")
+    mc_command("/say WARNING | Commencing project Rebirth in T-5s!")
+    await ctx.send(":fire:**INCINERATED:**fire:")
+    await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
     mc_funcs.restore_world(reset=True)
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
+# Restarts this bot script.
+@bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
+async def bot_restart(ctx): os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 bot.run(TOKEN)
-

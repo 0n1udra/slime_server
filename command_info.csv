@@ -21,8 +21,8 @@ Show Server Operators, ?oplist/?ops/?ol, Shows list of server operators.
 Add Server Operator, ?opadd <player>, Sets player as server operator.
 Remove Server Operator, ?opremove <player>, Remove players OP privileges.
 Get Backups, ?saves/?worlds/?backups, Shows list of created backups along with corresponding index number.
-Backup, ?backup/?clone <codename>, Create a new backup, need to provide a name or keywords.
-Restore, ?restore <index>, Restore to a saved backup, need to input a index number you get from `?saves`.
-Delete Save, ?delete/?rmsave <index>, Delete a backup.
-Project Rebirth, ?rebirth, Deleted current world save (does not make a backup!), creates a new world on next start.
-
+Create Backup, ?backup/?clone <codename>, Create a new backup, need to provide a name or keywords.
+Restore Backup, ?restore <index>, Restore to a saved backup, need to input a index number you get from `?saves`.
+Delete Backup, ?delete/?rmsave <index>, Delete a backup.
+Reboot Bot, ?rebootbot/?rboot, Reboots this discord bot.
+[HADES Protocol], ?hades, *WARNING*: Activating HADES Protocol ||Deletes world save, generates new one on start.||
