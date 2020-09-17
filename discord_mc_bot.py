@@ -2,8 +2,9 @@ import discord, asyncio, os, sys, psutil, time, json, csv, datetime, mc_funcs
 from discord.ext import commands, tasks
 from mc_funcs import lprint, server_path, file_path
 
+bot_token_file = '/home/slime/mc_bot_token.txt'
 # Exits script if no token.
-with open('/home/slime/mc_bot_token.txt', 'r') as file: TOKEN = file.readline()
+with open(bot_token_file, 'r') as file: TOKEN = file.readline()
 if not TOKEN: print("Token Error."), exit()
 
 # Make sure this doesn't conflict with other bots.
@@ -338,12 +339,16 @@ async def new_world(ctx):
 
 # Edit server properties.
 @bot.command(aliases=['properties', 'property'])
-async def server_properties(ctx, target_property, value=''): await ctx.send(mc_funcs.edit_properties(target_property, value))
+async def server_properties(ctx, target_property, *value):
+    if not value: value = ''
+    else: value = ' '.join(value)
+    await ctx.send(mc_funcs.edit_properties(target_property, value))
 
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
 async def bot_restart(ctx):
     os.chdir(file_path)
+    await ctx.send("***Rebooting Bot...***")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 

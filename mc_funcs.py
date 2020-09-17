@@ -1,7 +1,10 @@
-#from bs4 import BeautifulSoup
-import os, shutil, datetime, fileinput
+from bs4 import BeautifulSoup
+import os, shutil, datetime, fileinput, urllib, re
+
 
 def lprint(msg): print(f"{datetime.datetime.now()} | {msg}")
+
+new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
 file_path = os.getcwd()
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
@@ -19,11 +22,9 @@ popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 
 
 def start_server():
     os.chdir(server_path)
-
     # Tries starting new detached tmux session.
     try: os.system(new_tmux)
     except: lprint("Error starting detached tmux session with name: mcserver")
-
     if not os.system(start_server_command): return True
 
 def backup_world(name='backup', mc_version='1.16.3'):
@@ -77,26 +78,39 @@ def delete_world(world):
 
 def edit_properties(target_property=None, value=''):
     os.chdir(file_path)
-    return_line = None
+    return_line = ''
     with fileinput.FileInput(properties_file, inplace=True, backup='.bak') as file:
         for line in file:
             split_line = line.split('=', 1)
-            if target_property == split_line[0] and len(split_line) > 1:
+            if target_property == 'all':
+                return_line += F"`{line.rstrip()}`\n"
+                print(line, end='')
+            elif target_property == split_line[0] and len(split_line) > 1:
                 if value:
                     split_line[1] = value
                     new_line = '='.join(split_line)
-                    print(new_line, end='\n')
                     return_line = f"**Updated Property:** `{line}` > `{new_line}`.\nRestart to apply changes."
+                    print(new_line, end='')
                 else:
-                    print(line, end='')
                     return_line = f"`{'='.join(split_line)}`"
+                    print(line, end='')
             else: print(line, end='')
 
     # Sends Discord message saying property not found.
-    if return_line is None:
-        return "404: Property not found!"
-    else: return return_line
+    if return_line:
+        return return_line
+    else: return "**404:** Property not found!"
+
+def download_new_server():
+    html_page = urllib.request.urlopen(new_server_url)
+    soup = BeautifulSoup(html_page)
+    links = []
+
+    for link in soup.findAll('a', attrs={'href': re.compile("^http://")}): links.append(link.get('href'))
+
+    return links
 
 
 if __name__ == '__main__':
+    print(edit_properties('all'))
     pass
