@@ -1,28 +1,29 @@
 Command Name, ?command <required> [optional], Description.
 Help, ?help/?h, Shows this help page.
 Server Status, ?status/?serverstatus, Shows server's running status.
-Start Server, ?start, Starts Minecraft server up.
-Stop Server, ?stop/?halt, Messages all players the server will be halted in 15s. Then will save the world and halt the server.
-Restart Server, ?restart/?reboot, Uses the `?stop` command first then ?start command.
+Server Start, ?start, Starts Minecraft server up.
+Server Stop, ?stop/?halt, Messages all players the server will be halted in 15s. Then will save the world and halt the server.
+Server Restart, ?restart/?reboot, Uses the `?stop` command first then ?start command.
 Save World, ?save/?sa, Save current world file.
-Server Say, ?say/?s <message>, Server sends message to all active players.
+Say, ?say/?s <message>, Server sends message to all active players.
 Whisper, ?tell/?t <player> <message>, Whispers message to player.
 Kick, ?kick/?k <player> [reason], Kick player after 5s, reason is optional.
 Ban, ?ban/?b <player> [reason], After 5s bans player, providing reason is optional.
+Ban List, ?banlist/?blist/?bl, Shows banned players with the reason why.
 Pardon, ?pardon/?unban/?p <player> [reason], Pardons (unbans) player, optional reason can be provided.
 Kill, ?kill <target> [reason], Kill player, default reason 'No reason given'.
-Delayed Kill, ?delaykill/?dkill/?dk <target> <seconds> [reason], Kills target after x seconds.
+Kill Delayed, ?delaykill/?dkill/?dk <target> <seconds> [reason], Kills target after x seconds.
 Teleport, ?teleport/?tp <select_user> <target_user> [reason], After 5s teleports player to targeted player.
 Game Mode, ?gamemode/?gm <player> <mode> [reason], Set player's game mode.
-Timed Game Mode, ?timedgamemode/?tgm <player> <state> <duration> [reason], Timed game mode change.
+Game Mode Timed, ?timedgamemode/?tgm <player> <state> <duration> [reason], Timed game mode change.
 Weather, ?weather <clear/rain/thunder> [minutes], Sets weather for x minutes, 0 for random.
-Show Banned, ?banlist/?blist/?bl, Shows banned players with the reason why.
-Show Server Operators, ?oplist/?ops/?ol, Shows list of server operators.
-Add Server Operator, ?opadd <player>, Sets player as server operator.
-Remove Server Operator, ?opremove <player>, Remove players OP privileges.
+OP List, ?oplist/?ops/?ol, Shows list of server operators.
+OP Add, ?opadd <player>, Sets player as server operator.
+OP Remove, ?opremove <player>, Remove players OP privileges.
 Get Backups, ?saves/?worlds/?backups, Shows list of created backups along with corresponding index number.
-Create Backup, ?backup/?clone <codename>, Create a new backup, need to provide a name or keywords.
-Restore Backup, ?restore <index>, Restore to a saved backup, need to input a index number you get from `?saves`.
-Delete Backup, ?delete/?rmsave <index>, Delete a backup.
+Backups New, ?backup/?clone <codename>, Create a new backup, need to provide a name or keywords.
+Backups Restore, ?restore <index>, Restore to a saved backup, need to input a index number you get from `?saves`.
+Backups Delete, ?delete/?rmsave <index>, Delete a backup.
+Properties File, ?property <property name> [new value], Check and change server server.properties file.
 Reboot Bot, ?rebootbot/?rboot, Reboots this discord bot.
 [HADES Protocol], ?hades, *WARNING*: Activating HADES Protocol ||Deletes world save, generates new one on start.||
