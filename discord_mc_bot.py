@@ -36,6 +36,12 @@ async def on_ready():
     lprint("Bot PRIMED.")
 
 # ========== Common Server Functions.
+@bot.command(aliases=['/', 'command'])
+async def server_command(ctx, *args):
+    args = format_args(args)
+    mc_command(f"/{args}")
+
+
 @bot.command(aliases=['save', 'sa'])
 async def server_save(ctx):
     mc_command('/save-all')
@@ -116,6 +122,19 @@ async def server_op_remove(ctx, player, *reason):
     await ctx.send(f"`{player}` stripped of Godhood!")
     lprint(f"Removed server op: {player}")
 
+@bot.command(aliases=['top', 'timedop'])
+async def server_timed_op(ctx, player, time_limit=1):
+    await ctx.send(f"Granting `{player}` OP status for {time_limit}m!")
+    mc_command(f"/say INFO | {player} granted God status for {time_limit}m!")
+    mc_command(f"/op {player}")
+    lprint(f"OP {player} for {time_limit}.")
+    time.sleep(time_limit*60)
+    await ctx.send(f"Removed `{player}` OP status!")
+    mc_command(f"/say INFO | {player} is back to being a mortal.")
+    mc_command(f"/deop {player}")
+    lprint(f"Remove OP {player}")
+
+
 
 # ========== Player: gamemode, kill, tp, etc
 @bot.command(aliases=['kill', 'assassinate'])
@@ -171,61 +190,29 @@ async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
 
 # ========== World weather, time, etc
 @bot.command(aliases=['weather'])
-async def server_weather(ctx, state, duration=0):
+async def world_weather(ctx, state, duration=0):
     mc_command(f'/weather {state} {duration*60}')
     if duration: 
         await ctx.send(f"I see some `{state}` in the near future.")
     else: await ctx.send(f"Forecast entails `{state}`.")
     lprint(f"Weather set to: {state} for {duration}")
 
-# ========== Server Start, stop, status, backup, restore, etc
-@bot.remove_command("help")
-@bot.command(aliases=['help', 'h'])
-async def help_page(ctx):
-    x, embed_page, contents = 0, 1, []
-    pages, current_page, page_limit = 2, 1, 15
-    def new_embed(page): return discord.Embed(title=f'Help Page {page}')
-
-    embed = new_embed(embed_page)
-    for i in get_csv('command_info.csv'):
-        if not i: continue
-        embed.add_field(name=i[0], value=f"`{i[1]}`\n{', '.join(i[2:])}", inline=False)
-        x += 1
-        if not x % page_limit:
-            embed_page += 1
-            contents.append(embed)
-            embed = new_embed(embed_page)
-    contents.append(embed)
+@bot.command(aliases=['settime', 'time'])
+async def world_time(ctx, set_time=None):
+    if set_time:
+        mc_command(f"/time set {set_time}")
+        await ctx.send("Time updated!")
+    else: await ctx.send("Need time input, like: `12`, `day`")
 
 
-    # getting the message object for editing and reacting
-    message = await ctx.send(embed=contents[0])
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-
-    # This makes sure nobody except the command sender can interact with the "menu"
-    def check(reaction, user): return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
-
-    while True:
-        try:
-            # waiting for a reaction to be added - times out after x seconds, 60 in this
-            reaction, user = await bot.wait_for("reaction_add", timeout=60, check=check)
-
-            if str(reaction.emoji) == "▶️" and current_page != pages:
-                current_page += 1
-                await message.edit(embed=contents[current_page -1])
-                await message.remove_reaction(reaction, user)
-            elif str(reaction.emoji) == "◀️" and current_page > 1:
-                current_page -= 1
-                await message.edit(embed=contents[current_page - 1])
-                await message.remove_reaction(reaction, user)
-
-            # removes reactions if the user tries to go forward on the last page or backwards on the first page
-            else: await message.remove_reaction(reaction, user)
-        # end loop if user doesn't react after x seconds
-        except asyncio.TimeoutError:
-            await message.delete()
-            break
+# ========== Server Start, status, backup, update, etc
+@bot.command(aliases=['motd', 'servermessage'])
+async def server_motd(ctx, *message):
+    if message:
+        message = format_args(message)
+        mc_funcs.edit_properties('motd', message)
+        await ctx.send("Message of the day updates!")
+    else: await ctx.send(mc_funcs.edit_properties('motd'))
 
 @bot.command(aliases=['status', 'serverstatus'])
 async def server_status(ctx):
@@ -237,13 +224,12 @@ async def server_status(ctx):
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
     if mc_funcs.start_server():
-        await ctx.send("***Starting server...***")
+        await ctx.send("***Booting Server...***")
     else: await ctx.send("**Error** starting server, contact administrator!")
     time.sleep(5)
     await ctx.send("***Fetching server status...***")
     await ctx.invoke(bot.get_command('status'))
     lprint("Starting server.")
-
 
 @bot.command(aliases=['stop', 'deactivate', 'halt'])
 async def server_stop(ctx):
@@ -259,15 +245,14 @@ async def server_stop(ctx):
 @bot.command(aliases=['restart', 'reboot'])
 async def server_restart(ctx):
     lprint("Restarting server.")
-    if get_server_status():
-        await ctx.invoke(bot.get_command('stop'))
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
 
-@bot.command(aliases=['saves', 'worlds', 'backups', 'showsaves', 'showbackups'])
+@bot.command(aliases=['saves', 'worlds', 'backups', 'showsaves', 'showbackups', 'sb'])
 async def fetch_worlds(ctx, amount=5):
-    embed = discord.Embed(title='World Saves')
-    for index, save in mc_funcs.fetch_worlds(5): 
+    embed = discord.Embed(title='World Backups')
+    for index, save in mc_funcs.fetch_worlds(amount):
         embed.add_field(name=index, value=f"`{save}`", inline=False)
 
     await ctx.send(embed=embed)
@@ -275,7 +260,7 @@ async def fetch_worlds(ctx, amount=5):
     await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
     lprint(f"Fetching latest {amount} world saves.")
 
-@bot.command(aliases=['backup', 'clone'])
+@bot.command(aliases=['backup', 'clone', 'saveworld'])
 async def backup_world(ctx, *name):
     if not name:
         await ctx.send("Hey! I need a name or keywords to make a backup!")
@@ -295,7 +280,7 @@ async def backup_world(ctx, *name):
     lprint("New backup: " + backup)
 
 
-@bot.command(aliases=['restore', 'jumpto'])
+@bot.command(aliases=['restore', 'jumpto', 'saverestore', 'restoresave', 'worldrestore', 'restoreworld'])
 async def restore_world(ctx, index=None):
     try: index = int(index)
     except:
@@ -314,7 +299,7 @@ async def restore_world(ctx, index=None):
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
-@bot.command(aliases=['deletesave', 'rmsave', 'delete', 'killsave', 'killworld', 'ksave'])
+@bot.command(aliases=['deletesave', 'rmsave', 'delete', 'deleteworld', 'killworld', 'ksave'])
 async def delete_world(ctx, index):
     try: index = int(index)
     except:
@@ -344,6 +329,98 @@ async def server_properties(ctx, target_property, *value):
     else: value = ' '.join(value)
     await ctx.send(mc_funcs.edit_properties(target_property, value))
 
+@bot.command(aliases=['update', 'serverupdate'])
+async def server_update(ctx):
+    lprint("**Updating** `server.jar`...")
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    time.sleep(5)
+    server = mc_funcs.download_new_server()
+    if server:
+        await ctx.send(f"Downloaded latest version: `{server}`!")
+        time.sleep(3)
+        await ctx.invoke(bot.get_command('start'))
+    else: await ctx.send("**Error:** Updating server. Suggest restoring from a backup.")
+
+@bot.command(aliases=['version', 'ver'])
+async def server_version(ctx):
+    await ctx.send(f"`{mc_funcs.get_minecraft_version()}`")
+    lprint("Get Minecraft server version.")
+
+@bot.command(aliases=['serverlist', 'servers', 'serversaves', 'serverbackups'])
+async def server_list(ctx, amount=5):
+    embed = discord.Embed(title='Server Backups')
+    for index, save in mc_funcs.fetch_servers(amount):
+        embed.add_field(name=index, value=f"`{save}`", inline=False)
+
+    await ctx.send(embed=embed)
+    await ctx.send("Use `?serverrestore <index>` to restore server.")
+    await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
+    lprint(f"Fetched latest {amount} world saves.")
+
+@bot.command(aliases=['serverbackup', 'backupserver'])
+async def server_backup(ctx, *name):
+    if not name:
+        await ctx.send("Hey! I need a name or keywords to make a backup!")
+        return
+
+    name = format_args(name)
+
+    await ctx.send("***Backing Up...***")
+    mc_command(f"/save-all")
+    time.sleep(5)
+    backup = mc_funcs.backup_server(name)
+    print(backup)
+    if backup:
+        await ctx.send(f"New backup:\n`{backup}`.")
+    else: await ctx.send("**Error** saving server!")
+    await ctx.invoke(bot.get_command('servers'))
+    lprint("New backup: " + backup)
+
+
+@bot.command(aliases=['serverrestore', 'restoreserver'])
+async def server_restore(ctx, index=None):
+    try: index = int(index)
+    except:
+        await ctx.send("I need a index number of world to restore, use `?saves` to get list of saves")
+        return
+
+    restore = mc_funcs.get_server_from_index(index)
+    lprint("Restoring to: " + restore)
+    await ctx.send(f"***Restoring...*** `{restore}`")
+    mc_command(f"/say WARNING | Initiating jump to save point in 5s! | {restore}")
+    time.sleep(5)
+
+    # Stops server if running
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    if mc_funcs.restore_server(restore):
+        await ctx.send("Server **Restored!**")
+    else: await ctx.send("**Error:** Could not restore server!")
+    time.sleep(3)
+    await ctx.invoke(bot.get_command('start'))
+
+@bot.command(aliases=['deleteserver', 'rmserver', 'serverdelete', 'removeserver', 'serverremove'])
+async def server_delete(ctx, index):
+    try: index = int(index)
+    except:
+        await ctx.send("Need a index number of world to obliterate, use `?saves` to get list of saves")
+        return
+
+    to_delete = mc_funcs.get_server_from_index(index)
+    mc_funcs.delete_server(to_delete)
+    await ctx.send(f"Server backup deleted!")
+    await ctx.invoke(bot.get_command('servers'))
+    lprint("Deleted: " + to_delete)
+
+@bot.command(aliases=['serverreset', 'resetserver'])
+async def server_reset(ctx):
+    mc_command("/say WARNING | Resetting server in 5s!")
+    await ctx.send("**Resetting Server...**")
+    await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    mc_funcs.restore_server(reset=True)
+    time.sleep(5)
+    await ctx.invoke(bot.get_command('start'))
+
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
 async def bot_restart(ctx):
@@ -351,5 +428,51 @@ async def bot_restart(ctx):
     await ctx.send("***Rebooting Bot...***")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
+@bot.remove_command("help")
+@bot.command(aliases=['help', 'h'])
+async def help_page(ctx):
+    x, embed_page, contents = 0, 1, []
+    pages, current_page, page_limit = 3, 1, 15
+    def new_embed(page): return discord.Embed(title=f'Help Page {page}/{pages}')
+
+    embed = new_embed(embed_page)
+    for i in get_csv('command_info.csv'):
+        if not i: continue
+        embed.add_field(name=i[0], value=f"{i[1]}\n{', '.join(i[2:])}", inline=False)
+        x += 1
+        if not x % page_limit:
+            embed_page += 1
+            contents.append(embed)
+            embed = new_embed(embed_page)
+    contents.append(embed)
+
+    # getting the message object for editing and reacting
+    message = await ctx.send(embed=contents[0])
+    await message.add_reaction("◀️")
+    await message.add_reaction("▶️")
+
+    # This makes sure nobody except the command sender can interact with the "menu"
+    def check(reaction, user): return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+
+    while True:
+        try:
+            # waiting for a reaction to be added - times out after x seconds, 60 in this
+            reaction, user = await bot.wait_for("reaction_add", timeout=60, check=check)
+
+            if str(reaction.emoji) == "▶️" and current_page != pages:
+                current_page += 1
+                await message.edit(embed=contents[current_page -1])
+                await message.remove_reaction(reaction, user)
+            elif str(reaction.emoji) == "◀️" and current_page > 1:
+                current_page -= 1
+                await message.edit(embed=contents[current_page - 1])
+                await message.remove_reaction(reaction, user)
+
+            # removes reactions if the user tries to go forward on the last page or backwards on the first page
+            else: await message.remove_reaction(reaction, user)
+        # end loop if user doesn't react after x seconds
+        except asyncio.TimeoutError:
+            await message.delete()
+            break
 
 bot.run(TOKEN)
