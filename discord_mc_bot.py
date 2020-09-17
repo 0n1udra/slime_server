@@ -182,6 +182,7 @@ async def server_weather(ctx, state, duration=0):
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
     x, embed_page, contents = 0, 1, []
+    pages, current_page, page_limit = 2, 1, 15
     def new_embed(page): return discord.Embed(title=f'Help Page {page}')
 
     embed = new_embed(embed_page)
@@ -189,17 +190,14 @@ async def help_page(ctx):
         if not i: continue
         embed.add_field(name=i[0], value=f"`{i[1]}`\n{', '.join(i[2:])}", inline=False)
         x += 1
-        if not x % 25:
+        if not x % page_limit:
             embed_page += 1
             contents.append(embed)
             embed = new_embed(embed_page)
     contents.append(embed)
 
-    pages = 2
-    current_page = 1
 
     # getting the message object for editing and reacting
-    print(contents)
     message = await ctx.send(embed=contents[0])
     await message.add_reaction("◀️")
     await message.add_reaction("▶️")
@@ -338,9 +336,15 @@ async def new_world(ctx):
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
+# Edit server properties.
+@bot.command(aliases=['properties', 'property'])
+async def server_properties(ctx, target_property, value=''): await ctx.send(mc_funcs.edit_properties(target_property, value))
+
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
-async def bot_restart(ctx): os.execl(sys.executable, sys.executable, *sys.argv)
+async def bot_restart(ctx):
+    os.chdir(file_path)
+    os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 bot.run(TOKEN)

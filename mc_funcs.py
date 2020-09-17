@@ -1,16 +1,14 @@
 #from bs4 import BeautifulSoup
-import shutil as su
-import os, shutil, asyncio, datetime
-from subprocess import Popen, PIPE
+import os, shutil, datetime, fileinput
 
 def lprint(msg): print(f"{datetime.datetime.now()} | {msg}")
 
-
-file_path = os.path.dirname(__file__)
+file_path = os.getcwd()
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 server_path = f"{mc_path}/server"
 backups_path = f"{mc_path}/backups"
 server_jar_path = f'{server_path}/server.jar'
+properties_file = f"{server_path}/server.properties"
 
 new_bot = "tmux send-keys -t mcserver:2.2 {bot_file_path} ENTER"
 new_tmux = 'tmux new -d -s mcserver'
@@ -21,6 +19,8 @@ popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 
 
 def start_server():
     os.chdir(server_path)
+
+    # Tries starting new detached tmux session.
     try: os.system(new_tmux)
     except: lprint("Error starting detached tmux session with name: mcserver")
 
@@ -75,9 +75,28 @@ def delete_world(world):
         lprint("Error deleting current world folder at: " + str(backups_path))
         return False
 
+def edit_properties(target_property=None, value=''):
+    os.chdir(file_path)
+    return_line = None
+    with fileinput.FileInput(properties_file, inplace=True, backup='.bak') as file:
+        for line in file:
+            split_line = line.split('=', 1)
+            if target_property == split_line[0] and len(split_line) > 1:
+                if value:
+                    split_line[1] = value
+                    new_line = '='.join(split_line)
+                    print(new_line, end='\n')
+                    return_line = f"**Updated Property:** `{line}` > `{new_line}`.\nRestart to apply changes."
+                else:
+                    print(line, end='')
+                    return_line = f"`{'='.join(split_line)}`"
+            else: print(line, end='')
+
+    # Sends Discord message saying property not found.
+    if return_line is None:
+        return "404: Property not found!"
+    else: return return_line
+
 
 if __name__ == '__main__':
-    print(get_world_from_index(2))
-    #backup_world(
-    #restore_world(0)
-
+    pass
