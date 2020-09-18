@@ -1,12 +1,7 @@
 from bs4 import BeautifulSoup
-import os, shutil, datetime, fileinput, urllib, re, requests
+import os, shutil, datetime, fileinput, requests
 
-
-def lprint(msg): print(f"{datetime.datetime.now()} | {msg}")
-
-folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-new_server_url = 'https://www.minecraft.net/en-us/download/server'
-
+# Updates these to your liking.
 file_path = os.getcwd()
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 server_path = f"{mc_path}/server"
@@ -16,12 +11,18 @@ server_backups_path = f"{mc_path}/server_backups"
 properties_file = f"{server_path}/server.properties"
 version_file = f"{server_path}/version.txt"
 
+folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
+new_server_url = 'https://www.minecraft.net/en-us/download/server'
+
+# tmux and java required... obviously.
 new_bot = "tmux send-keys -t mcserver:2.2 {bot_file_path} ENTER"
 new_tmux = 'tmux new -d -s mcserver'
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_path} nogui java'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
 popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 'java']
 
+def lprint(msg):
+    print(f"{datetime.datetime.now()} | {msg}")
 
 def start_server():
     # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
@@ -33,29 +34,32 @@ def start_server():
     # Tries starting new detached tmux session.
     try: os.system(new_tmux)
     except: lprint("Error starting detached tmux session with name: mcserver")
+
     if not os.system(start_server_command): return True
 
 # ========== World Saves.
 def backup_world(name='backup'):
     os.chdir(server_path)
-    if not os.path.isdir(backups_path): os.mkdir(backups_path)
+    if not os.path.isdir(backups_path):
+        os.mkdir(backups_path)
 
-    new_backup = f"({folder_timestamp}) {get_minecraft_version()} {name}"
-    new_backup_path = backups_path + '/' + new_backup
-    shutil.copytree(server_path + '/world', backups_path + '/' + new_backup)
+    new_name = f"({folder_timestamp}) {get_minecraft_version()} {name}"
+    new_name_path = backups_path + '/' + new_name
+    shutil.copytree(server_path + '/world', backups_path + '/' + new_name)
 
-    if os.path.isdir(new_backup_path):
-        lprint("Backed up to: " + new_backup_path)
-        return new_backup
+    if os.path.isdir(new_name_path):
+        lprint("Backed up to: " + new_name_path)
+        return new_name
     else: 
-        lprint("Error backing up world folder to: " + new_backup_path)
+        lprint("Error backing up world folder to: " + new_name_path)
         return False
 
+# Yields index and world folder name.
 def fetch_worlds(amount=5):
-    # Yields index and world folder name.
     os.chdir(backups_path)
     for index, world in enumerate(os.listdir(backups_path)[:amount]):
-        if os.path.isdir(world): yield f"{index})", world
+        if os.path.isdir(world):
+            yield f"{index})", world
 
 def get_world_from_index(index):
     os.chdir(backups_path)
@@ -102,15 +106,20 @@ def download_new_server():
     soup = BeautifulSoup(minecraft_website.text, 'html.parser')
     # Finds Minecraft server.jar urls in div class.
     div_agenda = soup.find_all('div', class_='minecraft-version')
-    for i in div_agenda[0].find_all('a'): jar_download_url = f"{i.get('href')}"
+    for i in div_agenda[0].find_all('a'):
+        jar_download_url = f"{i.get('href')}"
 
     # Downloads new server jar if found url.
-    if jar_download_url:
-        mc_ver = get_minecraft_version(get_latest=True)
-        with open(server_path + '/server.jar', 'wb') as jar_file: jar_file.write(requests.get(jar_download_url).content)
-        # Updates server version.txt. Using seperate file because server.properties will remove foreign data on server start.
-        with open(version_file, 'w') as f: f.write(mc_ver)
-        return mc_ver
+    if not jar_download_url: return
+
+    mc_ver = get_minecraft_version(get_latest=True)
+    with open(server_path + '/server.jar', 'wb') as jar_file:
+        jar_file.write(requests.get(jar_download_url).content)
+
+    # Updates server version.txt. Using seperate file because server.properties will remove foreign data on server start.
+    with open(version_file, 'w') as f:
+        f.write(mc_ver)
+    return mc_ver
 
 def fetch_servers(amount=5):
     # Yields index and world folder name.
@@ -124,17 +133,19 @@ def get_server_from_index(index):
 
 def backup_server(name='backup'):
     os.chdir(mc_path)
-    if not os.path.isdir(server_backups_path): os.mkdir(server_backups_path)
 
-    new_backup = f"({folder_timestamp}) {get_minecraft_version()} {name}"
-    new_backup_path = backups_path + '/' + new_backup
-    shutil.copytree(server_path, server_backups_path + '/' + new_backup)
+    if not os.path.isdir(server_backups_path):
+        os.mkdir(server_backups_path)
 
-    if os.path.isdir(new_backup_path):
-        lprint("Server backup saved to: " + new_backup_path)
-        return new_backup
+    new_name = f"({folder_timestamp}) {get_minecraft_version()} {name}"
+    new_name_path = backups_path + '/' + new_name
+    shutil.copytree(server_path, server_backups_path + '/' + new_name)
+
+    if os.path.isdir(new_name_path):
+        lprint("Server backup saved to: " + new_name_path)
+        return new_name
     else:
-        lprint("Error backing up server to: " + new_backup_path)
+        lprint("Error backing up server to: " + new_name_path)
         return False
 
 def restore_server(server=None, reset=False):
@@ -146,11 +157,12 @@ def restore_server(server=None, reset=False):
         download_new_server()
         with open(server_path + '/eula.txt', 'w') as f: f.write("eula=true")
 
-    if server:
-        try:
-            os.system(f'cd "{server_path}" && cp -r "{server_backups_path}/{server}"/* ./')
-            return True
-        except: return False
+    if not server: return
+
+    try:
+        os.system(f'cd "{server_path}" && cp -r "{server_backups_path}/{server}"/* ./')
+        return True
+    except: return False
 
 def delete_server(server):
     os.chdir(server_backups_path)
@@ -159,14 +171,13 @@ def delete_server(server):
         return True
     except: lprint("Error deleting server at: " + str(server_backups_path))
 
-
+# Reads server.properties file and edits inplace.
 def edit_properties(target_property=None, value=''):
     os.chdir(file_path)
     return_line = ''
     with fileinput.FileInput(properties_file, inplace=True, backup='.bak') as file:
         for line in file:
             split_line = line.split('=', 1)
-            # Get server version, need this line because
             if target_property == 'all':
                 return_line += F"`{line.rstrip()}`\n"
                 print(line, end='')

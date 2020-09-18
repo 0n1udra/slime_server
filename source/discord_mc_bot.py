@@ -4,16 +4,19 @@ from mc_funcs import lprint, server_path, file_path
 
 bot_token_file = '/home/slime/mc_bot_token.txt'
 # Exits script if no token.
-with open(bot_token_file, 'r') as file: TOKEN = file.readline()
+with open(bot_token_file, 'r') as file:
+    TOKEN = file.readline()
 if not TOKEN: print("Token Error."), exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
 # Sends command to tmux window running server.
-def mc_command(command): os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
+def mc_command(command):
+    os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
 
-def get_server_status(): return 'java' in (p.name() for p in psutil.process_iter())
+def get_server_status():
+    return 'java' in (p.name() for p in psutil.process_iter())
 
 def format_args(args):
     if args: return ' '.join(args)
@@ -133,7 +136,6 @@ async def server_timed_op(ctx, player, time_limit=1):
     mc_command(f"/say INFO | {player} is back to being a mortal.")
     mc_command(f"/deop {player}")
     lprint(f"Remove OP {player}")
-
 
 
 # ========== Player: gamemode, kill, tp, etc
@@ -279,7 +281,6 @@ async def backup_world(ctx, *name):
     await ctx.invoke(bot.get_command('saves'))
     lprint("New backup: " + backup)
 
-
 @bot.command(aliases=['restore', 'jumpto', 'saverestore', 'restoresave', 'worldrestore', 'restoreworld'])
 async def restore_world(ctx, index=None):
     try: index = int(index)
@@ -364,15 +365,16 @@ async def server_backup(ctx, *name):
         return
 
     name = format_args(name)
-
     await ctx.send("***Backing Up...***")
+
     mc_command(f"/save-all")
     time.sleep(5)
     backup = mc_funcs.backup_server(name)
-    print(backup)
+
     if backup:
         await ctx.send(f"New backup:\n`{backup}`.")
     else: await ctx.send("**Error** saving server!")
+
     await ctx.invoke(bot.get_command('servers'))
     lprint("New backup: " + backup)
 
@@ -392,9 +394,11 @@ async def server_restore(ctx, index=None):
 
     # Stops server if running
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+
     if mc_funcs.restore_server(restore):
         await ctx.send("Server **Restored!**")
     else: await ctx.send("**Error:** Could not restore server!")
+
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
@@ -416,8 +420,10 @@ async def server_reset(ctx):
     mc_command("/say WARNING | Resetting server in 5s!")
     await ctx.send("**Resetting Server...**")
     await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
+
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
     mc_funcs.restore_server(reset=True)
+
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
 
@@ -431,16 +437,16 @@ async def bot_restart(ctx):
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
-    x, embed_page, contents = 0, 1, []
+    current_command, embed_page, contents = 0, 1, []
     pages, current_page, page_limit = 3, 1, 15
     def new_embed(page): return discord.Embed(title=f'Help Page {page}/{pages}')
 
     embed = new_embed(embed_page)
-    for i in get_csv('command_info.csv'):
-        if not i: continue
+    for command in get_csv('command_info.csv'):
+        if not command: continue
         embed.add_field(name=i[0], value=f"{i[1]}\n{', '.join(i[2:])}", inline=False)
-        x += 1
-        if not x % page_limit:
+        current_command += 1
+        if not current_command % page_limit:
             embed_page += 1
             contents.append(embed)
             embed = new_embed(embed_page)
@@ -470,6 +476,7 @@ async def help_page(ctx):
 
             # removes reactions if the user tries to go forward on the last page or backwards on the first page
             else: await message.remove_reaction(reaction, user)
+
         # end loop if user doesn't react after x seconds
         except asyncio.TimeoutError:
             await message.delete()
