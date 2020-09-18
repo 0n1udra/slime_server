@@ -1,5 +1,5 @@
 # slime_server
-Control Minecraft server within Discord.
+Control Minecraft server with Discord bot.
 ### Requirements:
 - [Python3](https://www.python.org/)
 - [tmux](https://github.com/tmux/tmux/wiki)
