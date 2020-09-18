@@ -1,6 +1,6 @@
-import discord, asyncio, os, sys, psutil, time, json, csv, datetime, mc_funcs
+import discord, asyncio, os, sys, psutil, time, json, csv, datetime, server_functions
 from discord.ext import commands, tasks
-from mc_funcs import lprint, server_path, file_path
+from server_functions import lprint, server_path, server_functions_path
 
 bot_token_file = '/home/slime/mc_bot_token.txt'
 # Exits script if no token.
@@ -10,6 +10,8 @@ if not TOKEN: print("Token Error."), exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
+
+autosave = False
 
 # Sends command to tmux window running server.
 def mc_command(command):
@@ -24,12 +26,12 @@ def format_args(args):
 
 # Gets data from json files in same local.
 def get_json(json_file):
-    os.chdir(file_path)
+    os.chdir(server_functions_path)
     with open(server_path + '/' + json_file) as file: 
         return [i for i in json.load(file)]
 
 def get_csv(csv_file):
-    os.chdir(file_path)
+    os.chdir(server_functions_path)
     with open(csv_file) as file: 
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
@@ -37,6 +39,8 @@ def get_csv(csv_file):
 async def on_ready():
     await bot.wait_until_ready()
     lprint("Bot PRIMED.")
+
+
 
 # ========== Common Server Functions.
 @bot.command(aliases=['/', 'command'])
@@ -49,7 +53,7 @@ async def server_command(ctx, *args):
 async def server_save(ctx):
     mc_command('/save-all')
     await ctx.send("I saved the world!")
-    await ctx.send("**NOTE:** This is not the same as backing up using `?backup`.")
+    await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
     lprint("Saved world.")
 
 @bot.command(aliases=['say', 's'])
@@ -212,9 +216,9 @@ async def world_time(ctx, set_time=None):
 async def server_motd(ctx, *message):
     if message:
         message = format_args(message)
-        mc_funcs.edit_properties('motd', message)
+        server_functions.edit_properties('motd', message)
         await ctx.send("Message of the day updates!")
-    else: await ctx.send(mc_funcs.edit_properties('motd'))
+    else: await ctx.send(server_functions.edit_properties('motd')[1])
 
 @bot.command(aliases=['status', 'serverstatus'])
 async def server_status(ctx):
@@ -225,7 +229,7 @@ async def server_status(ctx):
 
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
-    if mc_funcs.start_server():
+    if server_functions.start_server():
         await ctx.send("***Booting Server...***")
     else: await ctx.send("**Error** starting server, contact administrator!")
     time.sleep(5)
@@ -254,13 +258,14 @@ async def server_restart(ctx):
 @bot.command(aliases=['saves', 'worlds', 'backups', 'showsaves', 'showbackups', 'sb'])
 async def fetch_worlds(ctx, amount=5):
     embed = discord.Embed(title='World Backups')
-    for index, save in mc_funcs.fetch_worlds(amount):
-        embed.add_field(name=index, value=f"`{save}`", inline=False)
+    worlds = server_functions.fetch_worlds(amount)
+    for save in worlds:
+        embed.add_field(name=worlds.index(save), value=f"`{save}`", inline=False)
 
     await ctx.send(embed=embed)
     await ctx.send("Use `?restore <index>` to restore world save.")
     await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
-    lprint(f"Fetching latest {amount} world saves.")
+    lprint(f"Fetching {amount} most recent world saves.")
 
 @bot.command(aliases=['backup', 'clone', 'saveworld'])
 async def backup_world(ctx, *name):
@@ -274,7 +279,7 @@ async def backup_world(ctx, *name):
     await ctx.send("***Saving current world...***")
     mc_command(f"/save-all")
     time.sleep(5)
-    backup = mc_funcs.backup_world(name)
+    backup = server_functions.backup_world(name)
     if backup:
         await ctx.send(f"Cloned and archived your world to:\n`{backup}`.")
     else: await ctx.send("**Error** saving the world! || it's doomed!||")
@@ -288,7 +293,7 @@ async def restore_world(ctx, index=None):
         await ctx.send("I need a index number of world to restore, use `?saves` to get list of saves")
         return
 
-    restore = mc_funcs.get_world_from_index(index)
+    restore = server_functions.get_world_from_index(index)
     lprint("Restoring to: " + restore)
     await ctx.send(f"***Restoring...*** `{restore}`")
     mc_command(f"/say WARNING | Initiating jump to save point in 5s! | {restore}")
@@ -296,7 +301,7 @@ async def restore_world(ctx, index=None):
 
     # Stops server if running
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
-    mc_funcs.restore_world(restore)
+    server_functions.restore_world(restore)
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
@@ -307,8 +312,8 @@ async def delete_world(ctx, index):
         await ctx.send("Need a index number of world to obliterate, use `?saves` to get list of saves")
         return
 
-    to_delete = mc_funcs.get_world_from_index(index)
-    mc_funcs.delete_world(to_delete)
+    to_delete = server_functions.get_world_from_index(index)
+    server_functions.delete_world(to_delete)
     await ctx.send(f"World as been incinerated!")
     await ctx.invoke(bot.get_command('saves'))
     lprint("Deleted: " + to_delete)
@@ -319,7 +324,7 @@ async def new_world(ctx):
     await ctx.send(":fire:**INCINERATED:**fire:")
     await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
-    mc_funcs.restore_world(reset=True)
+    server_functions.restore_world(reset=True)
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
@@ -328,14 +333,14 @@ async def new_world(ctx):
 async def server_properties(ctx, target_property, *value):
     if not value: value = ''
     else: value = ' '.join(value)
-    await ctx.send(mc_funcs.edit_properties(target_property, value))
+    await ctx.send(server_functions.edit_properties(target_property, value)[1])
 
 @bot.command(aliases=['update', 'serverupdate'])
 async def server_update(ctx):
     lprint("**Updating** `server.jar`...")
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
-    server = mc_funcs.download_new_server()
+    server = server_functions.download_new_server()
     if server:
         await ctx.send(f"Downloaded latest version: `{server}`!")
         time.sleep(3)
@@ -344,21 +349,22 @@ async def server_update(ctx):
 
 @bot.command(aliases=['version', 'ver'])
 async def server_version(ctx):
-    await ctx.send(f"`{mc_funcs.get_minecraft_version()}`")
+    await ctx.send(f"`{server_functions.get_minecraft_version()}`")
     lprint("Get Minecraft server version.")
 
 @bot.command(aliases=['serverlist', 'servers', 'serversaves', 'serverbackups'])
 async def server_list(ctx, amount=5):
     embed = discord.Embed(title='Server Backups')
-    for index, save in mc_funcs.fetch_servers(amount):
-        embed.add_field(name=index, value=f"`{save}`", inline=False)
+    servers = server_functions.fetch_servers(amount)
+    for save in servers:
+        embed.add_field(name=servers.index(save), value=f"`{save}`", inline=False)
 
     await ctx.send(embed=embed)
     await ctx.send("Use `?serverrestore <index>` to restore server.")
     await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
     lprint(f"Fetched latest {amount} world saves.")
 
-@bot.command(aliases=['serverbackup', 'backupserver'])
+@bot.command(aliases=['serverbackup', 'backupserver', 'saveserver', 'serversave'])
 async def server_backup(ctx, *name):
     if not name:
         await ctx.send("Hey! I need a name or keywords to make a backup!")
@@ -369,7 +375,7 @@ async def server_backup(ctx, *name):
 
     mc_command(f"/save-all")
     time.sleep(5)
-    backup = mc_funcs.backup_server(name)
+    backup = server_functions.backup_server(name)
 
     if backup:
         await ctx.send(f"New backup:\n`{backup}`.")
@@ -386,7 +392,7 @@ async def server_restore(ctx, index=None):
         await ctx.send("I need a index number of world to restore, use `?saves` to get list of saves")
         return
 
-    restore = mc_funcs.get_server_from_index(index)
+    restore = server_functions.get_server_from_index(index)
     lprint("Restoring to: " + restore)
     await ctx.send(f"***Restoring...*** `{restore}`")
     mc_command(f"/say WARNING | Initiating jump to save point in 5s! | {restore}")
@@ -395,22 +401,22 @@ async def server_restore(ctx, index=None):
     # Stops server if running
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
 
-    if mc_funcs.restore_server(restore):
+    if server_functions.restore_server(restore):
         await ctx.send("Server **Restored!**")
     else: await ctx.send("**Error:** Could not restore server!")
 
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
-@bot.command(aliases=['deleteserver', 'rmserver', 'serverdelete', 'removeserver', 'serverremove'])
+@bot.command(aliases=['deleteserver', 'rmserver', 'serverdelete', 'rmserversave', 'rmserverbackup'])
 async def server_delete(ctx, index):
     try: index = int(index)
     except:
         await ctx.send("Need a index number of world to obliterate, use `?saves` to get list of saves")
         return
 
-    to_delete = mc_funcs.get_server_from_index(index)
-    mc_funcs.delete_server(to_delete)
+    to_delete = server_functions.get_server_from_index(index)
+    server_functions.delete_server(to_delete)
     await ctx.send(f"Server backup deleted!")
     await ctx.invoke(bot.get_command('servers'))
     lprint("Deleted: " + to_delete)
@@ -422,7 +428,7 @@ async def server_reset(ctx):
     await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))
-    mc_funcs.restore_server(reset=True)
+    server_functions.restore_server(reset=True)
 
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
@@ -430,7 +436,7 @@ async def server_reset(ctx):
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
 async def bot_restart(ctx):
-    os.chdir(file_path)
+    os.chdir(server_functions_path)
     await ctx.send("***Rebooting Bot...***")
     os.execl(sys.executable, sys.executable, *sys.argv)
 
@@ -444,7 +450,7 @@ async def help_page(ctx):
     embed = new_embed(embed_page)
     for command in get_csv('command_info.csv'):
         if not command: continue
-        embed.add_field(name=i[0], value=f"{i[1]}\n{', '.join(i[2:])}", inline=False)
+        embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
         current_command += 1
         if not current_command % page_limit:
             embed_page += 1

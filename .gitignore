@@ -1,5 +1,5 @@
 
-__pycache__/mc_funcs.cpython-38.pyc
+__pycache__/server_functions.cpython-38.pyc
 
 __pycache__/start_server.cpython-38.pyc
 
@@ -11,6 +11,6 @@ __pycache__/start_server.cpython-38.pyc
 
 .idea/slime_server.iml
 
-.mc_funcs.py.swp
+.server_functions.py.swp
 
 test.py
