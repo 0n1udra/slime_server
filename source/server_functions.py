@@ -21,14 +21,24 @@ java_args = f'java -Xmx2G -Xms1G -jar {server_jar_path} nogui java'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
 popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 'java']
 
-def lprint(msg): print(f"{datetime.datetime.now()} | {msg}")
+def lprint(arg1=None, arg2=None):
+    if type(arg1) is str:
+        msg = arg1
+        user = 'Script'
+    else:
+        try: user = arg1.message.author
+        except: user = 'N/A'
+        msg = arg2
+
+    print(f"{datetime.datetime.now()} | ({user}) {msg}")
 
 def get_from_index(path, index): return os.listdir(path)[index]
 
 def fetch_backups(path, amount=5):
     backups = []
     for item in os.listdir(path)[:amount]:
-        if os.path.isdir(path + '/' + item): backups.append(item)
+        if os.path.isdir(path + '/' + item):
+            backups.append(item)
     return backups
 
 def start_server():
@@ -64,6 +74,7 @@ def restore_backup(backup, dst, reset=False):
 
     # This function is used in ?rebirth discord command to create a new world.
     if reset: return True
+
     try: shutil.copytree(backup, server_path + dst)
     except: lprint("Error restoring: " + str(backup))
     
@@ -73,24 +84,7 @@ def delete_backup(backup):
         return True
     except: lprint("Error deleting: " + str(backup))
 
-
-# Functions for discord bot.
-def get_server_from_index(index): return get_from_index(server_backups_path, index)
-def get_world_from_index(index): return get_from_index(world_backups_path, index)
-
-def fetch_servers(amount=5): return fetch_backups(server_backups_path, amount)
-def fetch_worlds(amount=5): return fetch_backups(world_backups_path, amount)
-
-def backup_server(name='server_backup'): return create_backup(name, server_path, server_backups_path)
-def backup_world(name="world_backup"): return create_backup(name, server_path + '/world', world_backups_path)
-
-def restore_server(server=None, reset=False): return restore_backup(server, server_path, reset)
-def restore_world(world=None, reset=False): return restore_backup(world, server_path + '/world', reset)
-
-def delete_server(server): return delete_backup(server_backups_path + '/' + server)
-def delete_world(world): return delete_backup(world_backups_path + '/' + world)
-
-
+# Downloads latest server.jar from Minecraft website in current server folder.
 def download_new_server():
     os.chdir(mc_path)
     jar_download_url = ''
@@ -99,26 +93,33 @@ def download_new_server():
     soup = BeautifulSoup(minecraft_website.text, 'html.parser')
     # Finds Minecraft server.jar urls in div class.
     div_agenda = soup.find_all('div', class_='minecraft-version')
-    for i in div_agenda[0].find_all('a'): jar_download_url = f"{i.get('href')}"
+    for i in div_agenda[0].find_all('a'):
+        jar_download_url = f"{i.get('href')}"
 
     if not jar_download_url: return
 
     mc_ver = get_minecraft_version(get_latest=True)
     # Saves new server.jar in current server.
-    with open(server_path + '/server.jar', 'wb') as jar_file: jar_file.write(requests.get(jar_download_url).content)
+    with open(server_path + '/server.jar', 'wb') as jar_file:
+        jar_file.write(requests.get(jar_download_url).content)
+
     # Updates server discord-bot.properties file. server.properties will remove foreign data on server start.
-    with open(discord_bot_properties, 'w') as f: f.write(mc_ver)
+    with open(discord_bot_properties, 'w') as f:
+        f.write(mc_ver)
 
     return mc_ver
 
+# Gets server version from file or from website.
 def get_minecraft_version(get_latest=False):
     # Returns server version from discord-server.properties file located in same folder as server.jar.
-    if not get_latest: return edit_properties('version', file_path=discord_bot_properties)[0].split('=')[1]
+    if not get_latest:
+        return edit_properties('version', file_path=discord_bot_properties)[0].split('=')[1]
 
     soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
     for i in soup.findAll('a'):
         # Returns Minecraft server version by splitting up string and extracting only numbers then recombining.
-        if i.string and 'minecraft_server' in i.string: return '.'.join(i.string.split('.')[1:][:-1])
+        if i.string and 'minecraft_server' in i.string:
+            return '.'.join(i.string.split('.')[1:][:-1])
 
 # Reads server.properties file and edits inplace.
 def edit_properties(target_property=None, value='', file_path=properties_file):
@@ -150,9 +151,20 @@ def edit_properties(target_property=None, value='', file_path=properties_file):
         return return_line, discord_return
     else: return return_line, "404: Property not found!"
 
-if __name__ == '__main__':
-    #print(delete_server(1))
-    #download_new_server()
-    #print(backup_server('tester'))
-    #print(get_minecraft_version())
-    pass
+# Functions for discord bot.
+def get_server_from_index(index): return get_from_index(server_backups_path, index)
+def get_world_from_index(index): return get_from_index(world_backups_path, index)
+
+def fetch_servers(amount=5): return fetch_backups(server_backups_path, amount)
+def fetch_worlds(amount=5): return fetch_backups(world_backups_path, amount)
+
+def backup_server(name='server_backup'): return create_backup(name, server_path, server_backups_path)
+def backup_world(name="world_backup"): return create_backup(name, server_path + '/world', world_backups_path)
+
+def restore_server(server=None, reset=False): return restore_backup(server, server_path, reset)
+def restore_world(world=None, reset=False): return restore_backup(world, server_path + '/world', reset)
+
+def delete_server(server): return delete_backup(server_backups_path + '/' + server)
+def delete_world(world): return delete_backup(world_backups_path + '/' + world)
+
+if __name__ == '__main__': pass

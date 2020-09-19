@@ -21,13 +21,14 @@ def get_server_status():
     return 'java' in (p.name() for p in psutil.process_iter())
 
 def format_args(args):
-    if args: return ' '.join(args)
+    if args:
+        return ' '.join(args)
     else: return "No reason given"
 
 # Gets data from json files in same local.
 def get_json(json_file):
     os.chdir(server_functions_path)
-    with open(server_path + '/' + json_file) as file: 
+    with open(server_path + '/' + json_file) as file:
         return [i for i in json.load(file)]
 
 def get_csv(csv_file):
@@ -41,105 +42,104 @@ async def on_ready():
     lprint("Bot PRIMED.")
 
 
-
 # ========== Common Server Functions.
 @bot.command(aliases=['/', 'command'])
 async def server_command(ctx, *args):
     args = format_args(args)
     mc_command(f"/{args}")
-
+    lprint(ctx, "Sent command: " + args)
 
 @bot.command(aliases=['save', 'sa'])
 async def server_save(ctx):
     mc_command('/save-all')
     await ctx.send("I saved the world!")
     await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
-    lprint("Saved world.")
+    lprint(ctx, "Saved world.")
 
 @bot.command(aliases=['say', 's'])
 async def server_say(ctx, *msg):
     msg = format_args(msg)
     mc_command('/say ' + msg)
     await ctx.send("Message circulated to all active players!")
-    lprint("Server said: {msg}")
+    lprint(ctx, "Server said: {msg}")
 
 @bot.command(aliases=['tell', 'msg', 'whisper', 't'])
 async def server_tell(ctx, player, *msg):
     msg = format_args(msg)
     mc_command(f"/tell {player} {msg}")
     await ctx.send("Communiqué transmitted to: `{player}`.")
-    lprint(f"Messaged {player} : {msg}")
+    lprint(ctx, f"Messaged {player} : {msg}")
 
 
 # ========== Permissions: Ban, Kick, Whitelist, OP, etc
 @bot.command(aliases=['kick', 'k'])
-async def server_kick(ctx, player, *reason):
+async def player_kick(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f'/say WARNING | {player} will be ejected from server in 5s | {reason}.')
     time.sleep(5)
     mc_command(f"/kick {player}")
     await ctx.send(f"`{player}` is outta here!")
-    lprint(f"Kicked {player}")
+    lprint(ctx, f"Kicked {player}")
 
 @bot.command(aliases=['ban', 'b'])
-async def server_ban(ctx, player, *reason):
+async def player_ban(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"/say WARNING | Banishing {player} in 5s | {reason}.")
     time.sleep(5)
     mc_command(f"/kick {player}")
     mc_command(f"/ban {player} {reason}")
     await ctx.send(f"Dropkicked and exiled: `{player}`.")
-    lprint(f"Banned {player} : {reason}")
+    lprint(ctx, f"Banned {player} : {reason}")
 
 @bot.command(aliases=['pardon', 'unban', 'p'])
-async def server_pardon(ctx, player, *reason):
+async def player_pardon(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"/say INFO | {player} has been vindicated! | {reason}.")
     mc_command(f"/pardon {player}")
     await ctx.send(f"Cleansed `{player}`.")
-    lprint(f"Pardoned {player} : {reason}")
+    lprint(ctx, f"Pardoned {player} : {reason}")
 
 @bot.command(aliases=['banlist', 'bl', 'blist'])
-async def server_ban_list(ctx):
+async def ban_list(ctx):
     embed = discord.Embed(title='Banned Players')
     for player in [i for i in get_json('banned-players.json')]: 
         embed.add_field(name=player['name'], value=player['reason'])
     await ctx.send(embed=embed)
-    lprint(f"Fetching banned list.")
+    lprint(ctx, f"Fetching banned list.")
 
 @bot.command(aliases=['oplist', 'ol', 'ops'])
-async def server_op_list(ctx):
+async def op_list(ctx):
     op_players = [f"`{i['name']}`" for i in get_json('ops.json')]
     await ctx.send('\n'.join(op_players))
-    lprint(f"Fetching server operators list.")
+    lprint(ctx, f"Fetching server operators list.")
 
 @bot.command(aliases=['opadd'])
-async def server_op_add(ctx, player, *reason):
+async def op_add(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"/say INFO | {player} has become a God! | {reason}")
     mc_command(f"/op {player}")
     await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
-    lprint(f"New server op: {player}")
+    lprint(ctx, f"New server op: {player}")
 
 @bot.command(aliases=['opremove'])
-async def server_op_remove(ctx, player, *reason):
+async def op_remove(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"/say INFO | {player} fell from grace! | {reason}")
     mc_command(f"/deop {player}")
     await ctx.send(f"`{player}` stripped of Godhood!")
-    lprint(f"Removed server op: {player}")
+    lprint(ctx, f"Removed server op: {player}")
 
 @bot.command(aliases=['top', 'timedop'])
-async def server_timed_op(ctx, player, time_limit=1):
+async def timed_op(ctx, player, time_limit=1):
     await ctx.send(f"Granting `{player}` OP status for {time_limit}m!")
     mc_command(f"/say INFO | {player} granted God status for {time_limit}m!")
     mc_command(f"/op {player}")
-    lprint(f"OP {player} for {time_limit}.")
+    lprint(ctx, f"OP {player} for {time_limit}.")
     time.sleep(time_limit*60)
     await ctx.send(f"Removed `{player}` OP status!")
     mc_command(f"/say INFO | {player} is back to being a mortal.")
     mc_command(f"/deop {player}")
-    lprint(f"Remove OP {player}")
+    lprint(ctx, f"Remove OP {player}")
 
 
 # ========== Player: gamemode, kill, tp, etc
@@ -149,7 +149,7 @@ async def player_kill(ctx, player, *reason):
     mc_command(f"/say WARNING | {player} will be EXTERMINATED | {reason}.")
     mc_command(f'/kill {player}')
     await ctx.send(f"`{player}` assassinated!")
-    lprint(f"Killed: {player}")
+    lprint(ctx, f"Killed: {player}")
 
 @bot.command(aliases=['delaykill', 'delayassassinate', 'dkill', 'dk'])
 async def player_delay_kill(ctx, player, delay=5, *reason):
@@ -158,7 +158,7 @@ async def player_delay_kill(ctx, player, delay=5, *reason):
     time.sleep(delay)
     mc_command(f'/kill {player}')
     await ctx.send(f"`{player}` soul has been freed.")
-    lprint(f"Delay killed: {player}")
+    lprint(ctx, f"Delay killed: {player}")
 
 @bot.command(aliases=['tp', 'teleport'])
 async def player_teleport(ctx, player, target, *reason):
@@ -167,7 +167,7 @@ async def player_teleport(ctx, player, target, *reason):
     time.sleep(5)
     mc_command(f"/tp {player} {target}")
     await ctx.send(f"`{player}` and {target} touchin real close now.")
-    lprint(f"Teleported {player} to {target}")
+    lprint(ctx, f"Teleported {player} to {target}")
 
 @bot.command(aliases=['gamemode', 'gm'])
 async def player_gamemode(ctx, player, state, *reason):
@@ -175,7 +175,7 @@ async def player_gamemode(ctx, player, state, *reason):
     mc_command(f"/say {player} now in {state} | {reason}.")
     mc_command(f"/gamemode {state} {player}")
     await ctx.send(f"`{player}` is now in `{state}` indefinitely.")
-    lprint(f"Set {player} to: {state}")
+    lprint(ctx, f"Set {player} to: {state}")
 
 @bot.command(aliases=['timedgamemode', 'timedgm', 'tgm'])
 async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
@@ -191,7 +191,7 @@ async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
     time.sleep(duration)
     mc_command(f"/gamemode survival {player}")
     await ctx.send(f"`{player}` is back to survival.")
-    lprint(f"Set gamemode: {player} for {duration}")
+    lprint(ctx, f"Set gamemode: {player} for {duration}")
 
 
 # ========== World weather, time, etc
@@ -201,7 +201,7 @@ async def world_weather(ctx, state, duration=0):
     if duration: 
         await ctx.send(f"I see some `{state}` in the near future.")
     else: await ctx.send(f"Forecast entails `{state}`.")
-    lprint(f"Weather set to: {state} for {duration}")
+    lprint(ctx, f"Weather set to: {state} for {duration}")
 
 @bot.command(aliases=['settime', 'time'])
 async def world_time(ctx, set_time=None):
@@ -225,7 +225,7 @@ async def server_status(ctx):
     if get_server_status():
         await ctx.send("Server is now __**ACTIVE**__.")
     else: await ctx.send("Server is __**INACTIVE**__.")
-    lprint("Fetching server status.")
+    lprint(ctx, "Fetching server status.")
 
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
@@ -235,7 +235,7 @@ async def server_start(ctx):
     time.sleep(5)
     await ctx.send("***Fetching server status...***")
     await ctx.invoke(bot.get_command('status'))
-    lprint("Starting server.")
+    lprint(ctx, "Starting server.")
 
 @bot.command(aliases=['stop', 'deactivate', 'halt'])
 async def server_stop(ctx):
@@ -246,12 +246,13 @@ async def server_stop(ctx):
     time.sleep(5)
     mc_command('/stop')
     await ctx.send("World Saved. Server __**HALTED**__")
-    lprint("Stopping server.")
+    lprint(ctx, "Stopping server.")
 
 @bot.command(aliases=['restart', 'reboot'])
 async def server_restart(ctx):
-    lprint("Restarting server.")
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    lprint(ctx, "Restarting server.")
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
 
@@ -265,7 +266,7 @@ async def fetch_worlds(ctx, amount=5):
     await ctx.send(embed=embed)
     await ctx.send("Use `?restore <index>` to restore world save.")
     await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
-    lprint(f"Fetching {amount} most recent world saves.")
+    lprint(ctx, f"Fetching {amount} most recent world saves.")
 
 @bot.command(aliases=['backup', 'clone', 'saveworld'])
 async def backup_world(ctx, *name):
@@ -274,7 +275,6 @@ async def backup_world(ctx, *name):
         return
 
     name = format_args(name)
-
     mc_command(f"/say INFO | Standby, world is currently being archived. Codename: {name}")
     await ctx.send("***Saving current world...***")
     mc_command(f"/save-all")
@@ -284,7 +284,7 @@ async def backup_world(ctx, *name):
         await ctx.send(f"Cloned and archived your world to:\n`{backup}`.")
     else: await ctx.send("**Error** saving the world! || it's doomed!||")
     await ctx.invoke(bot.get_command('saves'))
-    lprint("New backup: " + backup)
+    lprint(ctx, "New backup: " + backup)
 
 @bot.command(aliases=['restore', 'jumpto', 'saverestore', 'restoresave', 'worldrestore', 'restoreworld'])
 async def restore_world(ctx, index=None):
@@ -294,13 +294,14 @@ async def restore_world(ctx, index=None):
         return
 
     restore = server_functions.get_world_from_index(index)
-    lprint("Restoring to: " + restore)
+    lprint(ctx, "Restoring to: " + restore)
     await ctx.send(f"***Restoring...*** `{restore}`")
     mc_command(f"/say WARNING | Initiating jump to save point in 5s! | {restore}")
     time.sleep(5)
 
     # Stops server if running
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
     server_functions.restore_world(restore)
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
@@ -316,7 +317,7 @@ async def delete_world(ctx, index):
     server_functions.delete_world(to_delete)
     await ctx.send(f"World as been incinerated!")
     await ctx.invoke(bot.get_command('saves'))
-    lprint("Deleted: " + to_delete)
+    lprint(ctx, "Deleted: " + to_delete)
 
 @bot.command(aliases=['newworld', 'startover', 'rebirth'])
 async def new_world(ctx):
@@ -331,14 +332,16 @@ async def new_world(ctx):
 # Edit server properties.
 @bot.command(aliases=['properties', 'property'])
 async def server_properties(ctx, target_property, *value):
-    if not value: value = ''
+    if not value:
+        value = ''
     else: value = ' '.join(value)
     await ctx.send(server_functions.edit_properties(target_property, value)[1])
 
 @bot.command(aliases=['update', 'serverupdate'])
 async def server_update(ctx):
-    lprint("**Updating** `server.jar`...")
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    lprint(ctx, "**Updating** `server.jar`...")
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
     server = server_functions.download_new_server()
     if server:
@@ -350,7 +353,7 @@ async def server_update(ctx):
 @bot.command(aliases=['version', 'ver'])
 async def server_version(ctx):
     await ctx.send(f"`{server_functions.get_minecraft_version()}`")
-    lprint("Get Minecraft server version.")
+    lprint(ctx, "Get Minecraft server version.")
 
 @bot.command(aliases=['serverlist', 'servers', 'serversaves', 'serverbackups'])
 async def server_list(ctx, amount=5):
@@ -362,7 +365,7 @@ async def server_list(ctx, amount=5):
     await ctx.send(embed=embed)
     await ctx.send("Use `?serverrestore <index>` to restore server.")
     await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
-    lprint(f"Fetched latest {amount} world saves.")
+    lprint(ctx, f"Fetched latest {amount} world saves.")
 
 @bot.command(aliases=['serverbackup', 'backupserver', 'saveserver', 'serversave'])
 async def server_backup(ctx, *name):
@@ -382,8 +385,7 @@ async def server_backup(ctx, *name):
     else: await ctx.send("**Error** saving server!")
 
     await ctx.invoke(bot.get_command('servers'))
-    lprint("New backup: " + backup)
-
+    lprint(ctx, "New backup: " + backup)
 
 @bot.command(aliases=['serverrestore', 'restoreserver'])
 async def server_restore(ctx, index=None):
@@ -393,13 +395,14 @@ async def server_restore(ctx, index=None):
         return
 
     restore = server_functions.get_server_from_index(index)
-    lprint("Restoring to: " + restore)
+    lprint(ctx, "Restoring to: " + restore)
     await ctx.send(f"***Restoring...*** `{restore}`")
     mc_command(f"/say WARNING | Initiating jump to save point in 5s! | {restore}")
     time.sleep(5)
 
     # Stops server if running
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
 
     if server_functions.restore_server(restore):
         await ctx.send("Server **Restored!**")
@@ -419,7 +422,7 @@ async def server_delete(ctx, index):
     server_functions.delete_server(to_delete)
     await ctx.send(f"Server backup deleted!")
     await ctx.invoke(bot.get_command('servers'))
-    lprint("Deleted: " + to_delete)
+    lprint(ctx, "Deleted: " + to_delete)
 
 @bot.command(aliases=['serverreset', 'resetserver'])
 async def server_reset(ctx):
@@ -427,7 +430,8 @@ async def server_reset(ctx):
     await ctx.send("**Resetting Server...**")
     await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
     server_functions.restore_server(reset=True)
 
     time.sleep(5)
@@ -439,17 +443,20 @@ async def bot_restart(ctx):
     os.chdir(server_functions_path)
     await ctx.send("***Rebooting Bot...***")
     os.execl(sys.executable, sys.executable, *sys.argv)
+    lprint(ctx, "Restarting bot.")
 
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
     current_command, embed_page, contents = 0, 1, []
     pages, current_page, page_limit = 3, 1, 15
-    def new_embed(page): return discord.Embed(title=f'Help Page {page}/{pages}')
+    def new_embed(page):
+        return discord.Embed(title=f'Help Page {page}/{pages}')
 
     embed = new_embed(embed_page)
     for command in get_csv('command_info.csv'):
-        if not command: continue
+        if not command:  continue
+
         embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
         current_command += 1
         if not current_command % page_limit:
@@ -464,7 +471,8 @@ async def help_page(ctx):
     await message.add_reaction("▶️")
 
     # This makes sure nobody except the command sender can interact with the "menu"
-    def check(reaction, user): return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ["◀️", "▶️"]
 
     while True:
         try:

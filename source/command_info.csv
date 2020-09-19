@@ -32,7 +32,7 @@ Server Backups, `?serverlist` `?servers [amount]`, Get list of server backups, c
 Server New Backup, `?serverbackup` `?backupserver <codename>`, Create backup of all server files.
 Server Delete backup, `?serverdelete` `?deleteserver` `?rmserver <index>`, Get index number from `?serverbackups`.
 Server Restore, '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
-Server Reset, `?resetserver` `?serverreset`, Deletes all server files, downloads latest server jar from official website and launches (do not need to edit eula.txt).
+Server Reset, `?resetserver` `?serverreset`, Deletes all server files, make a backup beforehand if needed. make a backup beforehand if neededd, downloads latest server jar from official website and launches (do not need to edit eula.txt).
 Properties File, `?property <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
 Reboot Bot, `?rebootbot` `?rboot`, Reboots this discord bot.
 [HADES Protocol], `?hades`, *WARNING*: Activating HADES Protocol ||Only deletes world save, generates new one on start. Does not make backup!||
