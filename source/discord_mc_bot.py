@@ -476,6 +476,18 @@ async def server_reset(ctx):
     await ctx.invoke(bot.get_command('start'))
     lprint(ctx, "Server Reset.")
 
+@bot.command(aliases=['onlinemode', 'om', 'online'])
+async def set_online_mode(ctx, mode=''):
+    if mode not in ['true', 'false']:
+        await ctx.send(server_functions.edit_properties('online-mode')[1])
+        await ctx.send("Need `true` or `false` argument to change online-mode property.")
+        return
+
+    server_functions.edit_properties('online-mode', mode)
+    await ctx.send(server_functions.edit_properties('online-mode')[1])
+    await ctx.send("Restart server to apply change.")
+    lprint(ctx, "Updated online-mode: " + mode)
+
 @bot.command(aliases=['log', 'l', 'getlog', 'showlog', 'output'])
 async def server_log(ctx, lines=5):
     log_data = server_functions.get_output(server_functions.server_log_file, lines)
