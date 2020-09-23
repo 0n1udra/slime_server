@@ -1,15 +1,19 @@
-from bs4 import BeautifulSoup
 import os, shutil, datetime, fileinput, requests
+from file_read_backwards import FileReadBackwards
+from bs4 import BeautifulSoup
+
 
 # Updates these to your liking.
 server_functions_path = os.getcwd()
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 server_path = f"{mc_path}/server"
 world_backups_path = f"{mc_path}/world_backups"
-server_jar_path = f'{server_path}/server.jar'
 server_backups_path = f"{mc_path}/server_backups"
+
+server_jar_file = f'{server_path}/server.jar'
+server_log_file = f"{server_path}/output.txt"
 properties_file = f"{server_path}/server.properties"
-discord_bot_properties = f"{server_path}/discord-bot.properties"
+discord_bot_properties_file = f"{server_path}/discord-bot.properties"
 
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
@@ -17,9 +21,9 @@ new_server_url = 'https://www.minecraft.net/en-us/download/server'
 # tmux and java required... obviously.
 new_bot = "tmux send-keys -t mcserver:2.2 {bot_file_path} ENTER"
 new_tmux = 'tmux new -d -s mcserver'
-java_args = f'java -Xmx2G -Xms1G -jar {server_jar_path} nogui java'
+java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
-popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_path, 'nogui', 'java']
+popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_file, 'nogui', 'java']
 
 def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
@@ -31,6 +35,21 @@ def lprint(arg1=None, arg2=None):
         msg = arg2
 
     print(f"{datetime.datetime.now()} | ({user}) {msg}")
+
+def get_output(file, lines=10, match=None):
+    log_data = match_found = ''
+    with FileReadBackwards(file) as file:
+        for i in range(lines):
+            line = file.readline()
+            if match in line:
+                match_found = line
+                break
+            log_data += line
+
+    if match:
+        return match_found
+    return log_data
+
 
 def get_from_index(path, index): return os.listdir(path)[index]
 
@@ -104,8 +123,7 @@ def download_new_server():
         jar_file.write(requests.get(jar_download_url).content)
 
     # Updates server discord-bot.properties file. server.properties will remove foreign data on server start.
-    with open(discord_bot_properties, 'w') as f:
-        f.write(mc_ver)
+    with open(discord_bot_properties_file, 'w') as file: file.write(mc_ver)
 
     return mc_ver
 
@@ -113,7 +131,7 @@ def download_new_server():
 def get_minecraft_version(get_latest=False):
     # Returns server version from discord-server.properties file located in same folder as server.jar.
     if not get_latest:
-        return edit_properties('version', file_path=discord_bot_properties)[0].split('=')[1]
+        return edit_properties('version', file_path=discord_bot_properties_file)[0].split('=')[1]
 
     soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
     for i in soup.findAll('a'):

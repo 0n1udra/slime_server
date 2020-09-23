@@ -1,6 +1,6 @@
 import discord, asyncio, os, sys, psutil, time, json, csv, datetime, server_functions
 from discord.ext import commands, tasks
-from server_functions import lprint, server_path, server_functions_path
+from server_functions import lprint
 
 bot_token_file = '/home/slime/mc_bot_token.txt'
 # Exits script if no token.
@@ -27,12 +27,12 @@ def format_args(args):
 
 # Gets data from json files in same local.
 def get_json(json_file):
-    os.chdir(server_functions_path)
-    with open(server_path + '/' + json_file) as file:
+    os.chdir(server_functions.server_functions_path)
+    with open(server_functions.server_path + '/' + json_file) as file:
         return [i for i in json.load(file)]
 
 def get_csv(csv_file):
-    os.chdir(server_functions_path)
+    os.chdir(server_functions.server_functions_path)
     with open(csv_file) as file: 
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
@@ -69,6 +69,27 @@ async def server_tell(ctx, player, *msg):
     mc_command(f"/tell {player} {msg}")
     await ctx.send("Communiqué transmitted to: `{player}`.")
     lprint(ctx, f"Messaged {player} : {msg}")
+
+@bot.command(aliases=['list', 'users', 'players'])
+async def list_players(ctx):
+    mc_command("/list")
+    time.sleep(1)
+    
+    log_data = server_functions.get_output(server_functions.server_log_file, match='players online')
+    if not log_data:
+        await ctx.send("**Error:** Trouble fetching player list.")
+        return
+
+    log_data = log_data.split(':')
+    text = log_data[-2]
+    player_data = log_data[-1]
+    # If there's no players connected at the moment.
+    if player_data == ' \n':
+        await ctx.send(text)
+    else:
+        # Outputs player names in special discord format.
+        players = [f"`{i.strip()}`" for i in (log_data[-1]).split(',')]
+        await ctx.send(text + ':\n' + ''.join(players))
 
 
 # ========== Permissions: Ban, Kick, Whitelist, OP, etc
@@ -437,10 +458,16 @@ async def server_reset(ctx):
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
 
+@bot.command(aliases=['log', 'getlog', 'showlog'])
+async def server_log(ctx, lines=10):
+    log_data = server_functions.get_output(server_functions.server_log_file, lines)
+    await ctx.send(f"`{log_data}`")
+
+
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
 async def bot_restart(ctx):
-    os.chdir(server_functions_path)
+    os.chdir(server_functions.server_functions_path)
     await ctx.send("***Rebooting Bot...***")
     os.execl(sys.executable, sys.executable, *sys.argv)
     lprint(ctx, "Restarting bot.")
