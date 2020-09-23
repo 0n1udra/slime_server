@@ -2,9 +2,8 @@ import discord, asyncio, os, sys, psutil, time, json, csv, datetime, server_func
 from discord.ext import commands, tasks
 from server_functions import lprint
 
-bot_token_file = '/home/slime/mc_bot_token.txt'
 # Exits script if no token.
-with open(bot_token_file, 'r') as file:
+with open(server_functions.discord_bot_token_file, 'r') as file:
     TOKEN = file.readline()
 if not TOKEN: print("Token Error."), exit()
 
@@ -246,21 +245,22 @@ async def server_motd(ctx, *message):
     else: await ctx.send(server_functions.edit_properties('motd')[1])
 
 @bot.command(aliases=['status', 'serverstatus'])
-async def server_status(ctx):
+async def server_status(ctx, show_players=True):
     if get_server_status():
         await ctx.send("Server is now __**ACTIVE**__.")
-        await ctx.invoke(bot.get_command('playerlist'))
+        if show_players:
+            await ctx.invoke(bot.get_command('playerlist'))
     else: await ctx.send("Server is __**INACTIVE**__.")
     lprint(ctx, "Fetched server status.")
 
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
-    if server_functions.start_server():
+    if server_functions.start_minecraft_server():
         await ctx.send("***Booting Server...***")
     else: await ctx.send("**Error** starting server, contact administrator!")
     time.sleep(5)
     await ctx.send("***Fetching server status...***")
-    await ctx.invoke(bot.get_command('status'))
+    await ctx.invoke(bot.get_command('status'), show_players=False)
     lprint(ctx, "Starting server.")
 
 @bot.command(aliases=['stop', 'deactivate', 'halt'])
@@ -348,7 +348,7 @@ async def delete_world(ctx, index):
 @bot.command(aliases=['newworld', 'startover', 'rebirth', 'hades'])
 async def new_world(ctx):
     mc_command("/say WARNING | Project Rebirth will commence in T-5s!")
-    await ctx.send(":fire:**INCINERATED:**fire:")
+    await ctx.send(":fire:**INCINERATED:**:fire:")
     await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
@@ -369,21 +369,24 @@ async def server_properties(ctx, target_property='', *value):
     else: value = ' '.join(value)
 
     get_property = server_functions.edit_properties(target_property, value)[1]
-    await ctx.send(property)
+    await ctx.send(get_property)
     lprint(ctx, f"Server property: {get_property[1:][:-1]}")
 
 @bot.command(aliases=['update', 'serverupdate'])
 async def server_update(ctx):
     lprint(ctx, "Updating server.jar...")
+    await ctx.send("***Updating...***")
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
+    await ctx.send("***Downloading latest server.jar***")
     server = server_functions.download_new_server()
     if server:
-        await ctx.send(f"Downloaded latest version: `{server}`!")
+        await ctx.send(f"Downloaded latest version: `{server}`")
         time.sleep(3)
         await ctx.invoke(bot.get_command('start'))
     else: await ctx.send("**Error:** Updating server. Suggest restoring from a backup.")
+    lprint(ctx, "Server Updated.")
 
 @bot.command(aliases=['version', 'ver'])
 async def server_version(ctx):
@@ -490,6 +493,7 @@ async def bot_restart(ctx):
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
+    lprint(ctx, "Fetched help page.")
     current_command, embed_page, contents = 0, 1, []
     pages, current_page, page_limit = 3, 1, 15
 
@@ -538,6 +542,5 @@ async def help_page(ctx):
         except asyncio.TimeoutError:
             await message.delete()
             break
-    lprint(ctx, "Fetched help page.")
 
 bot.run(TOKEN)

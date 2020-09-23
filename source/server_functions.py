@@ -1,29 +1,31 @@
-import os, shutil, datetime, fileinput, requests
+import os, shutil, datetime, fileinput, requests, time
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
-
-# Updates these to your liking.
 server_functions_path = os.getcwd()
-mc_path = '/mnt/c/Users/DT/Desktop/MC'
-server_path = f"{mc_path}/server"
-world_backups_path = f"{mc_path}/world_backups"
-server_backups_path = f"{mc_path}/server_backups"
-
-server_jar_file = f'{server_path}/server.jar'
-server_log_file = f"{server_path}/output.txt"
-properties_file = f"{server_path}/server.properties"
-discord_bot_properties_file = f"{server_path}/discord-bot.properties"
-
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
-# tmux and java required... obviously.
-new_bot = "tmux send-keys -t mcserver:2.2 {bot_file_path} ENTER"
-new_tmux = 'tmux new -d -s mcserver'
+# Updates variables as needed.
+discord_bot_token_file = '/home/slime/mc_bot_token.txt'
+# This is where Minecraft server, world backups and some discord bot files will be saved, so make sure this is an absolute path and is where you want it.
+# The setup_directories() function uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
+minecraft_folder_path = '/mnt/c/Users/DT/Desktop/MC'
+
+# Don't need to change these.
+server_path = f"{minecraft_folder_path}/server"
+world_backups_path = f"{minecraft_folder_path}/world_backups"
+server_backups_path = f"{minecraft_folder_path}/server_backups"
+server_jar_file = f'{server_path}/server.jar'
+server_log_file = f"{server_path}/output.txt"
+server_properties_file = f"{server_path}/server.properties"
+discord_bot_file = f"{server_functions_path}/discord_mc_bot.py"
+discord_bot_log_file = f"{server_functions_path}/bot_log.txt"
+discord_bot_properties_file = f"{server_path}/discord-bot.properties"
+
+# Can adjust java arguments as needed for your system.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
-popen_commands = ['java', '-Xmx2G', '-Xms1G', '-jar', server_jar_file, 'nogui', 'java']
 
 def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
@@ -34,7 +36,37 @@ def lprint(arg1=None, arg2=None):
         except: user = 'N/A'
         msg = arg2
 
-    print(f"{datetime.datetime.now()} | ({user}) {msg}")
+    output = f"{datetime.datetime.now()} | ({user}) {msg}"
+
+    with open(discord_bot_log_file, 'a') as file:
+        file.write(output + '\n')
+
+    print(output)
+
+def setup_directories():
+    try:
+        os.makedirs(server_path)
+        os.makedirs(world_backups_path)
+        os.makedirs(server_backups_path)
+    except: print("Error: Something went wrong setup up necessary directory structure.")
+
+def start_tmux_session():
+    try:
+        os.system('tmux new -d -s mcserver')
+        os.system('tmux send-keys -t mcserver:1.0 "tmux split-window -v" ENTER')
+        time.sleep(1)
+        os.system(f'tmux send-keys -t mcserver:1.1 "python3 {discord_bot_file}" ENTER')
+    except: lprint("Error starting required detached tmux session with 2 windows with name: mcserver")
+
+def start_minecraft_server():
+    # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+    os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
+    os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+
+    os.chdir(server_path)
+    # Tries starting new detached tmux session.
+    if not os.system(start_server_command): 
+        return True
 
 def get_output(file, lines=10, match='placeholder match'):
     log_data = match_found = ''
@@ -50,8 +82,8 @@ def get_output(file, lines=10, match='placeholder match'):
         return match_found
     return log_data
 
-
-def get_from_index(path, index): return os.listdir(path)[index]
+def get_from_index(path, index): 
+    return os.listdir(path)[index]
 
 def fetch_backups(path, amount=5):
     backups = []
@@ -60,17 +92,6 @@ def fetch_backups(path, amount=5):
             backups.append(item)
     return backups
 
-def start_server():
-    # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-    os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
-    os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
-
-    os.chdir(server_path)
-    # Tries starting new detached tmux session.
-    try:
-        os.system(new_tmux )
-    except: lprint("Error starting detached tmux session with name: mcserver")
-    if not os.system(start_server_command): return True
 
 def create_backup(name, src, dst):
     if not os.path.isdir(dst):
@@ -96,7 +117,8 @@ def restore_backup(backup, dst, reset=False):
     # This function is used in ?rebirth discord command to create a new world.
     if reset: return True
 
-    try: shutil.copytree(backup, server_path + dst)
+    try: 
+        shutil.copytree(backup, server_path + dst)
     except: lprint("Error restoring: " + str(backup))
     
 def delete_backup(backup):
@@ -107,7 +129,7 @@ def delete_backup(backup):
 
 # Downloads latest server.jar from Minecraft website in current server folder.
 def download_new_server():
-    os.chdir(mc_path)
+    os.chdir(minecraft_folder_path)
     jar_download_url = ''
 
     minecraft_website = requests.get(new_server_url)
@@ -125,7 +147,18 @@ def download_new_server():
         jar_file.write(requests.get(jar_download_url).content)
 
     # Updates server discord-bot.properties file. server.properties will remove foreign data on server start.
-    with open(discord_bot_properties_file, 'w') as file: file.write(mc_ver)
+    if not os.path.isfile(discord_bot_properties_file):
+        with open(discord_bot_properties_file, 'w+') as file:
+            file.write('version=' + mc_ver)
+    else:
+        with fileinput.FileInput(discord_bot_properties_file, inplace=True) as file:
+            for line in file:
+                if file.isfirstline():
+                    print('version=' + mc_ver, end='\n')
+                else: print(line, end='')
+
+    with open(server_path + '/eula.txt', 'w') as file:
+        file.write('eula=true')
 
     return mc_ver
 
@@ -142,7 +175,7 @@ def get_minecraft_version(get_latest=False):
             return '.'.join(i.string.split('.')[1:][:-1])
 
 # Reads server.properties file and edits inplace.
-def edit_properties(target_property=None, value='', file_path=properties_file):
+def edit_properties(target_property=None, value='', file_path=server_properties_file):
     os.chdir(server_path)
     # Return data for other script uses, and one specifically for Discord.
     return_line = discord_return = ''
@@ -187,4 +220,7 @@ def restore_world(world=None, reset=False): return restore_backup(world, server_
 def delete_server(server): return delete_backup(server_backups_path + '/' + server)
 def delete_world(world): return delete_backup(world_backups_path + '/' + world)
 
-if __name__ == '__main__': pass
+if __name__ == '__main__':
+    setup_directories()
+    start_tmux_session()
+    start_minecraft_server()
