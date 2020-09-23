@@ -35,3 +35,4 @@ pip3 install discord bs4 psutil file-read-backwards
 3. Run `server_functions.py` with Python3 to start tmux session, discord_mc_bot and setup needed directories.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
+5. Read through the help page with `?help`.
