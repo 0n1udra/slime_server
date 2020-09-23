@@ -345,7 +345,7 @@ async def delete_world(ctx, index):
     await ctx.invoke(bot.get_command('saves'))
     lprint(ctx, "Deleted: " + to_delete)
 
-@bot.command(aliases=['newworld', 'startover', 'rebirth'])
+@bot.command(aliases=['newworld', 'startover', 'rebirth', 'hades'])
 async def new_world(ctx):
     mc_command("/say WARNING | Project Rebirth will commence in T-5s!")
     await ctx.send(":fire:**INCINERATED:**fire:")
