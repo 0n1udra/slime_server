@@ -249,7 +249,7 @@ async def server_motd(ctx, *message):
 async def server_status(ctx):
     if get_server_status():
         await ctx.send("Server is now __**ACTIVE**__.")
-        await ctx.invoke(bot.get_command('players'))
+        await ctx.invoke(bot.get_command('playerlist'))
     else: await ctx.send("Server is __**INACTIVE**__.")
     lprint(ctx, "Fetched server status.")
 
