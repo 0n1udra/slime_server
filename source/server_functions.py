@@ -36,7 +36,7 @@ def lprint(arg1=None, arg2=None):
 
     print(f"{datetime.datetime.now()} | ({user}) {msg}")
 
-def get_output(file, lines=10, match=None):
+def get_output(file, lines=10, match='placeholder match'):
     log_data = match_found = ''
     with FileReadBackwards(file) as file:
         for i in range(lines):
@@ -46,7 +46,7 @@ def get_output(file, lines=10, match=None):
                 break
             log_data += line
 
-    if match:
+    if match_found:
         return match_found
     return log_data
 
@@ -67,12 +67,14 @@ def start_server():
 
     os.chdir(server_path)
     # Tries starting new detached tmux session.
-    try: os.system(new_tmux )
+    try:
+        os.system(new_tmux )
     except: lprint("Error starting detached tmux session with name: mcserver")
     if not os.system(start_server_command): return True
 
 def create_backup(name, src, dst):
-    if not os.path.isdir(dst): os.makedirs(dst)
+    if not os.path.isdir(dst):
+        os.makedirs(dst)
 
     new_name = f"({folder_timestamp}) {get_minecraft_version()} {name}"
     new_backup_path = dst + '/' + new_name

@@ -48,6 +48,9 @@ async def server_command(ctx, *args):
     args = format_args(args)
     mc_command(f"/{args}")
     lprint(ctx, "Sent command: " + args)
+    time.sleep(1)
+    await ctx.invoke(bot.get_command('log'), lines=2)
+
 
 @bot.command(aliases=['save', 'sa'])
 async def server_save(ctx):
@@ -70,7 +73,7 @@ async def server_tell(ctx, player, *msg):
     await ctx.send("Communiqué transmitted to: `{player}`.")
     lprint(ctx, f"Messaged {player} : {msg}")
 
-@bot.command(aliases=['list', 'users', 'players'])
+@bot.command(aliases=['list', 'playerlist', 'pl'])
 async def list_players(ctx):
     mc_command("/list")
     time.sleep(1)
@@ -90,6 +93,7 @@ async def list_players(ctx):
         # Outputs player names in special discord format.
         players = [f"`{i.strip()}`" for i in (log_data[-1]).split(',')]
         await ctx.send(text + ':\n' + ''.join(players))
+    lprint(ctx, "Fetched player list.")
 
 
 # ========== Permissions: Ban, Kick, Whitelist, OP, etc
@@ -126,13 +130,13 @@ async def ban_list(ctx):
     for player in [i for i in get_json('banned-players.json')]: 
         embed.add_field(name=player['name'], value=player['reason'])
     await ctx.send(embed=embed)
-    lprint(ctx, f"Fetching banned list.")
+    lprint(ctx, f"Fetched banned list.")
 
 @bot.command(aliases=['oplist', 'ol', 'ops'])
 async def op_list(ctx):
     op_players = [f"`{i['name']}`" for i in get_json('ops.json')]
     await ctx.send('\n'.join(op_players))
-    lprint(ctx, f"Fetching server operators list.")
+    lprint(ctx, f"Fetched server operators list.")
 
 @bot.command(aliases=['opadd'])
 async def op_add(ctx, player, *reason):
@@ -245,8 +249,9 @@ async def server_motd(ctx, *message):
 async def server_status(ctx):
     if get_server_status():
         await ctx.send("Server is now __**ACTIVE**__.")
+        await ctx.invoke(bot.get_command('players'))
     else: await ctx.send("Server is __**INACTIVE**__.")
-    lprint(ctx, "Fetching server status.")
+    lprint(ctx, "Fetched server status.")
 
 @bot.command(aliases=['start', 'activate'])
 async def server_start(ctx):
@@ -287,7 +292,7 @@ async def fetch_worlds(ctx, amount=5):
     await ctx.send(embed=embed)
     await ctx.send("Use `?restore <index>` to restore world save.")
     await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
-    lprint(ctx, f"Fetching {amount} most recent world saves.")
+    lprint(ctx, f"Fetched {amount} most recent world saves.")
 
 @bot.command(aliases=['backup', 'clone', 'saveworld'])
 async def backup_world(ctx, *name):
@@ -342,25 +347,34 @@ async def delete_world(ctx, index):
 
 @bot.command(aliases=['newworld', 'startover', 'rebirth'])
 async def new_world(ctx):
-    mc_command("/say WARNING | Commencing project Rebirth in T-5s!")
+    mc_command("/say WARNING | Project Rebirth will commence in T-5s!")
     await ctx.send(":fire:**INCINERATED:**fire:")
     await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
-    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    if get_server_status():
+        await ctx.invoke(bot.get_command('stop'))
     server_functions.restore_world(reset=True)
     time.sleep(3)
     await ctx.invoke(bot.get_command('start'))
+    lprint(ctx, "World Reset.")
 
 # Edit server properties.
 @bot.command(aliases=['properties', 'property'])
-async def server_properties(ctx, target_property, *value):
+async def server_properties(ctx, target_property='', *value):
+    if not target_property:
+        await ctx.send("Need at leat property name, optionally input new value to change property.\nUsage example: `?property motd`, `?property motd Hello World!`")
+        return
+
     if not value:
         value = ''
     else: value = ' '.join(value)
-    await ctx.send(server_functions.edit_properties(target_property, value)[1])
+
+    get_property = server_functions.edit_properties(target_property, value)[1]
+    await ctx.send(property)
+    lprint(ctx, f"Server property: {get_property[1:][:-1]}")
 
 @bot.command(aliases=['update', 'serverupdate'])
 async def server_update(ctx):
-    lprint(ctx, "**Updating** `server.jar`...")
+    lprint(ctx, "Updating server.jar...")
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
@@ -457,32 +471,34 @@ async def server_reset(ctx):
 
     time.sleep(5)
     await ctx.invoke(bot.get_command('start'))
+    lprint(ctx, "Server Reset.")
 
-@bot.command(aliases=['log', 'getlog', 'showlog'])
-async def server_log(ctx, lines=10):
+@bot.command(aliases=['log', 'l', 'getlog', 'showlog', 'output'])
+async def server_log(ctx, lines=5):
     log_data = server_functions.get_output(server_functions.server_log_file, lines)
     await ctx.send(f"`{log_data}`")
-
+    lprint(ctx, f"Fetched {lines} lines from log.")
 
 # Restarts this bot script.
 @bot.command(aliases=['restartbot', 'rbot', 'rebootbot'])
 async def bot_restart(ctx):
     os.chdir(server_functions.server_functions_path)
     await ctx.send("***Rebooting Bot...***")
-    os.execl(sys.executable, sys.executable, *sys.argv)
     lprint(ctx, "Restarting bot.")
+    os.execl(sys.executable, sys.executable, *sys.argv)
 
 @bot.remove_command("help")
 @bot.command(aliases=['help', 'h'])
 async def help_page(ctx):
     current_command, embed_page, contents = 0, 1, []
     pages, current_page, page_limit = 3, 1, 15
+
     def new_embed(page):
         return discord.Embed(title=f'Help Page {page}/{pages}')
 
     embed = new_embed(embed_page)
     for command in get_csv('command_info.csv'):
-        if not command:  continue
+        if not command: continue
 
         embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
         current_command += 1
@@ -522,5 +538,6 @@ async def help_page(ctx):
         except asyncio.TimeoutError:
             await message.delete()
             break
+    lprint(ctx, "Fetched help page.")
 
 bot.run(TOKEN)
