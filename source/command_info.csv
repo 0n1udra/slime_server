@@ -1,6 +1,6 @@
 Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help` `?h`, Shows this help page.
-Server Command, `?command` `?/ <command>`, Send command directly to server, you won't get a feedback or confirmation the command worked! example: `?/ time set day`
+Server Command, `?command` `?/ <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
 Server Log, `?log` `?l [lines]`, Shows server log. Optionally specify how many most recent lines to show, by default shows 5 most recent.
 Server Status, `?status` `?serverstatus`, Shows server's running status.
 Server Start, `?start`, Starts Minecraft server up.
