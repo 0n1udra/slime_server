@@ -1,4 +1,4 @@
-import os, shutil, datetime, fileinput, requests, time
+import os, shutil, datetime, fileinput, requests, time, sys
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
@@ -221,6 +221,7 @@ def delete_server(server): return delete_backup(server_backups_path + '/' + serv
 def delete_world(world): return delete_backup(world_backups_path + '/' + world)
 
 if __name__ == '__main__':
-    setup_directories()
-    start_tmux_session()
-    start_minecraft_server()
+    if 'setup' in sys.argv:
+        setup_directories()
+        start_tmux_session()
+        start_minecraft_server()

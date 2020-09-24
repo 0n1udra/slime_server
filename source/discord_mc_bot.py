@@ -1,11 +1,12 @@
 import discord, asyncio, os, sys, psutil, time, json, csv, datetime, server_functions
 from discord.ext import commands, tasks
-from server_functions import lprint
+from server_functions import lprint, discord_bot_token_file
 
 # Exits script if no token.
-with open(server_functions.discord_bot_token_file, 'r') as file:
-    TOKEN = file.readline()
-if not TOKEN: print("Token Error."), exit()
+if os.path.isfile(discord_bot_token_file):
+    with open(discord_bot_token_file, 'r') as file:
+        TOKEN = file.readline()
+else: print("Missing Token File:", discord_bot_token_file), exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
@@ -50,7 +51,6 @@ async def server_command(ctx, *args):
     time.sleep(1)
     await ctx.invoke(bot.get_command('log'), lines=2)
 
-
 @bot.command(aliases=['save', 'sa'])
 async def server_save(ctx):
     mc_command('/save-all')
@@ -90,7 +90,7 @@ async def list_players(ctx):
         await ctx.send(text)
     else:
         # Outputs player names in special discord format.
-        players = [f"`{i.strip()}`" for i in (log_data[-1]).split(',')]
+        players = [f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
         await ctx.send(text + ':\n' + ''.join(players))
     lprint(ctx, "Fetched player list.")
 
@@ -154,7 +154,7 @@ async def op_remove(ctx, player, *reason):
     lprint(ctx, f"Removed server op: {player}")
 
 @bot.command(aliases=['top', 'timedop'])
-async def timed_op(ctx, player, time_limit=1):
+async def op_timed(ctx, player, time_limit=1):
     await ctx.send(f"Granting `{player}` OP status for {time_limit}m!")
     mc_command(f"/say INFO | {player} granted God status for {time_limit}m!")
     mc_command(f"/op {player}")
@@ -202,7 +202,7 @@ async def player_gamemode(ctx, player, state, *reason):
     lprint(ctx, f"Set {player} to: {state}")
 
 @bot.command(aliases=['timedgamemode', 'timedgm', 'tgm'])
-async def player_timed_gamemode(ctx, player, state, duration=None, *reason):
+async def player_gamemode_timed(ctx, player, state, duration=None, *reason):
     try: duration = int(duration)
     except: 
         await ctx.send("You buffoon, I need a number to set the duration!")
