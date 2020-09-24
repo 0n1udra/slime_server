@@ -32,7 +32,7 @@ pip3 install discord bs4 psutil file-read-backwards
 ### Initial Startup:
 1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py`.
 2. In `server_functions.py` update directory paths and file paths variables as needed.
-3. Run `server_functions.py` with Python3 to start tmux session, discord_mc_bot and setup needed directories.
+3. Run `server_functions.py setup` with Python3 to start tmux session, discord_mc_bot and setup needed directories.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
 5. Read through the help page with `?help`.
