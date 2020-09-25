@@ -9,7 +9,7 @@ Use discord bot commands to control Minecraft server. Either use Tmux or RCON to
 - World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files/folders.
 - Server functions: start, stop, restart, active status, show log, and get minecraft version.
 - Extra feature: edit properties in server.properties file, download latest server.jar from official Minecraft website.
-- If you don't have access to local server files/folders you can use the bot just with RCON, but you will be limited to RCON commands.
+- If you don't have access to local server files/folders you can use the bot just with RCON, but you will be limited to Minecraft RCON commands.
 
 
 ### Requirements:
