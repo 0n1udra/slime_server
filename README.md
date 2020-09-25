@@ -28,9 +28,9 @@ Control Minecraft server with RCON, you only have access to server functions and
 
 
 ### Initial Startup:
-1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py`.
+1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py` as needed.
 2. In `server_functions.py` update directory paths and file paths variables as needed.
-3. Run `server_functions.py setup` with Python3 to start tmux session, discord_mc_bot and setup needed directories.
+3. Run `server_functions.py setup` with Python3 to start tmux session alongside discord_mc_bot and setup needed directories.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
 5. Read through the help page with `?help`.
@@ -44,7 +44,7 @@ B) Or use `?update` to download latest server.jar file from official Minecraft w
 1. Create a RCON password file containg your server's RCON password, then in `server_functions.py` update RCON and other variables as needed.
 2. Read through the help page with `?help`.
 
-### Using Virtualenv:
+## Using Virtualenv:
 Create Python environment:
 ```bash
 virtualenv ~/pyenv/minecraft_discord_bot
