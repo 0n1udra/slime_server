@@ -1,31 +1,28 @@
 ## Control Minecraft server with Discord bot.
+Use discord bot commands to control Minecraft server bot. Either use Tmux or RCON to send commands to server. 
 
-Executes server.jar in detached tmux session, bot runs in 2nd window of said session.
-Utializes tmux send-key command to pass through command to server.
-
-### Versions:
-#### Local with Tmux:
-If you have access to the Minecraft server and server related files/folders.
-There are functions that backup/restore world folder and even the whole server folder, and there's also functions that edit server files like server.properties and eula.txt.
-Tmux is used to pass commands through to Minecraft server, and is also used to capture and log server output.
-bs4 is used for server update function by downloading latest server.jar file from official Minecraft website.
-
-#### RCON:
-Control Minecraft server with RCON, you only have access to server functions and won't be able to edit server files/folders like backup/restore world saves or edit server properties.
+### Features:
+- Basic commands: Kick, ban, pardon, kill, whisiper, teleport, save-all, and broadcast.
+- Change world weather and time
+- Time limited gamemode or OP status change.
+- Show list: online players, banned, OPed, and whitelist.
+- World save backup and restore system. Also has server folder backup/restore feature.
+- Server functions: start, stop, restart, active status, show log, and get minecraft version.
+- Extra feature: edit properties in server.properties file, download latest server.jar from official Minecraft website.
+  
 
 
-## Local with Tmux
 ### Requirements:
 - [Python3](https://www.python.org/)
-- [Tmux](https://github.com/tmux/tmux/wiki)
 - [Java 64bit](https://www.java.com/en/download/linux_manual.jsp)
-- For Windows: [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+- [Tmux](https://github.com/tmux/tmux/wiki) (Optionaal)
+- [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Optional)
 
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
-- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
-- [file-read-backwards](https://pypi.org/project/file-read-backwards/)
-
+- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (Optional)
+- [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Optional)
+- [mctools](https://pypi.org/project/mctools/) (For RCON)
 
 ### Initial Startup:
 1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py` as needed.
@@ -34,15 +31,6 @@ Control Minecraft server with RCON, you only have access to server functions and
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
 5. Read through the help page with `?help`.
-
-## RCON
-### Python Modules:
-- [discord.py](https://github.com/Rapptz/discord.py)
-- [mctools](https://pypi.org/project/mctools/)
-
-### Initial Startup:
-1. Create a RCON password file containg your server's RCON password, then in `server_functions.py` update RCON and other variables as needed.
-2. Read through the help page with `?help`.
 
 ## Using Virtualenv:
 Create Python environment:
@@ -55,9 +43,6 @@ source ~/pyenv/minecraft_discord_bot/bin/activate
 ```
 Install required Python modules (Local version):
 ```bash
-pip3 install discord bs4 file-read-backwards
+pip3 install discord bs4 file-read-backwards mctools
 ```
-(RCON version):
-```bash
-pip3 install discord mctools
-```
+
