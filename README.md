@@ -1,15 +1,15 @@
 ## Control Minecraft server with Discord bot.
-Use discord bot commands to control Minecraft server bot. Either use Tmux or RCON to send commands to server. 
+Use discord bot commands to control Minecraft server. Either use Tmux or RCON to send commands to server. 
 
 ### Features:
 - Basic commands: Kick, ban, pardon, kill, whisiper, teleport, save-all, and broadcast.
 - Change world weather and time
 - Time limited gamemode or OP status change.
 - Show list: online players, banned, OPed, and whitelist.
-- World save backup and restore system. Also has server folder backup/restore feature.
+- World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files/folders.
 - Server functions: start, stop, restart, active status, show log, and get minecraft version.
 - Extra feature: edit properties in server.properties file, download latest server.jar from official Minecraft website.
-  
+- If you don't have access to local server files/folders you can use the bot just with RCON, but you will be limited to RCON commands.
 
 
 ### Requirements:
