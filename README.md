@@ -57,7 +57,7 @@ Install required Python modules (Local version):
 ```bash
 pip3 install discord bs4 file-read-backwards
 ```
-(RCON):
+(RCON version):
 ```bash
-pip3 install discord bs4 file-read-backwards
+pip3 install discord mctools
 ```
