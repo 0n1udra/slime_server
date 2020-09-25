@@ -1,4 +1,4 @@
-import os, shutil, datetime, fileinput, requests, time, sys
+import os, shutil, datetime, fileinput, requests, time, sys, mctools
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
@@ -12,7 +12,6 @@ discord_bot_token_file = '/home/slime/mc_bot_token.txt'
 # The setup_directories() function uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
 minecraft_folder_path = '/mnt/c/Users/DT/Desktop/MC'
 
-# Don't need to change these.
 server_path = f"{minecraft_folder_path}/server"
 world_backups_path = f"{minecraft_folder_path}/world_backups"
 server_backups_path = f"{minecraft_folder_path}/server_backups"
@@ -22,6 +21,7 @@ server_properties_file = f"{server_path}/server.properties"
 discord_bot_file = f"{server_functions_path}/discord_mc_bot.py"
 discord_bot_log_file = f"{server_functions_path}/bot_log.txt"
 discord_bot_properties_file = f"{server_path}/discord-bot.properties"
+command_info_file = "command_info.csv"
 
 # Can adjust java arguments as needed for your system.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
@@ -225,3 +225,4 @@ if __name__ == '__main__':
         setup_directories()
         start_tmux_session()
         start_minecraft_server()
+
