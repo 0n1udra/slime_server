@@ -26,19 +26,6 @@ Control Minecraft server with RCON, you only have access to server functions and
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/)
 
-### Setup Virtualenv:
-Create Python environment:
-```bash
-virtualenv ~/pyenv/minecraft_discord_bot
-```
-Activate new Python env:
-```bash
-source ~/pyenv/minecraft_discord_bot/bin/activate
-```
-Install required Python modules:
-```bash
-pip3 install discord bs4 psutil file-read-backwards
-```
 
 ### Initial Startup:
 1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py`.
@@ -56,3 +43,21 @@ B) Or use `?update` to download latest server.jar file from official Minecraft w
 ### Initial Startup:
 1. Create a RCON password file containg your server's RCON password, then in `server_functions.py` update RCON and other variables as needed.
 2. Read through the help page with `?help`.
+
+### Using Virtualenv:
+Create Python environment:
+```bash
+virtualenv ~/pyenv/minecraft_discord_bot
+```
+Activate new Python env:
+```bash
+source ~/pyenv/minecraft_discord_bot/bin/activate
+```
+Install required Python modules (Local version):
+```bash
+pip3 install discord bs4 file-read-backwards
+```
+(RCON):
+```bash
+pip3 install discord bs4 file-read-backwards
+```
