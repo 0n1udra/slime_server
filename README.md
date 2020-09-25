@@ -20,9 +20,11 @@ Use discord bot commands to control Minecraft server. Either use Tmux or RCON to
 
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
+- [asyncio](https://docs.python.org/3/library/asyncio.html), [csv](https://docs.python.org/3/library/csv.html), [json](https://docs.python.org/3/library/json.html), [time](https://docs.python.org/3/library/time.html), [os](https://docs.python.org/3/library/os.html)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (Optional)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Optional)
 - [mctools](https://pypi.org/project/mctools/) (For RCON)
+
 
 ### Initial Startup:
 1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py` as needed.
