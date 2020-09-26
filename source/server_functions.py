@@ -2,29 +2,28 @@ import os, datetime, csv
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
-# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like loggging.
+discord_bot_token_file = '/home/slime/mc_bot_token.txt'
+
+# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like server logging.
 use_rcon = False
-# Local file access allows for server files/folders manipulation.
+
+# Use Tmux to send commands to server and log server output to file. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features.
+use_tmux = True
+
+# Local file access allows for server files/folders manipulation for features like backup/restore world saves or editing server.properties file.
 server_files_access = True
-
-if use_rcon: import mctools, re
-if server_files_access: import shutil, requests, fileinput, json
-
-server_functions_path = os.getcwd()
-folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
 # RCON
 mc_ip = 'arcpy.asuscomm.com'
 mc_rcon_port = 25575
 mc_rcon_pass_file = "/home/slime/mc_rcon_pass.txt"
 
-# Updates variables as needed.
-discord_bot_token_file = '/home/slime/mc_bot_token.txt'
-# This is where Minecraft server, world backups and some discord bot files will be saved, so make sure this is an absolute path and is where you want it.
-# The setup_directories() function uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
+# This is where Minecraft server, world backups and some Discord bot files will be saved, so make sure this is an absolute path and is where you want it.
+# The setup_directories() function when running 'run_bot.py setup' uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
+# os.makedirs() will not overwrite existing files/folders.
 minecraft_folder_path = '/mnt/c/Users/DT/Desktop/MC'
 
+server_functions_path = os.getcwd()
 server_path = f"{minecraft_folder_path}/server"
 world_backups_path = f"{minecraft_folder_path}/world_backups"
 server_backups_path = f"{minecraft_folder_path}/server_backups"
@@ -35,9 +34,15 @@ discord_bot_file = f"{server_functions_path}/discord_mc_bot.py"
 discord_bot_log_file = f"{server_functions_path}/bot_log.txt"
 discord_bot_properties_file = f"{server_path}/discord-bot.properties"
 
-# Can adjust java arguments as needed for your system.
+# Update server.jar execution argument if needed.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
+
+folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
+new_server_url = 'https://www.minecraft.net/en-us/download/server'
+
+if use_rcon: import mctools, re
+if server_files_access: import shutil, requests, fileinput, json
 
 if os.path.isfile(mc_rcon_pass_file):
     with open(mc_rcon_pass_file, 'r') as file:
@@ -83,6 +88,7 @@ def mc_rcon(command=''):
         return response
     else: lprint("Error connecting RCON.")
 
+# Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping_stats():
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     stats = mctools.PINGClient(mc_ip).get_stats()
@@ -90,6 +96,7 @@ def mc_ping_stats():
              'version': stats['version']['name']}
     return stats
 
+# Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
 def get_server_status():
     if 'testcheckstring' not in mc_command('testcheckstring'): return False
 
@@ -99,6 +106,7 @@ def get_server_status():
         return {'motd': edit_properties('motd')[0].split('=')[1][:-1],
                 'version': get_minecraft_version()}
 
+# Used so Discord command arguments don't need qoutes.
 def format_args(args, return_empty=False):
     if args: return ' '.join(args)
     else:
@@ -106,7 +114,7 @@ def format_args(args, return_empty=False):
             return ''
         return "No reason given"
 
-# Gets data from json files in same local.
+# Gets data from json local file.
 def get_json(json_file):
     os.chdir(server_functions_path)
     with open(server_path + '/' + json_file) as file:
@@ -118,16 +126,21 @@ def get_csv(csv_file):
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 
+def start_discord_bot():
+    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
+    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True
+
+
+# Starts minecraft server in Tmux session.
 def start_minecraft_server():
     # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
     os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
     os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
 
-    os.chdir(server_path)
     # Tries starting new detached tmux session.
-    if not os.system(start_server_command): 
-        return True
+    if not os.system(start_server_command): return True
 
+# Gets server output by reading log file, can also find response from command in log by finding matching string.
 def get_output(match='placeholder match', file=server_log_file, lines=10):
     log_data = match_found = ''
     with FileReadBackwards(file) as file:
@@ -142,9 +155,11 @@ def get_output(match='placeholder match', file=server_log_file, lines=10):
         return match_found
     return log_data
 
-def get_from_index(path, index): 
+# Get server or world backup folder name from index.
+def get_from_index(path, index):
     return os.listdir(path)[index]
 
+# Gets x number of backups.
 def fetch_backups(path, amount=5):
     backups = []
     for item in os.listdir(path)[:amount]:
@@ -173,7 +188,7 @@ def restore_backup(backup, dst, reset=False):
         lprint("Error deleting: " + dst)
         return False
 
-    # This function is used in ?rebirth discord command to create a new world.
+    # This function is used in ?rebirth Discord command to create a new world.
     if reset: return True
 
     try: 
@@ -186,7 +201,7 @@ def delete_backup(backup):
         return True
     except: lprint("Error deleting: " + str(backup))
 
-# Downloads latest server.jar from Minecraft website in current server folder.
+# Downloads latest server.jar from Minecraft website in current server folder, also updates needed files like eula.txt.
 def download_new_server():
     os.chdir(minecraft_folder_path)
     jar_download_url = ''
@@ -221,9 +236,9 @@ def download_new_server():
 
     return mc_ver
 
-# Gets server version from file or from website.
+# Gets server version from file or gets latest version number from website.
 def get_minecraft_version(get_latest=False):
-    # Returns server version from discord-server.properties file located in same folder as server.jar.
+    # Returns server version from Discord-server.properties file located in same folder as server.jar.
     if not get_latest:
         return edit_properties('version', file_path=discord_bot_properties_file)[0].split('=')[1]
 
@@ -233,7 +248,7 @@ def get_minecraft_version(get_latest=False):
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])
 
-# Reads server.properties file and edits inplace.
+# Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_properties(target_property=None, value='', file_path=server_properties_file):
     os.chdir(server_path)
     # Return data for other script uses, and one specifically for Discord.

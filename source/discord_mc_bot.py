@@ -2,6 +2,12 @@ import discord, asyncio, os, sys, time, server_functions
 from discord.ext import commands, tasks
 from server_functions import lprint, use_rcon, format_args, mc_command, get_server_status
 
+# Exits script if no token.
+if os.path.isfile(server_functions.discord_bot_token_file):
+    with open(server_functions.discord_bot_token_file, 'r') as file:
+        TOKEN = file.readline()
+else: print("Missing Token File:", server_functions.discord_bot_token_file), exit()
+
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
@@ -219,7 +225,6 @@ async def status(ctx, show_players=True):
         await ctx.send("Server is now __**ACTIVE**__.")
         await ctx.send(f"version: `{stats['version']}` | motd: `{stats['motd']}`")
         if show_players: await ctx.invoke(bot.get_command('players'))
-
     else: await ctx.send("Server is __**INACTIVE**__.")
     lprint(ctx, "Fetched server status.")
 
@@ -528,3 +533,6 @@ async def help(ctx):
         except asyncio.TimeoutError:
             await message.delete()
             break
+
+if __name__ == '__main__':
+    bot.run(TOKEN)
