@@ -1,10 +1,23 @@
-import os, shutil, datetime, fileinput, requests, time, sys, mctools
+import os, datetime, csv
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
+
+# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like loggging.
+use_rcon = False
+# Local file access allows for server files/folders manipulation.
+server_files_access = True
+
+if use_rcon: import mctools
+if server_files_access: import shutil, requests, fileinput, json
 
 server_functions_path = os.getcwd()
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
+
+# RCON
+mc_rcon_ip = 'arcpy.asuscomm.com'
+mc_rcon_port = 25575
+mc_rcon_pass_file = "/home/slime/mc_rcon_pass.txt"
 
 # Updates variables as needed.
 discord_bot_token_file = '/home/slime/mc_bot_token.txt'
@@ -21,11 +34,18 @@ server_properties_file = f"{server_path}/server.properties"
 discord_bot_file = f"{server_functions_path}/discord_mc_bot.py"
 discord_bot_log_file = f"{server_functions_path}/bot_log.txt"
 discord_bot_properties_file = f"{server_path}/discord-bot.properties"
-command_info_file = "command_info.csv"
 
 # Can adjust java arguments as needed for your system.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
+
+if os.path.isfile(mc_rcon_pass_file):
+    with open(mc_rcon_pass_file, 'r') as file:
+        mc_rcon_pass = file.readline().strip()
+else:
+    print("Error finding RCON password file.")
+    mc_rcon_pass = None
+
 
 def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
@@ -37,26 +57,53 @@ def lprint(arg1=None, arg2=None):
         msg = arg2
 
     output = f"{datetime.datetime.now()} | ({user}) {msg}"
+    print(output)
 
     with open(discord_bot_log_file, 'a') as file:
         file.write(output + '\n')
 
-    print(output)
+# Sends command to tmux window running server.
+def mc_command(command, match_output=None):
+    if use_rcon: return mc_rcon(command)
 
-def setup_directories():
-    try:
-        os.makedirs(server_path)
-        os.makedirs(world_backups_path)
-        os.makedirs(server_backups_path)
-    except: print("Error: Something went wrong setup up necessary directory structure.")
+    os.system(f'tmux send-keys -t mcserver:1.0 "/{command}" ENTER')
+    if match_output is None:
+        return get_output(command)
+    else: return get_output(match_output)
 
-def start_tmux_session():
-    try:
-        os.system('tmux new -d -s mcserver')
-        os.system('tmux send-keys -t mcserver:1.0 "tmux split-window -v" ENTER')
-        time.sleep(1)
-        os.system(f'tmux send-keys -t mcserver:1.1 "python3 {discord_bot_file}" ENTER')
-    except: lprint("Error starting required detached tmux session with 2 windows with name: mcserver")
+def mc_rcon(command=''):
+    if mc_rcon_pass is None:
+        lprint("Error with getting RCON password.")
+        return
+
+    mc_rcon_client = mctools.RCONClient(mc_rcon_ip, port=mc_rcon_port)
+
+    if mc_rcon_client.login(mc_rcon_pass):
+        response = mc_rcon_client.command(command)
+        return response
+    else: lprint("Error connecting RCON.")
+
+def get_server_status():
+    if 'testcheckstring' in mc_command('testcheckstring'): return True
+
+def format_args(args, return_empty=False):
+    if args: return ' '.join(args)
+    else:
+        if return_empty:
+            return ''
+        return "No reason given"
+
+# Gets data from json files in same local.
+def get_json(json_file):
+    os.chdir(server_functions_path)
+    with open(server_path + '/' + json_file) as file:
+        return [i for i in json.load(file)]
+
+def get_csv(csv_file):
+    os.chdir(server_functions_path)
+    with open(csv_file) as file:
+        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
+
 
 def start_minecraft_server():
     # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
@@ -68,7 +115,7 @@ def start_minecraft_server():
     if not os.system(start_server_command): 
         return True
 
-def get_output(file, lines=10, match='placeholder match'):
+def get_output(match='placeholder match', file=server_log_file, lines=10):
     log_data = match_found = ''
     with FileReadBackwards(file) as file:
         for i in range(lines):
@@ -91,7 +138,6 @@ def fetch_backups(path, amount=5):
         if os.path.isdir(path + '/' + item):
             backups.append(item)
     return backups
-
 
 def create_backup(name, src, dst):
     if not os.path.isdir(dst):
@@ -220,9 +266,4 @@ def restore_world(world=None, reset=False): return restore_backup(world, server_
 def delete_server(server): return delete_backup(server_backups_path + '/' + server)
 def delete_world(world): return delete_backup(world_backups_path + '/' + world)
 
-if __name__ == '__main__':
-    if 'setup' in sys.argv:
-        setup_directories()
-        start_tmux_session()
-        start_minecraft_server()
 
