@@ -7,7 +7,7 @@ use_rcon = False
 # Local file access allows for server files/folders manipulation.
 server_files_access = True
 
-if use_rcon: import mctools
+if use_rcon: import mctools, re
 if server_files_access: import shutil, requests, fileinput, json
 
 server_functions_path = os.getcwd()
@@ -15,7 +15,7 @@ folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
 # RCON
-mc_rcon_ip = 'arcpy.asuscomm.com'
+mc_ip = 'arcpy.asuscomm.com'
 mc_rcon_port = 25575
 mc_rcon_pass_file = "/home/slime/mc_rcon_pass.txt"
 
@@ -76,15 +76,28 @@ def mc_rcon(command=''):
         lprint("Error with getting RCON password.")
         return
 
-    mc_rcon_client = mctools.RCONClient(mc_rcon_ip, port=mc_rcon_port)
+    mc_rcon_client = mctools.RCONClient(mc_ip, port=mc_rcon_port)
 
     if mc_rcon_client.login(mc_rcon_pass):
         response = mc_rcon_client.command(command)
         return response
     else: lprint("Error connecting RCON.")
 
+def mc_ping_stats():
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    stats = mctools.PINGClient(mc_ip).get_stats()
+    stats = {'motd': ansi_escape.sub('', stats['description']),
+             'version': stats['version']['name']}
+    return stats
+
 def get_server_status():
-    if 'testcheckstring' in mc_command('testcheckstring'): return True
+    if 'testcheckstring' not in mc_command('testcheckstring'): return False
+
+    if use_rcon:
+        return mc_ping_stats()
+    else:
+        return {'motd': edit_properties('motd')[0].split('=')[1][:-1],
+                'version': get_minecraft_version()}
 
 def format_args(args, return_empty=False):
     if args: return ' '.join(args)
@@ -265,5 +278,4 @@ def restore_world(world=None, reset=False): return restore_backup(world, server_
 
 def delete_server(server): return delete_backup(server_backups_path + '/' + server)
 def delete_world(world): return delete_backup(world_backups_path + '/' + world)
-
 

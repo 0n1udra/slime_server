@@ -1,7 +1,7 @@
 import os, sys, time, server_functions
 from discord_mc_bot import bot
 
-disabled_commands = ['banlist', 'oplist', 'mootd', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'update',
+disabled_commands = ['banlist', 'oplist', 'description', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'update',
                      'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'onlinemode', 'log']
 
 # Exits script if no token.
@@ -16,6 +16,12 @@ def setup_directories():
         os.makedirs(server_functions.world_backups_path)
         os.makedirs(server_functions.server_backups_path)
     except: print("Error: Something went wrong setup up necessary directory structure.")
+
+    try:
+        with open(server_functions.discord_bot_properties_file, 'w') as file:
+            file.write("version=")
+            file.write("autosave=")
+    except: print("Error: Setting up discord-bot.properties file.")
 
 def start_tmux_session():
     try:

@@ -212,23 +212,25 @@ async def set_time(ctx, set_time=None):
 
 
 # ========== Server Start, status, backup, update, etc
+@bot.command(aliases=['info', 'stats'])
+async def status(ctx, show_players=True):
+    stats = get_server_status()
+    if stats:
+        await ctx.send("Server is now __**ACTIVE**__.")
+        await ctx.send(f"version: `{stats['version']}` | motd: `{stats['motd']}`")
+        if show_players: await ctx.invoke(bot.get_command('players'))
+
+    else: await ctx.send("Server is __**INACTIVE**__.")
+    lprint(ctx, "Fetched server status.")
+
 @bot.command()
 async def motd(ctx, *message):
     if message:
         message = format_args(message)
         server_functions.edit_properties('motd', message)
         await ctx.send("Message of the day updates!")
+        lprint("Updated motd: " + message)
     else: await ctx.send(server_functions.edit_properties('motd')[1])
-
-@bot.command(aliases=['info', 'stats'])
-async def status(ctx, show_players=True):
-    if get_server_status():
-        await ctx.send("Server is now __**ACTIVE**__.")
-        await ctx.send(f"Version: `{server_functions.get_minecraft_version()}`")
-        if show_players:await ctx.invoke(bot.get_command('playerlist'))
-
-    else: await ctx.send("Server is __**INACTIVE**__.")
-    lprint(ctx, "Fetched server status.")
 
 @bot.command()
 async def start(ctx):
