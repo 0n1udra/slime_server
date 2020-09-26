@@ -1,8 +1,8 @@
 Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help`, Shows this help page.
 Server Command, `?command <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
+Server Status, `?status`, Shows server's running status, version, motd, and online players.
 Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, by default shows 5 most recent.
-Server Status, `?status`, Shows server's running status.
 Server Start, `?start`, Starts Minecraft server up.
 Server Stop, `?stop`, Messages all players the server will be halted in 15s. Then will save the world and halt the server.
 Server Restart, `?restart` `?reboot`, Uses the `?stop` command first then `?start` command.
