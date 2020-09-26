@@ -28,8 +28,8 @@ Use discord bot commands to control Minecraft server. Either use Tmux or RCON to
 
 ### Initial Startup:
 1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py` as needed.
-2. In `server_functions.py` update directory paths and file paths variables as needed.
-3. Run `server_functions.py setup` with Python3 to start tmux session alongside discord_mc_bot and setup needed directories.
+2. In `server_functions.py` update directory paths and file paths variables as needed. Also update `use_rcon` and `local_files_access` boolean variables for your setup.
+3. Run `python3 discord_mc_bot.py setup` which well setup required enviorment and/or folder structure as needed.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
 5. Read through the help page with `?help`.
