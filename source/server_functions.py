@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 server_functions_path = os.getcwd()
 bot_log_file = f"{server_functions_path}/bot_log.txt"
 
+# Outputs and logs used bot commands and which Discord user invoked them.
 def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
         msg = arg1
@@ -48,12 +49,12 @@ script_properties_file = f'{server_functions_path}/script_properties.txt'
 
 # Update server.jar execution argument if needed.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
-lprint("Java Command: " + java_args)
+lprint("Java run command set: " + java_args)
 
 # Use Tmux to send commands to server and log server output to file. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features.
 use_tmux = True
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
-lprint("Tmux Command: " + start_server_command)
+lprint("Tmux send server command set: " + start_server_command)
 
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
@@ -78,11 +79,15 @@ def mc_rcon(command=''):
         return response
     else: lprint("Error connecting RCON.")
 
+# Removes unwanted ANSI escape characters.
+def remove_ansi(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping_stats():
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     stats = mctools.PINGClient(mc_ip).get_stats()
-    stats = {'motd': ansi_escape.sub('', stats['description']),
+    stats = {'motd': remove_ansi(stats['description']),
              'version': stats['version']['name']}
     return stats
 
@@ -131,12 +136,21 @@ def start_minecraft_server():
     if not os.system(start_server_command): return True
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def get_output(match='placeholder match', file_path=server_log_file, lines=10):
+def get_output(match='placeholder match', file_path=server_log_file, lines=50):
     log_data = match_found = ''
     with FileReadBackwards(file_path) as file:
         for i in range(lines):
             line = file.readline()
-            if match in line:
+            if 'banlist' in match:
+                # Finds log lines that shows banned players.
+                if 'was banned by' in line:
+                    match_found += line
+                # Finds the end so it doesn't return everything from log other then banned users.
+                elif '/INFO]: There are' in line:
+                    match_found += line
+                    break
+
+            elif match in line:
                 match_found = line
                 break
             log_data += line
@@ -255,7 +269,7 @@ def edit_properties(target_property=None, value='', file_path=server_properties_
                 if value:
                     split_line[1] = value
                     new_line = '='.join(split_line)
-                    discord_return = f"Updated Property:`{line} > `{new_line}`.\nRestart to apply changes."
+                    discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
                     return_line = line
                     print(new_line, end='\n')
                 else:
