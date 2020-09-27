@@ -36,7 +36,8 @@ Server Delete backup, `?serverdelete <index>`, Get index number from `?serverbac
 Server Restore, '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
 Server Reset, `?serverreset`, Deletes all server files, make a backup beforehand if needed. make a backup beforehand if neededd, downloads latest server jar from official website and launches (do not need to edit eula.txt).
 Properties File, `?property <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
-Set Online Mode, `?onlinemode <true/false>`, Set online mode to true or false, restart needed to apply change.
+Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.
+Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to check RCON status else make sure true or false argument is all lowercase. Currently have to set other RCON properties with `?property`.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
 
