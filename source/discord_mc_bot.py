@@ -61,11 +61,11 @@ async def players(ctx):
     player_names = log_data[-1]
     # If there's no players active, player_names will still contain some anso escape characters.
     if len(player_names.strip()) < 5:
-        await ctx.send(text)
+        await ctx.send(text + '.')
     else:
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
         players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-        await ctx.send(text + ':\n' + ''.join(players_names))
+        await ctx.send(text + ':\n' + ''.join(players_names) + '.')
     lprint(ctx, "Fetched player list.")
 
 
@@ -97,12 +97,48 @@ async def pardon(ctx, player, *reason):
     await ctx.send(f"Cleansed `{player}`.")
     lprint(ctx, f"Pardoned {player} : {reason}")
 
-@bot.command()
+# Gets online players, formats output for Discord depending on using RCON or reading from server log.
+@bot.command(aliases=['bl', 'bans'])
 async def banlist(ctx):
-    embed = discord.Embed(title='Banned Players')
-    for player in [i for i in server_functions.get_json('banned-players.json')]:
-        embed.add_field(name=player['name'], value=player['reason'])
-    await ctx.send(embed=embed)
+    banned_players = ''
+    response = mc_command("banlist")
+
+    if use_rcon:
+        if 'There are no bans' in response:
+            banned_players = 'No exiles!'
+        else:
+            data = response.split(':', 1)
+            for line in data[1].split('.'):
+                line = line.split(':')
+                reason = server_functions.remove_ansi(line[-1].strip()) # Sometimes you'll get ansi escape chars in your reason.
+                player = line[0].split(' ')[0].strip()
+                banner = line[0].split(' ')[-1].strip()
+                banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+
+            banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
+
+    else:
+        for line in filter(None, server_functions.get_output('banlist').split('\n')):  # Filters out blank lines you sometimes get.
+            print(line)
+            if 'There are no bans' in line:
+                banned_players = 'No exiles!'
+                break
+
+            elif 'There are' in line:
+                banned_players += line.split(':')[-2]
+                break
+
+            # Gets relevant data from current log line, and formats it for Discord output.
+            # Example line: Slime was banned by Server: No reason given
+            # Extracts Player name, who banned the player, and the reason.
+            ban_log_line = line.split(':')[-2:]
+            reason = ban_log_line[-1][:-2].strip()
+            player = ban_log_line[0].split(' ')[1].strip()
+            banner = ban_log_line[0].split(' ')[-1].strip()
+            banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+
+
+    await ctx.send(banned_players)
     lprint(ctx, f"Fetched banned list.")
 
 @bot.command()
@@ -311,12 +347,9 @@ async def restore(ctx, index=None):
     mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
     time.sleep(5)
 
-    # Stops server if running
-    if get_server_status():
-        await ctx.invoke(bot.get_command('stop'))
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))  # Stops if server is running.
 
-    # Restore world
-    server_functions.restore_world(restore)
+    server_functions.restore_world(restore)  # Gives computer time to move around world files.
     time.sleep(3)
 
     await ctx.invoke(bot.get_command('start'))
@@ -465,17 +498,10 @@ async def serverreset(ctx):
     await ctx.invoke(bot.get_command('start'))
     lprint(ctx, "Server Reset.")
 
-@bot.command()
+@bot.command(aliases=['omode'])
 async def onlinemode(ctx, mode=''):
-    if mode not in ['true', 'false']:
-        await ctx.send(server_functions.edit_properties('online-mode')[1])
-        await ctx.send("Need `true` or `false` argument to change online-mode property.")
-        return
-
-    server_functions.edit_properties('online-mode', mode)
-    await ctx.send(server_functions.edit_properties('online-mode')[1])
-    await ctx.send("Restart server to apply change.")
-    lprint(ctx, "Updated online-mode: " + mode)
+    await ctx.send(server_functions.edit_properties('online-mode', mode)[1])
+    lprint(ctx, "Online-mode: " + mode)
 
 @bot.command(aliases=['log'])
 async def serverlog(ctx, lines=5):
