@@ -11,8 +11,6 @@ else: print("Missing Token File:", server_functions.discord_bot_token_file), exi
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
-autosave = False
-
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
@@ -223,7 +221,8 @@ async def status(ctx, show_players=True):
     stats = get_server_status()
     if stats:
         await ctx.send("Server is now __**ACTIVE**__.")
-        await ctx.send(f"version: `{stats['version']}` | motd: `{stats['motd']}`")
+        await ctx.send(f"version: `{stats['version']}`")
+        await ctx.send(f"motd: `{stats['motd']}`")
         if show_players: await ctx.invoke(bot.get_command('players'))
     else: await ctx.send("Server is __**INACTIVE**__.")
     lprint(ctx, "Fetched server status.")
@@ -480,6 +479,12 @@ async def restartbot(ctx):
     await ctx.send("***Rebooting Bot...***")
     lprint(ctx, "Restarting bot.")
     os.execl(sys.executable, sys.executable, *sys.argv)
+
+@bot.command()
+async def rcon(ctx, state=''):
+    response = server_functions.edit_properties('enable-rcon', state)[1]
+    await ctx.send(response)
+
 
 @bot.remove_command("help")
 @bot.command()
