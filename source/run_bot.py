@@ -15,10 +15,10 @@ def setup_directories():
     except: print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
     try:
-        with open(server_functions.discord_bot_properties_file, 'w') as file:
+        with open(server_functions.bot_properties_file, 'w') as file:
             file.write("version=\n")
             file.write("autosave=")
-        print("Created:", server_functions.discord_bot_properties_file)
+        print("Created:", server_functions.bot_properties_file)
     except: print("Error: Setting up Discord-bot.properties file at:", server_functions.server_path)
 
 def start_tmux_session():

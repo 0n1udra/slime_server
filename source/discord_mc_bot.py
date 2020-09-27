@@ -3,10 +3,10 @@ from discord.ext import commands, tasks
 from server_functions import lprint, use_rcon, format_args, mc_command, get_server_status
 
 # Exits script if no token.
-if os.path.isfile(server_functions.discord_bot_token_file):
-    with open(server_functions.discord_bot_token_file, 'r') as file:
+if os.path.isfile(server_functions.bot_token_file):
+    with open(server_functions.bot_token_file, 'r') as file:
         TOKEN = file.readline()
-else: print("Missing Token File:", server_functions.discord_bot_token_file), exit()
+else: print("Missing Token File:", server_functions.bot_token_file), exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
@@ -24,7 +24,7 @@ async def server_command(ctx, *args):
     mc_command(f"{args}")
     lprint(ctx, "Sent command: " + args)
     time.sleep(1)
-    await ctx.invoke(bot.get_command('log'), lines=2)
+    await ctx.invoke(bot.get_command('serverlog'), lines=2)
 
 @bot.command()
 async def saveall(ctx):
@@ -216,7 +216,7 @@ async def set_time(ctx, set_time=None):
 
 
 # ========== Server Start, status, backup, update, etc
-@bot.command(aliases=['info', 'stats'])
+@bot.command(aliases=['info', 'stat', 'stats'])
 async def status(ctx, show_players=True):
     stats = get_server_status()
     if stats:
@@ -466,11 +466,11 @@ async def onlinemode(ctx, mode=''):
     await ctx.send("Restart server to apply change.")
     lprint(ctx, "Updated online-mode: " + mode)
 
-@bot.command()
+@bot.command(aliases=['log'])
 async def serverlog(ctx, lines=5):
-    log_data = server_functions.get_output(server_functions.server_log_file, lines)
+    log_data = server_functions.get_output(file_path=server_functions.server_log_file, lines=lines)
     await ctx.send(f"`{log_data}`")
-    lprint(ctx, f"Fetched {lines} lines from log.")
+    lprint(ctx, f"Fetched {lines} lines from bot log.")
 
 # Restarts this bot script.
 @bot.command(aliases=['rbot', 'rebootbot'])
@@ -484,6 +484,13 @@ async def restartbot(ctx):
 async def rcon(ctx, state=''):
     response = server_functions.edit_properties('enable-rcon', state)[1]
     await ctx.send(response)
+
+
+@bot.command()
+async def botlog(ctx, lines=5):
+    log_data = server_functions.get_output(file_path=server_functions.bot_log_file, lines=lines)
+    await ctx.send(f"`{log_data}`")
+    lprint(ctx, f"Fetched {lines} lines from log.")
 
 
 @bot.remove_command("help")

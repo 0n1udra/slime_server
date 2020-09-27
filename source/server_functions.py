@@ -3,7 +3,8 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
 server_functions_path = os.getcwd()
-discord_bot_log_file = f"{server_functions_path}/bot_log.txt"
+bot_log_file = f"{server_functions_path}/bot_log.txt"
+
 def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
         msg = arg1
@@ -16,7 +17,7 @@ def lprint(arg1=None, arg2=None):
     output = f"{datetime.datetime.now()} | ({user}) {msg}"
     print(output)
 
-    with open(discord_bot_log_file, 'a') as file:
+    with open(bot_log_file, 'a') as file:
         file.write(output + '\n')
 
 # If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like server logging.
@@ -40,9 +41,9 @@ server_backups_path = f"{minecraft_folder_path}/server_backups"
 server_jar_file = f'{server_path}/server.jar'
 server_log_file = f"{server_path}/output.txt"
 server_properties_file = f"{server_path}/server.properties"
-discord_bot_file = f"{server_functions_path}/discord_mc_bot.py"
-discord_bot_properties_file = f"{server_path}/discord-bot.properties"
-discord_bot_token_file = '/home/slime/mc_bot_token.txt'
+bot_file = f"{server_functions_path}/discord_mc_bot.py"
+bot_properties_file = f"{server_path}/discord-bot.properties"
+bot_token_file = '/home/slime/mc_bot_token.txt'
 script_properties_file = f'{server_functions_path}/script_properties.txt'
 
 # Update server.jar execution argument if needed.
@@ -130,9 +131,9 @@ def start_minecraft_server():
     if not os.system(start_server_command): return True
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def get_output(match='placeholder match', file=server_log_file, lines=10):
+def get_output(match='placeholder match', file_path=server_log_file, lines=10):
     log_data = match_found = ''
-    with FileReadBackwards(file) as file:
+    with FileReadBackwards(file_path) as file:
         for i in range(lines):
             line = file.readline()
             if match in line:
@@ -210,12 +211,12 @@ def download_new_server():
         jar_file.write(requests.get(jar_download_url).content)
 
     # Updates server discord-bot.properties file. server.properties will remove foreign data on server start.
-    if not os.path.isfile(discord_bot_properties_file):
-        with open(discord_bot_properties_file, 'w+') as file:
+    if not os.path.isfile(bot_properties_file):
+        with open(bot_properties_file, 'w+') as file:
             file.write('version=' + mc_ver)
     else:
         edit_properties('version', )
-        with fileinput.FileInput(discord_bot_properties_file, inplace=True) as file:
+        with fileinput.FileInput(bot_properties_file, inplace=True) as file:
             for line in file:
                 if file.isfirstline():
                     print('version=' + mc_ver, end='\n')
@@ -229,7 +230,7 @@ def download_new_server():
 # Gets server version from file or gets latest version number from website.
 def get_minecraft_version(get_latest=False):
     # Returns server version from Discord-server.properties file located in same folder as server.jar.
-    if not get_latest: return edit_properties('version', file_path=discord_bot_properties_file)[2]
+    if not get_latest: return edit_properties('version', file_path=bot_properties_file)[2]
 
     soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
     for i in soup.findAll('a'):
