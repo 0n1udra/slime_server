@@ -1,7 +1,7 @@
 import os, sys, time, server_functions
 from discord_mc_bot import bot, TOKEN
 
-disabled_commands = ['banlist', 'oplist', 'description', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'update',
+disabled_commands = ['oplist', 'description', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'update',
                      'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'onlinemode', 'log']
 
 def setup_directories():
