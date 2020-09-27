@@ -26,21 +26,15 @@ async def server_command(ctx, *args):
     time.sleep(1)
     await ctx.invoke(bot.get_command('serverlog'), lines=2)
 
-@bot.command()
-async def saveall(ctx):
-    mc_command('save-all')
-    await ctx.send("I saved the world!")
-    await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
-    lprint(ctx, "Saved world.")
 
 @bot.command()
 async def say(ctx, *msg):
     msg = format_args(msg, return_empty=True)
     mc_command('say ' + msg)
     if not msg:
-        await ctx.send("Usage exmaple: `?s Hello everyone!`")
+        await ctx.send("Usage example: `?s Hello everyone!`")
     else: await ctx.send("Message circulated to all active players!")
-    lprint(ctx, "Server said: {msg}")
+    lprint(ctx, f"Server said: {msg}")
 
 @bot.command()
 async def tell(ctx, player, *msg):
@@ -65,13 +59,13 @@ async def players(ctx):
     log_data = log_data.split(':')
     text = log_data[-2]
     player_names = log_data[-1]
-    # If there's no players connected at the moment. Even if no players online, player_names will still contain some escape characters and other chars.
+    # If there's no players active, player_names will still contain some anso escape characters.
     if len(player_names.strip()) < 5:
         await ctx.send(text)
     else:
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        players = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-        await ctx.send(text + ':\n' + ''.join(players))
+        players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+        await ctx.send(text + ':\n' + ''.join(players_names))
     lprint(ctx, "Fetched player list.")
 
 
@@ -199,6 +193,13 @@ async def gamemodetimed(ctx, player, state, duration=None, *reason):
 
 
 # ========== World weather, time, etc
+@bot.command()
+async def saveall(ctx):
+    mc_command('save-all')
+    await ctx.send("I saved the world!")
+    await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
+    lprint(ctx, "Saved world.")
+
 @bot.command(aliases=['time'])
 async def set_weather(ctx, state, duration=0):
     mc_command(f'weather {state} {duration*60}')
@@ -213,6 +214,7 @@ async def set_time(ctx, set_time=None):
         mc_command(f"time set {set_time}")
         await ctx.send("Time updated!")
     else: await ctx.send("Need time input, like: `12`, `day`")
+    lprint(ctx, f"Timed set: {set_time}")
 
 
 # ========== Server Start, status, backup, update, etc
@@ -282,18 +284,19 @@ async def backup(ctx, *name):
     if not name:
         await ctx.send("Hey! I need a name or keywords to make a backup!")
         return
-
     name = format_args(name)
+
     mc_command(f"say INFO | Standby, world is currently being archived. Codename: {name}")
     await ctx.send("***Saving current world...***")
     mc_command(f"save-all")
     time.sleep(5)
-    backup = server_functions.backup_world(name)
-    if backup:
-        await ctx.send(f"Cloned and archived your world to:\n`{backup}`.")
+
+    new_backup = server_functions.backup_world(name)
+    if new_backup:
+        await ctx.send(f"Cloned and archived your world to:\n`{new_backup}`.")
     else: await ctx.send("**Error** saving the world! || it's doomed!||")
     await ctx.invoke(bot.get_command('saves'))
-    lprint(ctx, "New backup: " + backup)
+    lprint(ctx, "New backup: " + new_backup)
 
 @bot.command(aliases=['restoreworld', 'worldrestore'])
 async def restore(ctx, index=None):
@@ -302,17 +305,20 @@ async def restore(ctx, index=None):
         await ctx.send("I need a index number of world to restore, use `?saves` to get list of saves")
         return
 
-    restore = server_functions.get_world_from_index(index)
-    lprint(ctx, "Restoring to: " + restore)
-    await ctx.send(f"***Restoring...*** `{restore}`")
-    mc_command(f"say WARNING | Initiating jump to save point in 5s! | {restore}")
+    fetched_restore = server_functions.get_world_from_index(index)
+    lprint(ctx, "Restoring to: " + fetched_restore)
+    await ctx.send(f"***Restoring...*** `{fetched_restore}`")
+    mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
     time.sleep(5)
 
     # Stops server if running
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
+
+    # Restore world
     server_functions.restore_world(restore)
     time.sleep(3)
+
     await ctx.invoke(bot.get_command('start'))
 
 @bot.command('deleteworld')
@@ -333,10 +339,13 @@ async def newworld(ctx):
     mc_command("say WARNING | Project Rebirth will commence in T-5s!")
     await ctx.send(":fire:**INCINERATED:**:fire:")
     await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
+
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
+
     server_functions.restore_world(reset=True)
     time.sleep(3)
+
     await ctx.invoke(bot.get_command('start'))
     lprint(ctx, "World Reset.")
 
@@ -359,11 +368,14 @@ async def properties(ctx, target_property='', *value):
 async def update(ctx):
     lprint(ctx, "Updating server.jar...")
     await ctx.send("***Updating...***")
+
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
     time.sleep(5)
+
     await ctx.send("***Downloading latest server.jar***")
     server = server_functions.download_new_server()
+
     if server:
         await ctx.send(f"Downloaded latest version: `{server}`")
         time.sleep(3)
@@ -416,7 +428,6 @@ async def serverrestore(ctx, index=None):
     mc_command(f"say WARNING | Initiating jump to save point in 5s! | {restore}")
     time.sleep(5)
 
-    # Stops server if running
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
 
