@@ -36,16 +36,16 @@ B) Or use `?update` or `python3 run_bot.py download` to download latest server.j
 5. Read through the help pages with `?help` in Discord and `python3 run_bot.py help` for script functions.
 
 ## Using Virtualenv:
-Create Python environment:
+Create Python Virtualenvt:
 ```bash
 virtualenv ~/pyenv/minecraft_discord_bot
 ```
-Activate new Python env:
+Activate new Python Virtualenv:
 ```bash
 source ~/pyenv/minecraft_discord_bot/bin/activate
 ```
-Install required Python modules (Local version):
+Install required Python modules:
 ```bash
-pip3 install discord bs4 file-read-backwards mctools
+pip3 install discord asyncio file-read-backwards mctools
 ```
 
