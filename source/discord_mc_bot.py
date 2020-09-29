@@ -1,4 +1,4 @@
-import discord, asyncio, os, sys, time, server_functions
+import discord, asyncio, os, sys, server_functions
 from discord.ext import commands, tasks
 from server_functions import lprint, use_rcon, format_args, mc_command, get_server_status
 
@@ -18,16 +18,15 @@ async def on_ready():
 
 
 # ========== Common Server Functions.
-@bot.command(aliases=['/' ])
+@bot.command(aliases=['/', 'command', 'c'])
 async def server_command(ctx, *args):
     args = format_args(args)
     mc_command(f"{args}")
     lprint(ctx, "Sent command: " + args)
-    time.sleep(1)
     await ctx.invoke(bot.get_command('serverlog'), lines=2)
 
 
-@bot.command()
+@bot.command(aliases=['s', 'broadcast'])
 async def say(ctx, *msg):
     msg = format_args(msg, return_empty=True)
     mc_command('say ' + msg)
@@ -36,7 +35,7 @@ async def say(ctx, *msg):
     else: await ctx.send("Message circulated to all active players!")
     lprint(ctx, f"Server said: {msg}")
 
-@bot.command()
+@bot.command(aliases=['t', 'whisper'])
 async def tell(ctx, player, *msg):
     msg = format_args(msg)
     mc_command(f"tell {player} {msg}")
@@ -49,7 +48,7 @@ async def players(ctx):
 
     if use_rcon: log_data = response
     else:
-        time.sleep(1)
+        await asyncio.sleep(1)
         log_data = server_functions.get_output('players online')
 
     if not log_data:
@@ -74,7 +73,7 @@ async def players(ctx):
 async def kick(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f'say WARNING | {player} will be ejected from server in 5s | {reason}.')
-    time.sleep(5)
+    await asyncio.sleep(5)
     mc_command(f"kick {player}")
     await ctx.send(f"`{player}` is outta here!")
     lprint(ctx, f"Kicked {player}")
@@ -83,7 +82,7 @@ async def kick(ctx, player, *reason):
 async def ban(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"say WARNING | Banishing {player} in 5s | {reason}.")
-    time.sleep(5)
+    await asyncio.sleep(5)
     mc_command(f"kick {player}")
     mc_command(f"ban {player} {reason}")
     await ctx.send(f"Dropkicked and exiled: `{player}`.")
@@ -123,7 +122,6 @@ async def banlist(ctx):
             if 'There are no bans' in line:
                 banned_players = 'No exiles!'
                 break
-
             elif 'There are' in line:
                 banned_players += line.split(':')[-2]
                 break
@@ -136,7 +134,6 @@ async def banlist(ctx):
             player = ban_log_line[0].split(' ')[1].strip()
             banner = ban_log_line[0].split(' ')[-1].strip()
             banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
-
 
     await ctx.send(banned_players)
     lprint(ctx, f"Fetched banned list.")
@@ -169,7 +166,7 @@ async def optimed(ctx, player, time_limit=1):
     mc_command(f"say INFO | {player} granted God status for {time_limit}m!")
     mc_command(f"op {player}")
     lprint(ctx, f"OP {player} for {time_limit}.")
-    time.sleep(time_limit*60)
+    await asyncio.sleep(time_limit*60)
     await ctx.send(f"Removed `{player}` OP status!")
     mc_command(f"say INFO | {player} is back to being a mortal.")
     mc_command(f"deop {player}")
@@ -177,19 +174,20 @@ async def optimed(ctx, player, time_limit=1):
 
 
 # ========== Player: gamemode, kill, tp, etc
-@bot.command(aliases=['kill'])
-async def player_kill(ctx, player, *reason):
+@bot.command(aliases=['pk'])
+async def kill(ctx, player, *reason):
     reason = format_args(reason)
     mc_command(f"say WARNING | {player} will be EXTERMINATED! | {reason}.")
     mc_command(f'kill {player}')
     await ctx.send(f"`{player}` assassinated!")
     lprint(ctx, f"Killed: {player}")
 
-@bot.command(aliases=['delaykill'])
+@bot.command(aliases=['delaykill', 'dk'])
 async def delayedkill(ctx, player, delay=5, *reason):
     reason = format_args(reason)
     mc_command(f"say WARNING | {player} will self-destruct in {delay}s | {reason}.")
-    time.sleep(delay)
+    await ctx.send(f"Killing {player} in {delay}s!")
+    await asyncio.sleep(delay)
     mc_command(f'kill {player}')
     await ctx.send(f"`{player}` soul has been freed.")
     lprint(ctx, f"Delay killed: {player}")
@@ -198,12 +196,12 @@ async def delayedkill(ctx, player, delay=5, *reason):
 async def teleport(ctx, player, target, *reason):
     reason = format_args(reason)
     mc_command(f"say INFO | Flinging {player} towards {target} in 5s | {reason}.")
-    time.sleep(5)
+    await asyncio.sleep(5)
     mc_command(f"tp {player} {target}")
     await ctx.send(f"`{player}` and {target} touchin real close now.")
     lprint(ctx, f"Teleported {player} to {target}")
 
-@bot.command()
+@bot.command(alises=['gm'])
 async def gamemode(ctx, player, state, *reason):
     reason = format_args(reason)
     mc_command(f"say {player} now in {state} | {reason}.")
@@ -211,7 +209,7 @@ async def gamemode(ctx, player, state, *reason):
     await ctx.send(f"`{player}` is now in `{state}` indefinitely.")
     lprint(ctx, f"Set {player} to: {state}")
 
-@bot.command(aliases=['timedgamemodde'])
+@bot.command(aliases=['timedgamemodde', 'tgm', 'gmt'])
 async def gamemodetimed(ctx, player, state, duration=None, *reason):
     try: duration = int(duration)
     except: 
@@ -222,21 +220,21 @@ async def gamemodetimed(ctx, player, state, duration=None, *reason):
     mc_command(f"say {player} set to {state} for {duration}s | {reason}.")
     await ctx.send(f"`{player}` set to `{state}` for {duration}s, then will revert to survival.")
     mc_command(f"gamemode {state} {player}")
-    time.sleep(duration)
+    await asyncio.sleep(duration)
     mc_command(f"gamemode survival {player}")
     await ctx.send(f"`{player}` is back to survival.")
     lprint(ctx, f"Set gamemode: {player} for {duration}")
 
 
 # ========== World weather, time, etc
-@bot.command()
+@bot.command(aliases=['sa'])
 async def saveall(ctx):
     mc_command('save-all')
     await ctx.send("I saved the world!")
     await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
     lprint(ctx, "Saved world.")
 
-@bot.command(aliases=['time'])
+@bot.command(aliases=['weather'])
 async def set_weather(ctx, state, duration=0):
     mc_command(f'weather {state} {duration*60}')
     if duration: 
@@ -244,7 +242,7 @@ async def set_weather(ctx, state, duration=0):
     else: await ctx.send(f"Forecast entails `{state}`.")
     lprint(ctx, f"Weather set to: {state} for {duration}")
 
-@bot.command(aliases=['weather'])
+@bot.command(aliases=['time'])
 async def set_time(ctx, set_time=None):
     if set_time:
         mc_command(f"time set {set_time}")
@@ -279,7 +277,7 @@ async def start(ctx):
     if server_functions.start_minecraft_server():
         await ctx.send("***Booting Server...***")
     else: await ctx.send("**Error** starting server, contact administrator!")
-    time.sleep(5)
+    await asyncio.sleep(5)
     await ctx.send("***Fetching server status...***")
     await ctx.invoke(bot.get_command('status'), show_players=False)
     lprint(ctx, "Starting server.")
@@ -288,9 +286,9 @@ async def start(ctx):
 async def stop(ctx):
     mc_command('say WARNING | Server will halt in 15s!')
     await ctx.send("***Halting in 15s...***")
-    time.sleep(10)
+    await asyncio.sleep(10)
     mc_command('say WARNING | 5s left!')
-    time.sleep(5)
+    await asyncio.sleep(5)
     mc_command('stop')
     await ctx.send("World Saved. Server __**HALTED**__")
     lprint(ctx, "Stopping server.")
@@ -300,15 +298,14 @@ async def restart(ctx):
     lprint(ctx, "Restarting server.")
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
-    time.sleep(5)
+    await asyncio.sleep(5)
     await ctx.invoke(bot.get_command('start'))
 
 @bot.command(aliases=['backups', 'worldsaves'])
 async def saves(ctx, amount=5):
     embed = discord.Embed(title='World Backups')
     worlds = server_functions.fetch_worlds(amount)
-    for save in worlds:
-        embed.add_field(name=worlds.index(save), value=f"`{save}`", inline=False)
+    for save in worlds: embed.add_field(name=worlds.index(save), value=f"`{save}`", inline=False)
 
     await ctx.send(embed=embed)
     await ctx.send("Use `?restore <index>` to restore world save.")
@@ -325,7 +322,7 @@ async def backup(ctx, *name):
     mc_command(f"say INFO | Standby, world is currently being archived. Codename: {name}")
     await ctx.send("***Saving current world...***")
     mc_command(f"save-all")
-    time.sleep(5)
+    await asyncio.sleep(5)
 
     new_backup = server_functions.backup_world(name)
     if new_backup:
@@ -345,12 +342,12 @@ async def restore(ctx, index=None):
     lprint(ctx, "Restoring to: " + fetched_restore)
     await ctx.send(f"***Restoring...*** `{fetched_restore}`")
     mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
-    time.sleep(5)
+    await asyncio.sleep(5)
 
     if get_server_status(): await ctx.invoke(bot.get_command('stop'))  # Stops if server is running.
 
     server_functions.restore_world(restore)  # Gives computer time to move around world files.
-    time.sleep(3)
+    await asyncio.sleep(3)
 
     await ctx.invoke(bot.get_command('start'))
 
@@ -373,17 +370,16 @@ async def newworld(ctx):
     await ctx.send(":fire:**INCINERATED:**:fire:")
     await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
-    if get_server_status():
-        await ctx.invoke(bot.get_command('stop'))
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
 
     server_functions.restore_world(reset=True)
-    time.sleep(3)
+    await asyncio.sleep(3)
 
     await ctx.invoke(bot.get_command('start'))
     lprint(ctx, "World Reset.")
 
 # Edit server properties.
-@bot.command(aliases=['property'])
+@bot.command(aliases=['property', 'p'])
 async def properties(ctx, target_property='', *value):
     if not target_property:
         await ctx.send("Need at leat property name, optionally input new value to change property.\nUsage example: `?property motd`, `?property motd Hello World!`")
@@ -402,16 +398,15 @@ async def update(ctx):
     lprint(ctx, "Updating server.jar...")
     await ctx.send("***Updating...***")
 
-    if get_server_status():
-        await ctx.invoke(bot.get_command('stop'))
-    time.sleep(5)
+    if get_server_status(): await ctx.invoke(bot.get_command('stop'))
+    await asyncio.sleep(5)
 
     await ctx.send("***Downloading latest server.jar***")
     server = server_functions.download_new_server()
 
     if server:
         await ctx.send(f"Downloaded latest version: `{server}`")
-        time.sleep(3)
+        await asyncio.sleep(3)
         await ctx.invoke(bot.get_command('start'))
     else: await ctx.send("**Error:** Updating server. Suggest restoring from a backup.")
     lprint(ctx, "Server Updated.")
@@ -438,7 +433,7 @@ async def serverbackup(ctx, *name):
     await ctx.send("***Backing Up...***")
 
     mc_command(f"save-all")
-    time.sleep(5)
+    await asyncio.sleep(5)
     backup = server_functions.backup_server(name)
 
     if backup:
@@ -459,7 +454,7 @@ async def serverrestore(ctx, index=None):
     lprint(ctx, "Restoring to: " + restore)
     await ctx.send(f"***Restoring...*** `{restore}`")
     mc_command(f"say WARNING | Initiating jump to save point in 5s! | {restore}")
-    time.sleep(5)
+    await asyncio.sleep(5)
 
     if get_server_status():
         await ctx.invoke(bot.get_command('stop'))
@@ -468,7 +463,7 @@ async def serverrestore(ctx, index=None):
         await ctx.send("Server **Restored!**")
     else: await ctx.send("**Error:** Could not restore server!")
 
-    time.sleep(3)
+    await asyncio.sleep(3)
     await ctx.invoke(bot.get_command('start'))
 
 @bot.command()
@@ -494,7 +489,7 @@ async def serverreset(ctx):
         await ctx.invoke(bot.get_command('stop'))
     server_functions.restore_server(reset=True)
 
-    time.sleep(5)
+    await asyncio.sleep(5)
     await ctx.invoke(bot.get_command('start'))
     lprint(ctx, "Server Reset.")
 
