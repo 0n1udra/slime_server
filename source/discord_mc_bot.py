@@ -43,7 +43,7 @@ async def tell(ctx, player, *msg):
     await ctx.send("Communiqué transmitted to: `{player}`.")
     lprint(ctx, f"Messaged {player} : {msg}")
 
-@bot.command()
+@bot.command(aliases=['pl'])
 async def players(ctx):
     response = mc_command("list")
 
@@ -65,7 +65,7 @@ async def players(ctx):
     else:
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
         players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-        await ctx.send(text + ':\n' + ''.join(players_names) + '.')
+        await ctx.send(text + ':\n' + ''.join(players_names))
     lprint(ctx, "Fetched player list.")
 
 
