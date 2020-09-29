@@ -98,16 +98,13 @@ def get_server_status():
 
     if use_rcon:
         return mc_ping_stats()
-    else:
-        return {'motd': edit_properties('motd')[2][:-1],
-                'version': get_minecraft_version()}
+    else: return {'motd': edit_properties('motd')[2][:-1], 'version': get_minecraft_version()}
 
 # Used so Discord command arguments don't need qoutes.
 def format_args(args, return_empty=False):
     if args: return ' '.join(args)
     else:
-        if return_empty:
-            return ''
+        if return_empty: return ''
         return "No reason given"
 
 # Gets data from json local file.
@@ -144,13 +141,11 @@ def get_output(match='placeholder match', file_path=server_log_file, lines=50):
             line = file.readline()
             if 'banlist' in match:
                 # Finds log lines that shows banned players.
-                if 'was banned by' in line:
-                    match_found += line
+                if 'was banned by' in line: match_found += line
                 # Finds the end so it doesn't return everything from log other then banned users.
                 elif '/INFO]: There are' in line:
                     match_found += line
                     break
-
             elif match in line:
                 match_found = line
                 break
@@ -161,8 +156,7 @@ def get_output(match='placeholder match', file_path=server_log_file, lines=50):
     return log_data
 
 # Get server or world backup folder name from index.
-def get_from_index(path, index):
-    return os.listdir(path)[index]
+def get_from_index(path, index): return os.listdir(path)[index]
 
 # Gets x number of backups.
 def fetch_backups(path, amount=5):
@@ -173,8 +167,7 @@ def fetch_backups(path, amount=5):
     return backups
 
 def create_backup(name, src, dst):
-    if not os.path.isdir(dst):
-        os.makedirs(dst)
+    if not os.path.isdir(dst): os.makedirs(dst)
 
     new_name = f"({folder_timestamp}) {get_minecraft_version()} {name}"
     new_backup_path = dst + '/' + new_name
@@ -196,8 +189,7 @@ def restore_backup(backup, dst, reset=False):
     # This function is used in ?rebirth Discord command to create a new world.
     if reset: return True
 
-    try: 
-        shutil.copytree(backup, server_path + dst)
+    try:  shutil.copytree(backup, server_path + dst)
     except: lprint("Error restoring: " + str(backup))
     
 def delete_backup(backup):
