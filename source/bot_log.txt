@@ -1,0 +1,728 @@
+2020-09-26 18:12:26.337386 | (Script) Bot PRIMED.
+2020-09-26 18:12:34.339313 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-26 18:12:34.344323 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-26 19:24:31.529317 | (Script) Error: Parsing script_properties.txt file.
+2020-09-26 19:53:33.299828 | (4RDUB3RRY#7235) Server property: enable-rcon=true
+
+2020-09-26 19:53:40.047571 | (4RDUB3RRY#7235) Server property: rcon.password=SlimeySlime
+
+2020-09-26 20:00:01.995615 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 20:00:31.815702 | (Script) Bot PRIMED.
+2020-09-26 20:00:42.925878 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 20:00:46.281037 | (Script) Bot PRIMED.
+2020-09-26 20:01:43.035392 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 20:01:49.347030 | (Script) Bot PRIMED.
+2020-09-26 20:30:51.199644 | (Script) RCON Enabled: arcpy.asuscomm.com25575
+2020-09-26 20:31:21.967635 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 20:33:22.073617 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 20:33:22.079272 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 20:33:22.083478 | (Script) Java arg: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 20:33:22.088628 | (Script) Tmux Enabled, arg: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 20:48:44.369820 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 20:48:44.375700 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 20:48:44.380918 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 20:48:44.386487 | (Script) Tmux Enabled: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 21:52:41.742381 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 21:52:42.027468 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 21:52:42.032745 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 21:52:42.037337 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 21:52:42.041731 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 21:52:44.878491 | (Script) Bot PRIMED.
+2020-09-26 21:52:52.852274 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-26 21:52:52.857377 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-26 22:03:37.637197 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 22:03:37.917911 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 22:03:37.922909 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 22:03:37.927613 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 22:03:37.932722 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 22:03:40.528343 | (Script) Bot PRIMED.
+2020-09-26 22:03:41.884917 | (4RDUB3RRY#7235) Fetched 5 lines from log.
+2020-09-26 22:04:04.921053 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 22:04:05.193926 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 22:04:05.200033 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 22:04:05.204750 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 22:04:05.209867 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 22:04:07.640538 | (Script) Bot PRIMED.
+2020-09-26 22:04:51.535304 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 22:04:51.811521 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 22:04:51.817524 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 22:04:51.822434 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 22:04:51.828095 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 22:04:54.716811 | (Script) Bot PRIMED.
+2020-09-26 22:05:02.620015 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-09-26 22:06:52.807678 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-26 22:06:53.078143 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-26 22:06:53.083765 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-26 22:06:53.088585 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-26 22:06:53.094549 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-26 22:06:55.472702 | (Script) Bot PRIMED.
+2020-09-26 22:06:57.211370 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-09-26 22:07:00.178162 | (4RDUB3RRY#7235) Fetched 5 lines from log.
+2020-09-26 22:07:02.752549 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-09-26 22:07:05.515337 | (4RDUB3RRY#7235) Fetched 10 lines from log.
+2020-09-26 22:07:13.524572 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-26 22:07:13.530287 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-27 01:25:55.779719 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 01:25:56.061636 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 01:25:56.068494 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 01:25:56.073695 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 01:25:56.079349 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 01:26:03.540375 | (Script) Bot PRIMED.
+2020-09-27 01:26:05.206529 | (4RDUB3RRY#7235) Server property: motd=YAGA\!
+
+2020-09-27 01:26:10.067483 | (4RDUB3RRY#7235) Server property: #Minecraft server properties`
+`#Sat Sep 26 15:59:53 EDT 2020`
+`enable-jmx-monitoring=false`
+`rcon.port=25575`
+`level-seed=`
+`gamemode=survival`
+`enable-command-block=false`
+`enable-query=false`
+`generator-settings=`
+`level-name=world`
+`motd=YAGA\!`
+`query.port=25565`
+`pvp=true`
+`generate-structures=true`
+`difficulty=easy`
+`network-compression-threshold=256`
+`max-tick-time=60000`
+`use-native-transport=true`
+`max-players=20`
+`online-mode=false`
+`enable-status=true`
+`allow-flight=false`
+`broadcast-rcon-to-ops=true`
+`view-distance=10`
+`max-build-height=256`
+`server-ip=`
+`allow-nether=true`
+`server-port=25565`
+`enable-rcon=true`
+`sync-chunk-writes=true`
+`op-permission-level=4`
+`prevent-proxy-connections=false`
+`resource-pack=`
+`entity-broadcast-range-percentage=100`
+`rcon.password=SlimeySlime`
+`player-idle-timeout=0`
+`force-gamemode=false`
+`rate-limit=0`
+`hardcore=false`
+`white-list=false`
+`broadcast-console-to-ops=true`
+`spawn-npcs=true`
+`spawn-animals=true`
+`snooper-enabled=true`
+`function-permission-level=2`
+`level-type=default`
+`spawn-monsters=true`
+`enforce-whitelist=false`
+`resource-pack-sha1=`
+`spawn-protection=16`
+`max-world-size=29999984`
+2020-09-27 12:19:56.807202 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 12:43:02.112566 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:43:04.270864 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:43:04.276663 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:43:04.282010 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:43:04.287792 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:43:07.749645 | (Script) Bot PRIMED.
+2020-09-27 12:44:25.669506 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:44:25.946098 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:44:25.952414 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:44:25.957824 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:44:25.964014 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:44:28.596652 | (Script) Bot PRIMED.
+2020-09-27 12:44:40.620923 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:44:40.897194 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:44:40.903320 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:44:40.908649 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:44:40.914829 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:44:43.787476 | (Script) Bot PRIMED.
+2020-09-27 12:45:48.470002 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:45:48.752230 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:45:48.758822 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:45:48.764114 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:45:48.769879 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:45:51.187429 | (Script) Bot PRIMED.
+2020-09-27 12:47:17.202800 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:47:17.502124 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:47:17.509051 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:47:17.514330 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:47:17.520382 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:47:21.153417 | (Script) Bot PRIMED.
+2020-09-27 12:53:08.497919 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:53:08.783038 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:53:08.788405 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:53:08.793586 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:53:08.799357 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:53:11.425100 | (Script) Bot PRIMED.
+2020-09-27 12:53:45.231286 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 12:53:45.504009 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 12:53:45.510693 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 12:53:45.516074 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 12:53:45.521971 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 12:53:47.282074 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 12:53:48.956988 | (Script) Bot PRIMED.
+2020-09-27 13:05:32.093046 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:05:53.386056 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:05:53.685002 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:05:53.691256 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:05:53.696522 | (Script) Java Command: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:05:53.702340 | (Script) Tmux Command: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:05:59.763825 | (Script) Bot PRIMED.
+2020-09-27 13:06:48.521722 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:07:36.508028 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:07:36.815735 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:07:36.822422 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:07:36.827768 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:07:36.833109 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:07:42.742222 | (Script) Bot PRIMED.
+2020-09-27 13:07:43.883472 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:08:35.110551 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:08:35.394261 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:08:35.400347 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:08:35.405586 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:08:35.411599 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:08:38.289979 | (Script) Bot PRIMED.
+2020-09-27 13:08:38.876160 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:09:29.754427 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:09:31.365432 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:09:31.649724 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:09:31.656340 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:09:31.661391 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:09:31.666775 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:09:34.080762 | (Script) Bot PRIMED.
+2020-09-27 13:09:34.631549 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:11:56.020031 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:11:56.323271 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:11:56.329421 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:11:56.335327 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:11:56.341411 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:11:58.813293 | (Script) Bot PRIMED.
+2020-09-27 13:11:59.976487 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:13:17.389089 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:13:17.686872 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:13:17.692869 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:13:17.698072 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:13:17.704040 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:13:20.058590 | (Script) Bot PRIMED.
+2020-09-27 13:13:20.590523 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:13:53.454884 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:13:53.754908 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:13:53.761108 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:13:53.766390 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:13:53.771997 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:13:57.539164 | (Script) Bot PRIMED.
+2020-09-27 13:13:59.448634 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:22:29.072712 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:22:29.362448 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:22:29.368289 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:22:29.374160 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:22:29.379769 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:22:31.992298 | (Script) Bot PRIMED.
+2020-09-27 13:22:32.046295 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:24:11.958264 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:24:12.239705 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:24:12.245764 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:24:12.251301 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:24:12.256740 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:24:14.644336 | (Script) Bot PRIMED.
+2020-09-27 13:24:36.470200 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:24:36.781293 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:24:36.787557 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:24:36.793179 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:24:36.799450 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:24:40.324197 | (Script) Bot PRIMED.
+2020-09-27 13:24:40.771683 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:25:11.535053 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:25:11.820582 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:25:11.826739 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:25:11.832003 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:25:11.837931 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:25:14.241620 | (Script) Bot PRIMED.
+2020-09-27 13:25:15.168210 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:26:52.477263 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:26:52.761848 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:26:52.767945 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:26:52.772745 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:26:52.778541 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:26:56.312160 | (Script) Bot PRIMED.
+2020-09-27 13:27:22.913333 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:27:23.191382 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:27:23.197223 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:27:23.202924 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:27:23.208915 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:27:26.040997 | (Script) Bot PRIMED.
+2020-09-27 13:27:28.022217 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:27:39.196378 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:27:39.484676 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:27:39.490945 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:27:39.496430 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:27:39.501883 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:27:42.951849 | (Script) Bot PRIMED.
+2020-09-27 13:27:44.841996 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:33:48.577003 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:34:02.582039 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:34:02.588095 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:34:02.592838 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:34:02.597901 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:34:05.484303 | (Script) Bot PRIMED.
+2020-09-27 13:39:48.155006 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:39:48.457812 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:39:48.463622 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:39:48.468498 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:39:48.473707 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:39:51.227532 | (Script) Bot PRIMED.
+2020-09-27 13:40:16.886391 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:40:17.151424 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:40:17.157734 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:40:17.162531 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:40:17.167995 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:40:20.182743 | (Script) Bot PRIMED.
+2020-09-27 13:40:35.618837 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:40:35.888593 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:40:35.894863 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:40:35.899880 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:40:35.906148 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:40:39.387653 | (Script) Bot PRIMED.
+2020-09-27 13:40:58.162440 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:40:58.447348 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:40:58.453608 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:40:58.459170 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:40:58.464972 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:41:00.825566 | (Script) Bot PRIMED.
+2020-09-27 13:41:43.486525 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:41:43.762480 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:41:43.767974 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:41:43.773150 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:41:43.777835 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:41:46.225998 | (Script) Bot PRIMED.
+2020-09-27 13:42:03.298387 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:42:03.304780 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:42:03.309800 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:42:03.315520 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:42:05.749108 | (Script) Bot PRIMED.
+2020-09-27 13:42:50.386092 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:42:50.663880 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:42:50.670466 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:42:50.675730 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:42:50.681802 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:42:53.326055 | (Script) Bot PRIMED.
+2020-09-27 13:44:28.939173 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:44:29.214404 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:44:29.220567 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:44:29.226176 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:44:29.232199 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:44:31.640713 | (Script) Bot PRIMED.
+2020-09-27 13:44:33.011665 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:45:56.791050 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:45:57.072830 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:45:57.078564 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:45:57.084014 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:45:57.090061 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:45:59.562198 | (Script) Bot PRIMED.
+2020-09-27 13:46:00.640943 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:46:25.359681 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:46:25.632526 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:46:25.638665 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:46:25.643768 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:46:25.649652 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:46:28.171522 | (Script) Bot PRIMED.
+2020-09-27 13:46:30.118522 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:46:38.219376 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:46:38.502027 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:46:38.507915 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:46:38.513063 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:46:38.518458 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:46:41.373828 | (Script) Bot PRIMED.
+2020-09-27 13:46:42.783718 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:52:14.299618 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:52:14.581510 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:52:14.587128 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:52:14.592340 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:52:14.597285 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:52:18.371657 | (Script) Bot PRIMED.
+2020-09-27 13:52:19.648019 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 13:55:19.469690 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:55:19.757406 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:55:19.763639 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:55:19.769718 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:55:19.775136 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:55:22.451663 | (Script) Bot PRIMED.
+2020-09-27 13:56:11.988900 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:56:12.261531 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:56:12.267797 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:56:12.272745 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:56:12.277575 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:56:15.311241 | (Script) Bot PRIMED.
+2020-09-27 13:57:24.603641 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 13:57:24.875795 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 13:57:24.882281 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 13:57:24.887582 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 13:57:24.892811 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 13:57:27.717196 | (Script) Bot PRIMED.
+2020-09-27 14:01:04.198918 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:01:04.483713 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:01:04.489653 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:01:04.494396 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:01:04.499082 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:01:07.158172 | (Script) Bot PRIMED.
+2020-09-27 14:01:37.466084 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:01:37.738944 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:01:37.745985 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:01:37.751300 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:01:37.757078 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:01:40.139244 | (Script) Bot PRIMED.
+2020-09-27 14:02:00.298873 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:02:00.592631 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:02:00.598772 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:02:00.604125 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:02:00.610106 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:02:06.482710 | (Script) Bot PRIMED.
+2020-09-27 14:03:06.015116 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:03:06.288283 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:03:06.294375 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:03:06.299471 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:03:06.305073 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:03:08.758461 | (Script) Bot PRIMED.
+2020-09-27 14:03:09.768343 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:04:21.915706 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:04:22.190808 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:04:22.197110 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:04:22.203133 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:04:22.209372 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:04:26.914934 | (Script) Bot PRIMED.
+2020-09-27 14:04:27.772431 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:08:03.801287 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:08:04.108866 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:08:04.115135 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:08:04.120085 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:08:04.126027 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:08:09.600116 | (Script) Bot PRIMED.
+2020-09-27 14:09:55.184065 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:09:55.190152 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:09:55.195704 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:09:55.202287 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:09:58.085350 | (Script) Bot PRIMED.
+2020-09-27 14:10:13.256909 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:10:13.521185 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:10:13.527637 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:10:13.532692 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:10:13.537887 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:10:16.170340 | (Script) Bot PRIMED.
+2020-09-27 14:10:17.106789 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:11:44.628529 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:11:44.911552 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:11:44.918232 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:11:44.924050 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:11:44.930717 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:11:48.699724 | (Script) Bot PRIMED.
+2020-09-27 14:11:49.585144 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:12:30.652099 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:12:30.923146 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:12:30.929140 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:12:30.934686 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:12:30.940437 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:12:34.381467 | (Script) Bot PRIMED.
+2020-09-27 14:12:35.018489 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:13:21.651641 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:13:21.927602 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:13:21.933933 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:13:21.939383 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:13:21.945057 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:13:24.551454 | (Script) Bot PRIMED.
+2020-09-27 14:13:26.010071 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:16:01.335711 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:16:01.628878 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:16:01.635399 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:16:01.641121 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:16:01.647909 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:16:04.291997 | (Script) Bot PRIMED.
+2020-09-27 14:16:05.686757 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-27 14:16:05.693190 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-27 14:16:14.288759 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:17:04.590973 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:17:04.869362 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:17:04.875590 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:17:04.880683 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:17:04.886306 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:17:07.353345 | (Script) Bot PRIMED.
+2020-09-27 14:18:02.489223 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:18:02.763427 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:18:02.769894 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:18:02.775203 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:18:02.781514 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:18:05.439094 | (Script) Bot PRIMED.
+2020-09-27 14:18:06.611870 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-27 14:18:06.618154 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-27 14:18:56.276165 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:18:56.581753 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:18:56.587691 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:18:56.592580 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:18:56.598117 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:19:00.213725 | (Script) Bot PRIMED.
+2020-09-27 14:19:02.103588 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-27 14:19:02.109678 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-27 14:19:04.443854 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:19:32.134028 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:19:32.406799 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:19:32.413167 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:19:32.418544 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:19:32.424377 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:19:35.255754 | (Script) Bot PRIMED.
+2020-09-27 14:19:36.427010 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:20:45.320400 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:20:45.602515 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:20:45.608803 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:20:45.613935 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:20:45.619593 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:20:48.466879 | (Script) Bot PRIMED.
+2020-09-27 14:21:05.440444 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:21:05.917435 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:21:05.928816 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:21:05.941820 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:21:05.956041 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:21:10.510467 | (Script) Bot PRIMED.
+2020-09-27 14:22:46.773307 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-27 14:26:22.493502 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:26:22.766584 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:26:22.773167 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:26:22.778390 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:26:22.784280 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:26:25.259421 | (Script) Bot PRIMED.
+2020-09-27 14:26:28.721125 | (4RDUB3RRY#7235) Online-mode: 
+2020-09-27 14:26:58.793372 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-27 14:26:58.800131 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-27 14:27:00.290833 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:27:05.178968 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:27:10.740871 | (4RDUB3RRY#7235) Pardoned t3 : No reason given
+2020-09-27 14:27:17.266034 | (4RDUB3RRY#7235) Pardoned te : No reason given
+2020-09-27 14:27:20.110576 | (4RDUB3RRY#7235) Pardoned T2 : No reason given
+2020-09-27 14:27:22.998337 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:27:26.683879 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:27:29.368352 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:28:32.315896 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:29:22.657821 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:29:22.665278 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:29:22.671039 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:29:22.676835 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:29:26.142996 | (Script) Bot PRIMED.
+2020-09-27 14:29:26.804515 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:30:12.454432 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:30:12.725855 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:30:12.732568 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:30:12.738110 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:30:12.743704 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:30:15.567325 | (Script) Bot PRIMED.
+2020-09-27 14:30:16.928557 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:31:20.384762 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:31:24.319982 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:31:33.931226 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:31:34.209278 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:31:34.215000 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:31:34.219619 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:31:34.224470 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:31:37.046619 | (Script) Bot PRIMED.
+2020-09-27 14:31:44.209909 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:31:44.495866 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:31:44.501901 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:31:44.506812 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:31:44.512873 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:31:47.007924 | (Script) Bot PRIMED.
+2020-09-27 14:32:04.495499 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:32:04.766394 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:32:04.772440 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:32:04.777986 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:32:04.782731 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:32:07.206343 | (Script) Bot PRIMED.
+2020-09-27 14:33:28.079336 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:33:28.356124 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:33:28.362178 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:33:28.367570 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:33:28.373531 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:33:30.992615 | (Script) Bot PRIMED.
+2020-09-27 14:33:32.891392 | (4RDUB3RRY#7235) Fetched banned list.
+2020-09-27 14:33:43.607291 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-27 14:33:45.356911 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-27 14:33:45.362886 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-27 14:33:45.367542 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-27 14:33:45.373315 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-27 14:33:48.159456 | (Script) Bot PRIMED.
+2020-09-28 13:38:59.155873 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-28 13:38:59.161781 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-28 13:38:59.166969 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-28 13:38:59.171762 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-28 13:39:02.723480 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-28 13:39:02.728159 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-28 13:39:02.732604 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-28 13:39:02.736936 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-28 13:39:05.268899 | (Script) Bot PRIMED.
+2020-09-28 13:39:16.670026 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-28 13:39:16.677151 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-28 13:39:16.682709 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-28 13:39:16.688139 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 02:54:50.287857 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 02:55:17.170012 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 02:55:28.948317 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 02:55:28.953400 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 02:55:33.849922 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 02:55:33.855031 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 02:56:26.414333 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 02:56:28.119669 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 02:56:28.124552 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 02:56:28.129085 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 02:56:28.133931 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 02:56:31.027337 | (Script) Bot PRIMED.
+2020-09-29 02:56:58.947499 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 02:56:59.224436 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 02:56:59.230045 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 02:56:59.235097 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 02:56:59.240297 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 02:57:01.805805 | (Script) Bot PRIMED.
+2020-09-29 02:57:05.837429 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 02:57:05.842635 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 02:57:41.187786 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 02:57:41.193935 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 02:57:54.586955 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 02:58:44.159086 | (4RDUB3RRY#7235) Server property: motd=YAGA\!
+
+2020-09-29 02:59:00.668408 | (4RDUB3RRY#7235) Server property: pdated Property:`motd=YAGA\!
+` > `motd=Yewy!`.
+Restart to apply changes
+2020-09-29 03:00:23.823823 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 03:00:24.093470 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 03:00:24.099864 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 03:00:24.104889 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 03:00:24.110683 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 03:00:26.711726 | (Script) Bot PRIMED.
+2020-09-29 03:00:32.322977 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 03:02:08.879393 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 03:02:25.614880 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 03:02:25.886643 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 03:02:25.892566 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 03:02:25.897410 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 03:02:25.902097 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 03:02:28.631249 | (Script) Bot PRIMED.
+2020-09-29 03:02:34.560912 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 03:02:34.566341 | (4RDUB3RRY#7235) Fetched server status.
+2020-09-29 03:02:41.451963 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 03:04:38.672273 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-09-29 03:04:47.724445 | (4RDUB3RRY#7235) Fetched 5 lines from log.
+2020-09-29 03:13:48.497527 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-09-29 03:13:58.711471 | (4RDUB3RRY#7235) Fetched latest 5 world saves.
+2020-09-29 03:14:49.284402 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-09-29 03:15:02.090014 | (4RDUB3RRY#7235) Server property: #Minecraft server properties`
+`#Mon Sep 28 13:39:07 EDT 2020`
+`enable-jmx-monitoring=false`
+`rcon.port=25575`
+`level-seed=`
+`gamemode=survival`
+`enable-command-block=false`
+`enable-query=false`
+`generator-settings=`
+`level-name=world`
+`motd=Yewy!`
+`query.port=25565`
+`pvp=true`
+`generate-structures=true`
+`difficulty=easy`
+`network-compression-threshold=256`
+`max-tick-time=60000`
+`max-players=20`
+`use-native-transport=true`
+`online-mode=false`
+`enable-status=true`
+`allow-flight=false`
+`broadcast-rcon-to-ops=true`
+`view-distance=10`
+`max-build-height=256`
+`server-ip=`
+`allow-nether=true`
+`server-port=25565`
+`enable-rcon=false`
+`sync-chunk-writes=true`
+`op-permission-level=4`
+`prevent-proxy-connections=false`
+`resource-pack=`
+`entity-broadcast-range-percentage=100`
+`rcon.password=SlimeySlime`
+`player-idle-timeout=0`
+`force-gamemode=false`
+`rate-limit=0`
+`hardcore=false`
+`white-list=false`
+`broadcast-console-to-ops=true`
+`spawn-npcs=true`
+`spawn-animals=true`
+`snooper-enabled=true`
+`function-permission-level=2`
+`level-type=default`
+`spawn-monsters=true`
+`enforce-whitelist=false`
+`resource-pack-sha1=`
+`spawn-protection=16`
+`max-world-size=29999984`
+2020-09-29 03:16:31.165178 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 03:16:31.170368 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 03:16:31.175320 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 03:16:31.180141 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 03:17:10.570931 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 16:49:10.767372 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 16:49:11.045644 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 16:49:11.051333 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 16:49:11.056129 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 16:49:11.060660 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 16:49:12.429585 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 16:49:13.487434 | (Script) Bot PRIMED.
+2020-09-29 16:49:14.418522 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 16:49:52.258472 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 16:49:52.539140 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 16:49:52.544685 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 16:49:52.550136 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 16:49:52.555422 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 16:49:54.936983 | (Script) Bot PRIMED.
+2020-09-29 16:50:27.667178 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 16:50:27.932715 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 16:50:27.938036 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 16:50:27.942630 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 16:50:27.947749 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 16:50:30.380675 | (Script) Bot PRIMED.
+2020-09-29 16:51:22.521835 | (4RDUB3RRY#7235) Delay killed: ardu1n0
+2020-09-29 16:52:01.602909 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 16:52:01.874722 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 16:52:01.882869 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 16:52:01.887539 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 16:52:01.896639 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 16:52:04.350838 | (Script) Bot PRIMED.
+2020-09-29 16:52:25.162115 | (4RDUB3RRY#7235) Delay killed: ardu1n0
+2020-09-29 16:52:40.384346 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 16:52:46.762379 | (4RDUB3RRY#7235) Delay killed: ardu1n0
+2020-09-29 16:53:04.259413 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 16:53:04.527109 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 16:53:04.533127 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 16:53:04.538084 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 16:53:04.543616 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 16:53:06.944018 | (Script) Bot PRIMED.
+2020-09-29 16:53:17.272008 | (4RDUB3RRY#7235) Fetched help page.
+2020-09-29 16:53:27.573666 | (4RDUB3RRY#7235) Delay killed: ardu1n0
+2020-09-29 16:53:27.728239 | (4RDUB3RRY#7235) Server said: hi
+2020-09-29 16:53:36.288399 | (4RDUB3RRY#7235) Server said: hi
+2020-09-29 16:53:45.684154 | (4RDUB3RRY#7235) Delay killed: ardu1n0
+2020-09-29 17:00:18.700577 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 17:00:18.965194 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 17:00:18.970777 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 17:00:18.975854 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 17:00:18.981340 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 17:00:21.409875 | (Script) Bot PRIMED.
+2020-09-29 17:00:52.816745 | (4RDUB3RRY#7235) Restarting bot.
+2020-09-29 17:00:53.084391 | (Script) RCON Enabled: arcpy.asuscomm.com : 25575
+2020-09-29 17:00:53.089761 | (Script) Minecraft directory: /mnt/c/Users/DT/Desktop/MC
+2020-09-29 17:00:53.094762 | (Script) Java run command set: java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt
+2020-09-29 17:00:53.100564 | (Script) Tmux send server command set: tmux send-keys -t mcserver:1.0 "java -Xmx2G -Xms1G -jar /mnt/c/Users/DT/Desktop/MC/server/server.jar nogui java 2>&1 | tee -a output.txt" ENTER
+2020-09-29 17:00:55.534866 | (Script) Bot PRIMED.
+2020-09-29 17:00:57.179530 | (4RDUB3RRY#7235) Sent command: list
+2020-09-29 17:00:57.271268 | (4RDUB3RRY#7235) Fetched 2 lines from bot log.
+2020-09-29 17:01:03.853696 | (4RDUB3RRY#7235) Fetched player list.
+2020-09-29 17:01:03.859160 | (4RDUB3RRY#7235) Fetched server status.
