@@ -1,4 +1,4 @@
-import os, datetime, csv
+import os, datetime, csv, time
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
@@ -67,6 +67,7 @@ def mc_command(command, match_output=None):
     if use_rcon: return mc_rcon(command)
 
     os.system(f'tmux send-keys -t mcserver:1.0 "/{command}" ENTER')
+    time.sleep(1)
     if match_output is None:
         return get_output(command)
     else: return get_output(match_output)
