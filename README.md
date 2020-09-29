@@ -28,7 +28,7 @@ Includes extra features a backup/restore system for world saves, edit server.pro
 
 
 ### Initial Startup:
-1. Setup Discord token file, then update `discord_bot_token_file` variable in `server_functions.py` as needed.
+1. Get Discord bot token or create a new bot at this [portal](https://discord.com/developers/applications), then update `discord_bot_token_file` variable in `server_functions.py`.
 2. In `server_functions.py` update directory paths and file paths variables as needed. Also update `use_rcon`, `use_tmux`, and `local_files_access` boolean variables for your setup.
 3. Run `python3 run_bot.py setup` which well setup required enviorment and/or folder structure as needed.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
