@@ -255,7 +255,7 @@ class Permissions(commands.Cog):
         await ctx.send(f"`{player}` is outta here!")
         lprint(ctx, f"Kicked {player}")
 
-    @commands.command()
+    @commands.command(aliases=['exile', 'banish'])
     async def ban(self, ctx, player, *reason):
         """
         Ban player from server.
@@ -341,7 +341,7 @@ class Permissions(commands.Cog):
         await ctx.send(banned_players)
         lprint(ctx, f"Fetched banned list.")
 
-    @commands.command()
+    @commands.command(aliases=['ol', 'ops'])
     async def oplist(self, ctx):
         """
         Show list of current server operators.
@@ -351,7 +351,7 @@ class Permissions(commands.Cog):
         await ctx.send('\n'.join(op_players))
         lprint(ctx, f"Fetched server operators list.")
 
-    @commands.command()
+    @commands.command(aliases=['op'])
     async def opadd(self, ctx, player, *reason):
         """
         Add server operator (OP).
@@ -371,7 +371,7 @@ class Permissions(commands.Cog):
         await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
         lprint(ctx, f"New server op: {player}")
 
-    @commands.command()
+    @commands.command(aliases=['oprm', 'rmop', 'deop'])
     async def opremove(self, ctx, player, *reason):
         """
         Remove player OP status (deop).
