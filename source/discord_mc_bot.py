@@ -1,7 +1,7 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
 import server_functions
-from server_functions import lprint, use_rcon, format_args, mc_command, get_server_status
+from server_functions import lprint, use_rcon, format_args, mc_command, mc_status
 
 # Exits script if no token.
 if os.path.isfile(server_functions.bot_token_file):
@@ -91,7 +91,7 @@ class Basics(commands.Cog):
         if use_rcon: log_data = response
         else:
             await asyncio.sleep(1)
-            log_data = server_functions.get_output('players online')
+            log_data = server_functions.mc_log('players online')
 
         if not log_data:
             await ctx.send("**Error:** Trouble fetching player list.")
@@ -321,7 +321,7 @@ class Permissions(commands.Cog):
                 banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
 
         else:
-            for line in filter(None, server_functions.get_output('banlist').split('\n')):  # Filters out blank lines you sometimes get.
+            for line in filter(None, server_functions.mc_log('banlist').split('\n')):  # Filters out blank lines you sometimes get.
                 print(line)
                 if 'There are no bans' in line:
                     banned_players = 'No exiles!'
@@ -478,13 +478,15 @@ class Server(commands.Cog):
     async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        stats = get_server_status()
+        stats = mc_status()
         if stats:
             await ctx.send("Server is now __**ACTIVE**__.")
-            await ctx.send(f"version: `{stats['version']}`")
-            await ctx.send(f"motd: `{stats['motd']}`")
-            await ctx.invoke(self.bot.get_command('players'))
         else: await ctx.send("Server is __**INACTIVE**__.")
+
+        await ctx.send(f"version: `{server_functions.mc_version()}`")
+        await ctx.send(f"motd: `{server_functions.mo}`")
+        await ctx.invoke(self.bot.get_command('players'))
+
         lprint(ctx, "Fetched server status.")
 
     @commands.command(aliases=['log'])
@@ -500,7 +502,7 @@ class Server(commands.Cog):
             ?log 10
         """
 
-        log_data = server_functions.get_output(file_path=server_functions.server_log_file, lines=lines)
+        log_data = server_functions.mc_log(file_path=server_functions.server_log_file, lines=lines)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from bot log.")
 
@@ -512,7 +514,7 @@ class Server(commands.Cog):
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
 
-        if server_functions.start_minecraft_server():
+        if server_functions.mc_start():
             await ctx.send("***Booting Server...***")
         else: await ctx.send("**Error** starting server, contact administrator!")
         await ctx.send("***Fetching server status in 20s...***")
@@ -589,9 +591,9 @@ class Server(commands.Cog):
         if not value: value = ''
         else: value = ' '.join(value)
 
-        get_property = server_functions.edit_properties(target_property, value)[1]
-        await ctx.send(get_property)
-        lprint(ctx, f"Server property: {get_property[1:][:-1]}")
+        get_property = server_functions.edit_properties(target_property, value)
+        await ctx.send(f"`{get_property[0]}`")
+        lprint(ctx, f"Server property: {get_property[0]}")
 
     @commands.command(aliases=['omode'])
     async def onlinemode(self, ctx, mode=''):
@@ -607,9 +609,9 @@ class Server(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            await ctx.send(server_functions.edit_properties('online-mode', mode)[1])
-            lprint(ctx, "Online-mode: " + mode)
-        else: await ctx.send("Need a true or false value (in lowercase).")
+            await ctx.send(f"`{server_functions.edit_properties('online-mode', mode)[0]}`")
+            lprint(ctx, "Online Mode: " + mode)
+        else: await ctx.send("Need a true or false argument (in lowercase).")
 
     @commands.command()
     async def motd(self, ctx, *message):
@@ -624,12 +626,10 @@ class Server(commands.Cog):
             ?motd YAGA YEWY!
         """
 
-        if message:
-            message = format_args(message)
-            server_functions.edit_properties('motd', message)
-            await ctx.send("Message of the day updates!")
-            lprint("Updated motd: " + message)
-        else: await ctx.send(server_functions.edit_properties('motd')[1])
+        message = format_args(message, return_empty=True)
+        response = server_functions.edit_properties('motd', message)
+        await ctx.send(f"`{response[0]}`")
+        lprint("motd: " + response[0])
 
     @commands.command()
     async def rcon(self, ctx, state=''):
@@ -647,15 +647,15 @@ class Server(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            response = server_functions.edit_properties('enable-rcon', state)[1]
-            await ctx.send(response)
-        else: await ctx.send("Need a true or false value (in lowercase).")
+            response = server_functions.edit_properties('enable-rcon', state)
+            await ctx.send(f"`{response[0]}`")
+        else: await ctx.send("Need a true or false argument (in lowercase).")
 
     @commands.command(aliases=['ver', 'v'])
     async def version(self, ctx):
         """Gets Minecraft server version."""
 
-        response = server_functions.get_minecraft_version()
+        response = server_functions.mc_version()
         await ctx.send(f"`{response}`")
         lprint("Fetched Minecraft server version: " + response)
 
@@ -663,7 +663,7 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = server_functions.get_minecraft_version(get_latest=True)
+        response = server_functions.mc_version(get_latest=True)
         await ctx.send(f"`{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
 
@@ -750,7 +750,7 @@ class World_Saves(commands.Cog):
         mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
-        if get_server_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
+        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
 
         server_functions.restore_world(restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
@@ -792,7 +792,7 @@ class World_Saves(commands.Cog):
         await ctx.send(":fire:**INCINERATED:**:fire:")
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
-        if get_server_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
 
         server_functions.restore_world(reset=True)
         await asyncio.sleep(3)
@@ -811,7 +811,7 @@ class World_Saves(commands.Cog):
         lprint(ctx, "Updating server.jar...")
         await ctx.send("***Updating...***")
 
-        if get_server_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
         await asyncio.sleep(5)
 
         await ctx.send("***Downloading latest server.jar***")
@@ -905,7 +905,7 @@ class Server_Saves(commands.Cog):
         mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
-        if get_server_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
 
         if server_functions.restore_server(restore):
             await ctx.send("Server **Restored!**")
@@ -946,7 +946,7 @@ class Server_Saves(commands.Cog):
         await ctx.send("**Resetting Server...**")
         await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
-        if get_server_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
         server_functions.restore_server(reset=True)
         lprint(ctx, "Server Reset.")
 
@@ -977,7 +977,7 @@ class Bot_Functions(commands.Cog):
             ?blog 15
         """
 
-        log_data = server_functions.get_output(file_path=server_functions.bot_log_file, lines=lines)
+        log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from log.")
 
