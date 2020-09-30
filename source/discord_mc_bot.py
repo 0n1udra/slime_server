@@ -297,13 +297,11 @@ class Permissions(commands.Cog):
         await ctx.send(f"Cleansed `{player}`.")
         lprint(ctx, f"Pardoned {player} : {reason}")
 
-    # Gets online players, formats output for Discord depending on using RCON or reading from server log.
     @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
-        """
-        Show list of current bans.
-        """
+        """Show list of current bans."""
 
+        # Gets online players, formats output for Discord depending on using RCON or reading from server log.
         banned_players = ''
         response = mc_command("banlist")
 
@@ -476,7 +474,7 @@ class Server(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['info', 'stat', 'stats'])
-    async def status(self, ctx, show_players=True):
+    async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
         stats = get_server_status()
@@ -484,7 +482,7 @@ class Server(commands.Cog):
             await ctx.send("Server is now __**ACTIVE**__.")
             await ctx.send(f"version: `{stats['version']}`")
             await ctx.send(f"motd: `{stats['motd']}`")
-            if show_players: await ctx.invoke(self.bot.get_command('players'))
+            await ctx.invoke(self.bot.get_command('players'))
         else: await ctx.send("Server is __**INACTIVE**__.")
         lprint(ctx, "Fetched server status.")
 
@@ -507,40 +505,65 @@ class Server(commands.Cog):
 
     @commands.command()
     async def start(self, ctx):
-        """Start server."""
+        """
+        Start server.
+
+        Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
+        """
 
         if server_functions.start_minecraft_server():
             await ctx.send("***Booting Server...***")
         else: await ctx.send("**Error** starting server, contact administrator!")
-        await asyncio.sleep(5)
-        await ctx.send("***Fetching server status...***")
-        await ctx.invoke(self.bot.get_command('status'), show_players=False)
+        await ctx.send("***Fetching server status in 30s...***")
+        await asyncio.sleep(30)
+        await ctx.invoke(self.bot.get_command('status'))
         lprint(ctx, "Starting server.")
 
     @commands.command()
-    async def stop(self, ctx):
-        """Stop server, gives players 15s warning."""
+    async def stop(self, ctx, now=''):
+        """
+        Stop server, gives players 15s warning.
 
-        mc_command('say WARNING | Server will halt in 15s!')
-        await ctx.send("***Halting in 15s...***")
-        await asyncio.sleep(10)
-        mc_command('say WARNING | 5s left!')
-        await asyncio.sleep(5)
-        mc_command('stop')
+        Args:
+            now: Stops server immediately without giving online players 15s warning.
+
+        Usage:
+            ?stop
+            ?stop now
+        """
+
+        if 'now' in now: mc_command('stop')
+        else:
+            mc_command('say WARNING | Server will halt in 15s!')
+            await ctx.send("***Halting in 15s...***")
+            await asyncio.sleep(10)
+            mc_command('say WARNING | 5s left!')
+            await asyncio.sleep(5)
+            mc_command('stop')
         await ctx.send("World Saved. Server __**HALTED**__")
         lprint(ctx, "Stopping server.")
 
     @commands.command(aliases=['reboot'])
-    async def restart(self, ctx):
-        """Messages player that the server will restart in 15s, then will stop and startup server."""
+    async def restart(self, ctx, now=''):
+        """
+        Messages player that the server will restart in 15s, then will stop and startup server.
+
+        Args:
+            now: Restarts server immediately without giving online players 15s warning.
+
+        Usage:
+            ?restart
+            ?reboot now
+        """
 
         lprint(ctx, "Restarting server.")
-        if get_server_status():
-            await ctx.invoke(self.bot.get_command('stop'))
-        await asyncio.sleep(5)
+        if 'now' in now:
+            await ctx.invoke(self.bot.get_command('stop'), now='now')
+        else: await ctx.invoke(self.bot.get_command('stop'))
+
+        await asyncio.sleep(2)
         await ctx.invoke(self.bot.get_command('start'))
 
-    # Edit server properties.
     @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property='', *value):
         """
@@ -623,11 +646,25 @@ class Server(commands.Cog):
         response = server_functions.edit_properties('enable-rcon', state)[1]
         await ctx.send(response)
 
+    @commands.command(aliases=['ver', 'v'])
+    async def version(self, ctx):
+        """Gets Minecraft server version."""
+
+        response = server_functions.get_minecraft_version()
+        await ctx.send(f"`{response}`")
+        lprint("Fetched Minecraft server version: " + response)
+
+    @commands.command(aliases=['lversion', 'lver', 'lv'])
+    async def latestversion(self, ctx):
+        """Gets latest Minecraft server version number from official website."""
+
+        response = server_functions.get_minecraft_version(get_latest=True)
+        await ctx.send(f"`{response}`")
+        lprint("Fetched latest Minecraft server version: " + response)
 
 # ========== World backup/restore functions.
 class World_Saves(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['backups', 'worldsaves'])
     async def saves(self, ctx, amount=5):
@@ -785,8 +822,7 @@ class World_Saves(commands.Cog):
 
 # ========== Server backup/restore functions.
 class Server_Saves(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['serverbackups'])
     async def serversaves(self, ctx, amount=5):
@@ -914,7 +950,6 @@ class Server_Saves(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    # Restarts this bot script.
     @commands.command(aliases=['rbot', 'rebootbot'])
     async def restartbot(self, ctx):
         """Restart this bot."""
@@ -924,15 +959,26 @@ class Bot_Functions(commands.Cog):
         lprint(ctx, "Restarting bot.")
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-    @commands.command()
+    @commands.command(aliases=['blog'])
     async def botlog(self, ctx, lines=5):
+        """
+        Show bot log.
+
+        Args:
+            lines [5:Optional]: Number of most recent lines to show.
+
+        Usage:
+            ?botlog
+            ?blog 15
+        """
+
         log_data = server_functions.get_output(file_path=server_functions.bot_log_file, lines=lines)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from log.")
 
     @commands.command()
     async def help2(self, ctx):
-        """Shows help page with embed format."""
+        """Shows help page with embed format, using reactions to navigate pages."""
 
         lprint(ctx, "Fetched help page.")
         current_command, embed_page, contents = 0, 1, []

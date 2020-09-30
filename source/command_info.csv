@@ -5,8 +5,8 @@ Server Command, `?command` `?c <command>`, Send command directly to server, use 
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
 Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, by default shows 5 most recent.
 Server Start, `?start`, Starts Minecraft server up.
-Server Stop, `?stop`, Messages all players the server will be halted in 15s. Then will save the world and halt the server.
-Server Restart, `?restart` `?reboot`, Uses the `?stop` command first then `?start` command.
+Server Stop, `?stop [now]`, `?stop now` will immediately stop server, If no 'now' argument, Messages all players the server will be halted in 15s. Then will halt server.
+Server Restart, `?restart` `?reboot [now]`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
 Server Version, `?version`, Get Minecraft Server version.
 Active Players, `?players` `?pl`, Gets list of online users.
 Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.
@@ -39,6 +39,8 @@ Server Reset, `?serverreset`, Deletes all server files, make a backup beforehand
 Properties File, `?property` `?p <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
 Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.
 Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to check RCON status else make sure true or false argument is all lowercase. Currently have to set other RCON properties with `?property`.
+Version, `?version`, `?v`, Shows Minecraft server version.
+Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version from official website.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
 

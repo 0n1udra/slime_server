@@ -81,7 +81,7 @@ if __name__ == '__main__':
         server_functions.download_new_server()
         print("Downloaded server.jar to:", server_functions.server_path)
 
-    # Start minecraft server and/or Discord bot.
+    # Start Minecraft server and/or Discord bot.
     if len(sys.argv) == 1 or 'run' in sys.argv:
         if server_functions.use_tmux:
             server_functions.start_minecraft_server()
