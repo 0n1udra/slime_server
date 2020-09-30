@@ -23,9 +23,12 @@ See [releases](https://github.com/dthomas550/slime_server/releases).
 
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
-- [asyncio](https://docs.python.org/3/library/asyncio.html), [csv](https://docs.python.org/3/library/csv.html), [json](https://docs.python.org/3/library/json.html), [time](https://docs.python.org/3/library/time.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
-- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (Optional)
-- [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Optional)
+- [asyncio](https://docs.python.org/3/library/asyncio.html),[time](https://docs.python.org/3/library/time.html)
+
+For extra features:
+- [fileinput](https://docs.python.org/3/library/fileinput.html), [requests](https://pypi.org/project/requests/), [shutil](https://docs.python.org/3/library/shutil.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
+- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
+- [file-read-backwards](https://pypi.org/project/file-read-backwards/)
 - [mctools](https://pypi.org/project/mctools/) (For RCON)
 
 
