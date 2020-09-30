@@ -514,8 +514,8 @@ class Server(commands.Cog):
         if server_functions.start_minecraft_server():
             await ctx.send("***Booting Server...***")
         else: await ctx.send("**Error** starting server, contact administrator!")
-        await ctx.send("***Fetching server status in 30s...***")
-        await asyncio.sleep(30)
+        await ctx.send("***Fetching server status in 20s...***")
+        await asyncio.sleep(20)
         await ctx.invoke(self.bot.get_command('status'))
         lprint(ctx, "Starting server.")
 
@@ -532,7 +532,7 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if 'now' in now: mc_command('stop')
+        if now in 'now': mc_command('stop')
         else:
             mc_command('say WARNING | Server will halt in 15s!')
             await ctx.send("***Halting in 15s...***")
@@ -557,7 +557,7 @@ class Server(commands.Cog):
         """
 
         lprint(ctx, "Restarting server.")
-        if 'now' in now:
+        if now in 'now':
             await ctx.invoke(self.bot.get_command('stop'), now='now')
         else: await ctx.invoke(self.bot.get_command('stop'))
 
@@ -582,7 +582,7 @@ class Server(commands.Cog):
         """
 
         if not target_property:
-            await ctx.send("Need at leat property name, optionally input new value to change property.\nUsage example: `?property motd`, `?property motd Hello World!`")
+            await ctx.send("Need at least property name, optionally input new value to change property.\nUsage example: `?property motd`, `?property motd Hello World!`")
             return
 
         if not value: value = ''
@@ -605,8 +605,10 @@ class Server(commands.Cog):
             ?omode false
         """
 
-        await ctx.send(server_functions.edit_properties('online-mode', mode)[1])
-        lprint(ctx, "Online-mode: " + mode)
+        if state in ['true', 'false', '']:
+            await ctx.send(server_functions.edit_properties('online-mode', mode)[1])
+            lprint(ctx, "Online-mode: " + mode)
+        else: await ctx.send("Need a true or false value (in lowercase).")
 
     @commands.command()
     async def motd(self, ctx, *message):
@@ -643,8 +645,10 @@ class Server(commands.Cog):
 
         """
 
-        response = server_functions.edit_properties('enable-rcon', state)[1]
-        await ctx.send(response)
+        if state in ['true', 'false', '']:
+            response = server_functions.edit_properties('enable-rcon', state)[1]
+            await ctx.send(response)
+        else: await ctx.send("Need a true or false value (in lowercase).")
 
     @commands.command(aliases=['ver', 'v'])
     async def version(self, ctx):
@@ -1033,5 +1037,14 @@ class Bot_Functions(commands.Cog):
 # Adds functions to bot.
 cogs = [Basics, Player, Permissions, World, Server, World_Saves, Server_Saves, Bot_Functions]
 for i in cogs: bot.add_cog(i(bot))
+
+disabled_commands_rcon = ['oplist', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'motd', 'rcon', 'onelinemode',
+                          'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'update', 'log']
+disabled_commands_tmux = ['start', 'restart']
+
+if server_functions.server_files_access is False:
+    for command in disabled_commands: bot.remove_command(command)
+if server_functions.use_tmux is False:
+    for command in disabled_commands_tmux: bot.remove_command(command)
 
 if __name__ == '__main__': bot.run(TOKEN)
