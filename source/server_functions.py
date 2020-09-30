@@ -7,19 +7,14 @@ bot_log_file = f"{server_functions_path}/bot_log.txt"
 
 # Outputs and logs used bot commands and which Discord user invoked them.
 def lprint(arg1=None, arg2=None):
-    if type(arg1) is str:
-        msg = arg1
-        user = 'Script'
+    if type(arg1) is str: msg, user = arg1, 'Script'  # If did not receive ctx object.
     else:
         try: user = arg1.message.author
         except: user = 'N/A'
         msg = arg2
-
     output = f"{datetime.datetime.now()} | ({user}) {msg}"
     print(output)
-
-    with open(bot_log_file, 'a') as file:
-        file.write(output + '\n')
+    with open(bot_log_file, 'a') as file: file.write(output + '\n')
 
 # If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like server logging.
 use_rcon = False
@@ -40,7 +35,7 @@ server_path = f"{minecraft_folder_path}/server"
 world_backups_path = f"{minecraft_folder_path}/world_backups"
 server_backups_path = f"{minecraft_folder_path}/server_backups"
 server_jar_file = f'{server_path}/server.jar'
-server_log_file = f"{server_path}/output.txt"
+server_log_file = f"{server_path}/logs/latest.log"
 server_properties_file = f"{server_path}/server.properties"
 bot_file = f"{server_functions_path}/discord_mc_bot.py"
 bot_properties_file = f"{server_path}/discord-bot.properties"
@@ -48,13 +43,13 @@ bot_token_file = '/home/slime/mc_bot_token.txt'
 script_properties_file = f'{server_functions_path}/script_properties.txt'
 
 # Update server.jar execution argument if needed.
-java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui java 2>&1 | tee -a output.txt'
-lprint("Java run command set: " + java_args)
+java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui'
+lprint("Java run command: " + java_args)
 
 # Use Tmux to send commands to server and log server output to file. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features.
 use_tmux = True
 start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
-lprint("Tmux send server command set: " + start_server_command)
+lprint("Tmux send-keys command: " + start_server_command)
 
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
@@ -62,6 +57,8 @@ new_server_url = 'https://www.minecraft.net/en-us/download/server'
 if use_rcon: import mctools, re
 if server_files_access: import shutil, requests, fileinput, json
 
+
+# ========== Server command, start, bot start.
 # Sends command to tmux window running server.
 def mc_command(command, match_output=None):
     if use_rcon: return mc_rcon(command)
@@ -72,6 +69,7 @@ def mc_command(command, match_output=None):
         return get_output(command)
     else: return get_output(match_output)
 
+# Send commands to server using RCON.
 def mc_rcon(command=''):
     mc_rcon_client = mctools.RCONClient(mc_ip, port=rcon_port)
 
@@ -80,17 +78,56 @@ def mc_rcon(command=''):
         return response
     else: lprint("Error connecting RCON.")
 
+
+# Starts minecraft server in Tmux session.
+def start_minecraft_server():
+    # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+    os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
+    os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+
+    if not os.system(start_server_command): return True  # Tries starting new detached tmux session.
+
+def start_discord_bot():
+    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
+    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True
+
+# ========== Fetching server data, output, reading files.
+
 # Removes unwanted ANSI escape characters.
 def remove_ansi(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     return ansi_escape.sub('', text)
 
+# Gets server output by reading log file, can also find response from command in log by finding matching string.
+def get_output(match='placeholder match', file_path=server_log_file, lines=50, normal_read=False):
+    log_data = match_found = ''
+    if normal_read:
+        with open(file_path, 'r') as file:
+            for line in file:
+                if match in line: return line
+    else:
+        with FileReadBackwards(file_path) as file:
+            for i in range(lines):
+                line = file.readline()
+                if 'banlist' in match:
+                    if 'was banned by' in line: # finds log lines that shows banned players.
+                        match_found += line
+                    elif '/info]: there are' in line:  # finds the end so it doesn't return everything from log other then banned users.
+                        match_found += line
+                        break
+                elif match in line:
+                   match_found = line
+                   break
+                log_data += line
+
+    if match_found:
+        return match_found
+    return log_data
+
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping_stats():
     stats = mctools.PINGClient(mc_ip).get_stats()
-    stats = {'motd': remove_ansi(stats['description']),
-             'version': stats['version']['name']}
-    return stats
+    return {'motd': remove_ansi(stats['description']), 'version': stats['version']['name']}
 
 # Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
 def get_server_status():
@@ -119,41 +156,74 @@ def get_csv(csv_file):
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 
-def start_discord_bot():
-    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
-    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True
+# Gets server version from log file or gets latest version number from website.
+def get_minecraft_version(get_latest=False):
+    # Gets server version from latest.log file.
+    if not get_latest: return get_output('server version', normal_read=True).split()[-1]
+
+    # Gets latest minecraft version from website.
+    soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
+    for i in soup.findAll('a'):
+        # Returns Minecraft server version by splitting up string and extracting only numbers then recombining.
+        if i.string and 'minecraft_server' in i.string:
+            return '.'.join(i.string.split('.')[1:][:-1])
 
 
-# Starts minecraft server in Tmux session.
-def start_minecraft_server():
-    # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-    os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
-    os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+# ========== Extra server functions.
 
-    # Tries starting new detached tmux session.
-    if not os.system(start_server_command): return True
+# Downloads latest server.jar from Minecraft website in current server folder, also updates eula.txt.
+def download_new_server():
+    os.chdir(minecraft_folder_path)
+    jar_download_url = ''
 
-# Gets server output by reading log file, can also find response from command in log by finding matching string.
-def get_output(match='placeholder match', file_path=server_log_file, lines=50):
-    log_data = match_found = ''
-    with FileReadBackwards(file_path) as file:
-        for i in range(lines):
-            line = file.readline()
-            if 'banlist' in match:
-                # Finds log lines that shows banned players.
-                if 'was banned by' in line: match_found += line
-                # Finds the end so it doesn't return everything from log other then banned users.
-                elif '/INFO]: There are' in line:
-                    match_found += line
-                    break
-            elif match in line:
-                match_found = line
-                break
-            log_data += line
+    minecraft_website = requests.get(new_server_url)
+    soup = BeautifulSoup(minecraft_website.text, 'html.parser')
+    # Finds Minecraft server.jar urls in div class.
+    div_agenda = soup.find_all('div', class_='minecraft-version')
+    for i in div_agenda[0].find_all('a'):
+        jar_download_url = f"{i.get('href')}"
 
-    if match_found:
-        return match_found
-    return log_data
+    if not jar_download_url: return
+
+    mc_ver = get_minecraft_version(get_latest=True)
+    # Saves new server.jar in current server.
+    with open(server_path + '/server.jar', 'wb') as jar_file:
+        jar_file.write(requests.get(jar_download_url).content)
+
+    # Updates eula.txt to true.
+    with open(server_path + '/eula.txt', 'w') as file: file.write('eula=true')
+    return mc_ver
+
+# Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
+def edit_properties(target_property=None, value='', file_path=server_properties_file):
+    # Return values: name=value (Normal output), `name=value` (Discord format), value (Just value).
+
+    os.chdir(server_path)
+    return_line = discord_return = ''
+    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
+        for line in file:
+            split_line = line.split('=', 1)
+            if target_property == 'all':
+                discord_return += F"`{line.rstrip()}`\n"
+                return_line += line.strip() + '\n'
+                print(line, end='')
+            elif target_property in split_line[0] and len(split_line) > 1:
+                if value:
+                    split_line[1] = value
+                    new_line = '='.join(split_line)
+                    discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
+                    return_line = line
+                    print(new_line, end='\n')
+                else:
+                    discord_return = f"`{'='.join(split_line)}`"
+                    return_line = '='.join(split_line)
+                    print(line, end='')
+            else: print(line, end='')
+
+    
+    if return_line:  # If property not found.
+        return return_line, discord_return, return_line.split('=')[1]
+    else: return return_line, "404: Property not found!"
 
 # Get server or world backup folder name from index.
 def get_from_index(path, index): return os.listdir(path)[index]
@@ -182,101 +252,24 @@ def create_backup(name, src, dst):
 
 def restore_backup(backup, dst, reset=False):
     try: shutil.rmtree(dst)
-    except: 
+    except:
         lprint("Error deleting: " + dst)
         return False
 
     # This function is used in ?rebirth Discord command to create a new world.
     if reset: return True
 
-    try:  shutil.copytree(backup, server_path + dst)
+    try: shutil.copytree(backup, server_path + dst)
     except: lprint("Error restoring: " + str(backup))
-    
+
 def delete_backup(backup):
     try:
         shutil.rmtree(backup)
         return True
     except: lprint("Error deleting: " + str(backup))
 
-# Downloads latest server.jar from Minecraft website in current server folder, also updates needed files like eula.txt.
-def download_new_server():
-    os.chdir(minecraft_folder_path)
-    jar_download_url = ''
 
-    minecraft_website = requests.get(new_server_url)
-    soup = BeautifulSoup(minecraft_website.text, 'html.parser')
-    # Finds Minecraft server.jar urls in div class.
-    div_agenda = soup.find_all('div', class_='minecraft-version')
-    for i in div_agenda[0].find_all('a'):
-        jar_download_url = f"{i.get('href')}"
-
-    if not jar_download_url: return
-
-    mc_ver = get_minecraft_version(get_latest=True)
-    # Saves new server.jar in current server.
-    with open(server_path + '/server.jar', 'wb') as jar_file:
-        jar_file.write(requests.get(jar_download_url).content)
-
-    # Updates server discord-bot.properties file. server.properties will remove foreign data on server start.
-    if not os.path.isfile(bot_properties_file):
-        with open(bot_properties_file, 'w+') as file:
-            file.write('version=' + mc_ver)
-    else:
-        edit_properties('version', )
-        with fileinput.FileInput(bot_properties_file, inplace=True) as file:
-            for line in file:
-                if file.isfirstline():
-                    print('version=' + mc_ver, end='\n')
-                else: print(line, end='')
-
-    with open(server_path + '/eula.txt', 'w') as file:
-        file.write('eula=true')
-
-    return mc_ver
-
-# Gets server version from file or gets latest version number from website.
-def get_minecraft_version(get_latest=False):
-    # Returns server version from Discord-server.properties file located in same folder as server.jar.
-    if not get_latest: return edit_properties('version', file_path=bot_properties_file)[2]
-
-    soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
-    for i in soup.findAll('a'):
-        # Returns Minecraft server version by splitting up string and extracting only numbers then recombining.
-        if i.string and 'minecraft_server' in i.string:
-            return '.'.join(i.string.split('.')[1:][:-1])
-
-# Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
-# Return values: name=value, `name=value`, value
-def edit_properties(target_property=None, value='', file_path=server_properties_file):
-    os.chdir(server_path)
-    # Return data for other script uses, and one specifically for Discord.
-    return_line = discord_return = ''
-    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
-        for line in file:
-            split_line = line.split('=', 1)
-            if target_property == 'all':
-                discord_return += F"`{line.rstrip()}`\n"
-                return_line += line.strip() + '\n'
-                print(line, end='')
-            elif target_property in split_line[0] and len(split_line) > 1:
-                if value:
-                    split_line[1] = value
-                    new_line = '='.join(split_line)
-                    discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
-                    return_line = line
-                    print(new_line, end='\n')
-                else:
-                    discord_return = f"`{'='.join(split_line)}`"
-                    return_line = '='.join(split_line)
-                    print(line, end='')
-            else: print(line, end='')
-
-    # Sends Discord message saying property not found.
-    if return_line:
-        return return_line, discord_return, return_line.split('=')[1]
-    else: return return_line, "404: Property not found!"
-
-# Functions for discord bot.
+# ========== Discord commands.
 def get_server_from_index(index): return get_from_index(server_backups_path, index)
 def get_world_from_index(index): return get_from_index(world_backups_path, index)
 
