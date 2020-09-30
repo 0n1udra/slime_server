@@ -8,7 +8,7 @@ Includes extra features a backup/restore system for world saves, edit server.pro
 - Time limited gamemode or OP status change.
 - Show online players, and banned. Showing OPed and whitelist will not work with RCON.
 - World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files.
-- Server stop, active status, and get version. Need Tmux to start, restart and server log.
+- Server stop, active status, and get version. Need Tmux to start, restart and read server log.
 - If have access to local server, bot can edit properties in server.properties file, download latest server.jar from official Minecraft website.
 - If you don't have access to local server files you can use the bot just with RCON, but you will be limited to just Minecraft RCON commands.
 
