@@ -33,7 +33,7 @@ Includes extra features a backup/restore system for world saves, edit server.pro
 3. Run `python3 run_bot.py setup` which well setup required enviorment and/or folder structure as needed.
 4. A) If already have Minecraft server move, contents to `/server` folder created by the script, then use `?start` command in discord.\
 B) Or use `?update` or `python3 run_bot.py download` to download latest server.jar file from official Minecraft website. eula.txt will be updated automatically.
-5. Read through the help pages with `?help` in Discord and `python3 run_bot.py help` for script functions.
+5. Read through the help pages with `?help` or `?help2` in Discord and `python3 run_bot.py help` for script functions.
 
 ## Using Virtualenv:
 Create Python Virtualenvt:
