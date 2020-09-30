@@ -1,5 +1,6 @@
-import discord, asyncio, os, sys, server_functions
+import discord, asyncio, os, sys
 from discord.ext import commands, tasks
+import server_functions
 from server_functions import lprint, use_rcon, format_args, mc_command, get_server_status
 
 # Exits script if no token.
