@@ -1,9 +1,6 @@
 import os, sys, time, server_functions
 from discord_mc_bot import bot, TOKEN
 
-disabled_commands = ['oplist', 'description', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'update',
-                     'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'onlinemode', 'log']
-
 def setup_directories():
     try:
         os.makedirs(server_functions.server_path)
@@ -21,6 +18,7 @@ def setup_directories():
         print("Created:", server_functions.bot_properties_file)
     except: print("Error: Setting up Discord-bot.properties file at:", server_functions.server_path)
 
+
 def start_tmux_session():
     try:
         os.system('tmux new -d -s mcserver')
@@ -33,9 +31,6 @@ def start_tmux_session():
     except: print("Error: Creating second tmux pane for Discord bot.")
     time.sleep(1)
 
-if server_functions.server_files_access is False:
-    for command in disabled_commands:
-        bot.remove_command(command)
 
 def script_help():
     help = """
@@ -61,6 +56,7 @@ def script_help():
     """
     print(help)
 
+
 if __name__ == '__main__':
     # Initial directory and Tmux setup.
     if 'setup' in sys.argv:
@@ -72,8 +68,7 @@ if __name__ == '__main__':
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
 
     # Start 'mcserver' tmux detached session.
-    if 'tmux' in sys.argv and server_functions.use_tmux:
-        start_tmux_session()
+    if 'tmux' in sys.argv and server_functions.use_tmux: start_tmux_session()
 
     # Download latest server.jar.
     if 'download' in sys.argv and server_functions.server_files_access:
@@ -94,4 +89,3 @@ if __name__ == '__main__':
     if 'attach' in sys.argv: os.system("tmux attach -t mcserver")
 
     if 'help' in sys.argv: script_help()
-

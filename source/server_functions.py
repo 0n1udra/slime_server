@@ -16,6 +16,8 @@ def lprint(arg1=None, arg2=None):
     print(output)
     with open(bot_log_file, 'a') as file: file.write(output + '\n')
 
+bot_token_file = '/home/slime/mc_bot_token.txt'
+
 # If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
 mc_ip = 'arcpy.asuscomm.com'
@@ -26,34 +28,23 @@ lprint(f"RCON Enabled: {mc_ip} : {rcon_port}")
 # Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
 # This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
-# The setup_directories() function when running 'run_bot.py setup' uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
-# os.makedirs() will not overwrite existing files/folders.
 minecraft_folder_path = '/mnt/c/Users/DT/Desktop/MC'
 lprint("Minecraft directory: " + minecraft_folder_path)
 
-# These don't have to be chagned.
+# These don't have to be changed.
 server_path = f"{minecraft_folder_path}/server"
 world_backups_path = f"{minecraft_folder_path}/world_backups"
 server_backups_path = f"{minecraft_folder_path}/server_backups"
-server_jar_file = f'{server_path}/server.jar'
-server_log_file = f"{server_path}/logs/latest.log"
-server_properties_file = f"{server_path}/server.properties"
-bot_file = f"{server_functions_path}/discord_mc_bot.py"
-bot_properties_file = f"{server_path}/discord-bot.properties"
-bot_token_file = '/home/slime/mc_bot_token.txt'
-script_properties_file = f'{server_functions_path}/script_properties.txt'
 
-# Update server.jar execution argument for your setup if needed.
-java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui'
-lprint("Java run command: " + java_args)
-
-# Use Tmux to send commands to server and log server output to file. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features.
+# Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
-start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_args}" ENTER'
+java_command_args = f'java -Xmx2G -Xms1G -jar {server_path}/server.jar nogui'  # Update server.jar execution argument for your setup if needed.
+start_server_command = f'tmux send-keys -t mcserver:1.0 "{java_command_args}" ENTER'
+lprint("Java run command: " + java_command_args)
 lprint("Tmux send-keys command: " + start_server_command)
 
 folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-new_server_url = 'https://www.minecraft.net/en-us/download/server'
+minecraft_server_url = 'https://www.minecraft.net/en-us/download/server'
 
 if use_rcon: import mctools, re
 if server_files_access: import shutil, requests, fileinput, json
@@ -88,7 +79,7 @@ def start_minecraft_server():
 
 def start_discord_bot():
     os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
-    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True
+    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True  # If os.system() return 0, means successful.
 
 
 # ========== Fetching server data, output, reading files.
@@ -98,7 +89,7 @@ def remove_ansi(text):
     return ansi_escape.sub('', text)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def get_output(match='placeholder match', file_path=server_log_file, lines=50, normal_read=False):
+def get_output(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=50, normal_read=False):
     log_data = match_found = ''
     if normal_read:
         with open(file_path, 'r') as file:
@@ -159,7 +150,7 @@ def get_minecraft_version(get_latest=False):
     if not get_latest: return get_output('server version', normal_read=True).split()[-1]
 
     # Gets latest minecraft version from website.
-    soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
+    soup = BeautifulSoup(requests.get(minecraft_server_url).text, 'html.parser')
     for i in soup.findAll('a'):
         # Returns Minecraft server version by splitting up string and extracting only numbers then recombining.
         if i.string and 'minecraft_server' in i.string:
@@ -172,7 +163,7 @@ def download_new_server():
     os.chdir(minecraft_folder_path)
     jar_download_url = ''
 
-    minecraft_website = requests.get(new_server_url)
+    minecraft_website = requests.get(minecraft_server_url)
     soup = BeautifulSoup(minecraft_website.text, 'html.parser')
     # Finds Minecraft server.jar urls in div class.
     div_agenda = soup.find_all('div', class_='minecraft-version')
@@ -192,7 +183,7 @@ def download_new_server():
     return mc_ver
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
-def edit_properties(target_property=None, value='', file_path=server_properties_file):
+def edit_properties(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     # Return values: name=value (Normal output), `name=value` (Discord format), value (Just value).
     os.chdir(server_path)
     return_line = discord_return = ''
