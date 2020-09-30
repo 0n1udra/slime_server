@@ -16,21 +16,22 @@ def lprint(arg1=None, arg2=None):
     print(output)
     with open(bot_log_file, 'a') as file: file.write(output + '\n')
 
-# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like server logging.
+# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
 mc_ip = 'arcpy.asuscomm.com'
 rcon_port = 25575
 rcon_pass = 'SlimeySlime'
 lprint(f"RCON Enabled: {mc_ip} : {rcon_port}")
 
-# Local file access allows for server files/folders manipulation for features like backup/restore world saves or editing server.properties file.
+# Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
-# This is where Minecraft server, world backups and some Discord bot files will be saved, so make sure this is an absolute path and is where you want it.
+# This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
 # The setup_directories() function when running 'run_bot.py setup' uses os.makedirs(), which will recursively make subdirectories if they don't exists already. Read more: https://www.tutorialspoint.com/python/os_makedirs.htm
 # os.makedirs() will not overwrite existing files/folders.
 minecraft_folder_path = '/mnt/c/Users/DT/Desktop/MC'
 lprint("Minecraft directory: " + minecraft_folder_path)
 
+# These don't have to be chagned.
 server_path = f"{minecraft_folder_path}/server"
 world_backups_path = f"{minecraft_folder_path}/world_backups"
 server_backups_path = f"{minecraft_folder_path}/server_backups"
@@ -42,7 +43,7 @@ bot_properties_file = f"{server_path}/discord-bot.properties"
 bot_token_file = '/home/slime/mc_bot_token.txt'
 script_properties_file = f'{server_functions_path}/script_properties.txt'
 
-# Update server.jar execution argument if needed.
+# Update server.jar execution argument for your setup if needed.
 java_args = f'java -Xmx2G -Xms1G -jar {server_jar_file} nogui'
 lprint("Java run command: " + java_args)
 
@@ -72,12 +73,10 @@ def mc_command(command, match_output=None):
 # Send commands to server using RCON.
 def mc_rcon(command=''):
     mc_rcon_client = mctools.RCONClient(mc_ip, port=rcon_port)
-
     if mc_rcon_client.login(rcon_pass):
         response = mc_rcon_client.command(command)
         return response
     else: lprint("Error connecting RCON.")
-
 
 # Starts minecraft server in Tmux session.
 def start_minecraft_server():
@@ -91,8 +90,8 @@ def start_discord_bot():
     os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
     if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True
 
-# ========== Fetching server data, output, reading files.
 
+# ========== Fetching server data, output, reading files.
 # Removes unwanted ANSI escape characters.
 def remove_ansi(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
@@ -110,14 +109,14 @@ def get_output(match='placeholder match', file_path=server_log_file, lines=50, n
             for i in range(lines):
                 line = file.readline()
                 if 'banlist' in match:
-                    if 'was banned by' in line: # finds log lines that shows banned players.
+                    if 'was banned by' in line:  # finds log lines that shows banned players.
                         match_found += line
                     elif '/info]: there are' in line:  # finds the end so it doesn't return everything from log other then banned users.
                         match_found += line
                         break
                 elif match in line:
-                   match_found = line
-                   break
+                    match_found = line
+                    break
                 log_data += line
 
     if match_found:
@@ -132,7 +131,6 @@ def mc_ping_stats():
 # Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
 def get_server_status():
     if 'testcheckstring' not in mc_command('testcheckstring'): return False
-
     if use_rcon:
         return mc_ping_stats()
     else: return {'motd': edit_properties('motd')[2][:-1], 'version': get_minecraft_version()}
@@ -155,7 +153,6 @@ def get_csv(csv_file):
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
-
 # Gets server version from log file or gets latest version number from website.
 def get_minecraft_version(get_latest=False):
     # Gets server version from latest.log file.
@@ -170,7 +167,6 @@ def get_minecraft_version(get_latest=False):
 
 
 # ========== Extra server functions.
-
 # Downloads latest server.jar from Minecraft website in current server folder, also updates eula.txt.
 def download_new_server():
     os.chdir(minecraft_folder_path)
@@ -192,12 +188,12 @@ def download_new_server():
 
     # Updates eula.txt to true.
     with open(server_path + '/eula.txt', 'w') as file: file.write('eula=true')
+
     return mc_ver
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_properties(target_property=None, value='', file_path=server_properties_file):
     # Return values: name=value (Normal output), `name=value` (Discord format), value (Just value).
-
     os.chdir(server_path)
     return_line = discord_return = ''
     with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
@@ -220,7 +216,6 @@ def edit_properties(target_property=None, value='', file_path=server_properties_
                     print(line, end='')
             else: print(line, end='')
 
-    
     if return_line:  # If property not found.
         return return_line, discord_return, return_line.split('=')[1]
     else: return return_line, "404: Property not found!"
