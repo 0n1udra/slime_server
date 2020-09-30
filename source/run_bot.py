@@ -91,9 +91,9 @@ if __name__ == '__main__':
     # Start Minecraft server and/or Discord bot.
     if len(sys.argv) == 1 or 'run' in sys.argv:
         if server_functions.use_tmux:
-            server_functions.start_minecraft_server()
+            server_functions.mc_start()
             print("Started Minecraft server in 'mcserver' tmux session pane 0.")
-            server_functions.start_discord_bot()
+            server_functions.start_bot()
             print("Started Discord bot in 'mcserver' tmux session pane 1.")
         else: bot.run(TOKEN)
 
