@@ -38,7 +38,7 @@ class Basics(commands.Cog):
         """
 
         args = format_args(args)
-        mc_command(f"{args}")
+        await mc_command(f"{args}")
         lprint(ctx, "Sent command: " + args)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=2)
 
@@ -55,7 +55,7 @@ class Basics(commands.Cog):
         """
 
         msg = format_args(msg, return_empty=True)
-        mc_command('say ' + msg)
+        await mc_command('say ' + msg)
         if not msg:
             await ctx.send("Usage example: `?s Hello everyone!`")
         else: await ctx.send("Message circulated to all active players!")
@@ -76,7 +76,7 @@ class Basics(commands.Cog):
         """
 
         msg = format_args(msg)
-        mc_command(f"tell {player} {msg}")
+        await mc_command(f"tell {player} {msg}")
         await ctx.send("Communiqué transmitted to: `{player}`.")
         lprint(ctx, f"Messaged {player} : {msg}")
 
@@ -86,7 +86,7 @@ class Basics(commands.Cog):
         Show list of online players and how many out of server limit.
         """
 
-        response = mc_command("list")
+        response = await mc_command("list")
 
         if use_rcon: log_data = response
         else:
@@ -129,8 +129,8 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say WARNING | {player} will be EXTERMINATED! | {reason}.")
-        mc_command(f'kill {player}')
+        await mc_command(f"say WARNING | {player} will be EXTERMINATED! | {reason}.")
+        await mc_command(f'kill {player}')
         await ctx.send(f"`{player}` assassinated!")
         lprint(ctx, f"Killed: {player}")
 
@@ -150,10 +150,10 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say WARNING | {player} will self-destruct in {delay}s | {reason}.")
+        await mc_command(f"say WARNING | {player} will self-destruct in {delay}s | {reason}.")
         await ctx.send(f"Killing {player} in {delay}s!")
         await asyncio.sleep(delay)
-        mc_command(f'kill {player}')
+        await mc_command(f'kill {player}')
         await ctx.send(f"`{player}` soul has been freed.")
         lprint(ctx, f"Delay killed: {player}")
 
@@ -173,9 +173,9 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say INFO | Flinging {player} towards {target} in 5s | {reason}.")
+        await mc_command(f"say INFO | Flinging {player} towards {target} in 5s | {reason}.")
         await asyncio.sleep(5)
-        mc_command(f"tp {player} {target}")
+        await mc_command(f"tp {player} {target}")
         await ctx.send(f"`{player}` and {target} touchin real close now.")
         lprint(ctx, f"Teleported {player} to {target}")
 
@@ -195,8 +195,8 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say {player} now in {state} | {reason}.")
-        mc_command(f"gamemode {state} {player}")
+        await mc_command(f"say {player} now in {state} | {reason}.")
+        await mc_command(f"gamemode {state} {player}")
         await ctx.send(f"`{player}` is now in `{state}` indefinitely.")
         lprint(ctx, f"Set {player} to: {state}")
 
@@ -222,11 +222,11 @@ class Player(commands.Cog):
             return
 
         reason = format_args(reason)
-        mc_command(f"say {player} set to {state} for {duration}s | {reason}.")
+        await mc_command(f"say {player} set to {state} for {duration}s | {reason}.")
         await ctx.send(f"`{player}` set to `{state}` for {duration}s, then will revert to survival.")
-        mc_command(f"gamemode {state} {player}")
+        await mc_command(f"gamemode {state} {player}")
         await asyncio.sleep(duration)
-        mc_command(f"gamemode survival {player}")
+        await mc_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
         lprint(ctx, f"Set gamemode: {player} for {duration}")
 
@@ -250,9 +250,9 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f'say WARNING | {player} will be ejected from server in 5s | {reason}.')
+        await mc_command(f'say WARNING | {player} will be ejected from server in 5s | {reason}.')
         await asyncio.sleep(5)
-        mc_command(f"kick {player}")
+        await mc_command(f"kick {player}")
         await ctx.send(f"`{player}` is outta here!")
         lprint(ctx, f"Kicked {player}")
 
@@ -271,10 +271,10 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say WARNING | Banishing {player} in 5s | {reason}.")
+        await mc_command(f"say WARNING | Banishing {player} in 5s | {reason}.")
         await asyncio.sleep(5)
-        mc_command(f"kick {player}")
-        mc_command(f"ban {player} {reason}")
+        await mc_command(f"kick {player}")
+        await mc_command(f"ban {player} {reason}")
         await ctx.send(f"Dropkicked and exiled: `{player}`.")
         lprint(ctx, f"Banned {player} : {reason}")
 
@@ -293,8 +293,8 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say INFO | {player} has been vindicated! | {reason}.")
-        mc_command(f"pardon {player}")
+        await mc_command(f"say INFO | {player} has been vindicated! | {reason}.")
+        await mc_command(f"pardon {player}")
         await ctx.send(f"Cleansed `{player}`.")
         lprint(ctx, f"Pardoned {player} : {reason}")
 
@@ -304,7 +304,7 @@ class Permissions(commands.Cog):
 
         # Gets online players, formats output for Discord depending on using RCON or reading from server log.
         banned_players = ''
-        response = mc_command("banlist")
+        response = await mc_command("banlist")
 
         if use_rcon:
             if 'There are no bans' in response:
@@ -367,8 +367,8 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say INFO | {player} has become a God! | {reason}")
-        mc_command(f"op {player}")
+        await mc_command(f"say INFO | {player} has become a God! | {reason}")
+        await mc_command(f"op {player}")
         await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
         lprint(ctx, f"New server op: {player}")
 
@@ -387,8 +387,8 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        mc_command(f"say INFO | {player} fell from grace! | {reason}")
-        mc_command(f"deop {player}")
+        await mc_command(f"say INFO | {player} fell from grace! | {reason}")
+        await mc_command(f"deop {player}")
         await ctx.send(f"`{player}` stripped of Godhood!")
         lprint(ctx, f"Removed server op: {player}")
 
@@ -407,13 +407,13 @@ class Permissions(commands.Cog):
         """
 
         await ctx.send(f"Granting `{player}` OP status for {time_limit}m!")
-        mc_command(f"say INFO | {player} granted God status for {time_limit}m!")
-        mc_command(f"op {player}")
+        await mc_command(f"say INFO | {player} granted God status for {time_limit}m!")
+        await mc_command(f"op {player}")
         lprint(ctx, f"OP {player} for {time_limit}.")
         await asyncio.sleep(time_limit * 60)
         await ctx.send(f"Removed `{player}` OP status!")
-        mc_command(f"say INFO | {player} is back to being a mortal.")
-        mc_command(f"deop {player}")
+        await mc_command(f"say INFO | {player} is back to being a mortal.")
+        await mc_command(f"deop {player}")
         lprint(ctx, f"Remove OP {player}")
 
 
@@ -425,7 +425,7 @@ class World(commands.Cog):
     async def saveall(self, ctx):
         """Save current world, just sends save-all command to server."""
 
-        mc_command('save-all')
+        await mc_command('save-all')
         await ctx.send("I saved the world!")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved world.")
@@ -444,7 +444,7 @@ class World(commands.Cog):
             ?weather thunder 60
         """
 
-        mc_command(f'weather {state} {duration * 60}')
+        await mc_command(f'weather {state} {duration * 60}')
         if duration:
             await ctx.send(f"I see some `{state}` in the near future.")
         else: await ctx.send(f"Forecast entails `{state}`.")
@@ -464,7 +464,7 @@ class World(commands.Cog):
         """
 
         if set_time:
-            mc_command(f"time set {set_time}")
+            await mc_command(f"time set {set_time}")
             await ctx.send("Time updated!")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
@@ -478,13 +478,12 @@ class Server(commands.Cog):
     async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        stats = mc_status()
-        if stats:
+        if await mc_status():
             await ctx.send("Server is now __**ACTIVE**__.")
         else: await ctx.send("Server is __**INACTIVE**__.")
 
         await ctx.send(f"version: `{server_functions.mc_version()}`")
-        await ctx.send(f"motd: `{server_functions.mo}`")
+        await ctx.send(f"motd: `{server_functions.get_mc_motd()}`")
         await ctx.invoke(self.bot.get_command('players'))
 
         lprint(ctx, "Fetched server status.")
@@ -502,7 +501,7 @@ class Server(commands.Cog):
             ?log 10
         """
 
-        log_data = server_functions.mc_log(file_path=server_functions.server_log_file, lines=lines)
+        log_data = server_functions.mc_log(lines=lines)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from bot log.")
 
@@ -514,9 +513,12 @@ class Server(commands.Cog):
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
 
-        if server_functions.mc_start():
-            await ctx.send("***Booting Server...***")
-        else: await ctx.send("**Error** starting server, contact administrator!")
+        if await server_functions.mc_status():
+            await ctx.send("Server already **ACTIVE**.")
+            return True
+
+        await ctx.send("***Booting Server...***")
+        server_functions.mc_start()
         await ctx.send("***Fetching server status in 20s...***")
         await asyncio.sleep(20)
         await ctx.invoke(self.bot.get_command('status'))
@@ -535,15 +537,20 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if now in 'now': mc_command('stop')
+        if await server_functions.mc_status() is False:
+            await ctx.send("Server already **INACTIVE**.")
+            return True
+
+        if 'now' in now: await mc_command('stop')
         else:
-            mc_command('say WARNING | Server will halt in 15s!')
+            await mc_command('say WARNING | Server will halt in 15s!')
             await ctx.send("***Halting in 15s...***")
             await asyncio.sleep(10)
-            mc_command('say WARNING | 5s left!')
+            await mc_command('say WARNING | 5s left!')
             await asyncio.sleep(5)
-            mc_command('stop')
-        await ctx.send("World Saved. Server __**HALTED**__")
+            await mc_command('stop')
+        await ctx.send("Server __**HALTED**__")
+        server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
 
     @commands.command(aliases=['reboot'])
@@ -560,10 +567,8 @@ class Server(commands.Cog):
         """
 
         lprint(ctx, "Restarting server.")
-        if now in 'now':
-            await ctx.invoke(self.bot.get_command('stop'), now='now')
-        else: await ctx.invoke(self.bot.get_command('stop'))
-
+        await ctx.send("***Restarting...***")
+        await ctx.invoke(self.bot.get_command('stop'), now=now)
         await asyncio.sleep(2)
         await ctx.invoke(self.bot.get_command('start'))
 
@@ -627,9 +632,13 @@ class Server(commands.Cog):
         """
 
         message = format_args(message, return_empty=True)
-        response = server_functions.edit_properties('motd', message)
-        await ctx.send(f"`{response[0]}`")
-        lprint("motd: " + response[0])
+        if use_rcon:
+            response = server_functions.get_mc_motd()
+        elif server_functions.server_files_access:
+            response = server_functions.edit_properties('motd', message)[1]
+        else: response = '**Error:** Fetching server motd.'
+        await ctx.send(f"`{response}`")
+        lprint("motd: " + response)
 
     @commands.command()
     async def rcon(self, ctx, state=''):
@@ -663,9 +672,10 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = server_functions.mc_version(get_latest=True)
+        response = server_functions.get_latest_version()
         await ctx.send(f"`{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
+
 
 # ========== World backup/restore functions.
 class World_Saves(commands.Cog):
@@ -712,9 +722,9 @@ class World_Saves(commands.Cog):
             return False
         name = format_args(name)
 
-        mc_command(f"say INFO | Standby, world is currently being archived. Codename: {name}")
+        await mc_command(f"say INFO | Standby, world is currently being archived. Codename: {name}")
         await ctx.send("***Saving current world...***")
-        mc_command(f"save-all")
+        await mc_command(f"save-all")
         await asyncio.sleep(5)
 
         new_backup = server_functions.backup_world(name)
@@ -747,7 +757,7 @@ class World_Saves(commands.Cog):
         fetched_restore = server_functions.get_world_from_index(index)
         lprint(ctx, "Restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring...*** `{fetched_restore}`")
-        mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
+        await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
         if mc_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
@@ -788,7 +798,7 @@ class World_Saves(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        mc_command("say WARNING | Project Rebirth will commence in T-5s!")
+        await mc_command("say WARNING | Project Rebirth will commence in T-5s!")
         await ctx.send(":fire:**INCINERATED:**:fire:")
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
@@ -871,7 +881,7 @@ class Server_Saves(commands.Cog):
         name = format_args(name)
         await ctx.send("***Backing Up...***")
 
-        mc_command(f"save-all")
+        await mc_command(f"save-all")
         await asyncio.sleep(5)
         new_backup = server_functions.backup_server(name)
 
@@ -902,7 +912,7 @@ class Server_Saves(commands.Cog):
         fetched_restore = server_functions.get_server_from_index(index)
         lprint(ctx, "Restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring...*** `{fetched_restore}`")
-        mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
+        await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
         if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
@@ -942,7 +952,7 @@ class Server_Saves(commands.Cog):
     async def serverreset(self, ctx):
         """Deletes all current server files, keeps world and server backups."""
 
-        mc_command("say WARNING | Resetting server in 5s!")
+        await mc_command("say WARNING | Resetting server in 5s!")
         await ctx.send("**Resetting Server...**")
         await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
@@ -956,12 +966,14 @@ class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['rbot', 'rebootbot'])
-    async def restartbot(self, ctx):
+    async def restartbot(self, ctx, now=''):
         """Restart this bot."""
 
-        os.chdir(server_functions.server_functions_path)
         await ctx.send("***Rebooting Bot...***")
         lprint(ctx, "Restarting bot.")
+        if server_functions.use_subprocess:
+            await ctx.invoke(self.bot.get_command("stop"), now=now)
+        os.chdir(server_functions.server_functions_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
@@ -1039,12 +1051,12 @@ class Bot_Functions(commands.Cog):
 cogs = [Basics, Player, Permissions, World, Server, World_Saves, Server_Saves, Bot_Functions]
 for i in cogs: bot.add_cog(i(bot))
 
-disabled_commands_rcon = ['oplist', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'motd', 'rcon', 'onelinemode',
+disabled_commands_rcon = ['oplist', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'rcon', 'onelinemode',
                           'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'update', 'log']
 disabled_commands_tmux = ['start', 'restart']
 
 if server_functions.server_files_access is False:
-    for command in disabled_commands: bot.remove_command(command)
+    for command in disabled_commands_rcon: bot.remove_command(command)
 if server_functions.use_tmux is False:
     for command in disabled_commands_tmux: bot.remove_command(command)
 
