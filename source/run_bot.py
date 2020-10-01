@@ -1,4 +1,4 @@
-import os, sys, time
+import time, sys, os
 from discord_mc_bot import bot, TOKEN
 import server_functions
 
@@ -38,6 +38,9 @@ def start_tmux_session():
     except: print("Error: Creating second tmux pane for Discord bot.")
     time.sleep(1)
 
+def start_bot():
+    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.server_functions_path}" ENTER')
+    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True  # If os.system() return 0, means successful.
 
 def script_help():
     help = """
@@ -90,11 +93,13 @@ if __name__ == '__main__':
 
     # Start Minecraft server and/or Discord bot.
     if len(sys.argv) == 1 or 'run' in sys.argv:
+        if server_functions.use_subprocess:
+            print("Start server with ?start command in Discord")
+            input("Enter to continue > ")
         if server_functions.use_tmux:
+            start_bot()
             server_functions.mc_start()
-            print("Started Minecraft server in 'mcserver' tmux session pane 0.")
-            server_functions.start_bot()
-            print("Started Discord bot in 'mcserver' tmux session pane 1.")
+            print("Started bot in 'mcserver' tmux session top pane.")
         else: bot.run(TOKEN)
 
     # Attach to 'mcserver' tmux session.
