@@ -1,9 +1,41 @@
-import os, datetime, csv, time
+import subprocess, requests, datetime, asyncio, time, csv, os
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
 server_functions_path = os.getcwd()
+bot_token_file = '/home/slime/mc_bot_token.txt'
+
+# Run Minecraft server using subprocess.Popen(). Note, If script halts the server will halt also. Useful if you can't get Tmux, but I recommend Tmux if you can.
+# If use_tmux is also True, script will prioritize use_subprocess. Which means if both vars are True, MC server will run as subprocess instead of running in separate Tmux pane.
+# And if use_rcon is also True, RCON capabilities will have top priority over Popen() and Tmux.
+use_subprocess = False
+
+# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
+use_rcon = False
+mc_ip = 'arcpy.asuscomm.com'
+rcon_port = 25575
+rcon_pass = 'SlimeySlime'
+
+# Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
+server_files_access = True
+# This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
+mc_path = '/mnt/c/Users/DT/Desktop/MC'
+
+# These don't have to be changed.
+server_path = f"{mc_path}/server"
+world_backups_path = f"{mc_path}/world_backups"
+server_backups_path = f"{mc_path}/server_backups"
 bot_log_file = f"{server_functions_path}/bot_log.txt"
+
+# Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
+use_tmux = True
+java_command = f'java -Xmx2G -Xms1G -jar {server_path}/server.jar nogui'  # Update server.jar execution argument for your setup if needed.
+
+if use_rcon: import mctools, re
+if server_files_access: import shutil, fileinput, json
+
+mc_active_status = False
+mc_subprocess = None
 
 # Outputs and logs used bot commands and which Discord user invoked them.
 def lprint(arg1=None, arg2=None):
@@ -16,46 +48,61 @@ def lprint(arg1=None, arg2=None):
     print(output)
     with open(bot_log_file, 'a') as file: file.write(output + '\n')
 
-bot_token_file = '/home/slime/mc_bot_token.txt'
-
-# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = True
-mc_ip = 'arcpy.asuscomm.com'
-rcon_port = 25575
-rcon_pass = 'SlimeySlime'
-lprint(f"RCON Enabled: {mc_ip} : {rcon_port}")
-
-# Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = True
-# This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
-mc_path = '/mnt/c/Users/DT/Desktop/MC'
-lprint("Minecraft directory: " + mc_path)
-
-# These don't have to be changed.
-server_path = f"{mc_path}/server"
-world_backups_path = f"{mc_path}/world_backups"
-server_backups_path = f"{mc_path}/server_backups"
-
-# Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-use_tmux = True
-java_command_args = f'java -Xmx2G -Xms1G -jar {server_path}/server.jar nogui'  # Update server.jar execution argument for your setup if needed.
-start_mc_tmux = f'tmux send-keys -t mcserver:1.0 "{java_command_args}" ENTER'
-lprint("Java run command: " + java_command_args)
-lprint("Tmux send-keys command: " + start_mc_tmux)
-
-folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-mc_server_url = 'https://www.minecraft.net/en-us/download/server'
-
-if use_rcon: import mctools, re
-if server_files_access: import shutil, requests, fileinput, json
-
-
 # ========== Server command, start, bot start.
-# Sends command to tmux window running server.
-def mc_command(command, match_output=None, return_bool=True):
-    if use_rcon: return mc_rcon(command)
+def mc_start():
+    """
+    Start Minecraft server depending on whether you're using Tmux subprocess method.
 
-    os.system(f'tmux send-keys -t mcserver:1.0 "/{command}" ENTER')
+    Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
+
+    Returns:
+        bool: If successful boot.
+        str: If error starting server.
+    """
+
+    global mc_subprocess
+    os.chdir(server_path)
+    if use_subprocess:
+        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
+        try: mc_subprocess = subprocess.Popen(java_command.split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        except: lprint("Error server starting subprocess")
+        if type(mc_subprocess) == subprocess.Popen: return True
+    elif use_tmux:
+        os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+        if not os.system(f'tmux send-keys -t mcserver:1.0 "{java_command}" ENTER'): return True # Tries starting new detached tmux session.
+    else: return "Error starting server."
+
+# Sends command to tmux window running server.
+async def mc_command(command, match_output=None, return_bool=True):
+    """
+    Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
+    Sends command to server, then reads from latest.log file for output.
+    If using RCON, will only return RCON returned data, can't read from server log.
+
+    Args:
+        command: Command to send.
+        match_output [Optional]: Look for specific string from server output.
+        return_bool: Return True/False whether or not command ran successfully.
+
+    Returns:
+        bool: If error sending command to server, sends False boolean.
+        str: Returns matched string if match found.
+    """
+
+    global mc_subprocess
+    if use_rcon:
+        return mc_rcon(command)
+    elif use_subprocess:
+        if mc_subprocess is not None:
+            mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
+            mc_subprocess.stdin.flush()
+        else: return False
+    elif use_tmux:
+        if os.system(f'tmux send-keys -t mcserver:1.0 "/{command}" ENTER') != 0:
+            return True
+    else: return "Can't send command to server."
+
     time.sleep(1)
     if match_output is None:
         if return_bool: return mc_log(command, return_bool=True)
@@ -64,24 +111,23 @@ def mc_command(command, match_output=None, return_bool=True):
 
 # Send commands to server using RCON.
 def mc_rcon(command=''):
+    """
+    Send command to server with RCON.
+
+    Args:
+        command: Minecraft command.
+
+    Returns:
+        bool: Returns False if error connecting to RCON.
+        str: Output from RCON.
+    """
+
     mc_rcon_client = mctools.RCONClient(mc_ip, port=rcon_port)
     try: mc_rcon_client.login(rcon_pass)
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {mc_ip} : {rcon_port}")
         return False
     else: return mc_rcon_client.command(command)
-
-# Starts minecraft server in Tmux session.
-def mc_start():
-    # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-    os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')
-    os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
-
-    if not os.system(start_mc_tmux): return True  # Tries starting new detached tmux session.
-
-def start_bot():
-    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions_path}" ENTER')
-    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True  # If os.system() return 0, means successful.
 
 
 # ========== Fetching server data, output, ping, reading files.
@@ -91,7 +137,20 @@ def remove_ansi(text):
     return ansi_escape.sub('', text)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=50, normal_read=False, return_bool=True):
+def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=True):
+    """
+    Read latest.log file under /logs folder.
+
+    Args:
+        match [Optional]: Check for match string.
+        file_path [Optional]: Default is latest.log file.
+        lines [Optional]: Number of most recent lines to return. Returns 15 lines by default.
+        normal_read [Optional]: Reads file top down, by default this function reads file backwards with file-read-backwards module.
+        return_bool [Optional]: Return True/False boolean if match was found.
+
+    Returns:
+
+    """
     log_data = match_found = ''
     if normal_read:
         with open(file_path, 'r') as file:
@@ -119,38 +178,89 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
 
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping():
+    """
+    Gets server information using mctools.PINGClient()
+
+    Returns:
+        dict: Dictionary containing 'version', and 'description' (motd).
+
+    """
     try: stats = mctools.PINGClient(mc_ip).get_stats()
     except ConnectionRefusedError:
         lprint("Ping Error: Connection Refused.")
     else: return stats
 
 # Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
-def mc_status():
-    return mc_command('STATUS', return_bool=True)
+async def mc_status():
+    """
+    Gets server active status, by sending command to server and checking server log.
+
+    Returns:
+        bool: Server active status.
+    """
+
+    status = await mc_command('STATUS', return_bool=True)
+    if status is False:
+        server_active_status = False
+    else: server_active_status = True
+    return server_active_status
 
 def get_mc_motd():
+    """
+    Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
+
+    Returns:
+        str: Server motd.
+    """
+
     if server_files_access:
-        return edit_properties('motd')
-    return mc_ping()['description']
+        return edit_properties('motd')[1]
+    elif use_rcon:
+        return remove_ansi(mc_ping()['description'])
+    else: return "N/A"
 
 # Gets server version from log file or gets latest version number from website.
 def mc_version():
+    """
+    Gets server version, either by reading server log or using PINGClient.
+
+    Returns:
+        str: Server version number.
+    """
+
     if use_rcon:
-        return mc_status()['version']['name']
+        return mc_ping()['version']['name']
     elif server_files_access:
         return mc_log('server version', normal_read=True).split()[-1]
     else: return 'N/A'
 
 def get_latest_version():
-    # Gets latest minecraft version from website.
+    """
+    Gets latest Minecraft server version number from official website using bs4.
+
+    Returns:
+        str: Latest version number.
+    """
+
     soup = BeautifulSoup(requests.get(mc_server_url).text, 'html.parser')
     for i in soup.findAll('a'):
-        # Returns Minecraft server version by splitting up string and extracting only numbers then recombining.
         if i.string and 'minecraft_server' in i.string:
-            return '.'.join(i.string.split('.')[1:][:-1])
+            return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
 # Used so Discord command arguments don't need qoutes.
 def format_args(args, return_empty=False):
+    """
+    Formats passed in *args from Discord command functions.
+    This is so quotes aren't necessary for Discord command arguments.
+
+    Args:
+        args: Passed in args to combine and return.
+        return_empty: returns empty str if passed in arguments aren't usable for Discord command.
+
+    Returns:
+        str: Arguments combines with spaces.
+    """
+
     if args: return ' '.join(args)
     else:
         if return_empty: return ''
@@ -168,12 +278,18 @@ def get_csv(csv_file):
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 # ========== Extra server functions.
-# Downloads latest server.jar from Minecraft website in current server folder, also updates eula.txt.
 def download_new_server():
+    """
+    Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
+
+    Returns:
+        bool: If download was successful.
+    """
+
     os.chdir(mc_path)
     jar_download_url = ''
 
-    minecraft_website = requests.get(mc_server_url)
+    minecraft_website = requests.get('https://www.minecraft.net/en-us/download/server')
     soup = BeautifulSoup(minecraft_website.text, 'html.parser')
     # Finds Minecraft server.jar urls in div class.
     div_agenda = soup.find_all('div', class_='minecraft-version')
@@ -182,7 +298,6 @@ def download_new_server():
 
     if not jar_download_url: return
 
-    mc_ver = mc_version(get_latest=True)
     # Saves new server.jar in current server.
     with open(server_path + '/server.jar', 'wb') as jar_file:
         jar_file.write(requests.get(jar_download_url).content)
@@ -190,7 +305,7 @@ def download_new_server():
     # Updates eula.txt to true.
     with open(server_path + '/eula.txt', 'w') as file: file.write('eula=true')
 
-    return mc_ver
+    return True
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_properties(target_property=None, value='', file_path=f"{server_path}/server.properties"):
@@ -231,7 +346,7 @@ def edit_properties(target_property=None, value='', file_path=f"{server_path}/se
             else: print(line, end='')
 
     if return_line:  # If property not found.
-        return return_line, discord_return, return_line.split('=')[1]
+        return return_line, return_line.split('=')[1]
     else: return "404: Property not found!"
 
 # Get server or world backup folder name from index.
@@ -248,6 +363,7 @@ def fetch_backups(path, amount=5):
 def create_backup(name, src, dst):
     if not os.path.isdir(dst): os.makedirs(dst)
 
+    folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
     new_name = f"({folder_timestamp}) {mc_version()} {name}"
     new_backup_path = dst + '/' + new_name
     shutil.copytree(src, new_backup_path)
