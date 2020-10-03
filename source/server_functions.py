@@ -1,4 +1,4 @@
-import subprocess, requests, datetime, asyncio, time, csv, os
+import subprocess, requests, datetime, random, asyncio, time, csv, os
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 
@@ -34,6 +34,7 @@ java_command = f'java -Xmx2G -Xms1G -jar {server_path}/server.jar nogui'  # Upda
 if use_rcon: import mctools, re
 if server_files_access: import shutil, fileinput, json
 
+new_server_url = 'https://www.minecraft.net/en-us/download/server'
 mc_active_status = False
 mc_subprocess = None
 
@@ -151,6 +152,8 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
     Returns:
 
     """
+    if not os.path.isfile(file_path): return False
+
     log_data = match_found = ''
     if normal_read:
         with open(file_path, 'r') as file:
@@ -199,10 +202,10 @@ async def mc_status():
         bool: Server active status.
     """
 
-    status = await mc_command('STATUS', return_bool=True)
-    if status is False:
-        server_active_status = False
-    else: server_active_status = True
+    status = await mc_command('STATUS ' + str(random.random()), return_bool=True)
+    if status:
+        server_active_status = True
+    else: server_active_status = False
     return server_active_status
 
 def get_mc_motd():
@@ -231,8 +234,14 @@ def mc_version():
     if use_rcon:
         return mc_ping()['version']['name']
     elif server_files_access:
-        return mc_log('server version', normal_read=True).split()[-1]
-    else: return 'N/A'
+        version = mc_log('server version', normal_read=True)
+        if type(version) is str:
+            version = version.split()[-1]
+            with open(f"{server_path}/version.txt", 'w') as f: f.write(version)
+            return version
+        else:
+            with open(f"{server_path}/version.txt", 'r') as f: return f.readline()
+    return 'N/A'
 
 def get_latest_version():
     """
@@ -242,7 +251,7 @@ def get_latest_version():
         str: Latest version number.
     """
 
-    soup = BeautifulSoup(requests.get(mc_server_url).text, 'html.parser')
+    soup = BeautifulSoup(requests.get(new_server_url).text, 'html.parser')
     for i in soup.findAll('a'):
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
@@ -289,7 +298,7 @@ def download_new_server():
     os.chdir(mc_path)
     jar_download_url = ''
 
-    minecraft_website = requests.get('https://www.minecraft.net/en-us/download/server')
+    minecraft_website = requests.get(new_server_url)
     soup = BeautifulSoup(minecraft_website.text, 'html.parser')
     # Finds Minecraft server.jar urls in div class.
     div_agenda = soup.find_all('div', class_='minecraft-version')
