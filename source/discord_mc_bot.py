@@ -515,7 +515,7 @@ class Server(commands.Cog):
 
         if await server_functions.mc_status():
             await ctx.send("Server already **ACTIVE**.")
-            return True
+            return False
 
         await ctx.send("***Booting Server...***")
         server_functions.mc_start()
@@ -539,7 +539,7 @@ class Server(commands.Cog):
 
         if await server_functions.mc_status() is False:
             await ctx.send("Server already **INACTIVE**.")
-            return True
+            return False
 
         if 'now' in now: await mc_command('stop')
         else:
@@ -665,7 +665,7 @@ class Server(commands.Cog):
         """Gets Minecraft server version."""
 
         response = server_functions.mc_version()
-        await ctx.send(f"`{response}`")
+        await ctx.send(f"Current version: `{response}`")
         lprint("Fetched Minecraft server version: " + response)
 
     @commands.command(aliases=['lversion', 'lver', 'lv'])
@@ -673,7 +673,7 @@ class Server(commands.Cog):
         """Gets latest Minecraft server version number from official website."""
 
         response = server_functions.get_latest_version()
-        await ctx.send(f"`{response}`")
+        await ctx.send(f"Latest version: `{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
 
 
