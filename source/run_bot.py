@@ -2,7 +2,7 @@ import time, sys, os
 from discord_mc_bot import bot, TOKEN
 import server_functions
 
-__version__ = "2.5"
+__version__ = "3.1"
 __author__ = "D Thomas"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
