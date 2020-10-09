@@ -138,7 +138,7 @@ def remove_ansi(text):
     return ansi_escape.sub('', text)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=True):
+def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False):
     """
     Read latest.log file under /logs folder.
 
