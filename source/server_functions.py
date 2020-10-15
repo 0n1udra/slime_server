@@ -234,8 +234,7 @@ def mc_version():
     if use_rcon:
         return mc_ping()['version']['name']
     elif server_files_access:
-        version = mc_log('server version', normal_read=True)
-        if type(version) is str:
+        if version := mc_log('server version', normal_read=True):
             version = version.split()[-1]
             with open(f"{server_path}/version.txt", 'w') as f: f.write(version)
             return version

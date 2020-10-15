@@ -479,8 +479,8 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         if await mc_status():
-            await ctx.send("Server is now __**ACTIVE**__.")
-        else: await ctx.send("Server is __**INACTIVE**__.")
+            await ctx.send("Server is: __**ACTIVE**__.")
+        else: await ctx.send("Server is: __**INACTIVE**__.")
 
         await ctx.send(f"version: `{server_functions.mc_version()}`")
         await ctx.send(f"motd: `{server_functions.get_mc_motd()}`")
