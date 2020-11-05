@@ -52,7 +52,7 @@ def script_help():
     setup       --  If server_files_access is True, sets up necessary folders. Then, if use_tmux is True, starts Tmux session named 'mcserver' in detached mode with 2 panes.
                     Folders created: server, server_backups, and world_backs. If use_tmux is also True this will also start tmux session.
                         
-    download    --  If server_files_access is True, Downloads latest server.jar file from official Minecraft website to /server folder.
+    update    --  If server_files_access is True, Downloads latest server.jar file from official Minecraft website to /server folder.
     
     tmuxstart   --  If use_tmux is True, starts a Tmux session named 'mcserver' with 2 panes. 
                     Top pane for Minecraft server, and bottom pane is for Discord bot.
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     if 'tmuxstart' in sys.argv and server_functions.use_tmux: start_tmux_session()
 
     # Download latest server.jar.
-    if 'download' in sys.argv and server_functions.server_files_access:
+    if 'update' in sys.argv and server_functions.server_files_access:
         print("Downloading latest server.jar from Minecraft website...")
         server_functions.download_new_server()
         print("Downloaded server.jar to:", server_functions.server_path)

@@ -307,13 +307,14 @@ def download_new_server():
     if not jar_download_url: return
 
     # Saves new server.jar in current server.
+    version = requests.get(jar_download_url).content
     with open(server_path + '/server.jar', 'wb') as jar_file:
-        jar_file.write(requests.get(jar_download_url).content)
+        jar_file.write(version)
 
     # Updates eula.txt to true.
     with open(server_path + '/eula.txt', 'w') as file: file.write('eula=true')
 
-    return True
+    return version
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_properties(target_property=None, value='', file_path=f"{server_path}/server.properties"):
