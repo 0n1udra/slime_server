@@ -755,14 +755,14 @@ class World_Saves(commands.Cog):
             return False
 
         fetched_restore = server_functions.get_world_from_index(index)
-        lprint(ctx, "Restoring to: " + fetched_restore)
-        await ctx.send(f"***Restoring...*** `{fetched_restore}`")
+        lprint(ctx, "World restoring to: " + fetched_restore)
+        await ctx.send(f"***Restoring World...*** `{fetched_restore}`")
         await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
-        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
+        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
 
-        server_functions.restore_world(restore)  # Gives computer time to move around world files.
+        server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
         await ctx.invoke(self.bot.get_command('start'))
@@ -802,7 +802,7 @@ class World_Saves(commands.Cog):
         await ctx.send(":fire:**INCINERATED:**:fire:")
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
-        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))
 
         server_functions.restore_world(reset=True)
         await asyncio.sleep(3)
@@ -821,7 +821,7 @@ class World_Saves(commands.Cog):
         lprint(ctx, "Updating server.jar...")
         await ctx.send("***Updating...***")
 
-        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))
         await asyncio.sleep(5)
 
         await ctx.send("***Downloading latest server.jar***")
@@ -910,14 +910,14 @@ class Server_Saves(commands.Cog):
             return False
 
         fetched_restore = server_functions.get_server_from_index(index)
-        lprint(ctx, "Restoring to: " + fetched_restore)
-        await ctx.send(f"***Restoring...*** `{fetched_restore}`")
+        lprint(ctx, "Server restoring to: " + fetched_restore)
+        await ctx.send(f"***Restoring Server...*** `{fetched_restore}`")
         await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
         await asyncio.sleep(5)
 
-        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))
 
-        if server_functions.restore_server(restore):
+        if server_functions.restore_server(fetched_restore):
             await ctx.send("Server **Restored!**")
         else: await ctx.send("**Error:** Could not restore server!")
 
@@ -956,7 +956,7 @@ class Server_Saves(commands.Cog):
         await ctx.send("**Resetting Server...**")
         await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
-        if mc_status(): await ctx.invoke(self.bot.get_command('stop'))
+        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))
         server_functions.restore_server(reset=True)
         lprint(ctx, "Server Reset.")
 

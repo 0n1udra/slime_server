@@ -385,15 +385,15 @@ def create_backup(name, src, dst):
 
 def restore_backup(backup, dst, reset=False):
     try: shutil.rmtree(dst)
-    except:
-        lprint("Error deleting: " + dst)
-        return False
+    except: pass
 
     # This function is used in ?rebirth Discord command to create a new world.
     if reset: return True
 
-    try: shutil.copytree(backup, server_path + dst)
-    except: lprint("Error restoring: " + str(backup))
+    try:
+        shutil.copytree(backup, dst)
+        return True
+    except: lprint("Error restoring: " + str(backup + ' > ' + dst))
 
 def delete_backup(backup):
     try:
@@ -412,8 +412,12 @@ def fetch_worlds(amount=5): return fetch_backups(world_backups_path, amount)
 def backup_server(name='server_backup'): return create_backup(name, server_path, server_backups_path)
 def backup_world(name="world_backup"): return create_backup(name, server_path + '/world', world_backups_path)
 
-def restore_server(server=None, reset=False): return restore_backup(server, server_path, reset)
-def restore_world(world=None, reset=False): return restore_backup(world, server_path + '/world', reset)
-
 def delete_server(server): return delete_backup(server_backups_path + '/' + server)
 def delete_world(world): return delete_backup(world_backups_path + '/' + world)
+
+def restore_server(server=None, reset=False):
+    os.chdir(server_backups_path)
+    return restore_backup(server, server_path, reset)
+def restore_world(world=None, reset=False):
+    os.chdir(world_backups_path)
+    return restore_backup(world, server_path + '/world', reset)
