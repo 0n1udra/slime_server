@@ -494,14 +494,17 @@ class Server(commands.Cog):
         Show server log.
 
         Args:
-            lines [5:Optional]: How many most recent lines to show.
+            lines [5:Optional]: How many most recent lines to show. Max of 20 lines!
 
         Usage:
             ?serverlog
             ?log 10
         """
+        if lines > 20:
+            await ctx.send("Can fetch 20 lines or less.")
+            return
 
-        log_data = server_functions.mc_log(lines=lines)
+        log_data = server_functions.mc_log(lines=lines, log_mode=True)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from bot log.")
 
@@ -982,14 +985,18 @@ class Bot_Functions(commands.Cog):
         Show bot log.
 
         Args:
-            lines [5:Optional]: Number of most recent lines to show.
+            lines [5:Optional]: Number of most recent lines to show. Max of 20 lines.
 
         Usage:
             ?botlog
             ?blog 15
         """
 
-        log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines)
+        if lines > 20:
+            await ctx.send("Can fetch 20 lines or less.")
+            return
+
+        log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True)
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from log.")
 

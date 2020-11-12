@@ -138,7 +138,7 @@ def remove_ansi(text):
     return ansi_escape.sub('', text)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False):
+def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False):
     """
     Read latest.log file under /logs folder.
 
@@ -154,7 +154,7 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
     """
     if not os.path.isfile(file_path): return False
 
-    log_data = match_found = ''
+    log_data = ''
     if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
@@ -165,19 +165,23 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                 line = file.readline()
                 if 'banlist' in match:
                     if 'was banned by' in line:  # finds log lines that shows banned players.
-                        match_found += line
+                        log_data += line
                     elif '/info]: there are' in line:  # finds the end so it doesn't return everything from log other then banned users.
-                        match_found += line
+                        log_data += line
                         break
-                elif match in line:
-                    match_found = line
-                    break
-                log_data += line
 
-    if return_bool and not match_found: return False
-    if match_found:
-        return match_found
-    return log_data
+                elif log_mode:
+                    log_data += line
+                elif match in line:
+                    log_data = line
+                    break
+
+    if return_bool and not log_data:
+        return False
+
+    if log_data:
+        return log_data
+    else: return False
 
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping():

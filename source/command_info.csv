@@ -3,7 +3,7 @@ Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
 Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
-Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, by default shows 5 most recent.
+Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, max 20 lines, by default shows 5 most recent.
 Server Start, `?start`, Starts Minecraft server up.
 Server Stop, `?stop [now]`, `?stop now` will immediately stop server, If no 'now' argument, Messages all players the server will be halted in 15s. Then will halt server.
 Server Restart, `?restart` `?reboot [now]`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
@@ -41,6 +41,7 @@ Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, r
 Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to check RCON status else make sure true or false argument is all lowercase. Currently have to set other RCON properties with `?property`.
 Version, `?version`, `?v`, Shows Minecraft server version.
 Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version from official website.
+Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
 
