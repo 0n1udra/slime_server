@@ -44,15 +44,17 @@ def start_bot():
 
 def script_help():
     help = """
-    python3 run_bot.py setup download run tmuxattach  --  Creates required folders, downloads latest server.jar, starts MC server and bot in Tmux, and attach to tmux session.
-    python3 run_bot.py tmuxstart run tmuxattach  --  Starts Tmux session, starts MC server and bot, then attaches to Tmux.
+    python3 run_bot.py setup download run tmuxattach    --  Creates required folders, downloads latest server.jar, starts MC server and bot in Tmux, and attach to tmux session.
+    python3 run_bot.py tmuxstart run tmuxattach         --  Starts Tmux session, starts MC server and bot, then attaches to Tmux.
     
     server_files_access, use_rcon, and use_tmux boolean variables are in server_functions.py. update these for your setup.
     
+    help        --  Shows this help page.
+    
     setup       --  If server_files_access is True, sets up necessary folders. Then, if use_tmux is True, starts Tmux session named 'mcserver' in detached mode with 2 panes.
+    
+    update      --  If server_files_access is True, Downloads latest server.jar file from official Minecraft website to /server folder.
                     Folders created: server, server_backups, and world_backs. If use_tmux is also True this will also start tmux session.
-                        
-    update    --  If server_files_access is True, Downloads latest server.jar file from official Minecraft website to /server folder.
     
     tmuxstart   --  If use_tmux is True, starts a Tmux session named 'mcserver' with 2 panes. 
                     Top pane for Minecraft server, and bottom pane is for Discord bot.
@@ -63,7 +65,6 @@ def script_help():
     run         --  This is the same as running run_bot.py without any arguments. 
                     This will start Minecraft server (if use_tmux) and start Discord bot either in Tmux session or in current console depending on use_tmux boolean.
     
-    help        --  Shows this help page.
     
     Note:   The corresponding functions will run in the order you pass arguments in. 
             For example, 'python3 run_bot.py run tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
