@@ -38,14 +38,25 @@ def start_tmux_session():
     except: print("Error: Creating second tmux pane for Discord bot.")
     time.sleep(1)
 
-def start_bot():
-    os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.server_functions_path}" ENTER')
-    if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): return True  # If os.system() return 0, means successful.
+def start_func(startserver=False, startbot=False):
+    if startbot:
+        if server_functions.use_tmux:
+            os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.server_functions_path}" ENTER')
+            if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): 
+                print("Started bot in 'mcserver' tmux session, top pane.")
+                return True  # If os.system() return 0, means successful.
+        else:
+            print("Start server with ?start command in Discord")
+            input("Enter to continue > ")
+    if startserver:
+        if server_functions.use_tmux:
+            server_functions.mc_start()
+        else: bot.run(TOKEN)
 
 def script_help():
     help = """
-    python3 run_bot.py setup download run tmuxattach    --  Creates required folders, downloads latest server.jar, starts MC server and bot in Tmux, and attach to tmux session.
-    python3 run_bot.py tmuxstart run tmuxattach         --  Starts Tmux session, starts MC server and bot, then attaches to Tmux.
+    python3 run_bot.py setup download startbot            --  Creates required folders, downloads latest server.jar, bot in Tmux.
+    python3 run_bot.py tmuxstart startboth tmuxattach      --  Starts Tmux session, starts MC server and bot, then attaches to Tmux.
     
     server_files_access, use_rcon, and use_tmux boolean variables are in server_functions.py. update these for your setup.
     
@@ -62,7 +73,11 @@ def script_help():
     tmuxsattach --  If use_tmux is True, attaches to 'mcserver' session. 
                     This will not start session if it doesn't exist, use 'setup' or 'tmux' argument to setup session.
                     
-    run         --  This is the same as running run_bot.py without any arguments. 
+    startbot    --  Just starts Discord bot.
+
+    startserver --  Just starts MC server.
+
+    startboth   --  This is the same as running run_bot.py without any arguments. 
                     This will start Minecraft server (if use_tmux) and start Discord bot either in Tmux session or in current console depending on use_tmux boolean.
     
     
@@ -92,16 +107,15 @@ if __name__ == '__main__':
         server_functions.download_new_server()
         print("Downloaded server.jar to:", server_functions.server_path)
 
-    # Start Minecraft server and/or Discord bot.
-    if len(sys.argv) == 1 or 'run' in sys.argv:
-        if server_functions.use_subprocess:
-            print("Start server with ?start command in Discord")
-            input("Enter to continue > ")
-        if server_functions.use_tmux:
-            start_bot()
-            server_functions.mc_start()
-            print("Started bot in 'mcserver' tmux session top pane.")
-        else: bot.run(TOKEN)
+    if 'startbot' in sys.argv:
+        start_func(startbot=True)
+
+    if 'startserver' in sys.argv:
+        start_func(startbot=True)
+
+    # Start Minecraft server and Discord bot.
+    if len(sys.argv) == 1 or 'startboth' in sys.argv:
+        start_func(startserver=True, startbot=True)
 
     # Attach to 'mcserver' tmux session.
     if 'tmuxattach' in sys.argv: os.system("tmux attach -t mcserver")
