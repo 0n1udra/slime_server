@@ -77,7 +77,7 @@ class Basics(commands.Cog):
 
         msg = format_args(msg)
         await mc_command(f"tell {player} {msg}")
-        await ctx.send("Communiqué transmitted to: `{player}`.")
+        await ctx.send(f"Communiqué transmitted to: `{player}`.")
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['pl'])
@@ -231,7 +231,7 @@ class Player(commands.Cog):
         lprint(ctx, f"Set gamemode: {player} for {duration}")
 
 
-# ========== Permissions: Ban, Kick, OP.
+# ========== Permissions: Ban, Whitelist, Kick, OP.
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -321,26 +321,98 @@ class Permissions(commands.Cog):
                 banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
 
         else:
-            for line in filter(None, server_functions.mc_log('banlist').split('\n')):  # Filters out blank lines you sometimes get.
-                print(line)
-                if 'There are no bans' in line:
-                    banned_players = 'No exiles!'
-                    break
-                elif 'There are' in line:
-                    banned_players += line.split(':')[-2]
-                    break
+            if log_data := server_functions.mc_log('banlist'):
+                for line in filter(None, log_data.split('\n')):  # Filters out blank lines you sometimes get.
+                    print('ok:', line)
+                    if 'There are no bans' in line:
+                        banned_players = 'No exiled ones!'
+                        break
+                    elif 'There are' in line:
+                        banned_players += line.split(':')[-2]
+                        break
 
-                # Gets relevant data from current log line, and formats it for Discord output.
-                # Example line: Slime was banned by Server: No reason given
-                # Extracts Player name, who banned the player, and the reason.
-                ban_log_line = line.split(':')[-2:]
-                reason = ban_log_line[-1][:-2].strip()
-                player = ban_log_line[0].split(' ')[1].strip()
-                banner = ban_log_line[0].split(' ')[-1].strip()
-                banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+                    # Gets relevant data from current log line, and formats it for Discord output.
+                    # Example line: Slime was banned by Server: No reason given
+                    # Extracts Player name, who banned the player, and the reason.
+                    ban_log_line = line.split(':')[-2:]
+                    print(ban_log_line)
+                    player = ban_log_line[0].split(' ')[1].strip()
+                    banner = ban_log_line[0].split(' ')[-1].strip()
+                    reason = ban_log_line[-1].strip()
+                    banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+            else: banned_players = '**Error** fetching ban list.'
+
 
         await ctx.send(banned_players)
         lprint(ctx, f"Fetched banned list.")
+
+    @commands.command(aliases=['wl', 'whitel', 'white', 'wlist'])
+    async def whitelist(self, ctx, arg=None, arg2=None):
+        """
+        Whitelist commands, shows list, add, remove, turn off and on, etc.
+
+        Args:
+            arg: User passed in arguments for whitelist command, see below for arguments and usage.
+            player: Specify player or to specify more options for other arguments, like enforce for example.
+
+        Usage:
+            Usage within Discord without any arguments will show whitelist list, else see below for other examples.
+            add <player> : Add player to whitelist.
+            remove <player>: Remove player from whitelist.
+            on: Activates whitelisting..
+            off: Deactivate whitelist.
+            reload: Reloads from whitelist.json file.
+            enforce <status/on/true/off/false>: Changes 'enforce-whitelist' in server properties file.
+                Kicks players that are not on the whitelist when using ?whitelist reload command.
+                Server reboot required for enforce-whitelist to take effect.
+                Using enforce argument alone will also show current status.
+        """
+
+        if arg in ['on', 'true']:
+            await mc_command('whitelist on')
+            await ctx.send("Whitelist **ACTIVE**.")
+            lprint(ctx, f"Whitelist activated.")
+        elif arg in ['off', 'false']:
+            await mc_command('whitelist off')
+            await ctx.send("Whitelist **INACTIVE**.")
+            lprint(ctx, f"Whitelist deactivated.")
+
+        elif arg == 'add' and arg2:
+            await mc_command(f"whitelist {arg} {arg2}")
+            await ctx.send(f"Added `{arg2}` to whitelist.")
+            lprint(ctx, f"Added to whitelist: {arg2}")
+        elif arg == 'remove' and arg2:
+            await mc_command(f"whitelist {arg} {arg2}")
+            await ctx.send(f"Removed `{arg2}` from whitelist.")
+            lprint(ctx, f"Removed from whitelist: {arg2}")
+
+        elif arg == 'reload':
+            await mc_command('whitelist reload')
+            await ctx.send("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
+
+        elif arg == 'enforce' and arg2 is None:
+            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist')
+            await ctx.send(f"\nUsage examples for enforce: `?whitelist enforce true`, `?whitelist enforce false`.")
+        elif arg == 'enforce' and arg2 in ['true', 'on']:
+            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist', 'true')
+        elif arg == 'enforce' and arg2 in ['false', 'off']:
+            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist', 'false')
+
+        elif arg is None or arg == 'list':
+            await mc_command('whitelist list')
+            await asyncio.sleep(1)
+            # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
+            log_data = server_functions.mc_log('whitelisted players:').split(':')[-2:]
+            # Then, formats player names in Discord `player` markdown.
+            players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
+            await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
+            lprint(ctx, f"Showing whitelist: {log_data[1]}")
+
+            await ctx.send(f"\nUsage examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help` or `?help2` for more.")
+
+        else:
+            await ctx.send("Command error.")
+            return False
 
     @commands.command(aliases=['ol', 'ops'])
     async def oplist(self, ctx):
@@ -421,7 +493,7 @@ class Permissions(commands.Cog):
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['sa'])
+    @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
         """Save current world, just sends save-all command to server."""
 
@@ -479,8 +551,8 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         if await mc_status():
-            await ctx.send("Server is: __**ACTIVE**__.")
-        else: await ctx.send("Server is: __**INACTIVE**__.")
+            await ctx.send("Server is: **ACTIVE**.")
+        else: await ctx.send("Server is: **INACTIVE**.")
 
         await ctx.send(f"version: `{server_functions.mc_version()}`")
         await ctx.send(f"motd: `{server_functions.get_mc_motd()}`")
@@ -552,7 +624,7 @@ class Server(commands.Cog):
             await mc_command('say WARNING | 5s left!')
             await asyncio.sleep(5)
             await mc_command('stop')
-        await ctx.send("Server __**HALTED**__")
+        await ctx.send("Server **HALTED**.")
         server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
 
@@ -599,7 +671,9 @@ class Server(commands.Cog):
         if not value: value = ''
         else: value = ' '.join(value)
 
-        get_property = server_functions.edit_properties(target_property, value)
+        server_functions.edit_properties(target_property, value)
+        get_property = server_functions.edit_properties(target_property)
+        await asyncio.sleep(1)
         await ctx.send(f"`{get_property[0]}`")
         lprint(ctx, f"Server property: {get_property[0]}")
 
@@ -684,7 +758,7 @@ class Server(commands.Cog):
 class World_Saves(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['backups', 'worldsaves'])
+    @commands.command(aliases=['backups', 'worldsaves', 'savedworlds', 'worldbackups'])
     async def saves(self, ctx, amount=5):
         """
         Show world folder backups.
@@ -865,7 +939,7 @@ class Server_Saves(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched latest {amount} world saves.")
 
-    @commands.command(aliases=['backupserver'])
+    @commands.command(aliases=['backupserver', 'serversave', 'saveserver'])
     async def serverbackup(self, ctx, *name):
         """
         Create backup of server files (not just world save folder).
@@ -892,7 +966,7 @@ class Server_Saves(commands.Cog):
             await ctx.send(f"New backup:\n`{new_backup}`.")
         else: await ctx.send("**Error** saving server!")
 
-        await ctx.invoke(self.bot.get_command('servers'))
+        await ctx.invoke(self.bot.get_command('serversaves'))
         lprint(ctx, "New backup: " + new_backup)
 
     @commands.command(aliases=['restoreserver'])
@@ -1053,6 +1127,12 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
+    @commands.command(aliases=['commandhelp', 'mchelp', 'mch', 'mcc', 'commandlist'])
+    async def mccommands(self, ctx):
+        embed = discord.Embed(title='List of Minecraft server commands for JE.',
+                              url='https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
+                              description='Only JE (Java Edition) commands will work.')
+        await ctx.send(embed=embed)
 
 # Adds functions to bot.
 cogs = [Basics, Player, Permissions, World, Server, World_Saves, Server_Saves, Bot_Functions]
