@@ -129,7 +129,7 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say WARNING | {player} will be EXTERMINATED! | {reason}.")
+        await mc_command(f"say ---WARNING--- {player} will be EXTERMINATED! : {reason}.")
         await mc_command(f'kill {player}')
         await ctx.send(f"`{player}` assassinated!")
         lprint(ctx, f"Killed: {player}")
@@ -150,7 +150,7 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say WARNING | {player} will self-destruct in {delay}s | {reason}.")
+        await mc_command(f"say ---WARNING--- {player} will self-destruct in {delay}s: {reason}.")
         await ctx.send(f"Killing {player} in {delay}s!")
         await asyncio.sleep(delay)
         await mc_command(f'kill {player}')
@@ -173,7 +173,7 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say INFO | Flinging {player} towards {target} in 5s | {reason}.")
+        await mc_command(f"say ---INFO--- Flinging {player} towards {target} in 5s: {reason}.")
         await asyncio.sleep(5)
         await mc_command(f"tp {player} {target}")
         await ctx.send(f"`{player}` and {target} touchin real close now.")
@@ -195,7 +195,7 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say {player} now in {state} | {reason}.")
+        await mc_command(f"say {player} now in {state}: {reason}.")
         await mc_command(f"gamemode {state} {player}")
         await ctx.send(f"`{player}` is now in `{state}` indefinitely.")
         lprint(ctx, f"Set {player} to: {state}")
@@ -222,7 +222,7 @@ class Player(commands.Cog):
             return
 
         reason = format_args(reason)
-        await mc_command(f"say {player} set to {state} for {duration}s | {reason}.")
+        await mc_command(f"say ---INFO--- {player} set to {state} for {duration}s: {reason}.")
         await ctx.send(f"`{player}` set to `{state}` for {duration}s, then will revert to survival.")
         await mc_command(f"gamemode {state} {player}")
         await asyncio.sleep(duration)
@@ -250,7 +250,7 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f'say WARNING | {player} will be ejected from server in 5s | {reason}.')
+        await mc_command(f'say ---WARNING--- {player} will be ejected from server in 5s: {reason}.')
         await asyncio.sleep(5)
         await mc_command(f"kick {player}")
         await ctx.send(f"`{player}` is outta here!")
@@ -271,7 +271,7 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say WARNING | Banishing {player} in 5s | {reason}.")
+        await mc_command(f"say ---WARNING--- Banishing {player} in 5s: {reason}.")
         await asyncio.sleep(5)
         await mc_command(f"kick {player}")
         await mc_command(f"ban {player} {reason}")
@@ -293,7 +293,7 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say INFO | {player} has been vindicated! | {reason}.")
+        await mc_command(f"say ---INFO--- {player} has been vindicated: {reason}.")
         await mc_command(f"pardon {player}")
         await ctx.send(f"Cleansed `{player}`.")
         lprint(ctx, f"Pardoned {player} : {reason}")
@@ -439,7 +439,7 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say INFO | {player} has become a God! | {reason}")
+        await mc_command(f"say ---INFO--- {player} has become a God!: {reason}")
         await mc_command(f"op {player}")
         await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
         lprint(ctx, f"New server op: {player}")
@@ -459,7 +459,7 @@ class Permissions(commands.Cog):
         """
 
         reason = format_args(reason)
-        await mc_command(f"say INFO | {player} fell from grace! | {reason}")
+        await mc_command(f"say ---INFO--- {player} fell from grace!: {reason}")
         await mc_command(f"deop {player}")
         await ctx.send(f"`{player}` stripped of Godhood!")
         lprint(ctx, f"Removed server op: {player}")
@@ -479,12 +479,12 @@ class Permissions(commands.Cog):
         """
 
         await ctx.send(f"Granting `{player}` OP status for {time_limit}m!")
-        await mc_command(f"say INFO | {player} granted God status for {time_limit}m!")
+        await mc_command(f"say ---INFO--- {player} granted God status for {time_limit}m!")
         await mc_command(f"op {player}")
         lprint(ctx, f"OP {player} for {time_limit}.")
         await asyncio.sleep(time_limit * 60)
         await ctx.send(f"Removed `{player}` OP status!")
-        await mc_command(f"say INFO | {player} is back to being a mortal.")
+        await mc_command(f"say ---INFO--- {player} is back to being a mere mortal.")
         await mc_command(f"deop {player}")
         lprint(ctx, f"Remove OP {player}")
 
@@ -618,10 +618,10 @@ class Server(commands.Cog):
 
         if 'now' in now: await mc_command('stop')
         else:
-            await mc_command('say WARNING | Server will halt in 15s!')
+            await mc_command('say ---WARNING--- Server will halt in 15s!')
             await ctx.send("***Halting in 15s...***")
             await asyncio.sleep(10)
-            await mc_command('say WARNING | 5s left!')
+            await mc_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
             await mc_command('stop')
         await ctx.send("Server **HALTED**.")
@@ -799,7 +799,7 @@ class World_Saves(commands.Cog):
             return False
         name = format_args(name)
 
-        await mc_command(f"say INFO | Standby, world is currently being archived. Codename: {name}")
+        await mc_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}")
         await ctx.send("***Saving current world...***")
         await mc_command(f"save-all")
         await asyncio.sleep(5)
@@ -834,7 +834,7 @@ class World_Saves(commands.Cog):
         fetched_restore = server_functions.get_world_from_index(index)
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring World...*** `{fetched_restore}`")
-        await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
+        await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s!: {fetched_restore}")
         await asyncio.sleep(5)
 
         if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))  # Stops if server is running.
@@ -875,7 +875,7 @@ class World_Saves(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await mc_command("say WARNING | Project Rebirth will commence in T-5s!")
+        await mc_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
         await ctx.send(":fire:**INCINERATED:**:fire:")
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
@@ -989,10 +989,11 @@ class Server_Saves(commands.Cog):
         fetched_restore = server_functions.get_server_from_index(index)
         lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** `{fetched_restore}`")
-        await mc_command(f"say WARNING | Initiating jump to save point in 5s! | {fetched_restore}")
+        await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s!: {fetched_restore}")
         await asyncio.sleep(5)
 
-        if await mc_status(): await ctx.invoke(self.bot.get_command('stop'))
+        await ctx.invoke(self.bot.get_command('stop'))
+        await asyncio.sleep(3)
 
         if server_functions.restore_server(fetched_restore):
             await ctx.send("Server **Restored!**")
@@ -1029,7 +1030,7 @@ class Server_Saves(commands.Cog):
     async def serverreset(self, ctx):
         """Deletes all current server files, keeps world and server backups."""
 
-        await mc_command("say WARNING | Resetting server in 5s!")
+        await mc_command("say ---WARNING--- Resetting server in 5s!")
         await ctx.send("**Resetting Server...**")
         await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
 
