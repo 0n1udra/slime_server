@@ -12,6 +12,9 @@ Active Players, `?players` `?pl`, Gets list of online users.
 Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.
 Say, `?say` `?s <message>`, Server sends message to all active players.
 Whisper, `?tell` `t <player> <message>`, Whispers message to player.
+Whitelist, `?whitelist [on/off/add/remove/enforce/reload/list]`, Whitelist commands, using `?whitelist` standalone, will show list of whitelisted players. `?whitelist on` to turn on whitelist.
+Whitelist Add/Remove, `?whitelist <add/remove> <player>`, Add or remove player from whitelist, `?whitelist add MysticFrogo`.
+Whitelist Enforce, `?whitelist enforce <true/false/status>`, Edits `enforce-whitelist` in server properties file, server reboot required. Can also use false or true, or status.
 Kick, `?kick <player> [reason]`, Kick player after 5s, reason is optional.
 Ban, `?ban <player> [reason]`, After 5s bans player, providing reason is optional.
 Ban List, `?banlist` `?bl`, Shows banned players with the reason why.
@@ -42,6 +45,7 @@ Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to
 Version, `?version`, `?v`, Shows Minecraft server version.
 Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version from official website.
 Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
+Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
 
