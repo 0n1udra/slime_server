@@ -550,12 +550,18 @@ class Server(commands.Cog):
     async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
+
+        embed = discord.Embed(title='Current Server')
         if await mc_status():
             await ctx.send("Server is: **ACTIVE**.")
-        else: await ctx.send("Server is: **INACTIVE**.")
+            embed.add_field(name='Status', value=f"**ACTIVE**", inline=False)
+        else: embed.add_field(name='Status', value=f"**INACTIVE**", inline=False)
+        embed.add_field(name=server_functions.server[0], value=server_functions.server[2], inline=False)  # Shows server name, and small description.
+        embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
+        embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
+        embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
+        await ctx.send(embed=embed)
 
-        await ctx.send(f"version: `{server_functions.mc_version()}`")
-        await ctx.send(f"motd: `{server_functions.get_mc_motd()}`")
         await ctx.invoke(self.bot.get_command('players'))
 
         lprint(ctx, "Fetched server status.")
@@ -578,7 +584,7 @@ class Server(commands.Cog):
 
         log_data = server_functions.mc_log(lines=lines, log_mode=True)
         await ctx.send(f"`{log_data}`")
-        lprint(ctx, f"Fetched {lines} lines from bot log.")
+        lprint(ctx, f"Fetched {lines} lines from server log.")
 
     @commands.command()
     async def start(self, ctx):
@@ -677,7 +683,7 @@ class Server(commands.Cog):
         await ctx.send(f"`{get_property[0]}`")
         lprint(ctx, f"Server property: {get_property[0]}")
 
-    @commands.command(aliases=['omode'])
+    @commands.command(aliases=['omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
         """
         Check or enable/disable onlinemode property.
@@ -690,7 +696,7 @@ class Server(commands.Cog):
             ?omode false
         """
 
-        if state in ['true', 'false', '']:
+        if mode in ['true', 'false', '']:
             await ctx.send(f"`{server_functions.edit_properties('online-mode', mode)[0]}`")
             lprint(ctx, "Online Mode: " + mode)
         else: await ctx.send("Need a true or false argument (in lowercase).")
@@ -844,7 +850,7 @@ class World_Saves(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('start'))
 
-    @commands.command('deleteworld', 'worlddelete', 'wd')
+    @commands.command(aliases=['deleteworld', 'worlddelete', 'wd'])
     async def delete(self, ctx, index):
         """
         Delete a world backup.
@@ -915,6 +921,25 @@ class World_Saves(commands.Cog):
 # ========== Server backup/restore functions.
 class Server_Saves(commands.Cog):
     def __init__(self, bot): self.bot = bot
+
+    @commands.command(aliases=['selectserver', 'sselect'])
+    async def serverselect(self, ctx, name=None):
+        if name is None:
+            embed = discord.Embed(title='Server List')
+            for server in server_functions.server_list.values():
+                embed.add_field(name=server[0], value=server[2], inline=False)  # Shows server name, and small description.
+            await ctx.send(embed=embed)
+
+        else:
+            if name in server_functions.server_list.keys():
+                server_functions.server = server_functions.server_list[name]
+                server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server[0]}"
+                lprint(ctx, f"Server selected: {name}")
+
+                with open(f"{server_functions.server_functions_path}/vars.txt", 'w+') as f:
+                    f.write(name)
+
+        await ctx.invoke(self.bot.get_command('status'))
 
     @commands.command(aliases=['serverbackups', 'savedservers', 'ss'])
     async def serversaves(self, ctx, amount=5):
@@ -1073,7 +1098,7 @@ class Bot_Functions(commands.Cog):
 
         log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True)
         await ctx.send(f"`{log_data}`")
-        lprint(ctx, f"Fetched {lines} lines from log.")
+        lprint(ctx, f"Fetched {lines} lines from bot log.")
 
     @commands.command()
     async def help2(self, ctx):
