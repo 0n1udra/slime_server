@@ -45,7 +45,7 @@ def lprint(arg1=None, arg2=None):
         try: user = arg1.message.author
         except: user = 'N/A'
         msg = arg2
-    output = f"{datetime.datetime.now()} | ({user}) {msg}"
+    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
     print(output)
     with open(bot_log_file, 'a') as file: file.write(output + '\n')
 
@@ -58,7 +58,7 @@ def mc_start():
 
     Returns:
         bool: If successful boot.
-        str: If error starting server.
+        s[tr: If error starting se.strftime('%Y-%m-%d %H:%M:%S)rv]:e
     """
 
     global mc_subprocess
@@ -100,7 +100,7 @@ async def mc_command(command, match_output=None, return_bool=True):
             mc_subprocess.stdin.flush()
         else: return False
     elif use_tmux:
-        if os.system(f'tmux send-keys -t mcserver:1.0 "/{command}" ENTER') != 0:
+        if os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER') != 0:
             return True
     else: return "Can't send command to server."
 
@@ -206,7 +206,7 @@ async def mc_status():
         bool: Server active status.
     """
 
-    status = await mc_command('STATUS ' + str(random.random()), return_bool=True)
+    status = await mc_command('debug statuschecker' + str(random.random()), return_bool=True)
     if status:
         server_active_status = True
     else: server_active_status = False
