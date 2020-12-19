@@ -166,7 +166,7 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                 if 'banlist' in match:
                     if 'was banned by' in line:  # finds log lines that shows banned players.
                         log_data += line
-                    elif '/info]: there are' in line:  # finds the end so it doesn't return everything from log other then banned users.
+                    elif ']: There are' in line:  # finds the end so it doesn't return everything from log other then banned users.
                         log_data += line
                         break
 
