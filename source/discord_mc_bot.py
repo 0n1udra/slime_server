@@ -115,6 +115,26 @@ class Basics(commands.Cog):
             await ctx.send(text + ':\n' + ''.join(players_names))
         lprint(ctx, "Fetched player list.")
 
+    @commands.command(aliases=['chatlog', 'playerchat', 'getchat', 'showchat'])
+    async def chat(self, ctx, lines=15):
+        """
+        Get only user chat lines from server log. Note, does not include whipers.
+
+        Args:
+            lines [int:15]: How many log lines to look through. This is not how many chat lines to show.
+        """
+
+        chat_data = server_functions.mc_log(']: <', lines=lines, filter_mode=True)
+        for line in chat_data.split('\n'):
+            try:
+                line = line.split(']')
+                line = line[0][1:] + ':' + line[2][1:]
+                await ctx.send(f"`{line}`")
+            except:
+                pass
+
+        lprint(ctx, f"Fetching chat from {lines} lines of log lines.")
+
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):

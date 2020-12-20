@@ -208,8 +208,9 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                 elif log_mode:
                     log_data += line
                 elif match in line:
-                    log_data = line
-                    break
+                    log_data += line
+                    if filter_mode is False:
+                        break
 
     if return_bool and not log_data:
         return False
