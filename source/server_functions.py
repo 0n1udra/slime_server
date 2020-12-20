@@ -172,16 +172,17 @@ def remove_ansi(text):
 
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False):
+def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False, filter_mode=False):
     """
     Read latest.log file under /logs folder.
 
     Args:
-        match [Optional]: Check for match string.
-        file_path [Optional]: Default is latest.log file.
-        lines [Optional]: Number of most recent lines to return. Returns 15 lines by default.
-        normal_read [Optional]: Reads file top down, by default this function reads file backwards with file-read-backwards module.
-        return_bool [Optional]: Return True/False boolean if match was found.
+        match [str]: Check for match string.
+        file_path [str:latest.log]: Default is latest.log file.
+        lines [int:15]: Number of most recent lines to return. Returns 15 lines by default.
+        normal_read [bool:False]: Reads file top down, by default this function reads file backwards with file-read-backwards module.
+        return_bool [True/False]: Return True/False boolean if match was found.
+        filter_mode [True/False]: Don't stop at first match with 'match' argument.
 
     Returns:
 
@@ -314,7 +315,7 @@ def format_args(args, return_empty=False):
 
     Args:
         args: Passed in args to combine and return.
-        return_empty: returns empty str if passed in arguments aren't usable for Discord command.
+        return_empty [bool:False]: returns empty str if passed in arguments aren't usable for Discord command.
 
     Returns:
         str: Arguments combines with spaces.
@@ -380,9 +381,9 @@ def edit_properties(target_property=None, value='', file_path=f"{server_path}/se
     If receive no value, will return current set value if property exists.
 
     Args:
-        target_property: Find Minecraft server property.
-        value: If received argument, will change value.
-        file_path: File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
+        target_property [str:None]: Find Minecraft server property.
+        value [str:'']: If received argument, will change value.
+        file_path [str:server.properties]: File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
     Returns:
         str: If target_property was not found.

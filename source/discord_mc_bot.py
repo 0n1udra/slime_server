@@ -32,7 +32,7 @@ class Basics(commands.Cog):
         Pass command directly to server.
 
         Args:
-            command: Server command, do not include the slash /.
+            command [str]: Server command, do not include the slash /.
 
         Usage:
             ?command broadcast Hello Everyone!
@@ -52,7 +52,7 @@ class Basics(commands.Cog):
         Broadcast message to online players.
 
         Args:
-            msg: Message to broadcast.
+            msg [str]: Message to broadcast.
 
         Usage:
             ?s Hello World!
@@ -72,8 +72,8 @@ class Basics(commands.Cog):
         Message online player directly.
 
         Args:
-            player: Player name, casing does not matter.
-            msg: The message, no need for quotes.
+            player <str>: Player name, casing does not matter.
+            msg [str]: The message, no need for quotes.
 
         Usage:
             ?tell Steve Hello there!
@@ -100,7 +100,7 @@ class Basics(commands.Cog):
             log_data = server_functions.mc_log('players online')
 
         if not log_data:
-            await ctx.send("**Error:** Trouble fetching player list.")
+            await ctx.send("**ERROR:** Trouble fetching player list.")
             return
 
         log_data = log_data.split(':')
@@ -127,8 +127,8 @@ class Player(commands.Cog):
         Kill a player.
 
         Args:
-            player: Target player, casing does not matter.
-            reason [Optional]: Reason for kill, do not put in quotes.
+            player <str>: Target player, casing does not matter.
+            reason [str]: Reason for kill, do not put in quotes.
 
         Usage:
             ?kill Steve Because he needs to die!
@@ -147,9 +147,9 @@ class Player(commands.Cog):
         Kill player after time elapsed.
 
         Args:
-            player: Target player.
-            delay: Wait time in seconds.
-            reason [Optional]: Reason for kill.
+            player <str>: Target player.
+            delay [int:5]: Wait time in seconds.
+            reason [str]: Reason for kill.
 
         Usage:
             ?delayedkill Steve 5 Do I need a reason?
@@ -172,9 +172,9 @@ class Player(commands.Cog):
         Teleport player to another player.
 
         Args:
-            player: Player to teleport.
-            target: Destination, player to teleport to.
-            reason [Optional]: Reason for teleport.
+            player <str>: Player to teleport.
+            target <str>: Destination, player to teleport to.
+            reason [str]: Reason for teleport.
 
         Usage:
             ?teleport Steve Jesse I wanted to see him
@@ -194,9 +194,9 @@ class Player(commands.Cog):
         Change player's gamemode.
 
         Args:
-            player: Target player.
-            state: Game mode survival|adventure|creative|spectator.
-            reeason [Optional]: Optional reason for gamemode change.
+            player <str>: Target player.
+            state <str>: Game mode survival|adventure|creative|spectator.
+            reeason [str]: Optional reason for gamemode change.
 
         Usage:
             ?gamemode Steve creative In creative for test purposes.
@@ -209,36 +209,31 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` is now in `{state}` indefinitely.")
         lprint(ctx, f"Set {player} to: {state}")
 
-    @commands.command(aliases=['gamemodetimed', 'tgm', 'gmt'])
-    async def timedgamemode(ctx, player, state, duration=None, *reason):
+    @commands.command(aliases=['gamemodetimed', 'timedgm', 'tgm', 'gmt'])
+    async def timedgamemode(self, ctx, player, state='creative', duration=60, *reason):
         """
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
         Args:
-            player: Target player.
-            state: Game mode survival|adventure|creative|spectator.
-            duration: Duration in seconds.
-            *reason [Optional]: Reason for change.
+            player <str>: Target player.
+            state [str:creative]: Game mode survival/adventure/creative/spectator. Default is creative for 30s.
+            duration [int:30]: Duration in seconds.
+            *reason [str]: Reason for change.
 
         Usage:
             ?timedgamemode Steve spectator Steve needs a time out!
             ?tgm Jesse adventure Jesse going on a adventure.
         """
 
-        try:
-            duration = int(duration)
-        except:
-            await ctx.send("You buffoon, I need a number to set the duration!")
-            return
-
         reason = format_args(reason)
         await mc_command(f"say ---INFO--- {player} set to {state} for {duration}s: {reason}.")
         await mc_command(f"gamemode {state} {player}")
-        await ctx.send(f"`{player}` set to `{state}` for {duration}s, then will revert to survival.")
-        lprint(ctx, f"Set gamemode: {player} for {duration}")
+        await ctx.send(f"`{player}` set to `{state}` for `{duration}s`, then will revert to survival.")
+        lprint(ctx, f"Set gamemode: {player} for {duration}s")
 
         await asyncio.sleep(duration)
 
+        await mc_command(f"say ---INFO--- Times up! {player} is now back to survival.")
         await mc_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
 
@@ -254,8 +249,8 @@ class Permissions(commands.Cog):
         Kick player from server.
 
         Args:
-            player: Player to kick.
-            reason [Optional]: Optional reason for kick.
+            player <str>: Player to kick.
+            reason [str]: Optional reason for kick.
 
         Usage:
             ?kick Steve Because he was trolling
@@ -275,8 +270,8 @@ class Permissions(commands.Cog):
         Ban player from server.
 
         Args:
-            player: Player to ban.
-            reason [Optional]: Reason for ban.
+            player <str>: Player to ban.
+            reason [str]: Reason for ban.
 
         Usage:
             ?ban Steve Player killing
@@ -297,8 +292,8 @@ class Permissions(commands.Cog):
         Pardon (unban) player.
 
         Args:
-            player: Player to pardon.
-            reason [Optional]: Reason for pardon.
+            player <str>: Player to pardon.
+            reason [str]: Reason for pardon.
 
         Usage:
             ?pardon Steve He has turn over a new leaf.
@@ -354,7 +349,7 @@ class Permissions(commands.Cog):
                     reason = ban_log_line[-1].strip()
                     banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
             else:
-                banned_players = '**Error** fetching ban list.'
+                banned_players = '**ERROR:** Trouble fetching ban list.'
 
         await ctx.send(banned_players)
         lprint(ctx, f"Fetched banned list.")
@@ -365,8 +360,8 @@ class Permissions(commands.Cog):
         Whitelist commands, shows list, add, remove, turn off and on, etc.
 
         Args:
-            arg: User passed in arguments for whitelist command, see below for arguments and usage.
-            player: Specify player or to specify more options for other arguments, like enforce for example.
+            arg [str:None]: User passed in arguments for whitelist command, see below for arguments and usage.
+            player [str:None]: Specify player or to specify more options for other arguments, like enforce for example.
 
         Usage:
             Usage within Discord without any arguments will show whitelist list, else see below for other examples.
@@ -442,8 +437,8 @@ class Permissions(commands.Cog):
         Add server operator (OP).
 
         Args:
-            player: Player to make server operator.
-            reason [Optional]: Optional reason for new OP status.
+            player <str>: Player to make server operator.
+            reason [str]: Optional reason for new OP status.
 
         Usage:
             ?opadd Steve Testing purposes
@@ -462,8 +457,8 @@ class Permissions(commands.Cog):
         Remove player OP status (deop).
 
         Args:
-            player: Target player.
-            reason [Optional]: Reason for deop.
+            player <str>: Target player.
+            reason [str]: Reason for deop.
 
         Usage:
             ?opremove Steve abusing goodhood.
@@ -482,8 +477,8 @@ class Permissions(commands.Cog):
         Set player as OP for a set amount of seconds.
 
         Args:
-            player: Target player.
-            time_limit: Time limit in seconds.
+            player <str>: Target player.
+            time_limit [int:1]: Time limit in seconds.
 
         Usage:
             ?timedop Steve 30 Need to check something real quick.
@@ -523,8 +518,8 @@ class World(commands.Cog):
         Set weather.
 
         Args:
-            state: <clear|rain|thunder>: Weather to change to.
-            duration [Optional]: Duration in seconds.
+            state: <clear/rain/thunder>: Weather to change to.
+            duration [int:0]: Duration in seconds.
 
         Usage:
             ?setweather rain
@@ -544,7 +539,7 @@ class World(commands.Cog):
         Set time.
 
         Args:
-            set_time: Set time either using day|night|noon|midnight or numerically.
+            set_time [int:None]: Set time either using day|night|noon|midnight or numerically.
 
         Usage:
             ?settime day
@@ -589,7 +584,7 @@ class Server(commands.Cog):
         Show server log.
 
         Args:
-            lines [5:Optional]: How many most recent lines to show. Max of 20 lines!
+            lines [int:5]: How many most recent lines to show. Max of 20 lines!
 
         Usage:
             ?serverlog
@@ -628,7 +623,7 @@ class Server(commands.Cog):
         Stop server, gives players 15s warning.
 
         Args:
-            now: Stops server immediately without giving online players 15s warning.
+            now [str]: Stops server immediately without giving online players 15s warning.
 
         Usage:
             ?stop
@@ -640,6 +635,7 @@ class Server(commands.Cog):
             return False
 
         if 'now' in str(now):
+            await mc_command('save-all')
             await mc_command('stop')
         else:
             await mc_command('say ---WARNING--- Server will halt in 15s!')
@@ -647,6 +643,7 @@ class Server(commands.Cog):
             await asyncio.sleep(10)
             await mc_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
+            await mc_command('save-all')
             await mc_command('stop')
         await asyncio.sleep(3)
         await ctx.send("Server **HALTED**.")
@@ -659,7 +656,7 @@ class Server(commands.Cog):
         Messages player that the server will restart in 15s, then will stop and startup server.
 
         Args:
-            now: Restarts server immediately without giving online players 15s warning.
+            now [str]: Restarts server immediately without giving online players 15s warning.
 
         Usage:
             ?restart
@@ -680,8 +677,8 @@ class Server(commands.Cog):
         Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
 
         Args:
-            target_property: Target property to change, must be exact in casing and spelling and some may include a dash -.
-            value: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
+            target_property [str:None]: Target property to change, must be exact in casing and spelling and some may include a dash -.
+            value [str]: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
 
         Usage:
             ?property motd
@@ -710,7 +707,7 @@ class Server(commands.Cog):
         Check or enable/disable onlinemode property.
 
         Args:
-            mode <true|false>: Update onlinemode property in server.properties file. Must be in lowercase.
+            mode <true/false>: Update onlinemode property in server.properties file. Must be in lowercase.
 
         Usage:
             ?onlinemode true
@@ -719,6 +716,7 @@ class Server(commands.Cog):
 
         if mode in ['true', 'false', '']:
             await ctx.send(f"`{server_functions.edit_properties('online-mode', mode)[0]}`")
+            await ctx.send("**Note:** Server restart required to take effect.")
             lprint(ctx, "Online Mode: " + mode)
         else:
             await ctx.send("Need a true or false argument (in lowercase).")
@@ -729,7 +727,7 @@ class Server(commands.Cog):
         Check or Update motd property.
 
         Args:
-            message: New message for message of the day for server. No quotes needed.
+            message [str]: New message for message of the day for server. No quotes needed.
 
         Usage:
             ?motd
@@ -742,7 +740,7 @@ class Server(commands.Cog):
         elif server_functions.server_files_access:
             response = server_functions.edit_properties('motd', message)[1]
         else:
-            response = '**Error:** Fetching server motd.'
+            response = '**ERROR:** Fetching server motd failed.'
         await ctx.send(f"`{response}`")
         lprint("motd: " + response)
 
@@ -752,7 +750,7 @@ class Server(commands.Cog):
         Check RCON staatus or enable/disable enable-rcon property.
 
         Args:
-            state <true|false>: Set enable-rcon property in server.properties file, true or false must be in lowercase.
+            state <true/false>: Set enable-rcon property in server.properties file, true or false must be in lowercase.
 
         Usage:
             ?rcon
@@ -795,7 +793,7 @@ class World_Saves(commands.Cog):
         Show world folder backups.
 
         Args:
-            amount [5:Optional]: Number of most recent backups to show.
+            amount [int:5]: Number of most recent backups to show.
 
         Usage:
             ?saves
@@ -818,7 +816,7 @@ class World_Saves(commands.Cog):
         Backup current world save folder.
 
         Args:
-            name [Optional]: Keywords or codename for new save. No quotes needed.
+            name [str]: Keywords or codename for new save. No quotes needed.
 
         Usage:
             ?backup everything not on fire
@@ -839,7 +837,7 @@ class World_Saves(commands.Cog):
         if new_backup:
             await ctx.send(f"Cloned and archived your world to:\n`{new_backup}`.")
         else:
-            await ctx.send("**Error** saving the world! || it's doomed!||")
+            await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
 
         await ctx.invoke(self.bot.get_command('saves'))
         lprint(ctx, "New backup: " + new_backup)
@@ -852,7 +850,8 @@ class World_Saves(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
 
         Args:
-            index: Get index with ?saves command.
+            index <int:None>: Get index with ?saves command.
+            now [str]: Skip 15s wait to stop server. E.g. ?restore 0 now
 
         Usage:
             ?restore 3
@@ -884,7 +883,7 @@ class World_Saves(commands.Cog):
         Delete a world backup.
 
         Args:
-            index: Get index with ?saves command.
+            index <int>: Get index with ?saves command.
 
         Usage:
             ?delete 0
@@ -945,7 +944,7 @@ class World_Saves(commands.Cog):
             await asyncio.sleep(3)
             await ctx.invoke(self.bot.get_command('start'))
         else:
-            await ctx.send("**Error:** Updating server. Suggest restoring from a backup.")
+            await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated.")
 
 
@@ -979,7 +978,7 @@ class Server_Saves(commands.Cog):
         Show server backups.
 
         Args:
-            amount [5:Optional]: How many most recent backups to show.
+            amount [int:5]: How many most recent backups to show.
 
         Usage:
             ?serversaves
@@ -1002,7 +1001,7 @@ class Server_Saves(commands.Cog):
         Create backup of server files (not just world save folder).
 
         Args:
-            name [Optional]: Keyword or codename for save.
+            name [str]: Keyword or codename for save.
 
         Usage:
             ?serverbackup Dec checkpoint
@@ -1022,7 +1021,7 @@ class Server_Saves(commands.Cog):
         if new_backup:
             await ctx.send(f"New backup:\n`{new_backup}`.")
         else:
-            await ctx.send("**Error** saving server!")
+            await ctx.send("**Error** Saving server failed!")
 
         await ctx.invoke(self.bot.get_command('serversaves'))
         lprint(ctx, "New backup: " + new_backup)
@@ -1033,7 +1032,8 @@ class Server_Saves(commands.Cog):
         Restore server backup.
 
         Args:
-            index: Get index number from ?serversaves command.
+            index <int:None>: Get index number from ?serversaves command.
+            now [str:None]: Stop server without 15s wait.
 
         Usage:
             ?serverrestore 0
@@ -1057,7 +1057,7 @@ class Server_Saves(commands.Cog):
         if server_functions.restore_server(fetched_restore):
             await ctx.send("Server **Restored!**")
         else:
-            await ctx.send("**Error:** Could not restore server!")
+            await ctx.send("**ERROR:** Could not restore server!")
 
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('start'))
@@ -1068,7 +1068,7 @@ class Server_Saves(commands.Cog):
         Delete a server backup.
 
         Args:
-            index: Index of server save, get with ?serversaves command.
+            index <int>: Index of server save, get with ?serversaves command.
 
         Usage:
             ?serverdelete 0
@@ -1123,7 +1123,7 @@ class Bot_Functions(commands.Cog):
         Show bot log.
 
         Args:
-            lines [5:Optional]: Number of most recent lines to show. Max of 20 lines.
+            lines [int:5]: Number of most recent lines to show. Max of 20 lines.
 
         Usage:
             ?botlog
