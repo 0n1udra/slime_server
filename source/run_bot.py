@@ -8,6 +8,7 @@ __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
 __status__ = "Development"
 
+
 def setup_directories():
     try:
         os.makedirs(server_functions.server_path)
@@ -16,33 +17,38 @@ def setup_directories():
         print("Created:", server_functions.world_backups_path)
         os.makedirs(server_functions.server_backups_path)
         print("Created:", server_functions.server_backups_path)
-    except: print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
+    except:
+        print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
     try:
         with open(server_functions.bot_properties_file, 'w') as file:
             file.write("version=\n")
             file.write("autosave=")
         print("Created:", server_functions.bot_properties_file)
-    except: print("Error: Setting up Discord-bot.properties file at:", server_functions.server_path)
+    except:
+        print("Error: Setting up Discord-bot.properties file at:", server_functions.server_path)
 
 
 def start_tmux_session():
     try:
         os.system('tmux new -d -s mcserver')
         print("Started Tmux 'mcserver' detached session.")
-    except: print("Error: Starting 'mcserver' detached session.")
+    except:
+        print("Error: Starting 'mcserver' detached session.")
 
     try:
         os.system('tmux send-keys -t mcserver:1.0 "tmux split-window -v" ENTER')
         print("Created second tmux pane for Discord bot.")
-    except: print("Error: Creating second tmux pane for Discord bot.")
+    except:
+        print("Error: Creating second tmux pane for Discord bot.")
     time.sleep(1)
+
 
 def start_func(startserver=False, startbot=False):
     if startbot:
         if server_functions.use_tmux:
             os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.server_functions_path}" ENTER')
-            if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"): 
+            if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
                 print("Started bot in 'mcserver' tmux session, top pane.")
                 return True  # If os.system() return 0, means successful.
         else:
@@ -51,7 +57,9 @@ def start_func(startserver=False, startbot=False):
     if startserver:
         if server_functions.use_tmux:
             server_functions.mc_start()
-        else: bot.run(TOKEN)
+        else:
+            bot.run(TOKEN)
+
 
 def script_help():
     help = """
