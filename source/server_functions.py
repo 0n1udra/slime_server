@@ -1,56 +1,7 @@
 import subprocess, requests, datetime, random, asyncio, time, csv, os
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
-
-server_functions_path = os.getcwd()
-bot_token_file = '/home/slime/mc_bot_token.txt'
-bot_log_file = f"{server_functions_path}/bot_log.txt"
-new_server_url = 'https://www.minecraft.net/en-us/download/server'
-
-# ========== System Interfacing Options
-
-# Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = True
-
-# Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-use_tmux = True
-
-# Run Minecraft server using subprocess.Popen(). Note, If script halts the server will halt also. Useful if you can't get Tmux, but I recommend Tmux if you can.
-# If use_tmux is also True, script will prioritize use_subprocess. Which means if both vars are True, MC server will run as subprocess instead of running in separate Tmux pane.
-# And if use_rcon is also True, RCON capabilities will have top priority over Popen() and Tmux.
-use_subprocess = False
-
-# If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
-mc_ip = 'arcpy.asuscomm.com'
-use_rcon = False
-rcon_port = 25575
-rcon_pass = 'SlimeySlime'
-
-if use_rcon: import mctools, re
-if server_files_access: import shutil, fileinput, json
-
-# ========== Minecraft Server Config
-
-# This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
-mc_path = '/mnt/c/Users/DT/Desktop/MC'
-
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui' ],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui",],
-               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
-               }
-
-server = server_list['papermc']
-if os.path.isfile(f"{server_functions_path}/vars.txt"):
-    with open(f"{server_functions_path}/vars.txt", 'r') as f:
-        server = server_list[f.read().strip()]
-
-server_path = f"{mc_path}/{server[0]}"
-
-world_backups_path = f"{mc_path}/world_backups/{server[0]}"
-server_backups_path = f"{mc_path}/server_backups/{server[0]}"
-
-mc_active_status = False
-mc_subprocess = None
+from slime_vars import *
 
 
 # Outputs and logs used bot commands and which Discord user invoked them.
@@ -264,7 +215,7 @@ def get_mc_motd():
     """
 
     if server_files_access:
-        return edit_properties('motd')[1]
+        return edit_file('motd')[1]
     elif use_rcon:
         return remove_ansi(mc_ping()['description'])
     else:
@@ -376,7 +327,7 @@ def download_new_server():
 
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
-def edit_properties(target_property=None, value='', file_path=f"{server_path}/server.properties"):
+def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     """
     Edits server.properties file if received target_property and value.
     If receive no value, will return current set value if property exists.
@@ -392,14 +343,18 @@ def edit_properties(target_property=None, value='', file_path=f"{server_path}/se
     """
 
     os.chdir(server_path)
-    return_line = discord_return = ''
+    return_line = discord_return = ''  # Discord has it's own return variable, because the data might be formatted for Discord.
+
     with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
         for line in file:
             split_line = line.split('=', 1)
-            if target_property == 'all':
+
+            if target_property == 'all':  # Return all lines of file.
                 discord_return += F"`{line.rstrip()}`\n"
                 return_line += line.strip() + '\n'
                 print(line, end='')
+
+            # If found match, and user passed in new value to update it.
             elif target_property in split_line[0] and len(split_line) > 1:
                 if value:
                     split_line[1] = value
@@ -407,6 +362,7 @@ def edit_properties(target_property=None, value='', file_path=f"{server_path}/se
                     discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
                     return_line = line
                     print(new_line, end='\n')
+                # If user did not pass a new value to update property, just return the line from file.
                 else:
                     discord_return = f"`{'='.join(split_line)}`"
                     return_line = '='.join(split_line)
@@ -421,7 +377,8 @@ def edit_properties(target_property=None, value='', file_path=f"{server_path}/se
 
 
 # Get server or world backup folder name from index.
-def get_from_index(path, index): return os.listdir(path)[index]
+def get_from_index(path, index):
+    return os.listdir(path)[index]
 
 
 # Gets x number of backups.
@@ -434,7 +391,8 @@ def fetch_backups(path, amount=5):
 
 
 def create_backup(name, src, dst):
-    if not os.path.isdir(dst): os.makedirs(dst)
+    if not os.path.isdir(dst):
+        os.makedirs(dst)
 
     folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
     new_name = f"({folder_timestamp}) {mc_version()} {name}"
@@ -474,34 +432,34 @@ def delete_backup(backup):
 
 
 # ========== Discord commands.
-def get_server_from_index(index): return get_from_index(server_backups_path, index)
+def get_server_from_index(index):
+    return get_from_index(server_backups_path, index)
+
+def get_world_from_index(index):
+    return get_from_index(world_backups_path, index)
+
+def fetch_servers(amount=5):
+    return fetch_backups(server_backups_path, amount)
+
+def fetch_worlds(amount=5):
+    return fetch_backups(world_backups_path, amount)
+
+def backup_server(name='server_backup'):
+    return create_backup(name, server_path, server_backups_path)
 
 
-def get_world_from_index(index): return get_from_index(world_backups_path, index)
+def backup_world(name="world_backup"):
+    return create_backup(name, server_path + '/world', world_backups_path)
 
+def delete_server(server):
+    return delete_backup(server_backups_path + '/' + server)
 
-def fetch_servers(amount=5): return fetch_backups(server_backups_path, amount)
-
-
-def fetch_worlds(amount=5): return fetch_backups(world_backups_path, amount)
-
-
-def backup_server(name='server_backup'): return create_backup(name, server_path, server_backups_path)
-
-
-def backup_world(name="world_backup"): return create_backup(name, server_path + '/world', world_backups_path)
-
-
-def delete_server(server): return delete_backup(server_backups_path + '/' + server)
-
-
-def delete_world(world): return delete_backup(world_backups_path + '/' + world)
-
+def delete_world(world):
+    return delete_backup(world_backups_path + '/' + world)
 
 def restore_server(server=None, reset=False):
     os.chdir(server_backups_path)
     return restore_backup(server, server_path, reset)
-
 
 def restore_world(world=None, reset=False):
     os.chdir(world_backups_path)
