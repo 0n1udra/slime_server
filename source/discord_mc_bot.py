@@ -124,16 +124,21 @@ class Basics(commands.Cog):
             lines [int:15]: How many log lines to look through. This is not how many chat lines to show.
         """
 
-        chat_data = server_functions.mc_log(']: <', lines=lines, filter_mode=True)
-        for line in chat_data.split('\n'):
+        await ctx.send(f"***Loading Chat...***")
+
+        log_data = server_functions.mc_log(']: <', lines=lines, filter_mode=True)
+        chat_data = []
+        for line in log_data.split('\n'):
             try:
                 line = line.split(']')
-                line = line[0][1:] + ':' + line[2][1:]
-                await ctx.send(f"`{line}`")
+                chat_data.append(str(line[0][1:] + ':' + line[2][1:]))
             except:
                 pass
 
-        lprint(ctx, f"Fetching chat from {lines} lines of log lines.")
+        for line in reversed(chat_data):  # Fixes ordering when chatlines shows in Discord.
+            await ctx.send(f"`{line}`")
+
+        lprint(ctx, f"Fetching chat from latest {lines} lines of server log.")
 
 
 # ========== Player: gamemode, kill, tp, etc
@@ -930,7 +935,7 @@ class World_Saves(commands.Cog):
         """
 
         await mc_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
-        await ctx.send(":fire:**INCINERATED:**:fire:")
+        await ctx.send(":fire:**INCINERATED**:fire:")
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
         if await mc_status() is True:
