@@ -583,16 +583,16 @@ class Server(commands.Cog):
     async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        embed = discord.Embed(title='Current Server')
+        embed = discord.Embed(title='Current Server', description=f"Name: {server_functions.server[0]}\nDescription: {server_functions.server[1]}\n")
         if await mc_status() is True:
             await ctx.send("Server is: **ACTIVE**.")
             embed.add_field(name='Status', value=f"**ACTIVE**", inline=False)
         else:
             embed.add_field(name='Status', value=f"**INACTIVE**", inline=False)
-        embed.add_field(name=server_functions.server[0], value=server_functions.server[2], inline=False)  # Shows server name, and small description.
-        embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
-        embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
+        embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
+        embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
+        embed.add_field(name='Start Command', value=f"`{server_functions.server[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
         await ctx.invoke(self.bot.get_command('players'))
@@ -978,19 +978,20 @@ class Server_Saves(commands.Cog):
         if name is None:
             embed = discord.Embed(title='Server List')
             for server in server_functions.server_list.values():
-                embed.add_field(name=server[0], value=server[2], inline=False)  # Shows server name, and small description.
+                # Shows server name, description, location, and start command.
+                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
 
         else:
             if name in server_functions.server_list.keys():
                 server_functions.server = server_functions.server_list[name]
                 server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server[0]}"
-                lprint(ctx, f"Server selected: {name}")
+                await ctx.invoke(self.bot.get_command('status'))
+                lprint(ctx, f"Server Selected: {name}")
 
                 with open(f"{server_functions.server_functions_path}/vars.txt", 'w+') as f:
                     f.write(name)
 
-        await ctx.invoke(self.bot.get_command('status'))
 
     @commands.command(aliases=['serverbackups', 'savedservers', 'ss'])
     async def serversaves(self, ctx, amount=5):

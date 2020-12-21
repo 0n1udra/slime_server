@@ -34,9 +34,9 @@ if server_files_access: import shutil, fileinput, json
 # This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 
-server_list = {'papermc': ["papermc", f'java -Xmx2G -Xms1G -jar {mc_path}/papermc/server.jar nogui', 'Lightweight PaperMC.'],
-               'vanilla': ["vanilla", f"java -Xmx2G -Xms1G -jar {mc_path}/vanilla/server.jar nogui", 'Plain old vanilla.'],
-               'valhesia3': ["valhesia3", f"{mc_path}/valhesia3/ServerStart.sh", "140 mods!, Note: Takes a long time to start."]
+server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui' ],
+               'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui",],
+               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
                }
 
 server = server_list['papermc']
@@ -89,14 +89,14 @@ def mc_start():
     if use_subprocess:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            mc_subprocess = subprocess.Popen(server[1].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            mc_subprocess = subprocess.Popen(server[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         except:
             lprint("Error server starting subprocess")
         if type(mc_subprocess) == subprocess.Popen: return True
     elif use_tmux:
         os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
         os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
-        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server[1]}" ENTER'): return True  # Tries starting new detached tmux session.
+        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server[2]}" ENTER'): return True  # Tries starting new detached tmux session.
     else:
         return "Error starting server."
 
