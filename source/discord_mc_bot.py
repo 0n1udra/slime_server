@@ -85,7 +85,7 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}`.")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @commands.command(aliases=['pl', 'playerlist', 'playerslist', 'listplayers', 'listplayer', 'list'])
+    @commands.command(aliases=['pl', 'playerlist', 'playerslist', 'listplayers', 'listplayer', 'player', 'list'])
     async def players(self, ctx):
         """
         Show list of online players and how many out of server limit.
@@ -106,13 +106,16 @@ class Basics(commands.Cog):
         log_data = log_data.split(':')
         text = log_data[-2]
         player_names = log_data[-1]
+        embed = discord.Embed(title='Player Status')
         # If there's no players active, player_names will still contain some anso escape characters.
         if len(player_names.strip()) < 5:
-            await ctx.send(text + '.')
+            embed.add_field(name=text, value='¯\_(ツ)_/¯', inline=False)
         else:
             # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
             players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-            await ctx.send(text + ':\n' + ''.join(players_names))
+            embed.add_field(name=text, value=''.join(players_names), inline=False)
+
+        await ctx.send(embed=embed)
         lprint(ctx, "Fetched player list.")
 
     @commands.command(aliases=['chatlog', 'playerchat', 'getchat', 'showchat'])
@@ -401,11 +404,11 @@ class Permissions(commands.Cog):
                 Using enforce argument alone will also show current status.
         """
 
-        if arg in ['on', 'true']:
+        if arg.lower() in server_functions.enable_inputs:
             await mc_command('whitelist on')
             await ctx.send("Whitelist **ACTIVE**.")
             lprint(ctx, f"Whitelist activated.")
-        elif arg in ['off', 'false']:
+        elif arg.lower() in server_functions.disable_inputs:
             await mc_command('whitelist off')
             await ctx.send("Whitelist **INACTIVE**.")
             lprint(ctx, f"Whitelist deactivated.")
@@ -537,6 +540,53 @@ class World(commands.Cog):
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved world.")
 
+    @commands.command(aliases=['asave'])
+    async def autosave(self, ctx, arg=None):
+        """
+
+        Args:
+            arg: turn on/off autosave, or set interval in minutes.
+
+        Usage:
+            ?autosave
+            ?autosave on
+            ?autosave 60
+        """
+
+        if arg is None:
+            await ctx.send(f"Usage examples: Update interval (only in mintues, leave out) `?autosave 60`, turn on `?autosave on`.")
+            arg = ''
+
+        try:
+            arg = int(arg)
+        except:
+            pass
+        else:
+            server_functions.mc_auto_saveall_interval  = arg
+            return
+
+        if arg.lower() in server_functions.enable_inputs:
+            server_functions.mc_auto_saveall = True
+            self.auto_saveall_loop.start()
+            lprint(ctx, f'Autosave on, interval: {server_functions.mc_auto_saveall_interval}m')
+        elif arg.lower() in server_functions.disable_inputs:
+            server_functions.mc_auto_saveall = False
+            self.auto_saveall_loop.cancel()
+            lprint(ctx, 'Autosave off, interval')
+
+        await ctx.send(f"Auto save function: {'**ENABLED**.' if server_functions.mc_auto_saveall else '**DISABLED**.'}")
+        await ctx.send(f"Auto save interval: **{server_functions.mc_auto_saveall_interval}** minutes.")
+        lprint(ctx, 'Fetched autosave information.')
+
+    @tasks.loop(seconds=server_functions.mc_auto_saveall_interval)
+    async def auto_saveall_loop(self):
+        await mc_command('saveall')
+        lprint("Autosaved")
+
+    @auto_saveall_loop.before_loop
+    async def before_autosaveall_loop(self):
+        await self.bot.wait_until_ready()
+
     @commands.command(aliases=['weather'])
     async def setweather(self, ctx, state, duration=0):
         """
@@ -551,12 +601,12 @@ class World(commands.Cog):
             ?weather thunder 60
         """
 
-        await mc_command(f'weather {state} {duration * 60}')
+        await mc_command(f'weather {state} {duration}')
         if duration:
-            await ctx.send(f"I see some `{state}` in the near future.")
+            await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
         else:
             await ctx.send(f"Forecast entails `{state}`.")
-        lprint(ctx, f"Weather set to: {state} for {duration}")
+        lprint(ctx, f"Weather set to: {state} for {duration}s")
 
     @commands.command(aliases=['time'])
     async def settime(self, ctx, set_time=None):
@@ -588,19 +638,18 @@ class Server(commands.Cog):
     async def status(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        embed = discord.Embed(title='Current Server', description=f"Name: {server_functions.server[0]}\nDescription: {server_functions.server[1]}\n")
-        if await mc_status() is True:
-            await ctx.send("Server is: **ACTIVE**.")
-            embed.add_field(name='Status', value=f"**ACTIVE**", inline=False)
-        else:
-            embed.add_field(name='Status', value=f"**INACTIVE**", inline=False)
+        embed = discord.Embed(title='Server Status')
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE**' if await mc_status() is True else '**INACTIVE**'}\nServer: {server_functions.server[0]}\nDescription: {server_functions.server[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
+        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.mc_auto_saveall is True else '**DISABLED**'}\nInterval: **{server_functions.mc_auto_saveall_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{server_functions.server[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-        await ctx.invoke(self.bot.get_command('players'))
+        if await mc_status() is True:
+            await ctx.invoke(self.bot.get_command('players'))
+
         lprint(ctx, "Fetched server status.")
 
     @commands.command(aliases=['log'])
@@ -720,8 +769,8 @@ class Server(commands.Cog):
         else:
             value = ' '.join(value)
 
-        server_functions.edit_properties(target_property, value)
-        get_property = server_functions.edit_properties(target_property)
+        server_functions.edit_file(target_property, value)
+        get_property = server_functions.edit_file(target_property)
         await asyncio.sleep(1)
         await ctx.send(f"`{get_property[0]}`")
         lprint(ctx, f"Server property: {get_property[0]}")
@@ -740,7 +789,7 @@ class Server(commands.Cog):
         """
 
         if mode in ['true', 'false', '']:
-            await ctx.send(f"`{server_functions.edit_properties('online-mode', mode)[0]}`")
+            await ctx.send(f"`{server_functions.edit_file('online-mode', mode)[0]}`")
             await ctx.send("**Note:** Server restart required to take effect.")
             lprint(ctx, "Online Mode: " + mode)
         else:
@@ -763,7 +812,7 @@ class Server(commands.Cog):
         if use_rcon:
             response = server_functions.get_mc_motd()
         elif server_functions.server_files_access:
-            response = server_functions.edit_properties('motd', message)[1]
+            response = server_functions.edit_file('motd', message)[1]
         else:
             response = '**ERROR:** Fetching server motd failed.'
         await ctx.send(f"`{response}`")
@@ -785,7 +834,7 @@ class Server(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            response = server_functions.edit_properties('enable-rcon', state)
+            response = server_functions.edit_file('enable-rcon', state)
             await ctx.send(f"`{response[0]}`")
         else:
             await ctx.send("Need a true or false argument (in lowercase).")
@@ -808,7 +857,7 @@ class Server(commands.Cog):
 
 
 # ========== World backup/restore functions.
-class World_Saves(commands.Cog):
+class World_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -867,7 +916,7 @@ class World_Saves(commands.Cog):
         await ctx.invoke(self.bot.get_command('saves'))
         lprint(ctx, "New backup: " + new_backup)
 
-    @commands.command(aliases=['restoreworld', 'worldrestore', 'restoreworldbackup', 'worldbackuprestore', 'wbr'])
+    @commands.command(aliases=['restoreworld', 'worldrestore', 'restoreworldbackup', 'wbr'])
     async def worldbackuprestore(self, ctx, index=None, now=None):
         """
         Restore from world backup.
@@ -974,7 +1023,7 @@ class World_Saves(commands.Cog):
 
 
 # ========== Server backup/restore functions.
-class Server_Saves(commands.Cog):
+class Server_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -997,8 +1046,7 @@ class Server_Saves(commands.Cog):
                 with open(f"{server_functions.server_functions_path}/vars.txt", 'w+') as f:
                     f.write(name)
 
-
-    @commands.command(aliases=['serverbackups', 'savedservers', 'serverbackupslist', 'sbl'])
+    @commands.command(aliases=['listserverbackups', 'showserverbackups', 'serverbackupsshow', 'savedservers', 'serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=5):
         """
         Show server backups.
@@ -1021,7 +1069,7 @@ class Server_Saves(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched latest {amount} world saves.")
 
-    @commands.command(aliases=['servernewbackup', 'newserverbackup', 'sbn'])
+    @commands.command(aliases=['serverbackupnew', 'newserverbackup', 'sbn'])
     async def servernewbackup(self, ctx, *name):
         """
         Create backup of server files (not just world save folder).
@@ -1227,7 +1275,7 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-cogs = [Basics, Player, Permissions, World, Server, World_Saves, Server_Saves, Bot_Functions]
+cogs = [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]
 for i in cogs: bot.add_cog(i(bot))
 
 disabled_commands_rcon = ['oplist', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'rcon', 'onelinemode',
