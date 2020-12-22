@@ -19,8 +19,11 @@ def lprint(arg1=None, arg2=None):
         except:
             user = 'N/A'
         msg = arg2
+
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
     print(output)
+
+    # Logs output.
     with open(bot_log_file, 'a') as file:
         file.write(output + '\n')
 
@@ -120,7 +123,7 @@ def mc_rcon(command=''):
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
 def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False, filter_mode=False):
     """
-    Read latest.log file under /logs folder.
+    Read latest.log file under server/logs folder.
 
     Args:
         match [str]: Check for matching string.
@@ -166,7 +169,6 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
 
 # ========== Getting Info: output, ping, reading files.
 
-
 # Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
 async def mc_status():
     """
@@ -176,6 +178,7 @@ async def mc_status():
         bool: returns True if server is online.
 
     """
+
     status_checker = 'debug status_checker' + str(random.random())
     log_data = await mc_command(status_checker)
     if status_checker in str(log_data):
@@ -360,12 +363,29 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
         return return_line, return_line.split('=')[1]
         return True
 
-# Get server or world backup folder name from index.
 def get_from_index(path, index):
+    """
+    Get server or world backup folder name from passed in index number
+
+    Args:
+        path str: Location to find world or server backups.
+        index int: Select specific folder, get index from other functions like ?worldbackupslist, ?serverbackupslist
+
+    Returns:
+            str: file path of selected folder.
+    """
+
     return os.listdir(path)[index]
 
-# Gets x number of backups.
 def fetch_backups(path, amount=5):
+    """
+    Gets x amount of backups. Usually to show in list.
+
+    Args:
+        path str: Path of world or server backups location.
+        amount int: Number of backups to show in list.
+    """
+
     backups = []
     for item in os.listdir(path)[:amount]:
         if os.path.isdir(path + '/' + item):
@@ -373,6 +393,15 @@ def fetch_backups(path, amount=5):
     return backups
 
 def create_backup(name, src, dst):
+    """
+    Create a new world or server backup, by copying and renaming folder.
+
+    Args:
+        name str: Name of new backup. Final name will have date and time prefixed.
+        src str: Folder to backup, whether it's a world folder or a entire server folder.
+        dst str: Destination for backup.
+    """
+
     if not os.path.isdir(dst):
         os.makedirs(dst)
 
@@ -388,7 +417,16 @@ def create_backup(name, src, dst):
         lprint("Error creating backup at: " + new_backup_path)
         return False
 
-def restore_backup(backup, dst, reset=False):
+def restore_backup(src, dst, reset=False):
+    """
+    Restores world or server backup. Overwrites existing files.
+
+    Args:
+        src str: Backed up folder to copy to current server.
+        dst str: Location to copy backup to.
+        reset [bool:False]: Leave src folder empty and not copy backup to dst.
+    """
+
     try:
         shutil.rmtree(dst)
     except:
@@ -399,12 +437,19 @@ def restore_backup(backup, dst, reset=False):
         return True
 
     try:
-        shutil.copytree(backup, dst)
+        shutil.copytree(src, dst)
         return True
     except:
-        lprint("Error restoring: " + str(backup + ' > ' + dst))
+        lprint("Error restoring: " + str(src + ' > ' + dst))
 
 def delete_backup(backup):
+    """
+    Delete world or server backup.
+
+    Args:
+        backup str: Path of backup to delete.
+    """
+
     try:
         shutil.rmtree(backup)
         return True
@@ -414,30 +459,35 @@ def delete_backup(backup):
 
 # ========== Discord commands.
 def get_server_from_index(index):
+    """Returns server backup full path from passed in index number."""
     return get_from_index(server_backups_path, index)
 
 def get_world_from_index(index):
     return get_from_index(world_backups_path, index)
 
 def fetch_servers(amount=5):
+    """Returns list of x number of backed up server."""
     return fetch_backups(server_backups_path, amount)
 
 def fetch_worlds(amount=5):
     return fetch_backups(world_backups_path, amount)
 
 def backup_server(name='server_backup'):
+    """Create new server backup with specified name."""
     return create_backup(name, server_path, server_backups_path)
 
 def backup_world(name="world_backup"):
     return create_backup(name, server_path + '/world', world_backups_path)
 
 def delete_server(server):
+    """Delete specified server with specified index."""
     return delete_backup(server_backups_path + '/' + server)
 
 def delete_world(world):
     return delete_backup(world_backups_path + '/' + world)
 
 def restore_server(server=None, reset=False):
+    """Restore server with specified index."""
     os.chdir(server_backups_path)
     return restore_backup(server, server_path, reset)
 

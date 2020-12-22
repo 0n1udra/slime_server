@@ -14,7 +14,6 @@ else:
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
-
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
@@ -49,7 +48,7 @@ class Basics(commands.Cog):
     @commands.command(aliases=['broadcast', 's'])
     async def say(self, ctx, *msg):
         """
-        Broadcast message to online players.
+        sends message to all online players.
 
         Args:
             msg [str]: Message to broadcast.
@@ -89,9 +88,7 @@ class Basics(commands.Cog):
 
     @commands.command(aliases=['pl', 'playerlist', 'playerslist', 'listplayers', 'listplayer', 'player', 'list'])
     async def players(self, ctx):
-        """
-        Show list of online players and how many out of server limit.
-        """
+        """Show list of online players."""
 
         response = await mc_command("list")
 
@@ -120,10 +117,10 @@ class Basics(commands.Cog):
         await ctx.send(embed=embed)
         lprint(ctx, "Fetched player list.")
 
-    @commands.command(aliases=['chatlog', 'playerchat', 'getchat', 'showchat'])
-    async def chat(self, ctx, lines=15):
+    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
+    async def chatlog(self, ctx, lines=15):
         """
-        Get only user chat lines from server log. Note, does not include whipers.
+        Shows chat log. Does not include whispers.
 
         Args:
             lines [int:15]: How many log lines to look through. This is not how many chat lines to show.
@@ -392,7 +389,7 @@ class Permissions(commands.Cog):
     @commands.command(aliases=['wl', 'whitel', 'white', 'wlist'])
     async def whitelist(self, ctx, arg=None, arg2=None):
         """
-        Whitelist commands, shows list, add, remove, turn off and on, etc.
+        Whitelist commands. Turn on/off, add/remove, etc.
 
         Args:
             arg [str:None]: User passed in arguments for whitelist command, see below for arguments and usage.
@@ -456,17 +453,15 @@ class Permissions(commands.Cog):
             await ctx.send("Command error.")
             return False
 
-    @commands.command(aliases=['ol', 'ops'])
+    @commands.command(aliases=['ol', 'ops', 'listops'])
     async def oplist(self, ctx):
-        """
-        Show list of current server operators.
-        """
+        """Show list of server operators."""
 
         op_players = [f"`{i['name']}`" for i in server_functions.read_json('ops.json')]
         await ctx.send('\n'.join(op_players))
         lprint(ctx, f"Fetched server operators list.")
 
-    @commands.command(aliases=['op'])
+    @commands.command(aliases=['op', 'addop'])
     async def opadd(self, ctx, player, *reason):
         """
         Add server operator (OP).
@@ -487,7 +482,7 @@ class Permissions(commands.Cog):
         await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
         lprint(ctx, f"New server op: {player}")
 
-    @commands.command(aliases=['oprm', 'rmop', 'deop'])
+    @commands.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
     async def opremove(self, ctx, player, *reason):
         """
         Remove player OP status (deop).
@@ -511,7 +506,7 @@ class Permissions(commands.Cog):
     @commands.command(aliases=['optimed', 'top'])
     async def timedop(self, ctx, player, time_limit=1):
         """
-        Set player as OP for a set amount of seconds.
+        Set player as OP for x seconds.
 
         Args:
             player <str>: Target player.
@@ -542,7 +537,7 @@ class World(commands.Cog):
 
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
-        """Save current world, just sends save-all command to server."""
+        """Save current world using server save-all command."""
 
         await mc_command('save-all')
         await ctx.send("I saved the world!")
@@ -552,6 +547,7 @@ class World(commands.Cog):
     @commands.command(aliases=['asave'])
     async def autosave(self, ctx, arg=None):
         """
+        Sends save-all command at interval of x minutes.
 
         Args:
             arg: turn on/off autosave, or set interval in minutes.
@@ -592,7 +588,7 @@ class World(commands.Cog):
 
     @tasks.loop(seconds=server_functions.autosave_interval * 60)
     async def autosave_loop(self):
-        """Automatically sends 'save-all' command to server at interval of x minutes."""
+        """Automatically sends save-all command to server at interval of x minutes."""
 
         await mc_command('saveall')
         lprint(f"Autosaved, interval: {server_functions.autosave_interval}m")
@@ -744,7 +740,7 @@ class Server(commands.Cog):
     @commands.command(aliases=['reboot', 'rebootserver', 'restartserver', 'serverreboot'])
     async def serverrestart(self, ctx, now=None):
         """
-        Messages player that the server will restart in 15s, then will stop and startup server.
+        Restarts server with 15s warning to players.
 
         Args:
             now [str]: Restarts server immediately without giving online players 15s warning.
@@ -764,7 +760,7 @@ class Server(commands.Cog):
     @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property=None, *value):
         """
-        Check or change a server.properties property.
+        Check or change a server.properties property. May require restart.
 
         Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
 
@@ -801,7 +797,7 @@ class Server(commands.Cog):
     @commands.command(aliases=['omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
         """
-        Check or enable/disable onlinemode property.
+        Check or enable/disable onlinemode property. Restart required.
 
         Args:
             mode <true/false>: Update onlinemode property in server.properties file. Must be in lowercase.
@@ -821,7 +817,7 @@ class Server(commands.Cog):
     @commands.command()
     async def motd(self, ctx, *message):
         """
-        Check or Update motd property.
+        Check or Update motd property. Restart required.
 
         Args:
             message [str]: New message for message of the day for server. No quotes needed.
@@ -845,7 +841,7 @@ class Server(commands.Cog):
     @commands.command()
     async def rcon(self, ctx, state=''):
         """
-        Check RCON staatus or enable/disable enable-rcon property.
+        Check RCON status, enable/disable enable-rcon property. Restart required.
 
         Args:
             state <true/false>: Set enable-rcon property in server.properties file, true or false must be in lowercase.
@@ -885,10 +881,10 @@ class World_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['worldbackups', 'worldbackuplist', 'wbl'])
+    @commands.command(aliases=['worldbackups', 'listworldbackups', 'worldlistbackups', 'wbl'])
     async def worldbackupslist(self, ctx, amount=5):
         """
-        Show world folder backups.
+        Show world backups.
 
         Args:
             amount [int:5]: Number of most recent backups to show.
@@ -908,10 +904,10 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} most recent world saves.")
 
-    @commands.command(aliases=['backupworld', 'worldbackup', 'newworldbackup', 'wb'])
+    @commands.command(aliases=['backupworld', 'worldbackup', 'newworldbackup', 'worldnewbackup', 'wb'])
     async def worldbackupnew(self, ctx, *name):
         """
-        Backup current world save folder.
+        new backup of current world.
 
         Args:
             name [str]: Keywords or codename for new save. No quotes needed.
@@ -940,10 +936,10 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('saves'))
         lprint(ctx, "New backup: " + new_backup)
 
-    @commands.command(aliases=['restoreworld', 'worldrestore', 'restoreworldbackup', 'wbr'])
+    @commands.command(aliases=['restoreworld', 'worldrestore', 'restoreworldbackup', 'worldrestorebackup', 'wbr'])
     async def worldbackuprestore(self, ctx, index=None, now=None):
         """
-        Restore from world backup.
+        Restore a world backup.
 
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
 
@@ -1003,7 +999,7 @@ class World_Backups(commands.Cog):
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx):
         """
-        Deletes current world save folder (does not touch other server files).
+        Deletes world save (does not touch other server files).
 
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
@@ -1028,6 +1024,10 @@ class World_Backups(commands.Cog):
 
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
+
+        if 'vanilla' not in server_functions.server_selected:
+            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{server_functions.server_selected[0]}` selected.")
+            return False
 
         lprint(ctx, "Updating server.jar...")
         await ctx.send("***Updating...***")
@@ -1080,11 +1080,10 @@ class Server_Backups(commands.Cog):
             server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
 
-
-    @commands.command(aliases=['listserverbackups', 'showserverbackups', 'serverbackupsshow', 'savedservers', 'serverbackupslist', 'sbl'])
-    async def serverbackups(self, ctx, amount=5):
+    @commands.command(aliases=['listserverbackups', 'serverbackups', 'serverlistbackups', 'sbl'])
+    async def serverbackupslist(self, ctx, amount=5):
         """
-        Show server backups.
+        List server backups.
 
         Args:
             amount [int:5]: How many most recent backups to show.
@@ -1107,7 +1106,7 @@ class Server_Backups(commands.Cog):
     @commands.command(aliases=['serverbackupnew', 'newserverbackup', 'sbn'])
     async def servernewbackup(self, ctx, *name):
         """
-        Create backup of server files (not just world save folder).
+        New backup of server files (not just world save).
 
         Args:
             name [str]: Keyword or codename for save.

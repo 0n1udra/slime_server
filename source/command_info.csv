@@ -2,16 +2,19 @@ Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
 Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
+Server Select, `?serverselect` `?ss papermc`, Each server has their own backups and start command. Select server to change which one to start and use commands on.
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
 Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, max 20 lines, by default shows 5 most recent.
 Server Start, `?start`, Starts Minecraft server up.
-Server Stop, `?stop [now]`, `?stop now` will immediately stop server, If no 'now' argument, Messages all players the server will be halted in 15s. Then will halt server.
+Server Stop, `?stop [now]`, `?stop now` will immediately stop server. `?stop`, Messages all players the server will be halted in 15s. Then will halt server.
 Server Restart, `?restart` `?reboot [now]`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
 Server Version, `?version`, Get Minecraft Server version.
-Active Players, `?players` `?pl`, Gets list of online users.
+Online Players, `?players` `?pl`, Gets list of online users.
 Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.
+Autosave, `?autosave` `?asave [on/off/minutes]`, Turn on/off autosave function, or set autosave interval in minutes, e.g. `?autosave 30`
 Say, `?say` `?s <message>`, Server sends message to all active players.
 Whisper, `?tell` `t <player> <message>`, Whispers message to player.
+Chat Log, `?chatlog` `?chat`, Show server log lines of only player chats, does not include whispers.
 Whitelist, `?whitelist [on/off/add/remove/enforce/reload/list]`, Whitelist commands, using `?whitelist` standalone, will show list of whitelisted players. `?whitelist on` to turn on whitelist.
 Whitelist Add/Remove, `?whitelist <add/remove> <player>`, Add or remove player from whitelist, `?whitelist add MysticFrogo`.
 Whitelist Enforce, `?whitelist enforce <true/false/status>`, Edits `enforce-whitelist` in server properties file, server reboot required. Can also use false or true, or status.
@@ -30,14 +33,14 @@ OP List, `?oplist`, Shows list of server operators.
 OP Add, `?opadd <player>`, Sets player as server operator.
 OP Remove, `?opremove <player>`, Remove players OP privileges.
 OP Timed, `?timedop` `?top <player> <minutes>`, Set player to OP for a set time in minutes.
-World Backups, `?saves` `?backups [amount]`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
-World New Backup, `?backup <codename>`, Create a new backup, need to provide a name or keywords. Cannot overwrite existing backup, use `?delete` first.
-World Restore, `?restore <index>`, Restore to a saved backup, need to input a index number you get from `?saves`.
-World Backup Delete, `?delete <index>`, Delete a saved world backup.
-Server Backups, `?serversaves` `?serverbackups [amount]`, Get list of server backups, can specify how many of latest to show.
+World Backups, `?worldbackupslist` `?backups [amount]`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
+World New Backup, `?worldbackupnew <codename>`, Create a new backup, need to provide a name or keywords. Cannot overwrite existing backup, use `?delete` first.
+World Restore, `?worldbackuprestore` `?worldrestore <index>`, Restore to a saved backup, need to input a index number you get from `?saves`.
+World Backup Delete, `?worldbackupdelete` `?worlddelete <index>`, Delete a saved world backup.
+Server Backups, `?serverbackupslist` `?serverbackups [amount]`, Get list of server backups, can specify how many of latest to show.
 Server New Backup, `?serverbackup <codename>`, Create backup of all server files.
 Server Delete backup, `?serverdelete <index>`, Get index number from `?serverbackups`.
-Server Restore, '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
+Server Restore, `?serverbackuprestore` '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
 Server Reset, `?serverreset`, Deletes all server files, make a backup beforehand if needed. make a backup beforehand if neededd, downloads latest server jar from official website and launches (do not need to edit eula.txt).
 Properties File, `?property` `?p <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
 Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.

@@ -28,6 +28,7 @@ rcon_port = 25575
 # This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 
+# {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
 server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui' ],
                'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui",],
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
@@ -41,17 +42,16 @@ server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
 
-bot_log_file = f"{bot_files_path}/bot_log.txt"
-
-mc_active_status = False
-mc_subprocess = None
-
-# ===== Autosave
+# Default values.
 autosave_status = True
 autosave_interval = 30
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
+
+bot_log_file = f"{bot_files_path}/bot_log.txt"
+mc_active_status = False
+mc_subprocess = None
 
 if use_rcon:
     import mctools, re
