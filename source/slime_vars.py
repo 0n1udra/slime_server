@@ -1,6 +1,7 @@
 import os
 
-server_functions_path = os.getcwd()
+bot_files_path = os.getcwd()
+slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_token_file = '/home/slime/mc_bot_token.txt'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
@@ -32,22 +33,22 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
                }
 
-server = server_list['papermc']
-server_path = f"{mc_path}/{server[0]}"
-world_backups_path = f"{mc_path}/world_backups/{server[0]}"
-server_backups_path = f"{mc_path}/server_backups/{server[0]}"
+server_selected = server_list['papermc']
+server_path = f"{mc_path}/{server_selected[0]}"
+
+world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
+server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
 
-bot_log_file = f"{server_functions_path}/bot_log.txt"
+bot_log_file = f"{bot_files_path}/bot_log.txt"
 
 mc_active_status = False
 mc_subprocess = None
 
 # ===== Autosave
-autosave = False
-autosave_multiplier = 60  # 1: Seconds, 60: Minutes, 3_600: Hours
-autosave_interval = autosave_multiplier * 30  # Default autosave value, e.g. 30m (30 * 3_600)
+autosave_status = True
+autosave_interval = 30
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']

@@ -24,7 +24,7 @@ def lprint(arg1=None, arg2=None):
     with open(bot_log_file, 'a') as file:
         file.write(output + '\n')
 
-lprint("Server selected: " + server[0])
+lprint("Server selected: " + server_selected[0])
 
 
 # ========== Server commands: start, send command, read log, etc
@@ -43,7 +43,7 @@ def mc_start():
     if use_subprocess:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            mc_subprocess = subprocess.Popen(server[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            mc_subprocess = subprocess.Popen(server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         except:
             lprint("Error server starting subprocess")
 
@@ -55,7 +55,7 @@ def mc_start():
         os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
 
         # Tries starting new detached tmux session.
-        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server[2]}" ENTER'):
+        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server_selected[2]}" ENTER'):
             return True
     else:
         return "Error starting server."
@@ -269,13 +269,13 @@ def format_args(args, return_empty=False):
         return "No reason given"
 
 # Gets data from json local file.
-def get_json(json_file):
-    os.chdir(server_functions_path)
+def read_json(json_file):
+    os.chdir(bot_files_path)
     with open(server_path + '/' + json_file) as file:
         return [i for i in json.load(file)]
 
-def get_csv(csv_file):
-    os.chdir(server_functions_path)
+def read_csv(csv_file):
+    os.chdir(bot_files_path)
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
@@ -356,10 +356,9 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
             else:
                 print(line, end='')
 
-    if return_line:  # If property not found.
+    if return_line:
         return return_line, return_line.split('=')[1]
-    else:
-        return "404: Property not found!"
+        return True
 
 # Get server or world backup folder name from index.
 def get_from_index(path, index):
