@@ -20,15 +20,6 @@ def setup_directories():
     except:
         print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
-    try:
-        with open(server_functions.bot_properties_file, 'w') as file:
-            file.write("version=\n")
-            file.write("autosave=")
-        print("Created:", server_functions.bot_properties_file)
-    except:
-        print("Error: Setting up Discord-bot.properties file at:", server_functions.server_path)
-
-
 def start_tmux_session():
     try:
         os.system('tmux new -d -s mcserver')
@@ -47,7 +38,7 @@ def start_tmux_session():
 def start_func(startserver=False, startbot=False):
     if startbot:
         if server_functions.use_tmux:
-            os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.server_functions_path}" ENTER')
+            os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
             if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
                 print("Started bot in 'mcserver' tmux session, top pane.")
                 return True  # If os.system() return 0, means successful.
