@@ -1,8 +1,13 @@
-import subprocess, requests, datetime, random, asyncio, time, csv, os
+import subprocess, requests, datetime, random, asyncio, time, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from slime_vars import *
 
+
+# Removes unwanted ANSI escape characters.
+def remove_ansi(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
 
 # Outputs and logs used bot commands and which Discord user invoked them.
 def lprint(arg1=None, arg2=None):
@@ -19,11 +24,10 @@ def lprint(arg1=None, arg2=None):
     with open(bot_log_file, 'a') as file:
         file.write(output + '\n')
 
-
 lprint("Server selected: " + server[0])
 
 
-# ========== Server command, start, bot start.
+# ========== Server commands: start, send command, read log, etc
 def mc_start():
     """
     Start Minecraft server depending on whether you're using Tmux subprocess method.
@@ -32,7 +36,6 @@ def mc_start():
 
     Returns:
         bool: If successful boot.
-        s[tr: If error starting se.strftime('%Y-%m-%d %H:%M:%S)rv]:e
     """
 
     global mc_subprocess
@@ -43,17 +46,22 @@ def mc_start():
             mc_subprocess = subprocess.Popen(server[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         except:
             lprint("Error server starting subprocess")
-        if type(mc_subprocess) == subprocess.Popen: return True
+
+        if type(mc_subprocess) == subprocess.Popen:
+            return True
+
     elif use_tmux:
         os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
         os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
-        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server[2]}" ENTER'): return True  # Tries starting new detached tmux session.
+
+        # Tries starting new detached tmux session.
+        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server[2]}" ENTER'):
+            return True
     else:
         return "Error starting server."
 
-
 # Sends command to tmux window running server.
-async def mc_command(command, match_output=None, return_bool=True):
+async def mc_command(command, return_bool=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -76,21 +84,16 @@ async def mc_command(command, match_output=None, return_bool=True):
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
-        else:
+        else:  # If process not found.
             return False
     elif use_tmux:
         if os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER') != 0:
             return True
     else:
-        return "Can't send command to server."
+        return "Error sending command to server."
 
     time.sleep(1)
-    if match_output is None:
-        if return_bool: return mc_log(command, return_bool=True)
-        return mc_log(command)
-    else:
-        return mc_log(match_output)
-
+    return mc_log(command, return_bool=return_bool)
 
 # Send commands to server using RCON.
 def mc_rcon(command=''):
@@ -114,37 +117,32 @@ def mc_rcon(command=''):
     else:
         return mc_rcon_client.command(command)
 
-
-# ========== Fetching server data, output, ping, reading files.
-# Removes unwanted ANSI escape characters.
-def remove_ansi(text):
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
-
-
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
 def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False, filter_mode=False):
     """
     Read latest.log file under /logs folder.
 
     Args:
-        match [str]: Check for match string.
-        file_path [str:latest.log]: Default is latest.log file.
-        lines [int:15]: Number of most recent lines to return. Returns 15 lines by default.
-        normal_read [bool:False]: Reads file top down, by default this function reads file backwards with file-read-backwards module.
-        return_bool [True/False]: Return True/False boolean if match was found.
-        filter_mode [True/False]: Don't stop at first match with 'match' argument.
+        match [str]: Check for matching string.
+        file_path [str:latest.log]: File to read.
+        lines [int:15]: Number of most recent lines to return.
+        return_bool [bool:False]: Return True/False boolean if match was found.
+        log_mode [bool:False]: Return x lines from log file, skips matching.
+        normal_read [bool:False]: Reads file top down, defaults to bottom up using file-read-backwards module.
+        filter_mode [bool:False]: Don't stop at first match.
 
     Returns:
 
     """
-    if not os.path.isfile(file_path): return False
+    if not os.path.isfile(file_path):
+        return False
 
     log_data = ''
     if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
-                if match in line: return line
+                if match in line:
+                    return line
     else:
         with FileReadBackwards(file_path) as file:
             for i in range(lines):
@@ -155,7 +153,6 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                     elif ']: There are' in line:  # finds the end so it doesn't return everything from log other then banned users.
                         log_data += line
                         break
-
                 elif log_mode:
                     log_data += line
                 elif match in line:
@@ -163,14 +160,26 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                     if filter_mode is False:
                         break
 
-    if return_bool and not log_data:
-        return False
-
     if log_data:
         return log_data
-    else:
-        return False
 
+
+# ========== Getting Info: output, ping, reading files.
+
+
+# Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
+async def mc_status():
+    """
+    Gets server active status, by sending command to server and checking server log.
+
+    Returns:
+        bool: returns True if server is online.
+
+    """
+    status_checker = 'debug status_checker' + str(random.random())
+    log_data = await mc_command(status_checker)
+    if status_checker in str(log_data):
+        return True
 
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping():
@@ -188,24 +197,6 @@ def mc_ping():
     else:
         return stats
 
-
-# Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
-async def mc_status():
-    """
-    Gets server active status, by sending command to server and checking server log.
-
-    Returns:
-        bool: Server active status.
-    """
-
-    status = await mc_command('debug statuschecker' + str(random.random()), return_bool=True)
-    if status:
-        server_active_status = True
-    else:
-        server_active_status = False
-    return server_active_status
-
-
 def get_mc_motd():
     """
     Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
@@ -220,7 +211,6 @@ def get_mc_motd():
         return remove_ansi(mc_ping()['description'])
     else:
         return "N/A"
-
 
 # Gets server version from log file or gets latest version number from website.
 def mc_version():
@@ -242,8 +232,8 @@ def mc_version():
         else:
             with open(f"{server_path}/version.txt", 'r') as f:
                 return f.readline()
-    return 'N/A'
-
+    else:
+        return 'N/A'
 
 def get_latest_version():
     """
@@ -257,7 +247,6 @@ def get_latest_version():
     for i in soup.findAll('a'):
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
-
 
 # Used so Discord command arguments don't need qoutes.
 def format_args(args, return_empty=False):
@@ -279,13 +268,11 @@ def format_args(args, return_empty=False):
         if return_empty: return ''
         return "No reason given"
 
-
 # Gets data from json local file.
 def get_json(json_file):
     os.chdir(server_functions_path)
     with open(server_path + '/' + json_file) as file:
         return [i for i in json.load(file)]
-
 
 def get_csv(csv_file):
     os.chdir(server_functions_path)
@@ -293,7 +280,7 @@ def get_csv(csv_file):
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 
-# ========== Extra server functions.
+# ========== Extra: edit file, backup, restore
 def download_new_server():
     """
     Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
@@ -324,7 +311,6 @@ def download_new_server():
         file.write('eula=true')
 
     return version
-
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
@@ -375,11 +361,9 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
     else:
         return "404: Property not found!"
 
-
 # Get server or world backup folder name from index.
 def get_from_index(path, index):
     return os.listdir(path)[index]
-
 
 # Gets x number of backups.
 def fetch_backups(path, amount=5):
@@ -388,7 +372,6 @@ def fetch_backups(path, amount=5):
         if os.path.isdir(path + '/' + item):
             backups.append(item)
     return backups
-
 
 def create_backup(name, src, dst):
     if not os.path.isdir(dst):
@@ -406,22 +389,21 @@ def create_backup(name, src, dst):
         lprint("Error creating backup at: " + new_backup_path)
         return False
 
-
 def restore_backup(backup, dst, reset=False):
     try:
         shutil.rmtree(dst)
     except:
         pass
 
-    # This function is used in ?rebirth Discord command to create a new world.
-    if reset: return True
+    # Used in ?worldreset and ?serverreset Discord command to clear all world or server files.
+    if reset:
+        return True
 
     try:
         shutil.copytree(backup, dst)
         return True
     except:
         lprint("Error restoring: " + str(backup + ' > ' + dst))
-
 
 def delete_backup(backup):
     try:
@@ -446,7 +428,6 @@ def fetch_worlds(amount=5):
 
 def backup_server(name='server_backup'):
     return create_backup(name, server_path, server_backups_path)
-
 
 def backup_world(name="world_backup"):
     return create_backup(name, server_path + '/world', world_backups_path)
