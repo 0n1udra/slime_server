@@ -111,11 +111,11 @@ def mc_rcon(command=''):
         str: Output from RCON.
     """
 
-    mc_rcon_client = mctools.RCONClient(mc_ip, port=rcon_port)
+    mc_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
     try:
         mc_rcon_client.login(rcon_pass)
     except ConnectionError:
-        lprint(f"Error Connecting to RCON: {mc_ip} : {rcon_port}")
+        lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
         return False
     else:
         return mc_rcon_client.command(command)
@@ -194,7 +194,7 @@ def mc_ping():
 
     """
     try:
-        stats = mctools.PINGClient(mc_ip).get_stats()
+        stats = mctools.PINGClient(server_ip).get_stats()
     except ConnectionRefusedError:
         lprint("Ping Error: Connection Refused.")
     else:
@@ -214,6 +214,12 @@ def get_mc_motd():
         return remove_ansi(mc_ping()['description'])
     else:
         return "N/A"
+
+
+def get_server_ip():
+    server_ip = requests.get('http://ip.42.pl/raw').text
+    return server_ip
+server_ip = get_server_ip()
 
 # Gets server version from log file or gets latest version number from website.
 def mc_version():
@@ -387,7 +393,10 @@ def fetch_backups(path, amount=5):
     """
 
     backups = []
-    for item in os.listdir(path)[:amount]:
+    if not os.path.isdir(path):
+        return False
+
+    for item in os.listdir(path)[-amount:]:
         if os.path.isdir(path + '/' + item):
             backups.append(item)
     return backups

@@ -1,4 +1,4 @@
-import discord, asyncio, os, sys
+import requests, discord, asyncio, os, sys
 from discord.ext import commands, tasks
 import server_functions
 from server_functions import lprint, use_rcon, format_args, mc_command, mc_status
@@ -130,6 +130,10 @@ class Basics(commands.Cog):
 
         log_data = server_functions.mc_log(']: <', lines=lines, filter_mode=True)
         chat_data = []
+        if not chat_data:
+            await ctx.send("No chat logs to view.")
+            return False
+
         for line in log_data.split('\n'):
             try:
                 line = line.split(']')
@@ -653,6 +657,7 @@ class Server(commands.Cog):
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE**' if await mc_status() is True else '**INACTIVE**'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
+        embed.add_field(name='Address', value=f"IP: `{server_functions.server_ip}`\nURL: `{server_functions.server_url}`", inline=False)
         embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
@@ -683,8 +688,8 @@ class Server(commands.Cog):
         await ctx.send(f"`{log_data}`")
         lprint(ctx, f"Fetched {lines} lines from server log.")
 
-    @commands.command()
-    async def start(self, ctx):
+    @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
+    async def serverstart(self, ctx):
         """
         Start server.
 
@@ -697,14 +702,14 @@ class Server(commands.Cog):
 
         await ctx.send("***Booting Server...***")
         server_functions.mc_start()
-        await ctx.send("***Fetching server status in 20s...***")
+        await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('status'))
         lprint(ctx, "Starting server.")
 
-    @commands.command()
-    async def stop(self, ctx, now=None):
+    @commands.command(aliases=['stop', 'halt', 'serverhalt'])
+    async def serverstop(self, ctx, now=None):
         """
         Stop server, gives players 15s warning.
 
@@ -737,7 +742,7 @@ class Server(commands.Cog):
         server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
 
-    @commands.command(aliases=['reboot', 'rebootserver', 'restartserver', 'serverreboot'])
+    @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
     async def serverrestart(self, ctx, now=None):
         """
         Restarts server with 15s warning to players.
@@ -756,6 +761,22 @@ class Server(commands.Cog):
 
         await asyncio.sleep(2)
         await ctx.invoke(self.bot.get_command('start'))
+
+    @commands.command(aliases=['version', 'v', 'serverv'])
+    async def serverversion(self, ctx):
+        """Gets Minecraft server version."""
+
+        response = server_functions.mc_version()
+        await ctx.send(f"Current version: `{response}`")
+        lprint("Fetched Minecraft server version: " + response)
+
+    @commands.command(aliases=['lversion', 'lver', 'lv'])
+    async def latestversion(self, ctx):
+        """Gets latest Minecraft server version number from official website."""
+
+        response = server_functions.get_latest_version()
+        await ctx.send(f"Latest version: `{response}`")
+        lprint("Fetched latest Minecraft server version: " + response)
 
     @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property=None, *value):
@@ -831,7 +852,8 @@ class Server(commands.Cog):
         if use_rcon:
             response = server_functions.get_mc_motd()
         elif server_functions.server_files_access:
-            response = server_functions.edit_file('motd', message)[1]
+            server_functions.edit_file('motd', message)
+            response = server_functions.edit_file('motd')[1]
         else:
             response = '**ERROR:** Fetching server motd failed.'
 
@@ -859,29 +881,13 @@ class Server(commands.Cog):
         else:
             await ctx.send("Need a true or false argument (in lowercase).")
 
-    @commands.command(aliases=['ver', 'v'])
-    async def version(self, ctx):
-        """Gets Minecraft server version."""
-
-        response = server_functions.mc_version()
-        await ctx.send(f"Current version: `{response}`")
-        lprint("Fetched Minecraft server version: " + response)
-
-    @commands.command(aliases=['lversion', 'lver', 'lv'])
-    async def latestversion(self, ctx):
-        """Gets latest Minecraft server version number from official website."""
-
-        response = server_functions.get_latest_version()
-        await ctx.send(f"Latest version: `{response}`")
-        lprint("Fetched latest Minecraft server version: " + response)
-
 
 # ========== World backup/restore functions.
 class World_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['worldbackups', 'listworldbackups', 'worldlistbackups', 'wbl'])
+    @commands.command(aliases=['worldbackups', 'worldbl', 'wbl'])
     async def worldbackupslist(self, ctx, amount=5):
         """
         Show world backups.
@@ -896,15 +902,19 @@ class World_Backups(commands.Cog):
 
         embed = discord.Embed(title='World Backups')
         worlds = server_functions.fetch_worlds(amount)
+        if worlds is False:
+            await ctx.send("No world backups found.")
+            return False
+
         for save in worlds:
             embed.add_field(name=worlds.index(save), value=f"`{save}`", inline=False)
         await ctx.send(embed=embed)
-        await ctx.send("Use `?restore <index>` to restore world save.")
+        await ctx.send("Use `?worldrestore <index>` to restore world save.")
 
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} most recent world saves.")
 
-    @commands.command(aliases=['backupworld', 'worldbackup', 'newworldbackup', 'worldnewbackup', 'wb'])
+    @commands.command(aliases=['worldbackup', 'worldbn', 'wbn'])
     async def worldbackupnew(self, ctx, *name):
         """
         new backup of current world.
@@ -936,7 +946,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('saves'))
         lprint(ctx, "New backup: " + new_backup)
 
-    @commands.command(aliases=['restoreworld', 'worldrestore', 'restoreworldbackup', 'worldrestorebackup', 'wbr'])
+    @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
     async def worldbackuprestore(self, ctx, index=None, now=None):
         """
         Restore a world backup.
@@ -971,7 +981,7 @@ class World_Backups(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('start'))
 
-    @commands.command(aliases=['deleteworldbackup', 'deleteworld', 'worlddelete', 'wbd'])
+    @commands.command(aliases=['worlddelete', 'worldbackupd', 'wbackupdelete', 'wbd'])
     async def worldbackupdelete(self, ctx, index):
         """
         Delete a world backup.
@@ -1017,7 +1027,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('start'))
         lprint(ctx, "World Reset.")
 
-    @commands.command(aliases=['serverupdate', 'updateserver'])
+    @commands.command(aliases=['serverupdate', 'updateserver', 'supdate'])
     async def update(self, ctx):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
@@ -1054,7 +1064,7 @@ class Server_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['selectserver', 'sselect', 'ss'])
+    @commands.command(aliases=['selectserver', 'sselect', 'servers', 'ss'])
     async def serverselect(self, ctx, name=None):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -1080,7 +1090,7 @@ class Server_Backups(commands.Cog):
             server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
 
-    @commands.command(aliases=['listserverbackups', 'serverbackups', 'serverlistbackups', 'sbl'])
+    @commands.command(aliases=['serverbackups', 'serverbl', 'sblist', 'sbl'])
     async def serverbackupslist(self, ctx, amount=5):
         """
         List server backups.
@@ -1095,16 +1105,21 @@ class Server_Backups(commands.Cog):
 
         embed = discord.Embed(title='Server Backups')
         servers = server_functions.fetch_servers(amount)
+
+        if servers is False:
+            await ctx.send("No server backups found.")
+            return False
+
         for save in servers:
             embed.add_field(name=servers.index(save), value=f"`{save}`", inline=False)
-
         await ctx.send(embed=embed)
+
         await ctx.send("Use `?serverrestore <index>` to restore server.")
         await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched latest {amount} world saves.")
 
-    @commands.command(aliases=['serverbackupnew', 'newserverbackup', 'sbn'])
-    async def servernewbackup(self, ctx, *name):
+    @commands.command(aliases=['serverbackup', 'serverbn', 'sbnew', 'sbn'])
+    async def serverbackupnew(self, ctx, *name):
         """
         New backup of server files (not just world save).
 
@@ -1133,7 +1148,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serversaves'))
         lprint(ctx, "New backup: " + new_backup)
 
-    @commands.command(aliases=['restoreserverbackup', 'serverrestorebackup', 'serverrestore', 'restoreserver', 'sbr'])
+    @commands.command(aliases=['serverrestore', 'sbrestore', 'serverbr', 'sbr'])
     async def serverbackuprestore(self, ctx, index=None, now=None):
         """
         Restore server backup.
@@ -1169,7 +1184,7 @@ class Server_Backups(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('start'))
 
-    @commands.command(aliases=['serverdb', 'deleteserverbackups', 'serverdeletebackup', 'sdb'])
+    @commands.command(aliases=['serverdelete', 'serverbd', 'deleteserverbackup', 'serverdeletebackup', 'sdeletebackup', 'sbdelete', 'sbd'])
     async def serverbackupdelete(self, ctx, index):
         """
         Delete a server backup.
@@ -1210,7 +1225,7 @@ class Server_Backups(commands.Cog):
         lprint(ctx, "Server Reset.")
 
 
-# ========== Bot: Restart, botlog, help2.
+# ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -1304,7 +1319,12 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
-    @commands.command(aliases=['commandhelp', 'mchelp', 'mch', 'mcc', 'commandlist'])
+    @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
+    async def ip(self, ctx):
+        await ctx.send(f"Server IP: `{server_functions.server_ip}`\nAlternative Address: `{server_functions.server_url}`")
+        lprint(ctx, 'Fetched server address.')
+
+    @commands.command(aliases=['commandhelp', 'mchelp', 'mch', 'mcc', 'commandlist', 'mccommandlist'])
     async def mccommands(self, ctx):
         embed = discord.Embed(title='List of Minecraft server commands for JE.',
                               url='https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',

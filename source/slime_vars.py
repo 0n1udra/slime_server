@@ -19,7 +19,8 @@ use_subprocess = False
 
 # If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
-mc_ip = 'arcpy.asuscomm.com'
+server_ip = ''  # Will be updated by get_server_ip function in server_functions.py on bot startup.
+server_url = 'arcpy.asuscomm.com'
 rcon_pass = 'SlimeySlime'
 rcon_port = 25575
 
