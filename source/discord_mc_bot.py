@@ -462,7 +462,7 @@ class Permissions(commands.Cog):
         Show list of current server operators.
         """
 
-        op_players = [f"`{i['name']}`" for i in server_functions.get_json('ops.json')]
+        op_players = [f"`{i['name']}`" for i in server_functions.read_json('ops.json')]
         await ctx.send('\n'.join(op_players))
         lprint(ctx, f"Fetched server operators list.")
 
@@ -571,23 +571,26 @@ class World(commands.Cog):
         except:
             pass
         else:
-            server_functions.autosave_interval  = arg
+            server_functions.autosave_interval = arg
+            server_functions.edit_file('autosave_interval', f" {str(arg)}", server_functions.slime_vars_file)
             return
 
         if arg.lower() in server_functions.enable_inputs:
-            server_functions.autosave = True
+            server_functions.autosave_status = True
             self.autosave_loop.start()
+            server_functions.edit_file('autosave_status', ' True', server_functions.slime_vars_file)
             lprint(ctx, f'Autosave on, interval: {server_functions.autosave_interval}m')
         elif arg.lower() in server_functions.disable_inputs:
-            server_functions.autosave = False
+            server_functions.autosave_status = False
             self.autosave_loop.cancel()
+            server_functions.edit_file('autosave_status', ' False', server_functions.slime_vars_file)
             lprint(ctx, 'Autosave off')
 
-        await ctx.send(f"Auto save function: {'**ENABLED**.' if server_functions.autosave else '**DISABLED**.'}")
+        await ctx.send(f"Auto save function: {'**ENABLED**.' if server_functions.autosave_status else '**DISABLED**.'}")
         await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
         lprint(ctx, 'Fetched autosave information.')
 
-    @tasks.loop(seconds=server_functions.autosave_interval)
+    @tasks.loop(seconds=server_functions.autosave_interval * 60)
     async def autosave_loop(self):
         """Automatically sends 'save-all' command to server at interval of x minutes."""
 
@@ -651,12 +654,12 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         embed = discord.Embed(title='Server Status')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE**' if await mc_status() is True else '**INACTIVE**'}\nServer: {server_functions.server[0]}\nDescription: {server_functions.server[1]}\n", inline=False)
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE**' if await mc_status() is True else '**INACTIVE**'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
-        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
+        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
-        embed.add_field(name='Start Command', value=f"`{server_functions.server[2]}`", inline=False)  # Shows server name, and small description.
+        embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
         if await mc_status() is True:
@@ -738,8 +741,8 @@ class Server(commands.Cog):
         server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
 
-    @commands.command(aliases=['reboot'])
-    async def restart(self, ctx, now=None):
+    @commands.command(aliases=['reboot', 'rebootserver', 'restartserver', 'serverreboot'])
+    async def serverrestart(self, ctx, now=None):
         """
         Messages player that the server will restart in 15s, then will stop and startup server.
 
@@ -785,11 +788,15 @@ class Server(commands.Cog):
             value = ' '.join(value)
 
         server_functions.edit_file(target_property, value)
-        get_property = server_functions.edit_file(target_property)
+        fetched_property = server_functions.edit_file(target_property)
         await asyncio.sleep(1)
 
-        await ctx.send(f"`{get_property[0]}`")
-        lprint(ctx, f"Server property: {get_property[0]}")
+        if fetched_property is True:
+            await ctx.send(f"`{get_property[0]}`")
+            lprint(ctx, f"Server property: {get_property[1]}")
+        else:
+            await ctx.send(f"**ERROR:** 404 Property not found.")
+            lprint(f"Matching property not found.")
 
     @commands.command(aliases=['omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
@@ -1047,7 +1054,7 @@ class Server_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['selectserver', 'sselect'])
+    @commands.command(aliases=['selectserver', 'sselect', 'ss'])
     async def serverselect(self, ctx, name=None):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -1064,18 +1071,15 @@ class Server_Backups(commands.Cog):
             embed = discord.Embed(title='Server List')
             for server in server_functions.server_list.values():
                 # Shows server name, description, location, and start command.
-                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server[0]}`\nStart Command: `{server[2]}`", inline=False)
+                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
 
-        else:
-            if name in server_functions.server_list.keys():
-                server_functions.server = server_functions.server_list[name]
-                server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server[0]}"
-                await ctx.invoke(self.bot.get_command('status'))
-                lprint(ctx, f"Server Selected: {name}")
+        elif name in server_functions.server_list.keys():
+            server_functions.server_selected = server_functions.server_list[name]
+            server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server_selected[0]}"
+            server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
+            await ctx.invoke(self.bot.get_command('restartbot'))
 
-                with open(f"{server_functions.server_functions_path}/vars.txt", 'w+') as f:
-                    f.write(name)
 
     @commands.command(aliases=['listserverbackups', 'showserverbackups', 'serverbackupsshow', 'savedservers', 'serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=5):
@@ -1212,7 +1216,7 @@ class Bot_Functions(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['rbot', 'rebootbot'])
+    @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=None):
         """Restart this bot."""
 
@@ -1222,7 +1226,7 @@ class Bot_Functions(commands.Cog):
         if server_functions.use_subprocess:
             await ctx.invoke(self.bot.get_command("stop"), now=now)
 
-        os.chdir(server_functions.server_functions_path)
+        os.chdir(server_functions.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
@@ -1259,7 +1263,7 @@ class Bot_Functions(commands.Cog):
             return discord.Embed(title=f'Help Page {page}/{pages}')
 
         embed = new_embed(embed_page)
-        for command in server_functions.get_csv('command_info.csv'):
+        for command in server_functions.read_csv('command_info.csv'):
             if not command: continue
 
             embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
