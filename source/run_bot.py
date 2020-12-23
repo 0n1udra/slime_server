@@ -40,23 +40,23 @@ def start_tmux_session():
     time.sleep(1)
 
 
-def start_func(startserver=False, startbot=False):
+def start_server_func():
+    if server_functions.use_tmux is True:
+        os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
+        if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
+            print("Started bot in 'mcserver' tmux session, top pane.")
+            return True  # If os.system() return 0, means successful.
+    else:
+        print("Start server with ?start command in Discord.")
+        input("Enter to exit > ")
+
+def start_bot_func():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
-    if startbot:
-        if server_functions.use_tmux:
-            os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
-            if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
-                print("Started bot in 'mcserver' tmux session, top pane.")
-                return True  # If os.system() return 0, means successful.
-        else:
-            print("Start server with ?start command in Discord")
-            input("Enter to continue > ")
-    if startserver:
-        if server_functions.use_tmux:
-            server_functions.mc_start()
-        else:
-            bot.run(TOKEN)
+    if server_functions.use_tmux:
+        server_functions.mc_start()
+    else:
+        bot.run(TOKEN)
 
 
 def script_help():
@@ -97,28 +97,23 @@ def script_help():
 if __name__ == '__main__':
     # Initial directory and Tmux setup.
     if 'setup' in sys.argv:
-        if server_functions.server_files_access:
+        if server_functions.server_files_access is True:
             setup_directories()
-        if server_functions.use_tmux:
+        if server_functions.use_tmux is True:
             start_tmux_session()
-        if server_functions.use_rcon:
+        if server_functions.use_rcon is True:
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
-
-    # Download latest server.jar.
-    if 'update' in sys.argv and server_functions.server_files_access:
-        print("Downloading latest server.jar from Minecraft website...")
-        server_functions.download_new_server()
-        print("Downloaded server.jar to:", server_functions.server_path)
 
     # Start Minecraft server and Discord bot.
     if len(sys.argv) == 1 or 'startboth' in sys.argv:
-        start_func(startserver=True, startbot=True)
-
-    if 'startbot' in sys.argv:
-        start_func(startbot=True)
+        start_server_func()
+        start_bot_func()
 
     if 'startserver' in sys.argv:
-        start_func(startbot=True)
+        start_server_func()
+
+    if 'startbot' in sys.argv:
+        start_bot_func()
 
     # Start 'mcserver' Tmux detached session.
     if 'tmuxstart' in sys.argv and server_functions.use_tmux:
