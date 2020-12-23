@@ -42,8 +42,9 @@ def mc_start():
     """
 
     global mc_subprocess
+
     os.chdir(server_path)
-    if use_subprocess:
+    if use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             mc_subprocess = subprocess.Popen(server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -53,7 +54,7 @@ def mc_start():
         if type(mc_subprocess) == subprocess.Popen:
             return True
 
-    elif use_tmux:
+    elif use_tmux is True:
         os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
         os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
 
@@ -81,15 +82,18 @@ async def mc_command(command, return_bool=True):
     """
 
     global mc_subprocess
-    if use_rcon:
+
+    if use_rcon is True:
         return mc_rcon(command)
-    elif use_subprocess:
+
+    elif use_subprocess is True:
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
-        else:  # If process not found.
+        else:
             return False
-    elif use_tmux:
+
+    elif use_tmux is True:
         if os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER') != 0:
             return True
     else:
@@ -141,7 +145,7 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
         return False
 
     log_data = ''
-    if normal_read:
+    if normal_read is True:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line:
@@ -208,9 +212,9 @@ def get_mc_motd():
         str: Server motd.
     """
 
-    if server_files_access:
+    if server_files_access is True:
         return edit_file('motd')[1]
-    elif use_rcon:
+    elif use_rcon is True:
         return remove_ansi(mc_ping()['description'])
     else:
         return "N/A"
@@ -230,9 +234,9 @@ def mc_version():
         str: Server version number.
     """
 
-    if use_rcon:
+    if use_rcon is True:
         return mc_ping()['version']['name']
-    elif server_files_access:
+    elif server_files_access is True:
         if version := mc_log('server version', normal_read=True):
             version = version.split()[-1]
             with open(f"{server_path}/version.txt", 'w') as f:
@@ -258,7 +262,7 @@ def get_latest_version():
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
 # Used so Discord command arguments don't need qoutes.
-def format_args(args, return_empty=False):
+def format_args(args, return_empty_str=False):
     """
     Formats passed in *args from Discord command functions.
     This is so quotes aren't necessary for Discord command arguments.
@@ -271,10 +275,11 @@ def format_args(args, return_empty=False):
         str: Arguments combines with spaces.
     """
 
-    if args:
+    if len(str(args)) >= 1:
         return ' '.join(args)
     else:
-        if return_empty: return ''
+        if return_empty_str is True:
+            return ''
         return "No reason given"
 
 # Gets data from json local file.
@@ -308,18 +313,26 @@ def download_new_server():
     for i in div_agenda[0].find_all('a'):
         jar_download_url = f"{i.get('href')}"
 
-    if not jar_download_url: return
+    if not jar_download_url:
+        return False
 
     # Saves new server.jar in current server.
-    version = requests.get(jar_download_url).content
-    with open(server_path + '/server.jar', 'wb') as jar_file:
-        jar_file.write(version)
+    new_jar_data = requests.get(jar_download_url).content
 
-    # Updates eula.txt to true.
-    with open(server_path + '/eula.txt', 'w') as file:
-        file.write('eula=true')
+    try:
+        with open(server_path + '/eula.txt', 'w+') as f:
+            f.write(new_jar_data)
+    except IOError:
+        lprint(f"Error updatine eula.txt file: {server_path}")
 
-    return version
+    try:
+        with open(server_path + '/server.jar', 'wb+') as f:
+            f.write(new_jar_data)
+        return True
+    except IOError:
+        lprint(f"Error saving new jar file: {server_path}")
+
+    return False
 
 # Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
@@ -351,7 +364,7 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
 
             # If found match, and user passed in new value to update it.
             elif target_property in split_line[0] and len(split_line) > 1:
-                if value:
+                if len(str(value)) >= 1:
                     split_line[1] = value
                     new_line = '='.join(split_line)
                     discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
@@ -367,7 +380,8 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
 
     if return_line:
         return return_line, return_line.split('=')[1]
-        return True
+    else:
+        return "404 Match not found."
 
 def get_from_index(path, index):
     """
@@ -442,7 +456,7 @@ def restore_backup(src, dst, reset=False):
         pass
 
     # Used in ?worldreset and ?serverreset Discord command to clear all world or server files.
-    if reset:
+    if reset is True:
         return True
 
     try:
