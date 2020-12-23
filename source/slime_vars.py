@@ -5,6 +5,8 @@ slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_token_file = '/home/slime/mc_bot_token.txt'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
+channel_id = 754803768733728848
+
 # ========== Interfacing Options
 
 # Local file access allows for server files/folders manipulation for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -35,7 +37,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
                }
 
-server_selected = server_list['papermc']
+server_selected = server_list['vanilla']
 server_path = f"{mc_path}/{server_selected[0]}"
 
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -54,7 +56,7 @@ bot_log_file = f"{bot_files_path}/bot_log.txt"
 mc_active_status = False
 mc_subprocess = None
 
-if use_rcon:
+if use_rcon is True:
     import mctools, re
-if server_files_access:
+if server_files_access is True:
     import shutil, fileinput, json
