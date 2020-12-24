@@ -245,7 +245,7 @@ def mc_version():
     if use_rcon is True:
         return mc_ping()['version']['name']
     elif server_files_access is True:
-            return edit_file('version')[1]
+        return edit_file('version')[1]
     else:
         return 'N/A'
 
@@ -380,7 +380,7 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
                 print(line, end='')
 
     if return_line:
-        return return_line, return_line.split('=')[1]
+        return return_line, return_line.split('=')[1].strip()
     else:
         return "404 Match not found."
 

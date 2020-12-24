@@ -20,7 +20,7 @@ async def on_ready():
 
     if server_functions.channel_id:
         channel = bot.get_channel(server_functions.channel_id)
-        await channel.send('**Bot Primed** :white_check_mark:')
+        await channel.send('**Bot PRIMED** :white_check_mark:')
 
     lprint("Bot PRIMED.")
 
@@ -468,13 +468,13 @@ class Permissions(commands.Cog):
             await mc_command('whitelist reload')
             await ctx.send("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
 
-        elif arg == 'enforce' and (arg2 is None or 'status' in arg2):  # Shows if enforce-whitelist status.
-            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist')
+        elif arg == 'enforce' and (not arg2 or 'status' in arg2):  # Shows if enforce-whitelist status.
+            await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist')
             await ctx.send(f"\nUsage examples for enforce: `?whitelist enforce true`, `?whitelist enforce false`.")
         elif arg == 'enforce' and arg2 in ['true', 'on']:
-            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist', 'true')
+            await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'true')
         elif arg == 'enforce' and arg2 in ['false', 'off']:
-            await ctx.invoke(self.bot.get_command('property'), 'enforce-whitelist', 'false')
+            await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'false')
 
         elif arg is None or arg == 'list':
             await mc_command('whitelist list')
@@ -703,7 +703,7 @@ class Server(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['info', 'stat', 'stats'])
-    async def status(self, ctx):
+    async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
         embed = discord.Embed(title='Server Status :gear:')
@@ -759,7 +759,7 @@ class Server(commands.Cog):
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
 
-        await ctx.invoke(self.bot.get_command('status'))
+        await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting server.")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt'])
@@ -812,10 +812,10 @@ class Server(commands.Cog):
 
         lprint(ctx, "Restarting server.")
         await ctx.send("***Restarting...*** :arrows_counterclockwise:")
-        await ctx.invoke(self.bot.get_command('stop'), now=now)
+        await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await asyncio.sleep(2)
-        await ctx.invoke(self.bot.get_command('start'))
+        await ctx.invoke(self.bot.get_command('serverstart'))
 
     @commands.command(aliases=['version', 'v', 'serverv'])
     async def serverversion(self, ctx):
@@ -967,7 +967,7 @@ class Server(commands.Cog):
         await ctx.send("***Updating...*** :arrows_counterclockwise:")
 
         if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('stop'), now=now)
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
         await ctx.send("***Downloading latest server.jar***")
@@ -976,7 +976,7 @@ class Server(commands.Cog):
         if server is True:
             await ctx.send(f"Downloaded latest version: `{server}`")
             await asyncio.sleep(3)
-            await ctx.invoke(self.bot.get_command('start'))
+            await ctx.invoke(self.bot.get_command('serverstart'))
         else:
             await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
 
@@ -1028,7 +1028,7 @@ class World_Backups(commands.Cog):
         """
 
         if not name:
-            await ctx.send("Hey! I need a name or keywords to make a backup!")
+            await ctx.send("Usage: `?wbn <name>`\nExample: `?wbn Before the reckoning`")
             return False
 
         name = format_args(name)
@@ -1039,11 +1039,11 @@ class World_Backups(commands.Cog):
 
         new_backup = server_functions.backup_world(name)
         if new_backup:
-            await ctx.send(f"Cloned and archived your world to:\n`{new_backup}`.")
+            await ctx.send(f"Cloned and archived your world to:\n`{new_backup}`")
         else:
             await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
 
-        await ctx.invoke(self.bot.get_command('saves'))
+        await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New backup: " + new_backup)
 
     @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
@@ -1074,12 +1074,12 @@ class World_Backups(commands.Cog):
         await asyncio.sleep(5)
 
         if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('stop'), now=now)  # Stops if server is running.
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)  # Stops if server is running.
 
         server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
-        await ctx.invoke(self.bot.get_command('start'))
+        await ctx.invoke(self.bot.get_command('serverstart'))
 
     @commands.command(aliases=['worlddelete', 'worldbackupd', 'wbackupdelete', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
@@ -1103,11 +1103,10 @@ class World_Backups(commands.Cog):
         server_functions.delete_world(to_delete)
 
         await ctx.send(f"World as been incinerated!")
-        await ctx.invoke(self.bot.get_command('saves'))
         lprint(ctx, "Deleted: " + to_delete)
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
-    async def worldreset(self, ctx):
+    async def worldreset(self, ctx, now=''):
         """
         Deletes world save (does not touch other server files).
 
@@ -1119,12 +1118,11 @@ class World_Backups(commands.Cog):
         await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
 
         if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('stop'))
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         server_functions.restore_world(reset=True)
         await asyncio.sleep(3)
 
-        await ctx.invoke(self.bot.get_command('start'))
         lprint(ctx, "World Reset.")
 
 
@@ -1201,7 +1199,7 @@ class Server_Backups(commands.Cog):
         """
 
         if not name:
-            await ctx.send("Hey! I need a name or keywords to make a backup!")
+            await ctx.send("Usage: `?sbn <name>`\nExample: `?wbn Everything just dandy`")
             return False
 
         name = format_args(name)
@@ -1215,7 +1213,7 @@ class Server_Backups(commands.Cog):
         else:
             await ctx.send("**ERROR:** Creating server backup failed!")
 
-        await ctx.invoke(self.bot.get_command('serversaves'))
+        await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New backup: " + new_backup)
 
     @commands.command(aliases=['serverrestore', 'sbrestore', 'serverbr', 'sbr'])
@@ -1244,15 +1242,12 @@ class Server_Backups(commands.Cog):
         await asyncio.sleep(5)
 
         if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('stop'), now=now)
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         if server_functions.restore_server(fetched_restore):
             await ctx.send("**Server Restored!** :desktop::leftwards_arrow_with_hook: ")
         else:
             await ctx.send("**ERROR:** Could not restore server!")
-
-        await asyncio.sleep(3)
-        await ctx.invoke(self.bot.get_command('start'))
 
     @commands.command(aliases=['serverdelete', 'serverbd', 'deleteserverbackup', 'serverdeletebackup', 'sdeletebackup', 'sbdelete', 'sbd'])
     async def serverbackupdelete(self, ctx, index=''):
@@ -1277,7 +1272,6 @@ class Server_Backups(commands.Cog):
         server_functions.delete_server(to_delete)
 
         await ctx.send(f"Server backup deleted!")
-        await ctx.invoke(self.bot.get_command('servers'))
         lprint(ctx, "Deleted: " + to_delete)
 
     @commands.command(aliases=['resetserver', 'newserver'])
@@ -1308,7 +1302,7 @@ class Bot_Functions(commands.Cog):
         lprint(ctx, "Restarting bot.")
 
         if server_functions.use_subprocess is True:
-            await ctx.invoke(self.bot.get_command("stop"), now=now)
+            await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
         os.chdir(server_functions.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
@@ -1412,14 +1406,17 @@ class Bot_Functions(commands.Cog):
 for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
-disabled_commands_rcon = ['oplist', 'start', 'restart', 'saves', 'backup', 'restore', 'delete', 'newworld', 'properties', 'rcon', 'onelinemode',
-                          'serversaves', 'serverbackup', 'serverdelete', 'serverrestore', 'serverreset', 'update', 'log']
-disabled_commands_tmux = ['start', 'restart']
+if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
+            'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
+if_no_tmux = ['serverstart', 'serverrestart']
 
-if server_functions.server_files_access is False:
-    for command in disabled_commands_rcon: bot.remove_command(command)
+if server_functions.server_files_access is False and server_functions.use_rcon is True:
+    for command in if_no_tmux:
+        bot.remove_command(command)
+
 if server_functions.use_tmux is False:
-    for command in disabled_commands_tmux: bot.remove_command(command)
+    for command in if_no_tmux:
+        bot.remove_command(command)
 
 if __name__ == '__main__':
     bot.run(TOKEN)
