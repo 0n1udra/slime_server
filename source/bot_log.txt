@@ -726,3 +726,2634 @@ Restart to apply changes
 2020-09-29 17:00:57.271268 | (4RDUB3RRY#7235) Fetched 2 lines from bot log.
 2020-09-29 17:01:03.853696 | (4RDUB3RRY#7235) Fetched player list.
 2020-09-29 17:01:03.859160 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 00:12:39.109866 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:16:54.992682 | (Script) Bot PRIMED.
+2020-10-15 00:17:56.286351 | (4RDUB3RRY#7235) Restarting bot.
+2020-10-15 00:17:59.248944 | (Script) Bot PRIMED.
+2020-10-15 00:18:45.695144 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:42:32.655811 | (Script) Bot PRIMED.
+2020-10-15 00:43:25.873218 | (Script) Bot PRIMED.
+2020-10-15 00:44:02.953338 | (Script) Bot PRIMED.
+2020-10-15 00:44:04.997986 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:44:05.002877 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 00:44:13.771905 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:44:13.776672 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 00:45:46.574748 | (Script) Bot PRIMED.
+2020-10-15 00:45:48.087121 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:45:48.091805 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 00:47:38.230925 | (4RDUB3RRY#7235) Server said: hi
+2020-10-15 00:47:49.320654 | (Script) Fetched Minecraft server version: 1.16.3
+2020-10-15 00:47:53.429645 | (Script) Fetched Minecraft server version: 1.16.3
+2020-10-15 00:48:05.075118 | (4RDUB3RRY#7235) Server said: hi
+2020-10-15 00:49:07.700671 | (Script) Bot PRIMED.
+2020-10-15 00:49:10.404792 | (Script) Fetched Minecraft server version: 1.16.3
+2020-10-15 00:49:15.550198 | (4RDUB3RRY#7235) Server said: hi
+2020-10-15 00:49:30.794429 | (Script) Bot PRIMED.
+2020-10-15 00:49:34.076130 | (Script) Fetched Minecraft server version: 1.16.3
+2020-10-15 00:49:39.011409 | (4RDUB3RRY#7235) Server said: hi
+2020-10-15 00:49:44.804370 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 00:49:44.809823 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 20:50:18.138587 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-15 20:50:18.147209 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-15 20:50:21.015391 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:28:35.672923 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:28:35.677930 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-17 16:28:48.833597 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:29:46.225874 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:29:46.231053 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-17 16:34:00.578760 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:44:46.631024 | (4RDUB3RRY#7235) Fetched player list.
+2020-10-17 16:44:46.636118 | (4RDUB3RRY#7235) Fetched server status.
+2020-10-18 04:39:44.343879 | (Script) Bot PRIMED.
+2020-10-18 06:55:11.912188 | (Script) Bot PRIMED.
+2020-10-18 10:24:02.900624 | (Script) Bot PRIMED.
+2020-10-19 23:23:58.214042 | (Roman Yoshi#4231) Fetched player list.
+2020-10-19 23:23:58.220938 | (Roman Yoshi#4231) Fetched server status.
+2020-10-21 10:46:17.580454 | (Script) Bot PRIMED.
+2020-10-21 10:56:32.866350 | (Script) Bot PRIMED.
+2020-10-21 13:08:14.376671 | (Script) Bot PRIMED.
+2020-10-23 00:40:03.016661 | (4RDUB3RRY#7235) Set ardu1n0 to: survival
+2020-10-23 00:40:15.362073 | (4RDUB3RRY#7235) Killed: ardu1n0
+2020-10-23 16:30:33.265153 | (Script) Bot PRIMED.
+2020-10-23 19:24:54.288146 | (Script) Bot PRIMED.
+2020-10-28 23:39:55.803794 | (Script) Bot PRIMED.
+2020-10-29 01:24:32.173629 | (Script) Bot PRIMED.
+2020-11-03 21:48:27.601040 | (Script) Bot PRIMED.
+2020-11-05 07:39:55.790750 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:39:55.799762 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:41:56.393709 | (Roman Yoshi#4231) Updating server.jar...
+2020-11-05 07:42:16.463283 | (Roman Yoshi#4231) Stopping server.
+2020-11-05 07:43:03.153116 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:43:03.159528 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:43:03.164389 | (Roman Yoshi#4231) Starting server.
+2020-11-05 07:43:03.168882 | (Roman Yoshi#4231) Server Updated.
+2020-11-05 07:43:42.572919 | (Roman Yoshi#4231) Fetched 5 most recent world saves.
+2020-11-05 07:45:12.426246 | (Roman Yoshi#4231) Restoring to: world
+2020-11-05 07:45:38.016175 | (Roman Yoshi#4231) Stopping server.
+2020-11-05 07:46:08.751644 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:46:08.758328 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:47:01.937295 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:47:01.943260 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:47:01.948120 | (Roman Yoshi#4231) Starting server.
+2020-11-05 07:47:36.796139 | (Roman Yoshi#4231) Restarting server.
+2020-11-05 07:47:56.256697 | (Roman Yoshi#4231) Stopping server.
+2020-11-05 07:48:23.136579 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:48:23.142470 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:48:23.147669 | (Roman Yoshi#4231) Starting server.
+2020-11-05 07:49:02.965808 | (Roman Yoshi#4231) Restoring to: (2020-09-19 02-41) 1.16.3 yewey
+2020-11-05 07:49:28.580616 | (Roman Yoshi#4231) Stopping server.
+2020-11-05 07:53:37.331581 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:53:37.337640 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:53:37.343283 | (Roman Yoshi#4231) Starting server.
+2020-11-05 07:54:24.299950 | (Roman Yoshi#4231) Restoring to: (2020-09-15 21-51) 1.16.3 blown tf up
+2020-11-05 07:54:49.856304 | (Roman Yoshi#4231) Stopping server.
+2020-11-05 07:57:15.775558 | (Roman Yoshi#4231) Fetched player list.
+2020-11-05 07:57:15.781986 | (Roman Yoshi#4231) Fetched server status.
+2020-11-05 07:57:15.787685 | (Roman Yoshi#4231) Starting server.
+2020-11-05 14:48:57.938574 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 14:49:38.011235 | (Script) Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/(2020-11-05 14-49) 1.16.4 corrupted
+2020-11-05 14:49:38.469647 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 14:49:38.476426 | (4RDUB3RRY#7235) New backup: (2020-11-05 14-49) 1.16.4 corrupted
+2020-11-05 14:49:44.539459 | (4RDUB3RRY#7235) Restoring to: world
+2020-11-05 14:50:10.310895 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 14:55:42.779106 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 14:55:48.922049 | (Script) Bot PRIMED.
+2020-11-05 14:55:52.680855 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 14:55:54.171793 | (4RDUB3RRY#7235) Restoring to: world
+2020-11-05 14:56:01.482488 | (Script) Error restoring: restore
+2020-11-05 14:56:30.073599 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 14:56:30.113537 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 14:56:30.136621 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 14:57:13.802455 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 14:57:16.876268 | (Script) Bot PRIMED.
+2020-11-05 14:57:23.650581 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 14:57:26.055869 | (4RDUB3RRY#7235) Restoring to: world
+2020-11-05 14:57:33.378079 | (Script) Error restoring: 4
+2020-11-05 14:58:01.563110 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 14:58:01.572152 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 14:58:01.584099 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 14:58:23.397767 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 14:58:24.287486 | (4RDUB3RRY#7235) Restoring to: world
+2020-11-05 14:58:34.572845 | (Script) Error restoring: 4
+2020-11-05 14:58:48.621852 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 14:59:02.842988 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 14:59:02.858844 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 14:59:02.873138 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 15:01:19.600441 | (4RDUB3RRY#7235) Server property: rcon.password=SlimeySlime
+
+2020-11-05 15:01:29.446963 | (4RDUB3RRY#7235) Server property: enable-rcon=false
+
+2020-11-05 15:02:00.721032 | (4RDUB3RRY#7235) Fetched latest 5 world saves.
+2020-11-05 15:02:07.168982 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:02:32.923527 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 15:03:41.657983 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:03:44.764275 | (Script) Bot PRIMED.
+2020-11-05 15:03:50.570354 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:03:57.893987 | (Script) Error restoring: 0
+2020-11-05 15:05:22.790281 | (Script) Bot PRIMED.
+2020-11-05 15:05:25.811991 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:05:32.956404 | (Script) Error deleting: /mnt/c/Users/DT/Desktop/MC/server
+2020-11-05 15:06:36.088259 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:06:39.119074 | (Script) Bot PRIMED.
+2020-11-05 15:06:42.034082 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:07:29.467097 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:07:32.510532 | (Script) Bot PRIMED.
+2020-11-05 15:07:33.427801 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:08:47.962818 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:08:51.022998 | (Script) Bot PRIMED.
+2020-11-05 15:08:58.465283 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 15:09:00.910820 | (4RDUB3RRY#7235) Restoring to: world
+2020-11-05 15:09:30.524104 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:09:33.522222 | (Script) Bot PRIMED.
+2020-11-05 15:09:34.054955 | (4RDUB3RRY#7235) Restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:09:41.304625 | (Script) Error restoring: (2020-09-15 20-39) 1.16.3 YAGA>/mnt/c/Users/DT/Desktop/MC/server/mnt/c/Users/DT/Desktop/MC/server
+2020-11-05 15:12:50.096704 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:12:53.139171 | (Script) Bot PRIMED.
+2020-11-05 15:12:54.038385 | (4RDUB3RRY#7235) Server restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:13:01.194928 | (Script) Error restoring: (2020-09-15 20-39) 1.16.3 YAGA>/mnt/c/Users/DT/Desktop/MC/server/mnt/c/Users/DT/Desktop/MC/server
+2020-11-05 15:14:07.123985 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:14:10.426662 | (Script) Bot PRIMED.
+2020-11-05 15:14:16.554324 | (4RDUB3RRY#7235) Server restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:14:23.736718 | (Script) Error restoring: (2020-09-15 20-39) 1.16.3 YAGA > /mnt/c/Users/DT/Desktop/MC/server
+2020-11-05 15:18:06.474704 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-05 15:18:09.489481 | (Script) Bot PRIMED.
+2020-11-05 15:18:09.935865 | (4RDUB3RRY#7235) Server restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+2020-11-05 15:18:47.286968 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 15:18:47.297926 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 15:18:47.308210 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 15:19:04.760369 | (4RDUB3RRY#7235) World restoring to: world
+2020-11-05 15:19:31.536643 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 15:19:31.588681 | (Script) Error restoring: world > /mnt/c/Users/DT/Desktop/MC/server/world
+2020-11-05 15:20:00.376483 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 15:20:00.383250 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 15:20:00.388977 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 15:23:16.969862 | (4RDUB3RRY#7235) Updating server.jar...
+2020-11-05 15:23:37.509241 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 15:24:24.517645 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-05 15:24:24.537979 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-05 15:24:24.555535 | (4RDUB3RRY#7235) Starting server.
+2020-11-05 15:24:24.591781 | (4RDUB3RRY#7235) Server Updated.
+2020-11-05 15:27:35.564913 | (4RDUB3RRY#7235) Stopping server.
+2020-11-05 15:27:37.663111 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 15:29:01.278330 | (4RDUB3RRY#7235) Fetched help page.
+2020-11-05 15:29:18.644046 | (4RDUB3RRY#7235) Fetched 5 most recent world saves.
+2020-11-05 15:29:18.649889 | (4RDUB3RRY#7235) Deleted: world
+2020-11-07 02:56:15.216175 | (Script) Bot PRIMED.
+2020-11-07 04:05:48.857280 | (Script) Bot PRIMED.
+2020-11-07 09:13:01.340546 | (Script) Bot PRIMED.
+2020-11-11 22:28:53.500766 | (Script) Bot PRIMED.
+2020-11-11 22:29:03.957774 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-11 22:29:03.964220 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-11 22:32:00.887698 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-11 22:32:00.895037 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-11 22:41:30.314962 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-11 22:41:34.068445 | (Script) Bot PRIMED.
+2020-11-11 22:41:36.519167 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-11 22:41:39.612725 | (4RDUB3RRY#7235) Fetched 5 lines from bot log.
+2020-11-11 22:42:09.809837 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-11 22:42:09.817248 | (4RDUB3RRY#7235) Fetched server status.
+2020-11-11 22:42:09.823551 | (4RDUB3RRY#7235) Starting server.
+2020-11-11 22:42:15.925159 | (4RDUB3RRY#7235) Fetched player list.
+2020-11-11 22:42:36.435618 | (4RDUB3RRY#7235) Fetched 20 lines from bot log.
+2020-11-11 22:43:14.391978 | (4RDUB3RRY#7235) Fetched 25 lines from bot log.
+2020-11-11 22:43:17.405442 | (4RDUB3RRY#7235) Fetched 28 lines from bot log.
+2020-11-11 22:45:01.410845 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-11 22:45:04.499191 | (Script) Bot PRIMED.
+2020-11-11 22:45:24.753519 | (4RDUB3RRY#7235) Fetched 20 lines from bot log.
+2020-11-11 22:46:49.759791 | (4RDUB3RRY#7235) Fetched 5 lines from log.
+2020-11-11 22:48:30.562880 | (4RDUB3RRY#7235) Restarting bot.
+2020-11-11 22:48:33.552052 | (Script) Bot PRIMED.
+2020-11-11 22:48:43.692470 | (Script) motd: Yewy\!
+
+2020-11-11 22:49:07.587064 | (4RDUB3RRY#7235) Stopping server.
+2020-11-13 01:16:35.828246 | (ARDU1N0#4107) Fetched server status.
+2020-11-13 01:16:35.835088 | (ARDU1N0#4107) Starting server.
+2020-11-24 07:27:22.440515 | (Script) Bot PRIMED.
+2020-12-06 00:23:26.174329 | (Script) Bot PRIMED.
+2020-12-06 00:48:03.161655 | (Script) Bot PRIMED.
+2020-12-07 22:36:54.186278 | (Script) Bot PRIMED.
+2020-12-08 16:12:17.215673 | (4RDUB3RRY#7235) Fetched player list.
+2020-12-08 16:12:17.224478 | (4RDUB3RRY#7235) Fetched server status.
+2020-12-08 16:12:17.230085 | (4RDUB3RRY#7235) Starting server.
+2020-12-08 16:20:24.427067 | (4RDUB3RRY#7235) Server property: online-mode=false
+
+2020-12-08 16:20:31.528944 | (4RDUB3RRY#7235) Server property: server-port=25565
+
+2020-12-08 16:30:20.902151 | (4RDUB3RRY#7235) Fetched help page.
+2020-12-08 16:30:34.796806 | (4RDUB3RRY#7235) Saved world.
+2020-12-08 16:31:16.621028 | (4RDUB3RRY#7235) Stopping server.
+2020-12-09 00:26:19.551528 | (Script) Bot PRIMED.
+2020-12-11 00:03:34.585257 | (Script) Bot PRIMED.
+2020-12-15 14:39:53.454038 | (Script) Bot PRIMED.
+2020-12-17 23:02:00.749391 | (Script) Bot PRIMED.
+2020-12-17 23:02:51.080175 | (ARDU1N0#4107) Fetched help page.
+2020-12-17 23:14:06.143895 | (ARDU1N0#4107) Fetched server status.
+2020-12-17 23:14:06.156433 | (ARDU1N0#4107) Starting server.
+2020-12-17 23:17:53.715927 | (ARDU1N0#4107) Fetched player list.
+2020-12-17 23:17:53.726290 | (ARDU1N0#4107) Fetched server status.
+2020-12-17 23:38:35.177144 | (Script) Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/(2020-12-17 23-38) 1.16.4 beforePaper
+2020-12-17 23:38:35.675007 | (ARDU1N0#4107) Fetched 5 most recent world saves.
+2020-12-17 23:38:35.680653 | (ARDU1N0#4107) New backup: (2020-12-17 23-38) 1.16.4 beforePaper
+2020-12-17 23:38:44.293702 | (Script) Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/(2020-12-17 23-38) 1.16.4 beforePaper
+2020-12-17 23:40:43.752548 | (ARDU1N0#4107) Fetched server status.
+2020-12-17 23:40:43.767453 | (ARDU1N0#4107) Starting server.
+2020-12-17 23:43:08.355915 | (ARDU1N0#4107) Fetched latest 5 world saves.
+2020-12-17 23:43:12.952085 | (ARDU1N0#4107) Server restoring to: (2020-12-17 23-38) 1.16.4 beforePaper
+2020-12-17 23:43:50.513785 | (ARDU1N0#4107) Fetched player list.
+2020-12-17 23:43:50.522115 | (ARDU1N0#4107) Fetched server status.
+2020-12-17 23:43:50.530582 | (ARDU1N0#4107) Starting server.
+2020-12-17 23:45:34.944397 | (ARDU1N0#4107) Server property: online-mode=false
+
+2020-12-17 23:47:01.591856 | (ARDU1N0#4107) Fetched help page.
+2020-12-17 23:47:26.757084 | (ARDU1N0#4107) Server property: online-mode=true
+
+2020-12-17 23:47:33.102584 | (ARDU1N0#4107) Restarting server.
+2020-12-17 23:47:52.642417 | (ARDU1N0#4107) Stopping server.
+2020-12-17 23:48:20.403029 | (ARDU1N0#4107) Fetched player list.
+2020-12-17 23:48:20.416826 | (ARDU1N0#4107) Fetched server status.
+2020-12-17 23:48:20.429831 | (ARDU1N0#4107) Starting server.
+2020-12-17 23:49:06.990121 | (ARDU1N0#4107) Teleported R3diculous to MysticFrogo
+2020-12-18 00:06:16.187788 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 00:06:16.199571 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 00:07:42.385965 | (ARDU1N0#4107) Messaged MysticFrogo : is he ok in there? idk who dat is
+2020-12-18 00:09:47.189443 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 00:12:51.607145 | (Roman Yoshi#4231) Kicked shiroy0shi
+2020-12-18 00:27:08.083832 | (ARDU1N0#4107) Fetched help page.
+2020-12-18 00:27:25.758753 | (ARDU1N0#4107) Saved world.
+2020-12-18 01:13:51.404008 | (ARDU1N0#4107) Restarting server.
+2020-12-18 01:14:15.416967 | (ARDU1N0#4107) Stopping server.
+2020-12-18 01:14:42.319670 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 01:14:42.331162 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 01:14:42.340648 | (ARDU1N0#4107) Starting server.
+2020-12-18 01:15:46.985399 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 01:15:50.205726 | (Script) Bot PRIMED.
+2020-12-18 01:17:56.770620 | (ARDU1N0#4107) Messaged R3diculous : No reason given
+2020-12-18 11:52:32.334366 | (Roman Yoshi#4231) Fetched player list.
+2020-12-18 11:52:32.340481 | (Roman Yoshi#4231) Fetched server status.
+2020-12-18 13:08:14.549591 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 13:08:14.556070 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 13:09:14.896739 | (ARDU1N0#4107) Messaged MysticFrogo : who's looks? Just wondering
+2020-12-18 13:09:39.405993 | (ARDU1N0#4107) Fetched 5 lines from bot log.
+2020-12-18 15:29:15.415732 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 15:29:15.428487 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 15:51:16.467418 | (big dick daniel#9290) Kicked MysticFrogo
+2020-12-18 16:12:13.233579 | (ARDU1N0#4107) Fetched help page.
+2020-12-18 16:23:02.203472 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:23:09.398209 | (Script) Bot PRIMED.
+2020-12-18 16:25:49.468890 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:25:52.331831 | (Script) Bot PRIMED.
+2020-12-18 16:31:45.128990 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:31:48.002380 | (Script) Bot PRIMED.
+2020-12-18 16:33:07.650791 | (ARDU1N0#4107) Banned test : No reason given
+2020-12-18 16:33:10.156056 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 16:33:10.165938 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 16:34:15.635002 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:34:19.683730 | (Script) Bot PRIMED.
+2020-12-18 16:34:49.254412 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:34:52.091823 | (Script) Bot PRIMED.
+2020-12-18 16:34:53.997795 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:35:10.528303 | (ARDU1N0#4107) Pardoned Test : No reason given
+2020-12-18 16:35:13.604988 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:35:40.826824 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:36:11.188885 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:36:14.100742 | (Script) Bot PRIMED.
+2020-12-18 16:36:15.701105 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:42:57.693590 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:43:00.568392 | (Script) Bot PRIMED.
+2020-12-18 16:43:02.918149 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:44:15.483942 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:44:18.348608 | (Script) Bot PRIMED.
+2020-12-18 16:44:20.574125 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:44:32.947356 | (ARDU1N0#4107) Banned test : No reason given
+2020-12-18 16:44:42.726298 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:45:40.936381 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:45:43.838379 | (Script) Bot PRIMED.
+2020-12-18 16:45:45.615193 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:46:56.981378 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:47:04.856579 | (Script) Bot PRIMED.
+2020-12-18 16:47:06.743456 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 16:48:22.454451 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 16:48:25.288362 | (Script) Bot PRIMED.
+2020-12-18 16:48:29.040289 | (ARDU1N0#4107) Pardoned test : No reason given
+2020-12-18 16:48:35.413491 | (ARDU1N0#4107) Fetched banned list.
+2020-12-18 17:11:15.476871 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 17:21:00.627327 | (ARDU1N0#4107) Server property: 4
+2020-12-18 17:21:31.342125 | (ARDU1N0#4107) Server property: #Minecraft server properties
+#Fri Dec 18 01:14:25 EST 2020
+enable-jmx-monitoring=false
+rcon.port=25575
+level-seed=
+enable-command-block=true
+gamemode=survival
+enable-query=false
+generator-settings=
+level-name=world
+motd=Yewy\!
+query.port=25565
+pvp=true
+generate-structures=true
+version=1.16.3
+difficulty=normal
+network-compression-threshold=256
+max-tick-time=60000
+max-players=20
+use-native-transport=true
+online-mode=true
+enable-status=true
+allow-flight=false
+broadcast-rcon-to-ops=true
+view-distance=10
+max-build-height=256
+server-ip=192.168.1.65
+allow-nether=true
+server-port=25565
+sync-chunk-writes=true
+enable-rcon=false
+op-permission-level=4
+prevent-proxy-connections=false
+resource-pack=
+entity-broadcast-range-percentage=100
+rcon.password=
+player-idle-timeout=0
+force-gamemode=false
+rate-limit=0
+hardcore=false
+white-list=false
+broadcast-console-to-ops=true
+spawn-npcs=true
+spawn-animals=true
+snooper-enabled=true
+function-permission-level=2
+level-type=default
+text-filtering-config=
+spawn-monsters=true
+enforce-whitelist=false
+spawn-protection=0
+resource-pack-sha1=
+max-world-size=29999984
+
+2020-12-18 17:22:09.200859 | (ARDU1N0#4107) Server property: resource-pack-sha1=
+
+2020-12-18 17:22:20.053924 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 17:22:28.543859 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 17:22:40.533303 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 17:23:42.608041 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:23:45.617692 | (Script) Bot PRIMED.
+2020-12-18 17:23:54.841207 | (ARDU1N0#4107) Server property: 4
+2020-12-18 17:24:07.152558 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 17:24:19.670662 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 17:25:17.513906 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:25:20.348303 | (Script) Bot PRIMED.
+2020-12-18 17:25:32.896844 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 17:31:49.915851 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:31:52.771772 | (Script) Bot PRIMED.
+2020-12-18 17:33:19.718693 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:33:22.629764 | (Script) Bot PRIMED.
+2020-12-18 17:36:18.966777 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:36:21.828250 | (Script) Bot PRIMED.
+2020-12-18 17:39:44.369912 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:39:47.237313 | (Script) Bot PRIMED.
+2020-12-18 17:39:52.317323 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 17:40:25.302728 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 17:53:01.883567 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:53:04.725729 | (Script) Bot PRIMED.
+2020-12-18 17:55:56.224622 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:55:59.096284 | (Script) Bot PRIMED.
+2020-12-18 17:58:14.109392 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:58:22.286366 | (Script) Bot PRIMED.
+2020-12-18 17:59:11.025816 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 17:59:13.969105 | (Script) Bot PRIMED.
+2020-12-18 18:02:32.365653 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:02:35.202611 | (Script) Bot PRIMED.
+2020-12-18 18:03:28.950176 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:03:31.818790 | (Script) Bot PRIMED.
+2020-12-18 18:06:20.734210 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:06:23.613241 | (Script) Bot PRIMED.
+2020-12-18 18:07:17.819736 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:07:20.695156 | (Script) Bot PRIMED.
+2020-12-18 18:10:20.817649 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:10:23.670129 | (Script) Bot PRIMED.
+2020-12-18 18:13:07.474203 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:13:10.410625 | (Script) Bot PRIMED.
+2020-12-18 18:13:17.563895 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:13:58.078164 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:14:01.009309 | (Script) Bot PRIMED.
+2020-12-18 18:14:06.894359 | (ARDU1N0#4107) Showing whitelist: ['` MysticFrogo`', '`R3diculous\n`']
+2020-12-18 18:32:13.157495 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:32:16.042441 | (Script) Bot PRIMED.
+2020-12-18 18:32:48.776194 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:32:51.711922 | (Script) Bot PRIMED.
+2020-12-18 18:32:55.015946 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:35:32.964877 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:35:35.899250 | (Script) Bot PRIMED.
+2020-12-18 18:35:47.546885 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:36:49.949465 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:36:52.893497 | (Script) Bot PRIMED.
+2020-12-18 18:36:58.685309 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:38:42.023903 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:38:45.014645 | (Script) Bot PRIMED.
+2020-12-18 18:38:46.959157 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 18:39:01.955897 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:39:37.342045 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:39:40.254989 | (Script) Bot PRIMED.
+2020-12-18 18:39:46.548502 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo, R3diculous
+
+2020-12-18 18:40:32.821022 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 18:40:32.833898 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 18:40:51.886193 | (ARDU1N0#4107) Removed from whitelist: R3diculous
+2020-12-18 18:43:04.240706 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:43:07.270261 | (Script) Bot PRIMED.
+2020-12-18 18:44:41.318502 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 18:44:44.247974 | (Script) Bot PRIMED.
+2020-12-18 18:44:56.832525 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 18:45:03.190498 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 18:45:31.266675 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 18:46:54.118748 | (ARDU1N0#4107) Whitelist activated.
+2020-12-18 18:47:10.553927 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo
+
+2020-12-18 18:47:24.713593 | (ARDU1N0#4107) Server property: enforce-whitelist=false
+
+2020-12-18 18:47:32.297760 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 18:47:45.523475 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 18:47:50.999321 | (ARDU1N0#4107) Showing whitelist:  MysticFrogo
+
+2020-12-18 18:49:12.705512 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 18:49:15.411163 | (ARDU1N0#4107) Restarting server.
+2020-12-18 18:49:34.914966 | (ARDU1N0#4107) Stopping server.
+2020-12-18 18:50:02.062982 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 18:50:02.081433 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 18:50:02.094849 | (ARDU1N0#4107) Starting server.
+2020-12-18 18:55:04.533672 | (ARDU1N0#4107) Added to whitelist: R3diculous
+2020-12-18 18:55:24.270335 | (ARDU1N0#4107) Removed from whitelist: R3diculous
+2020-12-18 18:58:07.056249 | (ARDU1N0#4107) Whitelist deactivated.
+2020-12-18 19:08:17.549193 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 19:08:20.375453 | (Script) Bot PRIMED.
+2020-12-18 19:10:41.533129 | (ARDU1N0#4107) Restarting bot.
+2020-12-18 19:10:44.244452 | (Script) Bot PRIMED.
+2020-12-18 19:15:01.456594 | (ARDU1N0#4107) Killed: R3diculous
+2020-12-18 19:49:28.048868 | (Roman Yoshi#4231) Fetched server status.
+2020-12-18 19:49:48.459184 | (ARDU1N0#4107) Fetched server operators list.
+2020-12-18 19:50:02.765278 | (ARDU1N0#4107) New server op: remove
+2020-12-18 19:50:33.878578 | (ARDU1N0#4107) Removed server op: remove
+2020-12-18 19:50:39.988640 | (ARDU1N0#4107) Removed server op: 4rdu1n0
+2020-12-18 19:50:49.337304 | (ARDU1N0#4107) Removed server op: R3diculous
+2020-12-18 19:50:50.923598 | (ARDU1N0#4107) Fetched server operators list.
+2020-12-18 19:51:00.055608 | (ARDU1N0#4107) Fetched server operators list.
+2020-12-18 20:08:32.054774 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 20:09:06.002566 | (ARDU1N0#4107) Added to whitelist: R3diculous
+2020-12-18 21:39:27.152039 | (ARDU1N0#4107) Whitelist activated.
+2020-12-18 21:40:33.312929 | (Script) Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/(2020-12-18 21-40) 1.16.4 ok
+2020-12-18 21:42:28.750646 | (ARDU1N0#4107) Fetched 5 most recent world saves.
+2020-12-18 21:42:39.417985 | (ARDU1N0#4107) Fetched 5 most recent world saves.
+2020-12-18 21:44:05.864194 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 21:44:05.874670 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 21:44:05.888206 | (ARDU1N0#4107) Starting server.
+2020-12-18 21:45:17.609845 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 21:45:17.616536 | (ARDU1N0#4107) Starting server.
+2020-12-18 22:01:58.669776 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 22:01:58.685789 | (ARDU1N0#4107) Starting server.
+2020-12-18 22:03:37.046295 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 22:03:45.691270 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 22:03:45.699406 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 22:04:25.583541 | (ARDU1N0#4107) Showing whitelist:  R3diculous
+
+2020-12-18 22:04:32.107237 | (ARDU1N0#4107) Whitelist activated.
+2020-12-18 22:04:38.178706 | (ARDU1N0#4107) Server property: enforce-whitelist=true
+
+2020-12-18 22:04:50.885141 | (ARDU1N0#4107) Removed from whitelist: R3diculous
+2020-12-18 22:05:01.837984 | (ARDU1N0#4107) Added to whitelist: R3diculous
+2020-12-18 22:13:56.564437 | (ARDU1N0#4107) Fetched server status.
+2020-12-18 22:13:56.580682 | (ARDU1N0#4107) Starting server.
+2020-12-18 22:17:40.843783 | (Roman Yoshi#4231) Whitelist deactivated.
+2020-12-18 22:42:26.637120 | (ARDU1N0#4107) Stopping server.
+2020-12-18 22:48:23.457244 | (ARDU1N0#4107) Fetched player list.
+2020-12-18 22:48:23.464467 | (ARDU1N0#4107) Fetched server status.
+2020-12-19 00:04:41.610056 | (ARDU1N0#4107) Restarting bot.
+[2020-12-19 00:14:59] (Script): Bot PRIMED.
+[2020-12-19 01:41:35] (Script): Bot PRIMED.
+[2020-12-19 02:40:18] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 02:40:24] (Script): Bot PRIMED.
+[2020-12-19 02:40:48] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:40:48] (ARDU1N0#4107): Starting server.
+[2020-12-19 02:42:59] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 02:42:59] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:44:57] (ARDU1N0#4107): Whitelist deactivated.
+[2020-12-19 02:48:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 02:48:52] (Script): Bot PRIMED.
+[2020-12-19 02:48:55] (ARDU1N0#4107): Whitelist deactivated.
+[2020-12-19 02:51:31] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 02:51:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:51:32] (ARDU1N0#4107): Starting server.
+[2020-12-19 02:52:22] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/(2020-12-19 02-52) 1.16.4 papermc
+[2020-12-19 02:52:22] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 02:52:22] (ARDU1N0#4107): New backup: (2020-12-19 02-52) 1.16.4 papermc
+[2020-12-19 02:55:43] (ARDU1N0#4107): Server restoring to: (2020-12-17 23-38) 1.16.4 beforePaper
+[2020-12-19 02:56:26] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 02:56:26] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:56:26] (ARDU1N0#4107): Starting server.
+[2020-12-19 02:58:53] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:58:53] (ARDU1N0#4107): Starting server.
+[2020-12-19 02:59:03] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 02:59:06] (Script): Bot PRIMED.
+[2020-12-19 02:59:28] (ARDU1N0#4107): Server restoring to: (2020-12-17 23-38) 1.16.4 beforePaper
+[2020-12-19 02:59:32] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 02:59:32] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:00:12] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:00:12] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:00:12] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:05:00] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 03:05:04] (ARDU1N0#4107): Server restoring to: (2020-12-19 02-52) 1.16.4 papermc
+[2020-12-19 03:05:29] (ARDU1N0#4107): Stopping server.
+[2020-12-19 03:06:02] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:06:02] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:06:02] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:07:17] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:07:17] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:08:11] (ARDU1N0#4107): Server said: R3diculous test
+[2020-12-19 03:08:24] (ARDU1N0#4107): Kicked R3diculous
+[2020-12-19 03:10:30] (ARDU1N0#4107): Server said: R3diculous [WARNING]: Testing
+[2020-12-19 03:10:50] (ARDU1N0#4107): Kicked R3diculous
+[2020-12-19 03:11:10] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:11:12] (Script): Bot PRIMED.
+[2020-12-19 03:11:25] (ARDU1N0#4107): Kicked R3diculous
+[2020-12-19 03:11:57] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:12:00] (Script): Bot PRIMED.
+[2020-12-19 03:12:08] (ARDU1N0#4107): Kicked R3diculous
+[2020-12-19 03:17:24] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:17:27] (Script): Bot PRIMED.
+[2020-12-19 03:17:48] (ARDU1N0#4107): Kicked R3diculous
+[2020-12-19 03:21:37] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:21:40] (Script): Bot PRIMED.
+[2020-12-19 03:21:49] (ARDU1N0#4107): Server restoring to: (2020-09-15 20-39) 1.16.3 YAGA
+[2020-12-19 03:22:29] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:22:29] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:27:16] (ARDU1N0#4107): Fetched 5 lines from bot log.
+[2020-12-19 03:29:36] (ARDU1N0#4107): Server restoring to: (2020-12-18 21-40) 1.16.4 ok
+[2020-12-19 03:30:03] (ARDU1N0#4107): Stopping server.
+[2020-12-19 03:30:38] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:30:38] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:30:38] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:30:53] (ARDU1N0#4107): Stopping server.
+[2020-12-19 03:32:17] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 03:32:23] (ARDU1N0#4107): Server restoring to: (2020-12-19 02-52) 1.16.4 papermc
+[2020-12-19 03:33:03] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/(2020-12-19 03-33) 1.16.4 test
+[2020-12-19 03:33:03] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:33:03] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:33:03] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:33:06] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 03:33:06] (ARDU1N0#4107): New backup: (2020-12-19 03-33) 1.16.4 test
+[2020-12-19 03:33:15] (ARDU1N0#4107): Server restoring to: (2020-12-19 02-52) 1.16.4 papermc
+[2020-12-19 03:33:55] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:33:55] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:33:55] (ARDU1N0#4107): Starting server.
+[2020-12-19 03:46:19] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:46:22] (Script): Bot PRIMED.
+[2020-12-19 03:46:28] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:46:28] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:46:40] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:46:43] (Script): Bot PRIMED.
+[2020-12-19 03:46:47] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 03:46:47] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 03:46:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 03:46:56] (Script): Bot PRIMED.
+[2020-12-19 03:47:08] (ARDU1N0#4107): Fetched help page.
+[2020-12-19 03:47:31] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 03:58:09] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:21:47] (Script): Bot PRIMED.
+[2020-12-19 16:22:14] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:22:16] (Script): Bot PRIMED.
+[2020-12-19 16:22:34] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:22:37] (Script): Bot PRIMED.
+[2020-12-19 16:23:06] (ARDU1N0#4107): `valhesia3` server selected.
+[2020-12-19 16:26:27] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:26:30] (Script): Bot PRIMED.
+[2020-12-19 16:26:42] (ARDU1N0#4107): `valhesia3` server selected.
+[2020-12-19 16:30:37] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:30:39] (Script): Bot PRIMED.
+[2020-12-19 16:30:44] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 16:32:41] (ARDU1N0#4107): Fetched banned list.
+[2020-12-19 16:33:04] (ARDU1N0#4107): Fetched 5 lines from bot log.
+[2020-12-19 16:33:14] (ARDU1N0#4107): Fetched 5 lines from bot log.
+[2020-12-19 16:34:40] (ARDU1N0#4107): Server selected: valhesia3
+[2020-12-19 16:35:21] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:35:24] (Script): Bot PRIMED.
+[2020-12-19 16:35:26] (ARDU1N0#4107): Server selected: valhesia3
+[2020-12-19 16:35:38] (ARDU1N0#4107): Fetched 5 lines from bot log.
+[2020-12-19 16:39:39] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:39:42] (Script): Bot PRIMED.
+[2020-12-19 16:40:25] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:40:27] (Script): Bot PRIMED.
+[2020-12-19 16:41:00] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:41:03] (Script): Bot PRIMED.
+[2020-12-19 16:41:32] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:41:35] (Script): Bot PRIMED.
+[2020-12-19 16:41:58] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:42:01] (Script): Bot PRIMED.
+[2020-12-19 16:42:03] (ARDU1N0#4107): Server selected: valhesia3
+[2020-12-19 16:44:01] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-19 16:51:38] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 16:53:04] (Script): Bot PRIMED.
+[2020-12-19 16:54:02] (Script): Server selected:
+[2020-12-19 16:54:05] (Script): Bot PRIMED.
+[2020-12-19 16:55:01] (Script): Server selected:
+[2020-12-19 16:55:04] (Script): Bot PRIMED.
+[2020-12-19 16:55:16] (Script): Server selected:
+[2020-12-19 16:55:18] (Script): Bot PRIMED.
+[2020-12-19 16:55:26] (Script): Server selected: valhesia3
+[2020-12-19 16:55:28] (Script): Bot PRIMED.
+[2020-12-19 17:01:36] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:01:37] (Script): Server selected: valhesia3
+[2020-12-19 17:01:40] (Script): Bot PRIMED.
+[2020-12-19 17:02:18] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-19 17:03:01] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 17:03:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:03:23] (Script): Server selected: valhesia3
+[2020-12-19 17:03:26] (Script): Bot PRIMED.
+[2020-12-19 17:03:33] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 17:03:33] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 17:07:35] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:07:36] (Script): Server selected: valhesia3
+[2020-12-19 17:07:38] (Script): Bot PRIMED.
+[2020-12-19 17:07:42] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 17:07:42] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 17:08:44] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:08:44] (Script): Server selected: valhesia3
+[2020-12-19 17:08:47] (Script): Bot PRIMED.
+[2020-12-19 17:09:10] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:09:11] (Script): Server selected: valhesia3
+[2020-12-19 17:09:13] (Script): Bot PRIMED.
+[2020-12-19 17:09:17] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 17:09:17] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 17:12:41] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 17:12:42] (Script): Server selected: valhesia3
+[2020-12-19 17:12:44] (Script): Bot PRIMED.
+[2020-12-19 17:17:12] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/valhesia3/(2020-12-19 17-17) 1.16.4 testing_val
+[2020-12-19 17:17:13] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 17:17:13] (ARDU1N0#4107): New backup: (2020-12-19 17-17) 1.16.4 testing_val
+[2020-12-19 18:38:50] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/valhesia3/(2020-12-19 18-38) 1.16.4 pre-val3
+[2020-12-19 18:38:52] (ARDU1N0#4107): Stopping server.
+[2020-12-19 18:38:53] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 18:38:53] (ARDU1N0#4107): New backup: (2020-12-19 18-38) 1.16.4 pre-val3
+[2020-12-19 18:39:44] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 18:39:44] (ARDU1N0#4107): Starting server.
+[2020-12-19 18:55:05] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 18:55:05] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 18:58:25] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 18:58:34] (ARDU1N0#4107): Server restoring to: (2020-12-19 18-38) 1.16.4 pre-val3
+[2020-12-19 18:59:01] (ARDU1N0#4107): Stopping server.
+[2020-12-19 18:59:41] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 18:59:41] (ARDU1N0#4107): Starting server.
+[2020-12-19 19:20:27] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 19:20:27] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 19:49:35] (ARDU1N0#4107): Saved world.
+[2020-12-19 19:49:45] (ARDU1N0#4107): Stopping server.
+[2020-12-19 19:49:53] (ARDU1N0#4107): Server selected: papermc
+[2020-12-19 19:49:56] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 19:50:32] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 19:50:32] (ARDU1N0#4107): Starting server.
+[2020-12-19 20:53:51] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 20:53:51] (Script): Server selected: papermc
+[2020-12-19 20:53:54] (Script): Bot PRIMED.
+[2020-12-19 20:54:18] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 20:54:18] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 21:42:16] (Roman Yoshi#4231): Fetched player list.
+[2020-12-19 21:42:47] (Roman Yoshi#4231): New server op: MysticFrogo
+[2020-12-19 21:46:58] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 21:46:58] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 21:47:00] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-19 21:48:10] (ARDU1N0#4107): Stopping server.
+[2020-12-19 21:50:24] (ARDU1N0#4107): Fetched player list.
+[2020-12-19 21:50:24] (ARDU1N0#4107): Fetched server status.
+[2020-12-19 22:02:04] (Roman Yoshi#4231): New server op: Mysticfrogo
+[2020-12-19 22:05:45] (Roman Yoshi#4231): Fetched latest 5 world saves.
+[2020-12-19 22:06:01] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-19 22-06) 1.16.4 0
+[2020-12-19 22:06:02] (Roman Yoshi#4231): Fetched latest 5 world saves.
+[2020-12-19 22:06:02] (Roman Yoshi#4231): New backup: (2020-12-19 22-06) 1.16.4 0
+[2020-12-19 22:06:37] (Roman Yoshi#4231): Server restoring to: (2020-12-18 21-40) 1.16.4 ok
+[2020-12-19 22:07:07] (Roman Yoshi#4231): Stopping server.
+[2020-12-19 22:07:38] (Roman Yoshi#4231): Fetched player list.
+[2020-12-19 22:07:38] (Roman Yoshi#4231): Fetched server status.
+[2020-12-19 22:07:38] (Roman Yoshi#4231): Starting server.
+[2020-12-19 22:14:12] (ARDU1N0#4107): Saved world.
+[2020-12-19 22:15:17] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-19 22-15) 1.16.4 pottyboibackup
+[2020-12-19 22:15:18] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-19 22:15:18] (ARDU1N0#4107): New backup: (2020-12-19 22-15) 1.16.4 pottyboibackup
+[2020-12-19 22:15:56] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-19 22:57:16] (ARDU1N0#4107): Restarting bot.
+[2020-12-19 22:57:17] (Script): Server selected: papermc
+[2020-12-19 22:57:19] (Script): Bot PRIMED.
+[2020-12-20 00:18:15] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:18:15] (Script): Server selected: papermc
+[2020-12-20 00:18:18] (Script): Bot PRIMED.
+[2020-12-20 00:21:25] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:21:25] (Script): Server selected: papermc
+[2020-12-20 00:21:28] (Script): Bot PRIMED.
+[2020-12-20 00:21:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:21:54] (Script): Server selected: papermc
+[2020-12-20 00:21:56] (Script): Bot PRIMED.
+[2020-12-20 00:22:01] (ARDU1N0#4107): Set gamemode: R3diculous for 60
+[2020-12-20 00:28:59] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:28:59] (Script): Server selected: papermc
+[2020-12-20 00:29:02] (Script): Bot PRIMED.
+[2020-12-20 00:30:28] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:30:28] (Script): Server selected: papermc
+[2020-12-20 00:30:31] (Script): Bot PRIMED.
+[2020-12-20 00:30:48] (ARDU1N0#4107): Server said: test
+[2020-12-20 00:31:39] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:31:40] (Script): Server selected: papermc
+[2020-12-20 00:31:42] (Script): Bot PRIMED.
+[2020-12-20 00:32:49] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 00:32:49] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 00:43:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:43:18] (Script): Server selected: papermc
+[2020-12-20 00:43:20] (Script): Bot PRIMED.
+[2020-12-20 00:44:45] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:44:46] (Script): Server selected: papermc
+[2020-12-20 00:44:48] (Script): Bot PRIMED.
+[2020-12-20 00:45:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:45:14] (Script): Server selected: papermc
+[2020-12-20 00:45:16] (Script): Bot PRIMED.
+[2020-12-20 00:46:40] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:46:40] (Script): Server selected: papermc
+[2020-12-20 00:46:43] (Script): Bot PRIMED.
+[2020-12-20 00:48:55] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:48:56] (Script): Server selected: papermc
+[2020-12-20 00:48:58] (Script): Bot PRIMED.
+[2020-12-20 00:50:06] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:50:07] (Script): Server selected: papermc
+[2020-12-20 00:50:09] (Script): Bot PRIMED.
+[2020-12-20 00:50:28] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:50:29] (Script): Server selected: papermc
+[2020-12-20 00:50:31] (Script): Bot PRIMED.
+[2020-12-20 00:52:25] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:52:25] (Script): Server selected: papermc
+[2020-12-20 00:52:28] (Script): Bot PRIMED.
+[2020-12-20 00:53:27] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:53:28] (Script): Server selected: papermc
+[2020-12-20 00:53:30] (Script): Bot PRIMED.
+[2020-12-20 00:53:52] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:53:52] (Script): Server selected: papermc
+[2020-12-20 00:53:55] (Script): Bot PRIMED.
+[2020-12-20 00:54:59] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:54:59] (Script): Server selected: papermc
+[2020-12-20 00:55:01] (Script): Bot PRIMED.
+[2020-12-20 00:56:38] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:56:38] (Script): Server selected: papermc
+[2020-12-20 00:56:41] (Script): Bot PRIMED.
+[2020-12-20 00:57:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:57:23] (Script): Server selected: papermc
+[2020-12-20 00:57:25] (Script): Bot PRIMED.
+[2020-12-20 00:57:42] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:57:43] (Script): Server selected: papermc
+[2020-12-20 00:57:45] (Script): Bot PRIMED.
+[2020-12-20 00:58:09] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:58:10] (Script): Server selected: papermc
+[2020-12-20 00:58:12] (Script): Bot PRIMED.
+[2020-12-20 00:58:29] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:58:29] (Script): Server selected: papermc
+[2020-12-20 00:58:37] (Script): Bot PRIMED.
+[2020-12-20 00:59:43] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 00:59:44] (Script): Server selected: papermc
+[2020-12-20 00:59:46] (Script): Bot PRIMED.
+[2020-12-20 00:59:49] (ARDU1N0#4107): Fetching chat from 15 lines of log lines.
+[2020-12-20 02:28:22] (big dick daniel#9290): Fetched player list.
+[2020-12-20 02:28:22] (big dick daniel#9290): Fetched server status.
+[2020-12-20 19:20:56] (Roman Yoshi#4231): Fetched player list.
+[2020-12-20 19:20:56] (Roman Yoshi#4231): Fetched server status.
+[2020-12-20 19:21:39] (Roman Yoshi#4231): Fetched player list.
+[2020-12-20 19:21:39] (Roman Yoshi#4231): Fetched server status.
+[2020-12-20 19:21:39] (Roman Yoshi#4231): Starting server.
+[2020-12-20 19:22:52] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:22:52] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:22:52] (ARDU1N0#4107): Starting server.
+[2020-12-20 19:23:53] (ARDU1N0#4107): Saved world.
+[2020-12-20 19:24:14] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-20 19-24) 1.16.4 oof
+[2020-12-20 19:24:15] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-20 19:24:15] (ARDU1N0#4107): New backup: (2020-12-20 19-24) 1.16.4 oof
+[2020-12-20 19:24:39] (ARDU1N0#4107): Stopping server.
+[2020-12-20 19:25:15] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:25:18] (Script): Server selected: papermc
+[2020-12-20 19:25:20] (Script): Bot PRIMED.
+[2020-12-20 19:25:44] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:25:44] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:25:44] (ARDU1N0#4107): Starting server.
+[2020-12-20 19:36:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:36:23] (Script): Server selected: papermc
+[2020-12-20 19:36:26] (Script): Bot PRIMED.
+[2020-12-20 19:36:31] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:36:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:37:47] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:37:47] (Script): Server selected: papermc
+[2020-12-20 19:37:50] (Script): Bot PRIMED.
+[2020-12-20 19:37:54] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:37:54] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:39:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:39:18] (Script): Server selected: papermc
+[2020-12-20 19:39:20] (Script): Bot PRIMED.
+[2020-12-20 19:39:22] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:39:22] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:40:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:40:14] (Script): Server selected: papermc
+[2020-12-20 19:40:17] (Script): Bot PRIMED.
+[2020-12-20 19:40:20] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:40:20] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:40:45] (ARDU1N0#4107): Fetched player list.
+[2020-12-20 19:40:45] (ARDU1N0#4107): Fetched server status.
+[2020-12-20 19:42:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:42:49] (Script): Server selected: papermc
+[2020-12-20 19:42:51] (Script): Bot PRIMED.
+[2020-12-20 19:45:28] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 19:45:29] (Script): Server selected: papermc
+[2020-12-20 19:45:31] (Script): Bot PRIMED.
+[2020-12-20 19:47:21] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-20 23:04:33] (ARDU1N0#4107): Fetching chat from 15 lines of log lines.
+[2020-12-20 23:06:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 23:06:50] (Script): Server selected: papermc
+[2020-12-20 23:06:52] (Script): Bot PRIMED.
+[2020-12-20 23:07:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 23:07:24] (Script): Server selected: papermc
+[2020-12-20 23:07:36] (Script): Bot PRIMED.
+[2020-12-20 23:08:30] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 23:08:30] (Script): Server selected: papermc
+[2020-12-20 23:08:33] (Script): Bot PRIMED.
+[2020-12-20 23:09:22] (Script): Server selected: papermc
+[2020-12-20 23:09:24] (Script): Bot PRIMED.
+[2020-12-20 23:09:35] (ARDU1N0#4107): Fetching chat from 15 lines of log lines.
+[2020-12-20 23:17:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 23:17:13] (Script): Server selected: papermc
+[2020-12-20 23:17:16] (Script): Bot PRIMED.
+[2020-12-20 23:17:53] (ARDU1N0#4107): Sent command: save-all
+[2020-12-20 23:17:53] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-20 23:18:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-20 23:18:55] (Script): Server selected: papermc
+[2020-12-20 23:18:58] (Script): Bot PRIMED.
+[2020-12-20 23:19:00] (ARDU1N0#4107): Sent command: save-all
+[2020-12-20 23:19:01] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-21 01:53:01] (big dick daniel#9290): Saved world.
+[2020-12-21 01:53:25] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-21 01-53) 1.16.4 retard
+[2020-12-21 01:53:26] (big dick daniel#9290): Fetched 5 most recent world saves.
+[2020-12-21 01:53:26] (big dick daniel#9290): New backup: (2020-12-21 01-53) 1.16.4 retard
+[2020-12-21 02:00:27] (ARDU1N0#4107): Fetched help page.
+[2020-12-21 02:15:42] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 02:15:43] (Script): Server selected: papermc
+[2020-12-21 13:58:44] (Script): Server selected: papermc
+[2020-12-21 13:59:27] (Script): Server selected: papermc
+[2020-12-21 13:59:45] (Script): Server selected: papermc
+[2020-12-21 13:59:48] (Script): Bot PRIMED.
+[2020-12-21 14:00:03] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 15:55:06] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 15:56:28] (Script): Server selected: papermc
+[2020-12-21 15:57:03] (Script): Server selected: papermc
+[2020-12-21 15:58:02] (Script): Server selected: papermc
+[2020-12-21 15:58:05] (Script): Bot PRIMED.
+[2020-12-21 15:58:11] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 15:58:11] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 16:35:35] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:35:36] (Script): Server selected: papermc
+[2020-12-21 16:35:38] (Script): Bot PRIMED.
+[2020-12-21 16:36:19] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:36:19] (Script): Server selected: papermc
+[2020-12-21 16:36:22] (Script): Bot PRIMED.
+[2020-12-21 16:37:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:37:14] (Script): Server selected: papermc
+[2020-12-21 16:37:16] (Script): Bot PRIMED.
+[2020-12-21 16:39:27] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:39:27] (Script): Server selected: papermc
+[2020-12-21 16:39:29] (Script): Bot PRIMED.
+[2020-12-21 16:40:22] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:40:23] (Script): Server selected: papermc
+[2020-12-21 16:40:25] (Script): Bot PRIMED.
+[2020-12-21 16:40:47] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:40:47] (Script): Server selected: papermc
+[2020-12-21 16:40:50] (Script): Bot PRIMED.
+[2020-12-21 16:41:27] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:41:27] (Script): Server selected: papermc
+[2020-12-21 16:41:29] (Script): Bot PRIMED.
+[2020-12-21 16:41:57] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:41:58] (Script): Server selected: papermc
+[2020-12-21 16:42:00] (Script): Bot PRIMED.
+[2020-12-21 16:42:14] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:42:14] (Script): Server selected: papermc
+[2020-12-21 16:42:16] (Script): Bot PRIMED.
+[2020-12-21 16:42:55] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:42:56] (Script): Server selected: papermc
+[2020-12-21 16:42:58] (Script): Bot PRIMED.
+[2020-12-21 16:44:06] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:44:06] (Script): Server selected: papermc
+[2020-12-21 16:44:09] (Script): Bot PRIMED.
+[2020-12-21 16:54:41] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:54:42] (Script): Server selected: papermc
+[2020-12-21 16:54:45] (Script): Bot PRIMED.
+[2020-12-21 16:56:15] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 16:56:15] (Script): Server selected: papermc
+[2020-12-21 16:56:18] (Script): Bot PRIMED.
+[2020-12-21 16:56:20] (ARDU1N0#4107): Autosave on
+[2020-12-21 16:56:21] (Script): Autosaved
+[2020-12-21 16:56:26] (Script): Autosaved
+[2020-12-21 16:56:31] (Script): Autosaved
+[2020-12-21 16:56:36] (Script): Autosaved
+[2020-12-21 16:56:58] (Script): Server selected: papermc
+[2020-12-21 16:57:01] (Script): Bot PRIMED.
+[2020-12-21 16:57:04] (ARDU1N0#4107): Autosave on
+[2020-12-21 16:57:05] (Script): Autosaved
+[2020-12-21 16:57:15] (Script): Autosaved
+[2020-12-21 16:57:19] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 16:57:25] (Script): Autosaved
+[2020-12-21 16:57:35] (Script): Autosaved
+[2020-12-21 16:57:37] (ARDU1N0#4107): Autosave off
+[2020-12-21 17:05:29] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:05:29] (Script): Server selected: papermc
+[2020-12-21 17:05:32] (Script): Bot PRIMED.
+[2020-12-21 17:05:37] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 17:05:40] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-21 17:05:41] (Script): Autosaved
+[2020-12-21 17:05:41] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 17:06:11] (Script): Autosaved
+[2020-12-21 17:06:11] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:06:11] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:06:41] (Script): Autosaved
+[2020-12-21 17:07:11] (Script): Autosaved
+[2020-12-21 17:07:41] (Script): Autosaved
+[2020-12-21 17:08:11] (Script): Autosaved
+[2020-12-21 17:08:41] (Script): Autosaved
+[2020-12-21 17:08:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:08:54] (Script): Server selected: papermc
+[2020-12-21 17:08:57] (Script): Bot PRIMED.
+[2020-12-21 17:09:02] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:09:02] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:11:58] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:12:17] (Script): Server selected: papermc
+[2020-12-21 17:12:20] (Script): Bot PRIMED.
+[2020-12-21 17:12:42] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:12:43] (Script): Server selected: papermc
+[2020-12-21 17:12:45] (Script): Bot PRIMED.
+[2020-12-21 17:12:49] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:12:49] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:16:01] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:16:02] (Script): Server selected: papermc
+[2020-12-21 17:16:04] (Script): Bot PRIMED.
+[2020-12-21 17:16:47] (Script): Server selected: papermc
+[2020-12-21 17:16:49] (Script): Bot PRIMED.
+[2020-12-21 17:16:54] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:16:54] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:17:09] (ARDU1N0#4107): Stopping server.
+[2020-12-21 17:17:10] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:17:24] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:17:24] (Script): Server selected: papermc
+[2020-12-21 17:17:27] (Script): Bot PRIMED.
+[2020-12-21 17:17:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:18:26] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:18:26] (Script): Server selected: papermc
+[2020-12-21 17:18:28] (Script): Bot PRIMED.
+[2020-12-21 17:18:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:22:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:22:23] (Script): Server selected: papermc
+[2020-12-21 17:22:26] (Script): Bot PRIMED.
+[2020-12-21 17:22:28] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:22:40] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:22:40] (Script): Server selected: papermc
+[2020-12-21 17:22:43] (Script): Bot PRIMED.
+[2020-12-21 17:23:09] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:23:09] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:23:09] (ARDU1N0#4107): Starting server.
+[2020-12-21 17:23:38] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:23:38] (Script): Server selected: papermc
+[2020-12-21 17:23:41] (Script): Bot PRIMED.
+[2020-12-21 17:29:24] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:29:24] (Script): Server selected: papermc
+[2020-12-21 17:29:27] (Script): Bot PRIMED.
+[2020-12-21 17:29:29] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:31:10] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:31:11] (Script): Server selected: papermc
+[2020-12-21 17:31:13] (Script): Bot PRIMED.
+[2020-12-21 17:32:24] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:32:25] (Script): Server selected: papermc
+[2020-12-21 17:32:27] (Script): Bot PRIMED.
+[2020-12-21 17:32:31] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:33:15] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:33:16] (Script): Server selected: papermc
+[2020-12-21 17:33:18] (Script): Bot PRIMED.
+[2020-12-21 17:33:21] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:33:45] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:33:45] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:39:31] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:39:32] (Script): Server selected: papermc
+[2020-12-21 17:39:34] (Script): Bot PRIMED.
+[2020-12-21 17:39:39] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:39:39] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:40:19] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:40:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:40:54] (Script): Server selected: papermc
+[2020-12-21 17:40:57] (Script): Bot PRIMED.
+[2020-12-21 17:40:58] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:41:23] (Script): Server selected: papermc
+[2020-12-21 17:41:26] (Script): Bot PRIMED.
+[2020-12-21 17:41:29] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:42:10] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:42:11] (Script): Server selected: papermc
+[2020-12-21 17:42:13] (Script): Bot PRIMED.
+[2020-12-21 17:43:01] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:43:02] (Script): Server selected: papermc
+[2020-12-21 17:43:04] (Script): Bot PRIMED.
+[2020-12-21 17:43:16] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:43:17] (Script): Server selected: papermc
+[2020-12-21 17:43:19] (Script): Bot PRIMED.
+[2020-12-21 17:43:23] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:43:34] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:43:34] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 17:44:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 17:44:14] (Script): Server selected: papermc
+[2020-12-21 17:44:16] (Script): Bot PRIMED.
+[2020-12-21 17:44:19] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 17:53:51] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 17:54:02] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-21 17:54:03] (Script): Autosaved
+[2020-12-21 17:54:03] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 17:54:28] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 17:54:33] (Script): Autosaved
+[2020-12-21 17:55:03] (Script): Autosaved
+[2020-12-21 17:55:33] (Script): Autosaved
+[2020-12-21 17:56:03] (Script): Autosaved
+[2020-12-21 17:56:33] (Script): Autosaved
+[2020-12-21 17:57:03] (Script): Autosaved
+[2020-12-21 17:57:33] (Script): Autosaved
+[2020-12-21 17:58:03] (Script): Autosaved
+[2020-12-21 17:58:33] (Script): Autosaved
+[2020-12-21 17:59:03] (Script): Autosaved
+[2020-12-21 17:59:33] (Script): Autosaved
+[2020-12-21 18:00:03] (Script): Autosaved
+[2020-12-21 18:00:33] (Script): Autosaved
+[2020-12-21 18:01:03] (Script): Autosaved
+[2020-12-21 18:01:16] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 18:01:16] (Script): Server selected: papermc
+[2020-12-21 18:01:18] (Script): Bot PRIMED.
+[2020-12-21 18:02:39] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 18:03:19] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-21 18:03:20] (Script): Autosaved
+[2020-12-21 18:03:20] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 18:03:36] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 18:03:36] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 18:03:50] (Script): Autosaved
+[2020-12-21 18:04:20] (Script): Autosaved
+[2020-12-21 18:04:50] (Script): Autosaved
+[2020-12-21 18:05:20] (Script): Autosaved
+[2020-12-21 18:05:50] (Script): Autosaved
+[2020-12-21 18:06:20] (Script): Autosaved
+[2020-12-21 18:06:50] (Script): Autosaved
+[2020-12-21 18:07:20] (Script): Autosaved
+[2020-12-21 18:07:50] (Script): Autosaved
+[2020-12-21 18:08:20] (Script): Autosaved
+[2020-12-21 18:08:50] (Script): Autosaved
+[2020-12-21 18:09:20] (Script): Autosaved
+[2020-12-21 18:09:50] (Script): Autosaved
+[2020-12-21 18:10:20] (Script): Autosaved
+[2020-12-21 18:10:50] (Script): Autosaved
+[2020-12-21 18:11:20] (Script): Autosaved
+[2020-12-21 18:11:50] (Script): Autosaved
+[2020-12-21 18:12:20] (Script): Autosaved
+[2020-12-21 18:12:50] (Script): Autosaved
+[2020-12-21 18:13:20] (Script): Autosaved
+[2020-12-21 18:13:50] (Script): Autosaved
+[2020-12-21 18:14:20] (Script): Autosaved
+[2020-12-21 18:14:50] (Script): Autosaved
+[2020-12-21 18:15:20] (Script): Autosaved
+[2020-12-21 18:15:50] (Script): Autosaved
+[2020-12-21 18:16:20] (Script): Autosaved
+[2020-12-21 18:16:50] (Script): Autosaved
+[2020-12-21 18:17:20] (Script): Autosaved
+[2020-12-21 18:17:50] (Script): Autosaved
+[2020-12-21 18:18:20] (Script): Autosaved
+[2020-12-21 18:18:37] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-21 18:18:50] (Script): Autosaved
+[2020-12-21 18:18:56] (ARDU1N0#4107): Fetched 5 lines from bot log.
+[2020-12-21 18:19:20] (Script): Autosaved
+[2020-12-21 18:19:50] (Script): Autosaved
+[2020-12-21 18:20:20] (Script): Autosaved
+[2020-12-21 18:20:50] (Script): Autosaved
+[2020-12-21 18:21:20] (Script): Autosaved
+[2020-12-21 18:21:50] (Script): Autosaved
+[2020-12-21 18:22:20] (Script): Autosaved
+[2020-12-21 18:22:50] (Script): Autosaved
+[2020-12-21 18:23:20] (Script): Autosaved
+[2020-12-21 18:23:50] (Script): Autosaved
+[2020-12-21 18:24:20] (Script): Autosaved
+[2020-12-21 18:24:50] (Script): Autosaved
+[2020-12-21 18:25:20] (Script): Autosaved
+[2020-12-21 18:25:50] (Script): Autosaved
+[2020-12-21 18:26:20] (Script): Autosaved
+[2020-12-21 18:26:50] (Script): Autosaved
+[2020-12-21 18:27:20] (Script): Autosaved
+[2020-12-21 18:27:50] (Script): Autosaved
+[2020-12-21 18:28:20] (Script): Autosaved
+[2020-12-21 18:28:50] (Script): Autosaved
+[2020-12-21 18:29:20] (Script): Autosaved
+[2020-12-21 18:29:50] (Script): Autosaved
+[2020-12-21 18:30:20] (Script): Autosaved
+[2020-12-21 18:30:50] (Script): Autosaved
+[2020-12-21 18:31:20] (Script): Autosaved
+[2020-12-21 18:31:50] (Script): Autosaved
+[2020-12-21 18:32:20] (Script): Autosaved
+[2020-12-21 18:32:50] (Script): Autosaved
+[2020-12-21 18:33:20] (Script): Autosaved
+[2020-12-21 18:33:50] (Script): Autosaved
+[2020-12-21 18:34:20] (Script): Autosaved
+[2020-12-21 18:34:50] (Script): Autosaved
+[2020-12-21 18:35:20] (Script): Autosaved
+[2020-12-21 18:35:50] (Script): Autosaved
+[2020-12-21 18:36:20] (Script): Autosaved
+[2020-12-21 18:36:50] (Script): Autosaved
+[2020-12-21 18:37:20] (Script): Autosaved
+[2020-12-21 18:37:50] (Script): Autosaved
+[2020-12-21 18:38:20] (Script): Autosaved
+[2020-12-21 18:38:50] (Script): Autosaved
+[2020-12-21 18:39:20] (Script): Autosaved
+[2020-12-21 18:39:50] (Script): Autosaved
+[2020-12-21 18:40:20] (Script): Autosaved
+[2020-12-21 18:40:50] (Script): Autosaved
+[2020-12-21 18:41:20] (Script): Autosaved
+[2020-12-21 18:41:50] (Script): Autosaved
+[2020-12-21 18:42:20] (Script): Autosaved
+[2020-12-21 18:42:50] (Script): Autosaved
+[2020-12-21 18:43:20] (Script): Autosaved
+[2020-12-21 18:43:50] (Script): Autosaved
+[2020-12-21 18:44:20] (Script): Autosaved
+[2020-12-21 18:44:50] (Script): Autosaved
+[2020-12-21 18:45:20] (Script): Autosaved
+[2020-12-21 18:45:50] (Script): Autosaved
+[2020-12-21 18:46:20] (Script): Autosaved
+[2020-12-21 18:46:50] (Script): Autosaved
+[2020-12-21 18:47:20] (Script): Autosaved
+[2020-12-21 18:47:50] (Script): Autosaved
+[2020-12-21 18:48:20] (Script): Autosaved
+[2020-12-21 18:48:50] (Script): Autosaved
+[2020-12-21 18:49:20] (Script): Autosaved
+[2020-12-21 18:49:50] (Script): Autosaved
+[2020-12-21 18:50:20] (Script): Autosaved
+[2020-12-21 18:50:50] (Script): Autosaved
+[2020-12-21 18:51:20] (Script): Autosaved
+[2020-12-21 18:51:50] (Script): Autosaved
+[2020-12-21 18:52:20] (Script): Autosaved
+[2020-12-21 18:52:50] (Script): Autosaved
+[2020-12-21 18:53:20] (Script): Autosaved
+[2020-12-21 18:53:50] (Script): Autosaved
+[2020-12-21 18:54:20] (Script): Autosaved
+[2020-12-21 18:54:50] (Script): Autosaved
+[2020-12-21 18:55:20] (Script): Autosaved
+[2020-12-21 18:55:50] (Script): Autosaved
+[2020-12-21 18:56:20] (Script): Autosaved
+[2020-12-21 18:56:50] (Script): Autosaved
+[2020-12-21 18:57:20] (Script): Autosaved
+[2020-12-21 18:57:50] (Script): Autosaved
+[2020-12-21 18:58:20] (Script): Autosaved
+[2020-12-21 18:58:50] (Script): Autosaved
+[2020-12-21 18:59:20] (Script): Autosaved
+[2020-12-21 18:59:50] (Script): Autosaved
+[2020-12-21 19:00:20] (Script): Autosaved
+[2020-12-21 19:00:50] (Script): Autosaved
+[2020-12-21 19:01:20] (Script): Autosaved
+[2020-12-21 19:01:50] (Script): Autosaved
+[2020-12-21 19:02:20] (Script): Autosaved
+[2020-12-21 19:02:50] (Script): Autosaved
+[2020-12-21 19:03:20] (Script): Autosaved
+[2020-12-21 19:03:50] (Script): Autosaved
+[2020-12-21 19:04:20] (Script): Autosaved
+[2020-12-21 19:04:50] (Script): Autosaved
+[2020-12-21 19:05:20] (Script): Autosaved
+[2020-12-21 19:05:50] (Script): Autosaved
+[2020-12-21 19:06:20] (Script): Autosaved
+[2020-12-21 19:06:50] (Script): Autosaved
+[2020-12-21 19:07:20] (Script): Autosaved
+[2020-12-21 19:07:50] (Script): Autosaved
+[2020-12-21 19:08:20] (Script): Autosaved
+[2020-12-21 19:08:50] (Script): Autosaved
+[2020-12-21 19:09:20] (Script): Autosaved
+[2020-12-21 19:09:50] (Script): Autosaved
+[2020-12-21 19:10:20] (Script): Autosaved
+[2020-12-21 19:10:50] (Script): Autosaved
+[2020-12-21 19:11:20] (Script): Autosaved
+[2020-12-21 19:11:50] (Script): Autosaved
+[2020-12-21 19:12:20] (Script): Autosaved
+[2020-12-21 19:12:50] (Script): Autosaved
+[2020-12-21 19:13:20] (Script): Autosaved
+[2020-12-21 19:13:50] (Script): Autosaved
+[2020-12-21 19:14:20] (Script): Autosaved
+[2020-12-21 19:14:50] (Script): Autosaved
+[2020-12-21 19:15:20] (Script): Autosaved
+[2020-12-21 19:15:50] (Script): Autosaved
+[2020-12-21 19:16:20] (Script): Autosaved
+[2020-12-21 19:16:50] (Script): Autosaved
+[2020-12-21 19:17:20] (Script): Autosaved
+[2020-12-21 19:17:50] (Script): Autosaved
+[2020-12-21 19:18:20] (Script): Autosaved
+[2020-12-21 19:18:50] (Script): Autosaved
+[2020-12-21 19:19:20] (Script): Autosaved
+[2020-12-21 19:19:50] (Script): Autosaved
+[2020-12-21 19:20:20] (Script): Autosaved
+[2020-12-21 19:20:50] (Script): Autosaved
+[2020-12-21 19:21:20] (Script): Autosaved
+[2020-12-21 19:21:50] (Script): Autosaved
+[2020-12-21 19:22:20] (Script): Autosaved
+[2020-12-21 19:22:50] (Script): Autosaved
+[2020-12-21 19:23:20] (Script): Autosaved
+[2020-12-21 19:23:50] (Script): Autosaved
+[2020-12-21 19:24:20] (Script): Autosaved
+[2020-12-21 19:24:50] (Script): Autosaved
+[2020-12-21 19:25:20] (Script): Autosaved
+[2020-12-21 19:25:50] (Script): Autosaved
+[2020-12-21 19:26:20] (Script): Autosaved
+[2020-12-21 19:26:50] (Script): Autosaved
+[2020-12-21 19:27:20] (Script): Autosaved
+[2020-12-21 19:27:50] (Script): Autosaved
+[2020-12-21 19:28:20] (Script): Autosaved
+[2020-12-21 19:28:50] (Script): Autosaved
+[2020-12-21 19:29:20] (Script): Autosaved
+[2020-12-21 19:29:50] (Script): Autosaved
+[2020-12-21 19:30:20] (Script): Autosaved
+[2020-12-21 19:30:50] (Script): Autosaved
+[2020-12-21 19:31:20] (Script): Autosaved
+[2020-12-21 19:31:50] (Script): Autosaved
+[2020-12-21 19:32:20] (Script): Autosaved
+[2020-12-21 19:32:50] (Script): Autosaved
+[2020-12-21 19:33:20] (Script): Autosaved
+[2020-12-21 19:33:50] (Script): Autosaved
+[2020-12-21 19:34:20] (Script): Autosaved
+[2020-12-21 19:34:50] (Script): Autosaved
+[2020-12-21 19:35:20] (Script): Autosaved
+[2020-12-21 19:35:50] (Script): Autosaved
+[2020-12-21 19:36:20] (Script): Autosaved
+[2020-12-21 19:36:50] (Script): Autosaved
+[2020-12-21 19:37:20] (Script): Autosaved
+[2020-12-21 19:37:50] (Script): Autosaved
+[2020-12-21 19:38:20] (Script): Autosaved
+[2020-12-21 19:38:50] (Script): Autosaved
+[2020-12-21 19:39:20] (Script): Autosaved
+[2020-12-21 19:39:50] (Script): Autosaved
+[2020-12-21 19:40:20] (Script): Autosaved
+[2020-12-21 19:40:50] (Script): Autosaved
+[2020-12-21 19:41:20] (Script): Autosaved
+[2020-12-21 19:41:50] (Script): Autosaved
+[2020-12-21 19:42:20] (Script): Autosaved
+[2020-12-21 19:42:50] (Script): Autosaved
+[2020-12-21 19:43:20] (Script): Autosaved
+[2020-12-21 19:43:50] (Script): Autosaved
+[2020-12-21 19:44:20] (Script): Autosaved
+[2020-12-21 19:44:50] (Script): Autosaved
+[2020-12-21 19:45:20] (Script): Autosaved
+[2020-12-21 19:45:50] (Script): Autosaved
+[2020-12-21 19:46:20] (Script): Autosaved
+[2020-12-21 19:46:50] (Script): Autosaved
+[2020-12-21 19:47:20] (Script): Autosaved
+[2020-12-21 19:47:50] (Script): Autosaved
+[2020-12-21 19:48:20] (Script): Autosaved
+[2020-12-21 19:48:50] (Script): Autosaved
+[2020-12-21 19:49:20] (Script): Autosaved
+[2020-12-21 19:49:50] (Script): Autosaved
+[2020-12-21 19:50:20] (Script): Autosaved
+[2020-12-21 19:50:50] (Script): Autosaved
+[2020-12-21 19:51:20] (Script): Autosaved
+[2020-12-21 19:51:50] (Script): Autosaved
+[2020-12-21 19:52:20] (Script): Autosaved
+[2020-12-21 19:52:50] (Script): Autosaved
+[2020-12-21 19:53:20] (Script): Autosaved
+[2020-12-21 19:53:50] (Script): Autosaved
+[2020-12-21 19:54:20] (Script): Autosaved
+[2020-12-21 19:54:50] (Script): Autosaved
+[2020-12-21 19:55:20] (Script): Autosaved
+[2020-12-21 19:55:50] (Script): Autosaved
+[2020-12-21 19:56:20] (Script): Autosaved
+[2020-12-21 19:56:50] (Script): Autosaved
+[2020-12-21 19:57:20] (Script): Autosaved
+[2020-12-21 19:57:50] (Script): Autosaved
+[2020-12-21 19:58:20] (Script): Autosaved
+[2020-12-21 19:58:50] (Script): Autosaved
+[2020-12-21 19:59:20] (Script): Autosaved
+[2020-12-21 19:59:50] (Script): Autosaved
+[2020-12-21 20:00:20] (Script): Autosaved
+[2020-12-21 20:00:50] (Script): Autosaved
+[2020-12-21 20:01:20] (Script): Autosaved
+[2020-12-21 20:01:50] (Script): Autosaved
+[2020-12-21 20:02:20] (Script): Autosaved
+[2020-12-21 20:02:50] (Script): Autosaved
+[2020-12-21 20:03:20] (Script): Autosaved
+[2020-12-21 20:03:50] (Script): Autosaved
+[2020-12-21 20:04:20] (Script): Autosaved
+[2020-12-21 20:04:50] (Script): Autosaved
+[2020-12-21 20:05:20] (Script): Autosaved
+[2020-12-21 20:05:50] (Script): Autosaved
+[2020-12-21 20:06:20] (Script): Autosaved
+[2020-12-21 20:06:50] (Script): Autosaved
+[2020-12-21 20:07:20] (Script): Autosaved
+[2020-12-21 20:07:50] (Script): Autosaved
+[2020-12-21 20:08:20] (Script): Autosaved
+[2020-12-21 20:08:50] (Script): Autosaved
+[2020-12-21 20:09:20] (Script): Autosaved
+[2020-12-21 20:09:50] (Script): Autosaved
+[2020-12-21 20:10:20] (Script): Autosaved
+[2020-12-21 20:10:50] (Script): Autosaved
+[2020-12-21 20:11:20] (Script): Autosaved
+[2020-12-21 20:11:50] (Script): Autosaved
+[2020-12-21 20:12:20] (Script): Autosaved
+[2020-12-21 20:12:50] (Script): Autosaved
+[2020-12-21 20:13:20] (Script): Autosaved
+[2020-12-21 20:13:50] (Script): Autosaved
+[2020-12-21 20:14:20] (Script): Autosaved
+[2020-12-21 20:14:50] (Script): Autosaved
+[2020-12-21 20:15:20] (Script): Autosaved
+[2020-12-21 20:15:50] (Script): Autosaved
+[2020-12-21 20:16:20] (Script): Autosaved
+[2020-12-21 20:16:50] (Script): Autosaved
+[2020-12-21 20:17:20] (Script): Autosaved
+[2020-12-21 20:17:50] (Script): Autosaved
+[2020-12-21 20:18:20] (Script): Autosaved
+[2020-12-21 20:18:50] (Script): Autosaved
+[2020-12-21 20:19:20] (Script): Autosaved
+[2020-12-21 20:19:50] (Script): Autosaved
+[2020-12-21 20:20:20] (Script): Autosaved
+[2020-12-21 20:20:50] (Script): Autosaved
+[2020-12-21 20:21:20] (Script): Autosaved
+[2020-12-21 20:21:50] (Script): Autosaved
+[2020-12-21 20:22:20] (Script): Autosaved
+[2020-12-21 20:22:50] (Script): Autosaved
+[2020-12-21 20:23:20] (Script): Autosaved
+[2020-12-21 20:23:50] (Script): Autosaved
+[2020-12-21 20:24:20] (Script): Autosaved
+[2020-12-21 20:24:50] (Script): Autosaved
+[2020-12-21 20:25:20] (Script): Autosaved
+[2020-12-21 20:25:50] (Script): Autosaved
+[2020-12-21 20:26:20] (Script): Autosaved
+[2020-12-21 20:26:50] (Script): Autosaved
+[2020-12-21 20:27:20] (Script): Autosaved
+[2020-12-21 20:27:50] (Script): Autosaved
+[2020-12-21 20:28:20] (Script): Autosaved
+[2020-12-21 20:28:50] (Script): Autosaved
+[2020-12-21 20:29:20] (Script): Autosaved
+[2020-12-21 20:29:50] (Script): Autosaved
+[2020-12-21 20:30:20] (Script): Autosaved
+[2020-12-21 20:30:50] (Script): Autosaved
+[2020-12-21 20:31:20] (Script): Autosaved
+[2020-12-21 20:31:50] (Script): Autosaved
+[2020-12-21 20:32:20] (Script): Autosaved
+[2020-12-21 20:32:50] (Script): Autosaved
+[2020-12-21 20:33:20] (Script): Autosaved
+[2020-12-21 20:33:50] (Script): Autosaved
+[2020-12-21 20:34:20] (Script): Autosaved
+[2020-12-21 20:34:50] (Script): Autosaved
+[2020-12-21 20:35:20] (Script): Autosaved
+[2020-12-21 20:35:50] (Script): Autosaved
+[2020-12-21 20:36:20] (Script): Autosaved
+[2020-12-21 20:36:50] (Script): Autosaved
+[2020-12-21 20:37:20] (Script): Autosaved
+[2020-12-21 20:37:50] (Script): Autosaved
+[2020-12-21 20:38:20] (Script): Autosaved
+[2020-12-21 20:38:50] (Script): Autosaved
+[2020-12-21 20:39:20] (Script): Autosaved
+[2020-12-21 20:39:50] (Script): Autosaved
+[2020-12-21 20:40:20] (Script): Autosaved
+[2020-12-21 20:40:50] (Script): Autosaved
+[2020-12-21 20:41:20] (Script): Autosaved
+[2020-12-21 20:41:50] (Script): Autosaved
+[2020-12-21 20:42:20] (Script): Autosaved
+[2020-12-21 20:42:50] (Script): Autosaved
+[2020-12-21 20:43:20] (Script): Autosaved
+[2020-12-21 20:43:50] (Script): Autosaved
+[2020-12-21 20:44:20] (Script): Autosaved
+[2020-12-21 20:44:50] (Script): Autosaved
+[2020-12-21 20:45:20] (Script): Autosaved
+[2020-12-21 20:45:50] (Script): Autosaved
+[2020-12-21 20:46:20] (Script): Autosaved
+[2020-12-21 20:46:50] (Script): Autosaved
+[2020-12-21 20:47:20] (Script): Autosaved
+[2020-12-21 20:47:50] (Script): Autosaved
+[2020-12-21 20:48:20] (Script): Autosaved
+[2020-12-21 20:48:50] (Script): Autosaved
+[2020-12-21 20:49:20] (Script): Autosaved
+[2020-12-21 20:49:50] (Script): Autosaved
+[2020-12-21 20:50:20] (Script): Autosaved
+[2020-12-21 20:50:50] (Script): Autosaved
+[2020-12-21 20:51:20] (Script): Autosaved
+[2020-12-21 20:51:50] (Script): Autosaved
+[2020-12-21 20:52:20] (Script): Autosaved
+[2020-12-21 20:52:50] (Script): Autosaved
+[2020-12-21 20:53:20] (Script): Autosaved
+[2020-12-21 20:53:50] (Script): Autosaved
+[2020-12-21 20:54:20] (Script): Autosaved
+[2020-12-21 20:54:50] (Script): Autosaved
+[2020-12-21 20:55:20] (Script): Autosaved
+[2020-12-21 20:55:35] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 20:55:36] (Script): Server selected: papermc
+[2020-12-21 20:55:39] (Script): Bot PRIMED.
+[2020-12-21 20:56:03] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 20:56:10] (ARDU1N0#4107): Autosave on, interval: 60m
+[2020-12-21 20:56:11] (Script): Autosaved, interval: 60m
+[2020-12-21 20:56:12] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-21 20:56:20] (ARDU1N0#4107): Fetched player list.
+[2020-12-21 20:56:20] (ARDU1N0#4107): Fetched server status.
+[2020-12-21 20:56:41] (Script): Autosaved, interval: 60m
+[2020-12-21 20:57:11] (Script): Autosaved, interval: 60m
+[2020-12-21 20:57:41] (Script): Autosaved, interval: 60m
+[2020-12-21 20:58:11] (Script): Autosaved, interval: 60m
+[2020-12-21 20:58:41] (Script): Autosaved, interval: 60m
+[2020-12-21 20:59:11] (Script): Autosaved, interval: 60m
+[2020-12-21 20:59:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:00:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:00:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:01:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:01:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:02:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:02:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:03:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:03:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:04:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:04:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:05:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:05:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:06:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:06:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:07:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:07:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:08:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:08:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:09:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:09:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:10:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:10:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:11:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:11:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:12:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:12:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:13:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:13:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:14:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:14:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:15:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:15:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:16:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:16:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:17:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:17:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:18:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:18:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:19:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:19:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:20:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:20:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:21:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:21:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:22:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:22:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:23:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:23:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:24:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:24:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:25:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:25:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:26:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:26:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:27:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:27:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:28:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:28:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:29:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:29:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:30:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:30:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:31:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:31:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:32:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:32:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:33:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:33:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:34:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:34:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:35:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:35:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:36:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:36:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:37:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:37:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:38:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:38:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:39:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:39:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:40:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:40:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:41:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:41:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:42:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:42:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:43:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:43:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:44:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:44:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:45:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:45:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:46:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:46:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:47:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:47:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:48:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:48:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:49:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:49:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:50:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:50:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:51:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:51:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:52:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:52:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:53:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:53:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:54:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:54:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:55:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:55:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:56:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:56:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:57:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:57:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:58:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:58:41] (Script): Autosaved, interval: 60m
+[2020-12-21 21:59:11] (Script): Autosaved, interval: 60m
+[2020-12-21 21:59:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:00:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:00:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:01:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:01:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:02:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:02:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:03:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:03:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:04:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:04:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:05:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:05:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:06:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:06:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:07:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:07:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:08:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:08:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:09:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:09:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:10:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:10:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:11:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:11:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:12:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:12:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:13:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:13:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:14:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:14:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:15:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:15:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:16:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:16:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:17:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:17:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:18:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:18:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:19:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:19:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:20:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:20:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:21:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:21:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:22:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:22:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:23:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:23:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:24:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:24:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:25:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:25:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:26:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:26:41] (Script): Autosaved, interval: 60m
+[2020-12-21 22:27:11] (Script): Autosaved, interval: 60m
+[2020-12-21 22:27:29] (Script): Server selected: papermc
+[2020-12-21 22:27:31] (Script): Bot PRIMED.
+[2020-12-21 23:40:24] (ARDU1N0#4107): Restarting bot.
+[2020-12-21 23:40:24] (Script): Server selected: papermc
+[2020-12-21 23:40:26] (Script): Bot PRIMED.
+[2020-12-21 23:40:51] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:01:25] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 00:01:25] (Script): Server selected: papermc
+[2020-12-22 00:01:28] (Script): Bot PRIMED.
+[2020-12-22 00:01:31] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 00:01:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:03:40] (ARDU1N0#4107): Stopping server.
+[2020-12-22 00:13:16] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 00:13:17] (Script): Server selected: papermc
+[2020-12-22 00:13:19] (Script): Bot PRIMED.
+[2020-12-22 00:19:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 00:19:17] (Script): Server selected: papermc
+[2020-12-22 00:19:20] (Script): Bot PRIMED.
+[2020-12-22 00:33:00] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 00:33:00] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:35:53] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 00:35:53] (Script): Server selected: papermc
+[2020-12-22 00:35:56] (Script): Bot PRIMED.
+[2020-12-22 00:36:40] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:37:16] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 00:37:16] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:37:16] (ARDU1N0#4107): Starting server.
+[2020-12-22 00:44:52] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 00:44:53] (Script): Server selected: papermc
+[2020-12-22 00:44:55] (Script): Bot PRIMED.
+[2020-12-22 00:45:02] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 00:55:25] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 00:55:25] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 01:01:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 01:01:17] (Script): Server selected: papermc
+[2020-12-22 01:01:19] (Script): Bot PRIMED.
+[2020-12-22 01:04:06] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 01:04:06] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 01:07:27] (Script): motd: Yewy\!
+
+[2020-12-22 01:58:38] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 01:58:39] (Script): Server selected: papermc
+[2020-12-22 01:58:41] (Script): Bot PRIMED.
+[2020-12-22 01:58:44] (ARDU1N0#4107): Autosave on, interval: 1800m
+[2020-12-22 01:58:45] (Script): Autosaved, interval: 1800m
+[2020-12-22 01:58:45] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:03:51] (Script): Server selected: papermc
+[2020-12-22 02:03:53] (Script): Bot PRIMED.
+[2020-12-22 02:03:55] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 02:03:56] (Script): Autosaved, interval: 30m
+[2020-12-22 02:03:56] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:04:14] (ARDU1N0#4107): Server property: 4
+[2020-12-22 02:10:01] (Script): Server selected: papermc
+[2020-12-22 02:10:04] (Script): Bot PRIMED.
+[2020-12-22 02:10:06] (ARDU1N0#4107): Server property: 404 Property not found in: /mnt/c/Users/DT/Desktop/MC/papermc/server.properties
+[2020-12-22 02:13:36] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 02:13:37] (Script): Server selected: papermc
+[2020-12-22 02:13:39] (Script): Bot PRIMED.
+[2020-12-22 02:13:41] (Script): Matching property not found in
+[2020-12-22 02:14:31] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 02:14:32] (Script): Autosaved, interval: 30m
+[2020-12-22 02:14:32] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:17:25] (Script): Server selected: papermc
+[2020-12-22 02:17:28] (Script): Bot PRIMED.
+[2020-12-22 02:17:29] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 02:17:30] (Script): Autosaved, interval: 30m
+[2020-12-22 02:17:31] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:17:41] (ARDU1N0#4107): Autosave off
+[2020-12-22 02:17:41] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:17:47] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 02:17:48] (Script): Autosaved, interval: 30m
+[2020-12-22 02:17:48] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:18:33] (Script): Server selected: papermc
+[2020-12-22 02:18:35] (Script): Bot PRIMED.
+[2020-12-22 02:20:11] (Script): Server selected: papermc
+[2020-12-22 02:20:14] (Script): Bot PRIMED.
+[2020-12-22 02:20:24] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:20:33] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 02:20:34] (Script): Autosaved, interval: 30m
+[2020-12-22 02:20:34] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 02:20:51] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:20:51] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:21:16] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:21:16] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:21:16] (ARDU1N0#4107): Server Selected: vanilla
+[2020-12-22 02:25:53] (Script): Server selected: t
+[2020-12-22 02:25:55] (Script): Bot PRIMED.
+[2020-12-22 02:28:48] (Script): Server selected: t
+[2020-12-22 02:28:51] (Script): Bot PRIMED.
+[2020-12-22 02:29:29] (Script): Server selected: t
+[2020-12-22 02:29:32] (Script): Bot PRIMED.
+[2020-12-22 02:30:34] (Script): Server selected: t
+[2020-12-22 02:30:37] (Script): Bot PRIMED.
+[2020-12-22 02:31:31] (Script): Server selected: t
+[2020-12-22 02:31:33] (Script): Bot PRIMED.
+[2020-12-22 02:34:07] (Script): Server selected: vanilla
+[2020-12-22 02:34:09] (Script): Bot PRIMED.
+[2020-12-22 02:34:13] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:34:13] (ARDU1N0#4107): Server Selected: papermc
+[2020-12-22 02:34:27] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:34:33] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 02:34:58] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 02:35:02] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:37:52] (Script): Server selected: papermc
+[2020-12-22 02:37:54] (Script): Bot PRIMED.
+[2020-12-22 02:37:58] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:37:58] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:38:41] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:38:41] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:38:41] (ARDU1N0#4107): Server Selected: papermc
+[2020-12-22 02:38:47] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:38:47] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:38:47] (ARDU1N0#4107): Server Selected: vanilla
+[2020-12-22 02:38:57] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:38:57] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:39:10] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 02:39:39] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 02:40:22] (Script): Server selected: vanilla
+[2020-12-22 02:40:24] (Script): Bot PRIMED.
+[2020-12-22 02:40:24] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 02:40:29] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:42:56] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 02:42:56] (Script): Server selected: vanilla
+[2020-12-22 02:42:59] (Script): Bot PRIMED.
+[2020-12-22 02:43:02] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 02:43:03] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 02:43:04] (Script): Server selected: papermc
+[2020-12-22 02:43:06] (Script): Bot PRIMED.
+[2020-12-22 02:43:12] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 02:43:12] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 11:37:56] (Roman Yoshi#4231): Fetched player list.
+[2020-12-22 11:37:56] (Roman Yoshi#4231): Fetched server status.
+[2020-12-22 11:39:40] (Roman Yoshi#4231): Restarting server.
+[2020-12-22 11:40:03] (Roman Yoshi#4231): Stopping server.
+[2020-12-22 11:40:31] (Roman Yoshi#4231): Fetched player list.
+[2020-12-22 11:40:31] (Roman Yoshi#4231): Fetched server status.
+[2020-12-22 11:40:31] (Roman Yoshi#4231): Starting server.
+[2020-12-22 13:18:19] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 13:18:20] (Script): Server selected: papermc
+[2020-12-22 13:18:22] (Script): Bot PRIMED.
+[2020-12-22 13:18:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 13:18:50] (Script): Server selected: papermc
+[2020-12-22 13:18:52] (Script): Bot PRIMED.
+[2020-12-22 13:18:57] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 13:18:57] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 13:39:01] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 13:39:02] (Script): Server selected: papermc
+[2020-12-22 13:41:27] (Script): Server selected: papermc
+[2020-12-22 13:41:29] (Script): Bot PRIMED.
+[2020-12-22 13:41:59] (ARDU1N0#4107): Fetched help page.
+[2020-12-22 13:46:55] (Script): Server selected: papermc
+[2020-12-22 13:46:57] (Script): Bot PRIMED.
+[2020-12-22 13:53:14] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 13:53:14] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 15:35:11] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 15:35:11] (Script): Server selected: vanilla
+[2020-12-22 15:35:14] (Script): Bot PRIMED.
+[2020-12-22 15:35:31] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 15:35:59] (ARDU1N0#4107): Restarting server.
+[2020-12-22 15:36:22] (ARDU1N0#4107): Stopping server.
+[2020-12-22 15:36:50] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 15:36:50] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 15:36:50] (ARDU1N0#4107): Starting server.
+[2020-12-22 15:38:33] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/vanilla/(2020-12-22 15-38) 1.16.4 wubba
+[2020-12-22 15:38:41] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-22 15:39:00] (ARDU1N0#4107): Server restoring to: (2020-12-22 15-38) 1.16.4 wubba
+[2020-12-22 15:39:31] (ARDU1N0#4107): Stopping server.
+[2020-12-22 15:40:01] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 15:40:01] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 15:40:01] (ARDU1N0#4107): Starting server.
+[2020-12-22 15:40:19] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 15:41:07] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/vanilla/(2020-12-22 15-41) 1.16.4 lubba
+[2020-12-22 15:41:48] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 15:42:13] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 15:44:46] (ARDU1N0#4107): World restoring to: (2020-12-17 23-38) 1.16.4 beforePaper
+[2020-12-22 15:45:17] (ARDU1N0#4107): Stopping server.
+[2020-12-22 15:45:46] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 15:45:46] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 15:45:46] (ARDU1N0#4107): Starting server.
+[2020-12-22 15:46:32] (ARDU1N0#4107): Online Mode: 
+[2020-12-22 15:47:04] (Script): motd: Yewy\!
+
+[2020-12-22 15:47:39] (Script): motd: Yewy\!
+
+[2020-12-22 15:47:45] (Script): motd: fucccc
+
+[2020-12-22 16:09:35] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 16:09:40] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-22 16:10:31] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 16:10:47] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:10:48] (Script): Server selected: vanilla
+[2020-12-22 16:10:50] (Script): Bot PRIMED.
+[2020-12-22 16:10:52] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 16:10:58] (ARDU1N0#4107): Fetched 6 most recent world saves.
+[2020-12-22 16:38:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:38:50] (Script): Server selected: vanilla
+[2020-12-22 16:39:03] (Script): Server selected: vanilla
+[2020-12-22 16:45:51] (Script): Server selected: vanilla
+[2020-12-22 16:46:40] (Script): Server selected: vanilla
+[2020-12-22 16:46:42] (Script): Bot PRIMED.
+[2020-12-22 16:49:48] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:49:48] (Script): Server selected: vanilla
+[2020-12-22 16:49:51] (Script): Bot PRIMED.
+[2020-12-22 16:50:01] (Script): motd: fucccc
+
+[2020-12-22 16:50:05] (Script): motd: tester
+
+[2020-12-22 16:50:06] (Script): motd: tester
+
+[2020-12-22 16:50:10] (Script): motd: fucccccc
+
+[2020-12-22 16:52:31] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:52:32] (Script): Server selected: vanilla
+[2020-12-22 16:52:34] (Script): Bot PRIMED.
+[2020-12-22 16:52:41] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-22 16:54:51] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:54:51] (Script): Server selected: vanilla
+[2020-12-22 16:54:54] (Script): Bot PRIMED.
+[2020-12-22 16:56:02] (Script): Server selected: vanilla
+[2020-12-22 16:56:05] (Script): Bot PRIMED.
+[2020-12-22 16:56:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 16:56:23] (Script): Server selected: valhesia3
+[2020-12-22 16:56:25] (Script): Bot PRIMED.
+[2020-12-22 16:56:37] (Script): Server selected: valhesia3
+[2020-12-22 16:56:39] (Script): Bot PRIMED.
+[2020-12-22 16:57:07] (Script): Server selected: valhesia3
+[2020-12-22 16:57:10] (Script): Bot PRIMED.
+[2020-12-22 16:57:14] (ARDU1N0#4107): Restarting server.
+[2020-12-22 16:57:21] (ARDU1N0#4107): Stopping server.
+[2020-12-22 16:57:46] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 16:57:46] (ARDU1N0#4107): Starting server.
+[2020-12-22 16:59:39] (Script): Server selected: valhesia3
+[2020-12-22 16:59:41] (Script): Bot PRIMED.
+[2020-12-22 17:00:55] (Script): Server selected: valhesia3
+[2020-12-22 17:00:57] (Script): Bot PRIMED.
+[2020-12-22 17:01:00] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:01:17] (Script): Server selected: valhesia3
+[2020-12-22 17:01:19] (Script): Bot PRIMED.
+[2020-12-22 17:01:21] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:01:38] (Script): Server selected: valhesia3
+[2020-12-22 17:01:40] (Script): Bot PRIMED.
+[2020-12-22 17:01:44] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:02:34] (Script): Server selected: valhesia3
+[2020-12-22 17:02:36] (Script): Bot PRIMED.
+[2020-12-22 17:02:37] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:03:18] (Script): Server selected: valhesia3
+[2020-12-22 17:03:20] (Script): Bot PRIMED.
+[2020-12-22 17:03:36] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 17:03:36] (Script): Server selected: vanilla
+[2020-12-22 17:03:39] (Script): Bot PRIMED.
+[2020-12-22 17:06:21] (Script): Server selected: vanilla
+[2020-12-22 17:06:23] (Script): Bot PRIMED.
+[2020-12-22 17:07:10] (Script): Server selected: vanilla
+[2020-12-22 17:07:12] (Script): Bot PRIMED.
+[2020-12-22 17:07:49] (Script): Server selected: vanilla
+[2020-12-22 17:07:52] (Script): Bot PRIMED.
+[2020-12-22 17:13:42] (Script): Server selected: vanilla
+[2020-12-22 17:13:44] (Script): Bot PRIMED.
+[2020-12-22 17:14:06] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 17:15:02] (Script): Server selected: vanilla
+[2020-12-22 17:15:04] (Script): Bot PRIMED.
+[2020-12-22 17:15:21] (Script): Server selected: vanilla
+[2020-12-22 17:15:23] (Script): Bot PRIMED.
+[2020-12-22 17:15:37] (Script): Server selected: vanilla
+[2020-12-22 17:15:39] (Script): Bot PRIMED.
+[2020-12-22 17:15:45] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:16:09] (ARDU1N0#4107): Fetched 6 most recent world saves.
+[2020-12-22 17:17:28] (Script): Server selected: vanilla
+[2020-12-22 17:17:31] (Script): Bot PRIMED.
+[2020-12-22 17:17:32] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:17:52] (Script): Server selected: vanilla
+[2020-12-22 17:17:54] (Script): Bot PRIMED.
+[2020-12-22 17:17:55] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:18:01] (ARDU1N0#4107): Fetched banned list.
+[2020-12-22 17:18:02] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:18:08] (ARDU1N0#4107): Fetched 6 most recent world saves.
+[2020-12-22 17:18:20] (Script): Server selected: vanilla
+[2020-12-22 17:18:23] (Script): Bot PRIMED.
+[2020-12-22 17:18:24] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:18:53] (Script): Server selected: vanilla
+[2020-12-22 17:18:55] (Script): Bot PRIMED.
+[2020-12-22 17:18:56] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-22 17:20:58] (ARDU1N0#4107): Stopping server.
+[2020-12-22 17:21:08] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 17:21:09] (Script): Server selected: vanilla
+[2020-12-22 17:21:11] (Script): Bot PRIMED.
+[2020-12-22 17:22:21] (Script): Fetched latest Minecraft server version: 1.16.4
+[2020-12-22 17:22:26] (Script): Fetched Minecraft server version: 1.16.4
+[2020-12-22 17:24:06] (ARDU1N0#4107): Sent command: say yolo
+[2020-12-22 17:24:06] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-22 17:24:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 17:24:17] (Script): Server selected: vanilla
+[2020-12-22 17:24:53] (Script): Server selected: vanilla
+[2020-12-22 17:25:09] (Script): Server selected: vanilla
+[2020-12-22 17:25:11] (Script): Bot PRIMED.
+[2020-12-22 17:26:51] (ARDU1N0#4107): Sent command: say test
+[2020-12-22 17:26:52] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-22 17:27:26] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 17:27:26] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 17:27:26] (ARDU1N0#4107): Starting server.
+[2020-12-22 17:49:42] (Script): Server selected: vanilla
+[2020-12-22 17:49:45] (Script): Bot PRIMED.
+[2020-12-22 18:10:43] (Script): Server selected: vanilla
+[2020-12-22 18:10:45] (Script): Bot PRIMED.
+[2020-12-22 18:10:47] (ARDU1N0#4107): Fetched server address.
+[2020-12-22 18:11:55] (Script): Server selected: vanilla
+[2020-12-22 18:11:58] (Script): Bot PRIMED.
+[2020-12-22 18:11:58] (ARDU1N0#4107): Fetched server address.
+[2020-12-22 18:12:06] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 18:12:06] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 18:12:38] (Script): Server selected: vanilla
+[2020-12-22 18:12:41] (Script): Bot PRIMED.
+[2020-12-22 18:12:47] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 18:12:47] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 18:12:58] (ARDU1N0#4107): Fetched server address.
+[2020-12-22 18:15:23] (Script): Server selected: vanilla
+[2020-12-22 18:15:25] (Script): Bot PRIMED.
+[2020-12-22 18:15:30] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 18:15:30] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 18:16:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 18:16:24] (Script): Server selected: papermc
+[2020-12-22 18:16:26] (Script): Bot PRIMED.
+[2020-12-22 18:16:30] (ARDU1N0#4107): Restarting server.
+[2020-12-22 18:16:54] (ARDU1N0#4107): Stopping server.
+[2020-12-22 18:17:21] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 18:17:21] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 18:17:21] (ARDU1N0#4107): Starting server.
+[2020-12-22 19:39:33] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-22 19:41:17] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 19:41:32] (ARDU1N0#4107): Autosave on, interval: 30m
+[2020-12-22 19:41:33] (Script): Autosaved, interval: 30m
+[2020-12-22 19:41:33] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-22 20:11:33] (Script): Autosaved, interval: 30m
+[2020-12-22 20:41:33] (Script): Autosaved, interval: 30m
+[2020-12-22 21:11:33] (Script): Autosaved, interval: 30m
+[2020-12-22 21:41:33] (Script): Autosaved, interval: 30m
+[2020-12-22 21:46:46] (Script): Server selected: papermc
+[2020-12-22 21:46:49] (Script): Bot PRIMED.
+[2020-12-22 21:46:50] (Script): Autosaved, interval: 30m
+[2020-12-22 22:16:50] (Script): Autosaved, interval: 30m
+[2020-12-22 22:46:50] (Script): Autosaved, interval: 30m
+[2020-12-22 23:16:50] (Script): Autosaved, interval: 30m
+[2020-12-22 23:21:48] (ARDU1N0#4107): Saved world.
+[2020-12-22 23:22:09] (ARDU1N0#4107): Restarting bot.
+[2020-12-22 23:22:09] (Script): Server selected: vanilla
+[2020-12-22 23:22:12] (Script): Bot PRIMED.
+[2020-12-22 23:22:13] (Script): Autosaved, interval: 30m
+[2020-12-22 23:22:26] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 23:23:34] (ARDU1N0#4107): Fetched player list.
+[2020-12-22 23:23:34] (ARDU1N0#4107): Fetched server status.
+[2020-12-22 23:23:34] (ARDU1N0#4107): Starting server.
+[2020-12-22 23:52:13] (Script): Autosaved, interval: 30m
+[2020-12-23 00:22:13] (Script): Autosaved, interval: 30m
+[2020-12-23 00:44:46] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 00:45:04] (Script): Server selected: vanilla
+[2020-12-23 00:45:22] (Script): Server selected: vanilla
+[2020-12-23 00:45:25] (Script): Autosaved, interval: 30m
+[2020-12-23 00:45:25] (Script): Bot PRIMED.
+[2020-12-23 01:06:28] (Script): Server selected: vanilla
+[2020-12-23 01:06:32] (Script): Autosaved, interval: 30m
+[2020-12-23 01:06:32] (Script): Bot PRIMED.
+[2020-12-23 01:07:11] (Script): Server selected: vanilla
+[2020-12-23 01:07:15] (Script): Autosaved, interval: 30m
+[2020-12-23 01:07:15] (Script): Bot PRIMED.
+[2020-12-23 01:07:17] (ARDU1N0#4107): Fetched server operators list.
+[2020-12-23 01:07:29] (ARDU1N0#4107): New server op: R3diculous
+[2020-12-23 01:07:39] (ARDU1N0#4107): Fetched server operators list.
+[2020-12-23 01:07:44] (ARDU1N0#4107): Fetched server operators list.
+[2020-12-23 01:14:01] (Script): Server selected: vanilla
+[2020-12-23 01:14:05] (Script): Autosaved, interval: 30m
+[2020-12-23 01:14:05] (Script): Bot PRIMED.
+[2020-12-23 01:15:17] (Script): Server selected: vanilla
+[2020-12-23 01:15:21] (Script): Autosaved, interval: 30m
+[2020-12-23 01:15:21] (Script): Bot PRIMED.
+[2020-12-23 01:45:21] (Script): Autosaved, interval: 30m
+[2020-12-23 01:54:27] (Script): Server selected: vanilla
+[2020-12-23 01:54:31] (Script): Autosaved, interval: 30m
+[2020-12-23 01:54:31] (Script): Bot PRIMED.
+[2020-12-23 01:55:06] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 01:55:54] (ARDU1N0#4107): Banned test : 
+[2020-12-23 02:00:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 02:00:50] (Script): Server selected: vanilla
+[2020-12-23 02:00:53] (Script): Autosaved, interval: 30m
+[2020-12-23 02:00:53] (Script): Bot PRIMED.
+[2020-12-23 02:01:07] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:01:19] (ARDU1N0#4107): Banned list : 
+[2020-12-23 02:01:44] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:04:26] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 02:04:26] (Script): Server selected: vanilla
+[2020-12-23 02:04:30] (Script): Autosaved, interval: 30m
+[2020-12-23 02:04:30] (Script): Bot PRIMED.
+[2020-12-23 02:04:37] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:07:07] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:07:16] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:08:11] (ARDU1N0#4107): Banned tester : 
+[2020-12-23 02:08:38] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:09:50] (ARDU1N0#4107): Banned R3diculous : 
+[2020-12-23 02:11:18] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:12:48] (ARDU1N0#4107): Banned R3diculous : 
+[2020-12-23 02:12:51] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:17:23] (ARDU1N0#4107): Banned R3diculous : 
+[2020-12-23 02:17:25] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:18:57] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 02:34:30] (Script): Autosaved, interval: 30m
+[2020-12-23 03:04:30] (Script): Autosaved, interval: 30m
+[2020-12-23 03:16:02] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:16:05] (Script): Server selected: vanilla
+[2020-12-23 03:16:09] (Script): Autosaved, interval: 30m
+[2020-12-23 03:16:09] (Script): Bot PRIMED.
+[2020-12-23 03:16:58] (Script): Server selected: vanilla
+[2020-12-23 03:17:01] (Script): Autosaved, interval: 30m
+[2020-12-23 03:17:01] (Script): Bot PRIMED.
+[2020-12-23 03:19:40] (Script): Server selected: vanilla
+[2020-12-23 03:19:44] (Script): Autosaved, interval: 30m
+[2020-12-23 03:19:45] (Script): Bot PRIMED.
+[2020-12-23 03:19:49] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 03:19:49] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 03:19:56] (ARDU1N0#4107): Fetched autosave information.
+[2020-12-23 03:23:19] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 03:23:24] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 03:29:27] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:29:27] (Script): Server selected: vanilla
+[2020-12-23 03:29:31] (Script): Autosaved, interval: 30m
+[2020-12-23 03:29:31] (Script): Bot PRIMED.
+[2020-12-23 03:29:32] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:29:33] (Script): Server selected: vanilla
+[2020-12-23 03:29:36] (Script): Autosaved, interval: 30m
+[2020-12-23 03:29:36] (Script): Bot PRIMED.
+[2020-12-23 03:49:34] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:49:34] (Script): Server selected: vanilla
+[2020-12-23 03:49:38] (Script): Autosaved, interval: 30m
+[2020-12-23 03:49:38] (Script): Bot PRIMED.
+[2020-12-23 03:49:47] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 03:49:47] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 03:49:55] (ARDU1N0#4107): Fetched banned list.
+[2020-12-23 03:50:04] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-23 03:50:09] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-23 03:51:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:51:49] (Script): Server selected: vanilla
+[2020-12-23 03:51:53] (Script): Autosaved, interval: 30m
+[2020-12-23 03:51:53] (Script): Bot PRIMED.
+[2020-12-23 03:51:56] (ARDU1N0#4107): Showing whitelist:  MysticFrogo, nickP54
+
+[2020-12-23 03:57:10] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 03:57:10] (Script): Server selected: vanilla
+[2020-12-23 03:57:14] (Script): Autosaved, interval: 30m
+[2020-12-23 03:57:14] (Script): Bot PRIMED.
+[2020-12-23 03:57:17] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 03:58:08] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 03:58:08] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 04:00:58] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 04:00:58] (Script): Server selected: vanilla
+[2020-12-23 04:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 04:01:02] (Script): Bot PRIMED.
+[2020-12-23 04:01:04] (ARDU1N0#4107): Fetched server operators list.
+[2020-12-23 04:01:08] (ARDU1N0#4107): Showing whitelist:  MysticFrogo, nickP54
+
+[2020-12-23 04:07:28] (ARDU1N0#4107): Fetched server address.
+[2020-12-23 04:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 05:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 05:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 06:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 06:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 07:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 07:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 08:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 08:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 09:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 09:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 10:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 10:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 11:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 11:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 12:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 12:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 13:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 13:31:02] (Script): Autosaved, interval: 30m
+[2020-12-23 14:01:02] (Script): Autosaved, interval: 30m
+[2020-12-23 14:09:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:09:23] (Script): Server selected: vanilla
+[2020-12-23 14:09:27] (Script): Autosaved, interval: 30m
+[2020-12-23 14:09:27] (Script): Bot PRIMED.
+[2020-12-23 14:09:32] (ARDU1N0#4107): Server said: testing
+[2020-12-23 14:10:39] (ARDU1N0#4107): Server said: 
+[2020-12-23 14:12:30] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:12:30] (Script): Server selected: vanilla
+[2020-12-23 14:12:34] (Script): Autosaved, interval: 30m
+[2020-12-23 14:12:34] (Script): Bot PRIMED.
+[2020-12-23 14:13:44] (ARDU1N0#4107): Sent command: 
+[2020-12-23 14:13:44] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-23 14:14:53] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:14:53] (Script): Server selected: vanilla
+[2020-12-23 14:14:57] (Script): Autosaved, interval: 30m
+[2020-12-23 14:14:57] (Script): Bot PRIMED.
+[2020-12-23 14:14:59] (ARDU1N0#4107): Messaged None : 
+[2020-12-23 14:15:14] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:15:15] (Script): Server selected: vanilla
+[2020-12-23 14:15:18] (Script): Autosaved, interval: 30m
+[2020-12-23 14:15:19] (Script): Bot PRIMED.
+[2020-12-23 14:16:07] (ARDU1N0#4107): Messaged R3d : hi
+[2020-12-23 14:16:18] (ARDU1N0#4107): Messaged R3diculous : testing
+[2020-12-23 14:17:56] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 14:19:31] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:19:31] (Script): Server selected: vanilla
+[2020-12-23 14:19:35] (Script): Autosaved, interval: 30m
+[2020-12-23 14:19:35] (Script): Bot PRIMED.
+[2020-12-23 14:19:36] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 14:20:23] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 14:21:09] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 14:21:53] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:21:53] (Script): Server selected: vanilla
+[2020-12-23 14:21:57] (Script): Autosaved, interval: 30m
+[2020-12-23 14:21:57] (Script): Bot PRIMED.
+[2020-12-23 14:22:22] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 14:42:52] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:42:52] (Script): Server selected: vanilla
+[2020-12-23 14:42:56] (Script): Autosaved, interval: 30m
+[2020-12-23 14:42:56] (Script): Bot PRIMED.
+[2020-12-23 14:43:23] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:43:24] (Script): Server selected: vanilla
+[2020-12-23 14:43:28] (Script): Autosaved, interval: 30m
+[2020-12-23 14:43:28] (Script): Bot PRIMED.
+[2020-12-23 14:43:47] (ARDU1N0#4107): Killed: frog
+[2020-12-23 14:43:56] (ARDU1N0#4107): Killed: R3dicuouls
+[2020-12-23 14:44:00] (ARDU1N0#4107): Killed: R3diculous
+[2020-12-23 14:47:15] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:47:16] (Script): Server selected: vanilla
+[2020-12-23 14:47:19] (Script): Autosaved, interval: 30m
+[2020-12-23 14:47:20] (Script): Bot PRIMED.
+[2020-12-23 14:47:34] (ARDU1N0#4107): Killed: R3diculous
+[2020-12-23 14:51:01] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:51:02] (Script): Server selected: vanilla
+[2020-12-23 14:51:05] (Script): Autosaved, interval: 30m
+[2020-12-23 14:51:06] (Script): Bot PRIMED.
+[2020-12-23 14:53:55] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 14:53:55] (Script): Server selected: vanilla
+[2020-12-23 14:53:59] (Script): Autosaved, interval: 30m
+[2020-12-23 14:53:59] (Script): Bot PRIMED.
+[2020-12-23 14:54:03] (Script): Matching property not found.
+[2020-12-23 14:54:09] (Script): Matching property not found.
+[2020-12-23 14:56:52] (Script): Matching property not found.
+[2020-12-23 15:07:38] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 15:07:38] (Script): Server selected: vanilla
+[2020-12-23 15:07:42] (Script): Autosaved, interval: 30m
+[2020-12-23 15:07:42] (Script): Bot PRIMED.
+[2020-12-23 15:08:03] (Script): Matching property not found.
+[2020-12-23 15:11:35] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 15:11:36] (Script): Server selected: vanilla
+[2020-12-23 15:11:40] (Script): Autosaved, interval: 30m
+[2020-12-23 15:11:40] (Script): Bot PRIMED.
+[2020-12-23 15:12:05] (Script): Server selected: vanilla
+[2020-12-23 15:12:09] (Script): Autosaved, interval: 30m
+[2020-12-23 15:12:09] (Script): Bot PRIMED.
+[2020-12-23 15:12:10] (ARDU1N0#4107): Server property: testing
+
+[2020-12-23 15:12:24] (Script): Server selected: vanilla
+[2020-12-23 15:12:28] (Script): Autosaved, interval: 30m
+[2020-12-23 15:12:28] (Script): Bot PRIMED.
+[2020-12-23 15:12:29] (ARDU1N0#4107): Server property: motd=testing
+
+[2020-12-23 15:12:55] (ARDU1N0#4107): Online Mode: 
+[2020-12-23 15:13:40] (ARDU1N0#4107): Online Mode: true
+[2020-12-23 15:16:00] (Script): Server selected: vanilla
+[2020-12-23 15:16:04] (Script): Autosaved, interval: 30m
+[2020-12-23 15:16:04] (Script): Bot PRIMED.
+[2020-12-23 15:16:09] (ARDU1N0#4107): online-mode=true
+
+[2020-12-23 15:16:22] (ARDU1N0#4107): online-mode=false
+
+[2020-12-23 15:16:24] (ARDU1N0#4107): online-mode=true
+
+[2020-12-23 15:16:47] (Script): Server selected: vanilla
+[2020-12-23 15:16:51] (Script): Autosaved, interval: 30m
+[2020-12-23 15:16:51] (Script): Bot PRIMED.
+[2020-12-23 15:16:52] (ARDU1N0#4107): online-mode=true
+
+[2020-12-23 15:17:17] (Script): Server selected: vanilla
+[2020-12-23 15:17:21] (Script): Autosaved, interval: 30m
+[2020-12-23 15:17:21] (Script): Bot PRIMED.
+[2020-12-23 15:17:21] (ARDU1N0#4107): online-mode=true
+[2020-12-23 15:21:11] (Script): Server selected: vanilla
+[2020-12-23 15:21:14] (Script): Autosaved, interval: 30m
+[2020-12-23 15:21:15] (Script): Bot PRIMED.
+[2020-12-23 15:21:15] (ARDU1N0#4107): Fetched online-mode state.
+[2020-12-23 15:21:21] (ARDU1N0#4107): online-mode=true
+[2020-12-23 15:22:02] (Script): Server selected: vanilla
+[2020-12-23 15:22:06] (Script): Autosaved, interval: 30m
+[2020-12-23 15:22:06] (Script): Bot PRIMED.
+[2020-12-23 15:22:07] (ARDU1N0#4107): Updated online-mode: true
+
+[2020-12-23 15:22:26] (Script): motd: testing
+
+[2020-12-23 15:23:38] (Script): Server selected: vanilla
+[2020-12-23 15:23:42] (Script): Autosaved, interval: 30m
+[2020-12-23 15:23:42] (Script): Bot PRIMED.
+[2020-12-23 15:23:43] (ARDU1N0#4107): Fetched online-mode state.
+[2020-12-23 15:23:46] (ARDU1N0#4107): Updated online-mode: true
+[2020-12-23 15:27:19] (Script): Server selected: vanilla
+[2020-12-23 15:27:23] (Script): Autosaved, interval: 30m
+[2020-12-23 15:27:23] (Script): Bot PRIMED.
+[2020-12-23 15:27:24] (Script): Updated MOTD: e
+[2020-12-23 15:27:52] (Script): Server selected: vanilla
+[2020-12-23 15:27:56] (Script): Autosaved, interval: 30m
+[2020-12-23 15:27:56] (Script): Bot PRIMED.
+[2020-12-23 15:27:57] (Script): Fetched MOTD: e
+[2020-12-23 15:28:23] (Script): Server selected: vanilla
+[2020-12-23 15:28:27] (Script): Autosaved, interval: 30m
+[2020-12-23 15:28:27] (Script): Bot PRIMED.
+[2020-12-23 15:28:28] (Script): Fetched MOTD: testing
+[2020-12-23 15:28:49] (Script): Server selected: vanilla
+[2020-12-23 15:28:53] (Script): Autosaved, interval: 30m
+[2020-12-23 15:28:53] (Script): Bot PRIMED.
+[2020-12-23 15:28:53] (Script): Fetched MOTD: testing
+[2020-12-23 15:29:00] (Script): Fetched MOTD: testing
+[2020-12-23 15:29:04] (Script): Fetched MOTD: testing
+[2020-12-23 15:29:46] (ARDU1N0#4107): Server property: motd=testing
+
+[2020-12-23 15:29:59] (ARDU1N0#4107): Server property: motd=ooof
+
+[2020-12-23 15:31:49] (Script): Server selected: vanilla
+[2020-12-23 15:31:52] (Script): Autosaved, interval: 30m
+[2020-12-23 15:31:52] (Script): Bot PRIMED.
+[2020-12-23 15:31:54] (ARDU1N0#4107): Server property: motd=ooof
+
+[2020-12-23 15:32:02] (Script): Fetched MOTD: ooof
+[2020-12-23 15:32:11] (ARDU1N0#4107): Server property: motd=o
+
+[2020-12-23 15:35:36] (Script): Server selected: vanilla
+[2020-12-23 15:35:39] (Script): Autosaved, interval: 30m
+[2020-12-23 15:35:39] (Script): Fetched MOTD: o
+[2020-12-23 15:35:40] (Script): Bot PRIMED.
+[2020-12-23 15:35:50] (Script): Fetched MOTD: o
+[2020-12-23 15:37:59] (Script): Server selected: vanilla
+[2020-12-23 15:38:03] (Script): Autosaved, interval: 30m
+[2020-12-23 15:38:03] (Script): Bot PRIMED.
+[2020-12-23 15:38:03] (Script): Fetched MOTD: o
+[2020-12-23 15:38:46] (ARDU1N0#4107): Sent command: No reason given.
+[2020-12-23 15:38:47] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-23 15:39:00] (Script): Server selected: vanilla
+[2020-12-23 15:39:03] (Script): Autosaved, interval: 30m
+[2020-12-23 15:39:03] (Script): Bot PRIMED.
+[2020-12-23 15:39:06] (ARDU1N0#4107): Sent command: say testing
+[2020-12-23 15:39:06] (ARDU1N0#4107): Fetched 2 lines from server log.
+[2020-12-23 15:39:20] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 15:39:45] (Script): Fetched MOTD: o
+[2020-12-23 15:39:50] (Script): Updated MOTD: just fek off
+[2020-12-23 15:39:54] (ARDU1N0#4107): Server property: motd=just fek off
+[2020-12-23 15:41:33] (Script): Server selected: vanilla
+[2020-12-23 15:41:36] (Script): Autosaved, interval: 30m
+[2020-12-23 15:41:36] (Script): Bot PRIMED.
+[2020-12-23 15:46:25] (Script): Server selected: vanilla
+[2020-12-23 15:46:29] (Script): Autosaved, interval: 30m
+[2020-12-23 15:46:30] (Script): Bot PRIMED.
+[2020-12-23 15:46:33] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 15:46:33] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 15:53:56] (ARDU1N0#4107): Server property: version=1.16.3
+[2020-12-23 15:55:51] (Script): Fetched Minecraft server version: 1.16.4
+[2020-12-23 16:02:01] (Script): Server selected: vanilla
+[2020-12-23 16:02:05] (Script): Bot PRIMED.
+[2020-12-23 16:04:15] (Script): Server selected: vanilla
+[2020-12-23 16:04:19] (Script): Bot PRIMED.
+[2020-12-23 16:05:25] (Script): Server selected: vanilla
+[2020-12-23 16:05:29] (Script): Autosaved, interval: 30m
+[2020-12-23 16:05:29] (Script): Bot PRIMED.
+[2020-12-23 16:06:31] (Script): Server selected: vanilla
+[2020-12-23 16:06:34] (Script): Autosaved, interval: 30m
+[2020-12-23 16:06:34] (Script): Bot PRIMED.
+[2020-12-23 16:09:52] (Script): Server selected: vanilla
+[2020-12-23 16:09:56] (Script): Autosaved, interval: 30m
+[2020-12-23 16:09:56] (Script): Bot PRIMED.
+[2020-12-23 16:10:22] (Script): Server selected: vanilla
+[2020-12-23 16:10:26] (Script): Autosaved, interval: 30m
+[2020-12-23 16:10:26] (Script): Bot PRIMED.
+[2020-12-23 16:11:18] (Script): Server selected: vanilla
+[2020-12-23 16:11:22] (Script): Autosaved, interval: 30m
+[2020-12-23 16:11:22] (Script): Bot PRIMED.
+[2020-12-23 16:11:56] (Script): Server selected: vanilla
+[2020-12-23 16:12:00] (Script): Autosaved, interval: 30m
+[2020-12-23 16:12:00] (Script): Bot PRIMED.
+[2020-12-23 16:12:49] (Script): Fetched MOTD: just fek off
+[2020-12-23 16:13:50] (Script): Server selected: vanilla
+[2020-12-23 16:13:54] (Script): Autosaved, interval: 30m
+[2020-12-23 16:13:54] (Script): Bot PRIMED.
+[2020-12-23 16:16:27] (Script): Server selected: vanilla
+[2020-12-23 16:16:31] (Script): Autosaved, interval: 30m
+[2020-12-23 16:16:31] (Script): Bot PRIMED.
+[2020-12-23 16:16:32] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:17:04] (Script): Server selected: vanilla
+[2020-12-23 16:17:08] (Script): Autosaved, interval: 30m
+[2020-12-23 16:17:08] (Script): Bot PRIMED.
+[2020-12-23 16:17:09] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:17:52] (Script): Server selected: vanilla
+[2020-12-23 16:17:55] (Script): Autosaved, interval: 30m
+[2020-12-23 16:17:55] (Script): Bot PRIMED.
+[2020-12-23 16:17:56] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:18:17] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:20:26] (Script): Server selected: vanilla
+[2020-12-23 16:20:30] (Script): Autosaved, interval: 30m
+[2020-12-23 16:20:30] (Script): Bot PRIMED.
+[2020-12-23 16:20:55] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:21:21] (Script): Server selected: vanilla
+[2020-12-23 16:21:30] (Script): Autosaved, interval: 30m
+[2020-12-23 16:21:30] (Script): Bot PRIMED.
+[2020-12-23 16:21:31] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:21:47] (Script): Server selected: vanilla
+[2020-12-23 16:21:57] (Script): Autosaved, interval: 30m
+[2020-12-23 16:21:57] (Script): Bot PRIMED.
+[2020-12-23 16:21:58] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:22:16] (Script): Server selected: vanilla
+[2020-12-23 16:22:20] (Script): Autosaved, interval: 30m
+[2020-12-23 16:22:20] (Script): Bot PRIMED.
+[2020-12-23 16:22:21] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:22:50] (Script): Server selected: vanilla
+[2020-12-23 16:22:54] (Script): Autosaved, interval: 30m
+[2020-12-23 16:22:54] (Script): Bot PRIMED.
+[2020-12-23 16:22:56] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:23:26] (ARDU1N0#4107): Fetched 10 lines from server log.
+[2020-12-23 16:23:44] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:23:45] (Script): Server selected: vanilla
+[2020-12-23 16:23:48] (Script): Autosaved, interval: 30m
+[2020-12-23 16:23:48] (Script): Bot PRIMED.
+[2020-12-23 16:23:50] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:23:59] (ARDU1N0#4107): Fetched 10 lines from server log.
+[2020-12-23 16:24:29] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:24:30] (Script): Server selected: vanilla
+[2020-12-23 16:24:38] (Script): Autosaved, interval: 30m
+[2020-12-23 16:24:39] (Script): Bot PRIMED.
+[2020-12-23 16:24:39] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:29:13] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:29:13] (Script): Server selected: vanilla
+[2020-12-23 16:29:17] (Script): Autosaved, interval: 30m
+[2020-12-23 16:29:17] (Script): Bot PRIMED.
+[2020-12-23 16:29:18] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:32:42] (Script): Server selected: vanilla
+[2020-12-23 16:32:46] (Script): Autosaved, interval: 30m
+[2020-12-23 16:32:46] (Script): Bot PRIMED.
+[2020-12-23 16:33:05] (Script): Server selected: vanilla
+[2020-12-23 16:33:09] (Script): Autosaved, interval: 30m
+[2020-12-23 16:33:09] (Script): Bot PRIMED.
+[2020-12-23 16:33:26] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:35:54] (Script): Server selected: vanilla
+[2020-12-23 16:35:58] (Script): Autosaved, interval: 30m
+[2020-12-23 16:35:58] (Script): Bot PRIMED.
+[2020-12-23 16:35:58] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:36:21] (Script): Server selected: vanilla
+[2020-12-23 16:36:25] (Script): Autosaved, interval: 30m
+[2020-12-23 16:36:25] (Script): Bot PRIMED.
+[2020-12-23 16:36:26] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:36:41] (Script): Server selected: vanilla
+[2020-12-23 16:36:44] (Script): Autosaved, interval: 30m
+[2020-12-23 16:36:44] (Script): Bot PRIMED.
+[2020-12-23 16:36:46] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:37:03] (Script): Server selected: vanilla
+[2020-12-23 16:37:07] (Script): Autosaved, interval: 30m
+[2020-12-23 16:37:07] (Script): Bot PRIMED.
+[2020-12-23 16:37:08] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:38:28] (Script): Server selected: vanilla
+[2020-12-23 16:38:31] (Script): Autosaved, interval: 30m
+[2020-12-23 16:38:32] (Script): Bot PRIMED.
+[2020-12-23 16:39:30] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:39:30] (Script): Server selected: vanilla
+[2020-12-23 16:39:34] (Script): Autosaved, interval: 30m
+[2020-12-23 16:39:34] (Script): Bot PRIMED.
+[2020-12-23 16:39:36] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:42:55] (ARDU1N0#4107): Sent command: say test
+[2020-12-23 16:42:55] (ARDU1N0#4107): Fetched 3 lines from server log.
+[2020-12-23 16:44:32] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:46:09] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:46:09] (Script): Server selected: vanilla
+[2020-12-23 16:46:13] (Script): Autosaved, interval: 30m
+[2020-12-23 16:46:13] (Script): Bot PRIMED.
+[2020-12-23 16:46:14] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:46:36] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:46:37] (Script): Server selected: vanilla
+[2020-12-23 16:46:40] (Script): Autosaved, interval: 30m
+[2020-12-23 16:46:40] (Script): Bot PRIMED.
+[2020-12-23 16:46:41] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 16:47:01] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 16:52:41] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:52:42] (Script): Server selected: vanilla
+[2020-12-23 16:52:46] (Script): Autosaved, interval: 30m
+[2020-12-23 16:52:46] (Script): Bot PRIMED.
+[2020-12-23 16:53:17] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 16:53:18] (Script): Server selected: vanilla
+[2020-12-23 16:53:21] (Script): Autosaved, interval: 30m
+[2020-12-23 16:53:22] (Script): Bot PRIMED.
+[2020-12-23 16:53:59] (ARDU1N0#4107): Fetched 90 lines from server log.
+[2020-12-23 17:04:04] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:04:05] (Script): Server selected: vanilla
+[2020-12-23 17:04:08] (Script): Autosaved, interval: 30m
+[2020-12-23 17:04:08] (Script): Bot PRIMED.
+[2020-12-23 17:04:15] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 17:08:26] (ARDU1N0#4107): Set R3diculous to: creative
+[2020-12-23 17:09:08] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:09:08] (Script): Server selected: vanilla
+[2020-12-23 17:09:12] (Script): Autosaved, interval: 30m
+[2020-12-23 17:09:13] (Script): Bot PRIMED.
+[2020-12-23 17:09:21] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 17:09:34] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:09:34] (Script): Server selected: vanilla
+[2020-12-23 17:09:38] (Script): Autosaved, interval: 30m
+[2020-12-23 17:09:38] (Script): Bot PRIMED.
+[2020-12-23 17:09:44] (ARDU1N0#4107): Fetched 5 lines from server log.
+[2020-12-23 17:10:37] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:10:37] (Script): Server selected: vanilla
+[2020-12-23 17:10:41] (Script): Autosaved, interval: 30m
+[2020-12-23 17:10:41] (Script): Bot PRIMED.
+[2020-12-23 17:10:44] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 17:16:54] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:16:54] (Script): Server selected: vanilla
+[2020-12-23 17:16:58] (Script): Autosaved, interval: 30m
+[2020-12-23 17:16:58] (Script): Bot PRIMED.
+[2020-12-23 17:26:47] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 17:26:47] (Script): Server selected: vanilla
+[2020-12-23 17:26:51] (Script): Autosaved, interval: 30m
+[2020-12-23 17:26:51] (Script): Bot PRIMED.
+[2020-12-23 17:34:20] (ARDU1N0#4107): Server said: 
+[2020-12-23 17:46:56] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-23 17:47:12] (ARDU1N0#4107): Fetched 6 most recent world saves.
+[2020-12-23 17:56:51] (Script): Autosaved, interval: 30m
+[2020-12-23 18:26:51] (Script): Autosaved, interval: 30m
+[2020-12-23 18:56:51] (Script): Autosaved, interval: 30m
+[2020-12-23 19:26:51] (Script): Autosaved, interval: 30m
+[2020-12-23 19:56:51] (Script): Autosaved, interval: 30m
+[2020-12-23 20:26:51] (Script): Autosaved, interval: 30m
+[2020-12-23 20:56:51] (Script): Autosaved, interval: 30m
+[2020-12-23 21:03:09] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 21:03:09] (Script): Server selected: vanilla
+[2020-12-23 21:03:16] (Script): Autosaved, interval: 30m
+[2020-12-23 21:03:16] (Script): Bot PRIMED.
+[2020-12-23 21:05:40] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 21:05:40] (Script): Server selected: vanilla
+[2020-12-23 21:05:44] (Script): Autosaved, interval: 30m
+[2020-12-23 21:05:44] (Script): Bot PRIMED.
+[2020-12-23 21:06:12] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 21:06:12] (Script): Server selected: vanilla
+[2020-12-23 21:06:16] (Script): Autosaved, interval: 30m
+[2020-12-23 21:06:16] (Script): Bot PRIMED.
+[2020-12-23 21:06:59] (Script): Server selected: vanilla
+[2020-12-23 21:07:03] (Script): Autosaved, interval: 30m
+[2020-12-23 21:07:03] (Script): Bot PRIMED.
+[2020-12-23 21:08:18] (Script): Server selected: vanilla
+[2020-12-23 21:08:22] (Script): Autosaved, interval: 30m
+[2020-12-23 21:08:22] (Script): Bot PRIMED.
+[2020-12-23 21:08:46] (Script): Server selected: vanilla
+[2020-12-23 21:08:50] (Script): Autosaved, interval: 30m
+[2020-12-23 21:08:50] (Script): Bot PRIMED.
+[2020-12-23 21:08:51] (ARDU1N0#4107): Fetched 5 most recent world saves.
+[2020-12-23 21:09:29] (ARDU1N0#4107): Fetched 1 most recent world saves.
+[2020-12-23 21:11:07] (Script): Server selected: vanilla
+[2020-12-23 21:11:21] (Script): Autosaved, interval: 30m
+[2020-12-23 21:11:21] (Script): Bot PRIMED.
+[2020-12-23 21:11:25] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-23 21:11:29] (ARDU1N0#4107): Fetched latest 1 world saves.
+[2020-12-23 21:11:38] (ARDU1N0#4107): Fetched latest 0 world saves.
+[2020-12-23 21:19:03] (ARDU1N0#4107): Sent command: list
+[2020-12-23 21:19:03] (ARDU1N0#4107): Fetched 3 lines from server log.
+[2020-12-23 21:19:49] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 21:19:49] (Script): Server selected: papermc
+[2020-12-23 21:19:55] (Script): Autosaved, interval: 30m
+[2020-12-23 21:19:55] (Script): Bot PRIMED.
+[2020-12-23 21:20:03] (ARDU1N0#4107): Restarting server.
+[2020-12-23 21:20:11] (ARDU1N0#4107): Stopping server.
+[2020-12-23 21:20:40] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 21:20:40] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 21:20:40] (ARDU1N0#4107): Starting server.
+[2020-12-23 21:25:53] (Script): Server selected: papermc
+[2020-12-23 21:25:57] (Script): Autosaved, interval: 30m
+[2020-12-23 21:25:58] (Script): Bot PRIMED.
+[2020-12-23 21:26:24] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 21:26:24] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 21:26:50] (Script): Server selected: papermc
+[2020-12-23 21:26:54] (Script): Autosaved, interval: 30m
+[2020-12-23 21:26:54] (Script): Bot PRIMED.
+[2020-12-23 21:27:01] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 21:27:01] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 21:27:37] (Script): Server selected: papermc
+[2020-12-23 21:27:40] (Script): Autosaved, interval: 30m
+[2020-12-23 21:27:40] (Script): Bot PRIMED.
+[2020-12-23 21:27:49] (ARDU1N0#4107): Fetched player list.
+[2020-12-23 21:27:49] (ARDU1N0#4107): Fetched server status.
+[2020-12-23 21:48:36] (Script): Server selected: papermc
+[2020-12-23 21:48:46] (Script): Autosaved, interval: 30m
+[2020-12-23 21:48:46] (Script): Bot PRIMED.
+[2020-12-23 22:07:21] (Script): Server selected: papermc
+[2020-12-23 22:07:55] (Script): Server selected: papermc
+[2020-12-23 22:08:06] (Script): Server selected: papermc
+[2020-12-23 22:08:10] (Script): Autosaved, interval: 30m
+[2020-12-23 22:08:10] (Script): Bot PRIMED.
+[2020-12-23 22:08:20] (ARDU1N0#4107): Set R3diculous to: spectator
+[2020-12-23 22:10:01] (ARDU1N0#4107): Fetched server address.
+[2020-12-23 22:12:44] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 22:12:49] (ARDU1N0#4107): Fetched chat.
+[2020-12-23 22:34:07] (Script): Server selected: papermc
+[2020-12-23 22:34:12] (Script): Autosaved, interval: 30m
+[2020-12-23 22:34:12] (Script): Bot PRIMED.
+[2020-12-23 22:38:57] (ARDU1N0#4107): Messaged MysticFrogo : why u kill each other, love not war
+[2020-12-23 22:39:50] (Roman Yoshi#4231): Messaged kooksbrat : SHUT UP
+[2020-12-23 22:43:06] (Script): Bot PRIMED.
+[2020-12-23 23:02:06] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-02) 1.16.3
+ bc y not
+[2020-12-23 23:04:12] (Script): Autosaved, interval: 30m
+[2020-12-23 23:12:57] (Script): Server selected: papermc
+[2020-12-23 23:13:01] (Script): Autosaved, interval: 30m
+[2020-12-23 23:13:01] (Script): Bot PRIMED.
+[2020-12-23 23:13:13] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-13) 1.16.3
+ testing
+[2020-12-23 23:13:13] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:13:13] (ARDU1N0#4107): New backup: (2020-12-23 23-13) 1.16.3
+ testing
+[2020-12-23 23:15:35] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:15:37] (ARDU1N0#4107): Restarting bot.
+[2020-12-23 23:15:37] (Script): Server selected: papermc
+[2020-12-23 23:15:41] (Script): Autosaved, interval: 30m
+[2020-12-23 23:15:41] (Script): Bot PRIMED.
+[2020-12-23 23:15:53] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-15) 1.16.3
+ testing
+[2020-12-23 23:15:53] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:15:53] (ARDU1N0#4107): New backup: (2020-12-23 23-15) 1.16.3
+ testing
+[2020-12-23 23:18:07] (Script): Server selected: papermc
+[2020-12-23 23:18:11] (Script): Autosaved, interval: 30m
+[2020-12-23 23:18:11] (Script): Bot PRIMED.
+[2020-12-23 23:18:25] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-23 23-18) 1.16.3
+ test
+[2020-12-23 23:23:36] (Script): Server selected: papermc
+[2020-12-23 23:23:43] (Script): Autosaved, interval: 30m
+[2020-12-23 23:23:43] (Script): Bot PRIMED.
+[2020-12-23 23:23:52] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-23 23-23) 1.16.3
+ ttt
+[2020-12-23 23:23:52] (ARDU1N0#4107): Fetched latest 10 world saves.
+[2020-12-23 23:23:52] (ARDU1N0#4107): New backup: (2020-12-23 23-23) 1.16.3
+ ttt
+[2020-12-23 23:24:11] (Script): Server selected: papermc
+[2020-12-23 23:24:15] (Script): Autosaved, interval: 30m
+[2020-12-23 23:24:15] (Script): Bot PRIMED.
+[2020-12-23 23:24:24] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-23 23-24) 1.16.3
+ asdf
+[2020-12-23 23:24:24] (ARDU1N0#4107): Fetched latest 10 world saves.
+[2020-12-23 23:24:24] (ARDU1N0#4107): New backup: (2020-12-23 23-24) 1.16.3
+ asdf
+[2020-12-23 23:27:04] (Script): Server selected: papermc
+[2020-12-23 23:27:08] (Script): Autosaved, interval: 30m
+[2020-12-23 23:27:08] (Script): Bot PRIMED.
+[2020-12-23 23:27:17] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-27) 1.16.3
+ te
+[2020-12-23 23:27:18] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:27:18] (ARDU1N0#4107): New backup: (2020-12-23 23-27) 1.16.3
+ te
+[2020-12-23 23:27:33] (Script): Fetched Minecraft server version: 1.16.3
+
+[2020-12-23 23:27:39] (ARDU1N0#4107): Server property: version=1.16.3
+[2020-12-23 23:28:36] (ARDU1N0#4107): Server property: version=1.16.4
+[2020-12-23 23:30:46] (Script): Server selected: papermc
+[2020-12-23 23:30:49] (Script): Autosaved, interval: 30m
+[2020-12-23 23:30:49] (Script): Bot PRIMED.
+[2020-12-23 23:31:00] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-31) 1.16.4
+ ug
+[2020-12-23 23:31:01] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:31:01] (ARDU1N0#4107): New backup: (2020-12-23 23-31) 1.16.4
+ ug
+[2020-12-23 23:35:22] (Script): Server selected: papermc
+[2020-12-23 23:35:25] (Script): Autosaved, interval: 30m
+[2020-12-23 23:35:26] (Script): Bot PRIMED.
+[2020-12-23 23:35:36] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2020-12-23 23-35) 1.16.4
+ oo
+[2020-12-23 23:35:37] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2020-12-23 23:35:37] (ARDU1N0#4107): New backup: (2020-12-23 23-35) 1.16.4
+ oo
+[2020-12-23 23:36:32] (Script): Server selected: papermc
+[2020-12-23 23:36:36] (Script): Autosaved, interval: 30m
+[2020-12-23 23:36:36] (Script): Bot PRIMED.
+[2020-12-23 23:36:50] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-23 23-36) 1.16.4
+ testinggggg
+[2020-12-23 23:36:50] (ARDU1N0#4107): Fetched latest 10 world saves.
+[2020-12-23 23:36:50] (ARDU1N0#4107): New backup: (2020-12-23 23-36) 1.16.4
+ testinggggg
+[2020-12-23 23:37:29] (ARDU1N0#4107): Fetched latest 5 world saves.
+[2020-12-23 23:39:50] (Script): Fetched Minecraft server version: 1.16.4
+
+[2020-12-23 23:40:00] (Script): Server selected: papermc
+[2020-12-23 23:40:04] (Script): Autosaved, interval: 30m
+[2020-12-23 23:40:04] (Script): Bot PRIMED.
+[2020-12-23 23:40:05] (Script): Fetched Minecraft server version: 1.16.4
+
+[2020-12-23 23:40:33] (Script): Server selected: papermc
+[2020-12-23 23:40:37] (Script): Autosaved, interval: 30m
+[2020-12-23 23:40:37] (Script): Bot PRIMED.
+[2020-12-23 23:40:39] (Script): Fetched Minecraft server version: 1.16.4
+[2020-12-23 23:40:45] (ARDU1N0#4107): Server property: version=1
+[2020-12-23 23:40:52] (ARDU1N0#4107): Server property: version=1.16.4
+[2020-12-23 23:40:54] (ARDU1N0#4107): Server property: motd=Yewy\!
+[2020-12-23 23:41:37] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/server_backups/papermc/(2020-12-23 23-41) 1.16.4 ttttttset
+[2020-12-23 23:41:38] (ARDU1N0#4107): Fetched latest 10 world saves.
+[2020-12-23 23:41:38] (ARDU1N0#4107): New backup: (2020-12-23 23-41) 1.16.4 ttttttset
+[2020-12-23 23:42:56] (Script): Server selected: papermc
+[2020-12-23 23:43:00] (Script): Autosaved, interval: 30m
+[2020-12-23 23:43:00] (Script): Bot PRIMED.
+[2020-12-24 00:13:00] (Script): Autosaved, interval: 30m
+[2020-12-24 00:43:00] (Script): Autosaved, interval: 30m
+[2020-12-24 01:13:00] (Script): Autosaved, interval: 30m
+[2020-12-24 01:43:00] (Script): Autosaved, interval: 30m
+[2020-12-24 02:13:00] (Script): Autosaved, interval: 30m
+[2020-12-24 02:43:00] (Script): Autosaved, interval: 30m
+[2020-12-24 02:47:15] (Script): Server selected: papermc
+[2020-12-24 02:48:39] (Script): Server selected: papermc
