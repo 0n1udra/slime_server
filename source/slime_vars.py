@@ -37,7 +37,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
                }
 
-server_selected = server_list['vanilla']
+server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
