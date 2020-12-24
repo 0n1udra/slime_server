@@ -65,7 +65,7 @@ def mc_start():
         return "Error starting server."
 
 # Sends command to tmux window running server.
-async def mc_command(command, return_bool=True):
+async def mc_command(command):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -74,7 +74,6 @@ async def mc_command(command, return_bool=True):
     Args:
         command: Command to send.
         match_output [Optional]: Look for specific string from server output.
-        return_bool: Return True/False whether or not command ran successfully.
 
     Returns:
         bool: If error sending command to server, sends False boolean.
@@ -100,7 +99,7 @@ async def mc_command(command, return_bool=True):
         return "Error sending command to server."
 
     time.sleep(1)
-    return mc_log(command, return_bool=return_bool)
+    return mc_log(command)
 
 # Send commands to server using RCON.
 def mc_rcon(command=''):
@@ -125,7 +124,7 @@ def mc_rcon(command=''):
         return mc_rcon_client.command(command)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=15, normal_read=False, return_bool=False, log_mode=False, filter_mode=False):
+def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log", lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, return_reversed=False):
     """
     Read latest.log file under server/logs folder.
 
@@ -133,16 +132,22 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
         match [str]: Check for matching string.
         file_path [str:latest.log]: File to read.
         lines [int:15]: Number of most recent lines to return.
-        return_bool [bool:False]: Return True/False boolean if match was found.
         log_mode [bool:False]: Return x lines from log file, skips matching.
+        list_mode [bool:False]: Puts log lines in a list instead of single string.
         normal_read [bool:False]: Reads file top down, defaults to bottom up using file-read-backwards module.
         filter_mode [bool:False]: Don't stop at first match.
+        match_lines [int:10]: How many matches to find.
+        return_reversed [bool:False]: Returns so ordering is newest at bottom going up for older.
 
     Returns:
 
     """
+
     if not os.path.isfile(file_path):
         return False
+
+    if filter_mode is True:
+        lines = log_lines_limit
 
     log_data = ''
     if normal_read is True:
@@ -164,10 +169,14 @@ def mc_log(match='placeholder match', file_path=f"{server_path}/logs/latest.log"
                     log_data += line
                 elif match in line:
                     log_data += line
-                    if filter_mode is False:
+                    if filter_mode is True and match_lines >= 1:
+                        match_lines -= 1
+                    else:
                         break
 
     if log_data:
+        if return_reversed is True:
+            log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
         return log_data
 
 
@@ -219,7 +228,6 @@ def get_mc_motd():
     else:
         return "N/A"
 
-
 def get_server_ip():
     server_ip = requests.get('http://ip.42.pl/raw').text
     return server_ip
@@ -237,14 +245,7 @@ def mc_version():
     if use_rcon is True:
         return mc_ping()['version']['name']
     elif server_files_access is True:
-        if version := mc_log('server version', normal_read=True):
-            version = version.split()[-1]
-            with open(f"{server_path}/version.txt", 'w') as f:
-                f.write(version)
-            return version
-        else:
-            with open(f"{server_path}/version.txt", 'r') as f:
-                return f.readline()
+            return edit_file('version')[1]
     else:
         return 'N/A'
 
@@ -275,12 +276,12 @@ def format_args(args, return_empty_str=False):
         str: Arguments combines with spaces.
     """
 
-    if len(str(args)) >= 1:
+    if args:
         return ' '.join(args)
     else:
         if return_empty_str is True:
             return ''
-        return "No reason given"
+        return "No reason given."
 
 # Gets data from json local file.
 def read_json(json_file):
@@ -364,7 +365,7 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
 
             # If found match, and user passed in new value to update it.
             elif target_property in split_line[0] and len(split_line) > 1:
-                if len(str(value)) >= 1:
+                if value:
                     split_line[1] = value
                     new_line = '='.join(split_line)
                     discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
@@ -397,22 +398,21 @@ def get_from_index(path, index):
 
     return os.listdir(path)[index]
 
-def fetch_backups(path, amount=5):
+def fetch_backups(path):
     """
     Gets x amount of backups. Usually to show in list.
 
     Args:
         path str: Path of world or server backups location.
-        amount int: Number of backups to show in list.
     """
 
     backups = []
     if not os.path.isdir(path):
         return False
 
-    for item in os.listdir(path)[-amount:]:
+    for index, item in enumerate(os.listdir(path)):
         if os.path.isdir(path + '/' + item):
-            backups.append(item)
+            backups.append([index, item])
     return backups
 
 def create_backup(name, src, dst):
@@ -488,12 +488,12 @@ def get_server_from_index(index):
 def get_world_from_index(index):
     return get_from_index(world_backups_path, index)
 
-def fetch_servers(amount=5):
+def fetch_servers():
     """Returns list of x number of backed up server."""
-    return fetch_backups(server_backups_path, amount)
+    return fetch_backups(server_backups_path)
 
-def fetch_worlds(amount=5):
-    return fetch_backups(world_backups_path, amount)
+def fetch_worlds():
+    return fetch_backups(world_backups_path)
 
 def backup_server(name='server_backup'):
     """Create new server backup with specified name."""

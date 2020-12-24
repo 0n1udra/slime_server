@@ -5,7 +5,7 @@ slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_token_file = '/home/slime/mc_bot_token.txt'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
-channel_id = 754803768733728848
+channel_id = 754803768733728848  # Optionally add channel ID, so bot can send message when ready.
 
 # ========== Interfacing Options
 
@@ -55,6 +55,8 @@ disable_inputs = ['disable', 'deactivate', 'false', 'off']
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 mc_active_status = False
 mc_subprocess = None
+
+log_lines_limit = 100  # Limit how max number of log lines to read.
 
 if use_rcon is True:
     import mctools, re
