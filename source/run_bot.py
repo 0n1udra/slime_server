@@ -61,41 +61,35 @@ def start_bot_func():
 
 def script_help():
     help = """
-    python3 run_bot.py setup download startbot            --  Creates required folders, downloads latest server.jar, bot in Tmux.
-    python3 run_bot.py tmuxstart startboth tmuxattach      --  Starts Tmux session, starts MC server and bot, then attaches to Tmux.
-    
-    server_files_access, use_rcon, and use_tmux boolean variables are in server_functions.py. update these for your setup.
+    python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
+    python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
     
     help        --  Shows this help page.
     
-    setup       --  If server_files_access is True, sets up necessary folders. Then, if use_tmux is True, starts Tmux session named 'mcserver' in detached mode with 2 panes.
+    setup       --  Create necessary folders. Starts 'mcserver' Tmux session in detached mode with 2 panes.
     
-    update      --  If server_files_access is True, Downloads latest server.jar file from official Minecraft website to /server folder.
-                    Folders created: server, server_backups, and world_backs. If use_tmux is also True this will also start tmux session.
+    update      --  Downloads latest server.jar file from official Minecraft website to server folder.
     
-    tmuxstart   --  If use_tmux is True, starts a Tmux session named 'mcserver' with 2 panes. 
-                    Top pane for Minecraft server, and bottom pane is for Discord bot.
+    starttmux   --  Start Tmux session named 'mcserver' with 2 panes. 
+                    Top pane for Minecraft server, bottom for bot.
                     
-    tmuxsattach --  If use_tmux is True, attaches to 'mcserver' session. 
-                    This will not start session if it doesn't exist, use 'setup' or 'tmux' argument to setup session.
+    attachtmux --  Attaches to 'mcserver' session. 
+                   Will not start Tmux, use starttmux or setup.
                     
-    startbot    --  Just starts Discord bot.
+    startbot    --  Start Discord bot.
 
-    startserver --  Just starts MC server.
-
-    startboth   --  This is the same as running run_bot.py without any arguments. 
-                    This will start Minecraft server (if use_tmux) and start Discord bot either in Tmux session or in current console depending on use_tmux boolean.
+    startserver --  Start MC server.
+                    
+    startboth   --  Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
     
-    
-    Note:   The corresponding functions will run in the order you pass arguments in. 
-            For example, 'python3 run_bot.py run tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
-            Instead run 'python3 tmuxstart run tmuxattach', which will start a Tmux session then start server and bot, then attach to Tmux session.
+    Note:   The corresponding functions will run in the order you pass arguments in.
+            For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
+            Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then start server and bot, then attach to Tmux session.
     """
     print(help)
 
 
 if __name__ == '__main__':
-    # Initial directory and Tmux setup.
     if 'setup' in sys.argv:
         if server_functions.server_files_access is True:
             setup_directories()
@@ -104,8 +98,7 @@ if __name__ == '__main__':
         if server_functions.use_rcon is True:
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
 
-    # Start Minecraft server and Discord bot.
-    if len(sys.argv) == 1 or 'startboth' in sys.argv:
+    if 'startboth' in sys.argv:
         start_server_func()
         start_bot_func()
 
@@ -115,12 +108,10 @@ if __name__ == '__main__':
     if 'startbot' in sys.argv:
         start_bot_func()
 
-    # Start 'mcserver' Tmux detached session.
-    if 'tmuxstart' in sys.argv and server_functions.use_tmux:
+    if 'starttmux' in sys.argv and server_functions.use_tmux:
         start_tmux_session()
 
-    # Attach to 'mcserver' tmux session.
-    if 'tmuxattach' in sys.argv:
+    if 'attachtmux' in sys.argv:
         os.system("tmux attach -t mcserver")
 
     if 'help' in sys.argv:
