@@ -2,7 +2,7 @@ import os
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_token_file = '/home/slime/mc_bot_token.txt'
+bot_token_file = '/home/slime/mc_bot.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
 channel_id = 754803768733728848  # Optionally add channel ID, so bot can send message when ready.
@@ -28,7 +28,7 @@ rcon_port = 25575
 
 # ========== Minecraft Server Config
 
-# This is where Minecraft server, world backups and server backups will be saved, so make sure this is a full path and is where you want it.
+# Location for Minecraft servers and backups, make sure is full path and is where you want it.
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
