@@ -14,6 +14,7 @@ else:
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
+
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
@@ -103,7 +104,7 @@ class Basics(commands.Cog):
         if use_rcon is True:
             log_data = response
         else:
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
             log_data = server_functions.mc_log('players online')
 
         if not log_data:
@@ -124,7 +125,7 @@ class Basics(commands.Cog):
         lprint(ctx, "Fetched player list.")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=15) :
+    async def chatlog(self, ctx, lines=15):
         """
         Shows chat log. Does not include whispers.
 
@@ -433,17 +434,21 @@ class Permissions(commands.Cog):
             arg [str:None]: User passed in arguments for whitelist command, see below for arguments and usage.
             player [str:None]: Specify player or to specify more options for other arguments, like enforce for example.
 
-        Usage:
-            Usage within Discord without any arguments will show whitelist list, else see below for other examples.
-            add <player> : Add player to whitelist.
-            remove <player>: Remove player from whitelist.
-            on: Activates whitelisting..
-            off: Deactivate whitelist.
+        Discord Args:
+            list: Show whitelist, same as if no arguments.
+            add/add <player>: Player add/remove to whitelist.
+            on/off: Whitelist enable/disable
             reload: Reloads from whitelist.json file.
             enforce <status/on/off>: Changes 'enforce-whitelist' in server properties file.
                 Kicks players that are not on the whitelist when using ?whitelist reload command.
                 Server reboot required for enforce-whitelist to take effect.
-                Using enforce argument alone will also show current status.
+
+        Usage:
+            ?whitelist list
+            ?whitelist add MysticFrogo
+            ?whitelist enforce on
+            ?whitelist on
+            ?whitelist reload
         """
 
         if arg.lower() in server_functions.enable_inputs:
@@ -476,9 +481,9 @@ class Permissions(commands.Cog):
         elif arg == 'enforce' and arg2 in ['false', 'off']:
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'false')
 
-        elif arg is None or arg == 'list':
+        elif not arg or arg == 'list':
             await mc_command('whitelist list')
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
             # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
             log_data = server_functions.mc_log('whitelisted players:').split(':')[-2:]
             # Then, formats player names in Discord `player` markdown.
@@ -496,8 +501,12 @@ class Permissions(commands.Cog):
         """Show list of server operators."""
 
         op_players = [f"`{i['name']}`" for i in server_functions.read_json('ops.json')]
-        await ctx.send(f"**OP List** :scroll:")
-        await ctx.send('\n'.join(op_players))
+        if op_players:
+            await ctx.send(f"**OP List** :scroll:")
+            await ctx.send('\n'.join(op_players))
+        else:
+            await ctx.send("No players are OP.")
+
         lprint(ctx, f"Fetched server operators list.")
 
     @commands.command(aliases=['op', 'addop'])
@@ -519,10 +528,12 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- {player} has become a God! : {reason}")
-        await mc_command(f"op {player}")
-
-        await ctx.send(f"`{player}` too op now. ||Please nerf soon rito!||")
+        _, status_checker = await mc_command(f"op {player}")
+        if server_functions.mc_log(player, stopgap_str=status_checker):
+            await mc_command(f"say ---INFO--- {player} is now OP : {reason}")
+            await ctx.send(f"**New OP Player:** {player}")
+        else:
+            await ctx.send("**ERROR:** Problem setting OP status.")
         lprint(ctx, f"New server op: {player}")
 
     @commands.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
@@ -544,11 +555,13 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- {player} fell from grace! : {reason}")
-        await mc_command(f"deop {player}")
-
-        await ctx.send(f"`{player}` stripped of Godhood!")
-        lprint(ctx, f"Removed server op: {player}")
+        _, status_checker = await mc_command(f"deop {player}")
+        if server_functions.mc_log(player, stopgap_str=status_checker):
+            await mc_command(f"say ---INFO--- {player} no longer OP : {reason}")
+            await ctx.send(f"**Player OP Removed:** {player}")
+        else:
+            await ctx.send("**ERROR:** Problem removing OP status.")
+        lprint(ctx, f"Removed server OP: {player}")
 
     @commands.command(aliases=['optimed', 'top'])
     async def timedop(self, ctx, player='', time_limit=1, *reason):
@@ -569,14 +582,23 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- {player} granted God status for {time_limit}m : {reason}")
         await mc_command(f"OP {player} for {time_limit}m : {reason}")
-        await ctx.send(f"Granting `{player}` OP status for {time_limit}m :hourglass:")
         lprint(ctx, f"OP {player} for {time_limit}.")
         await asyncio.sleep(time_limit * 60)
 
-        await mc_command(f"say ---INFO--- {player} is back to being a mere mortal.")
+        if server_functions.mc_log(player):
+            await mc_command(f"say ---INFO--- {player} is OP for {time_limit}m : {reason}")
+            await ctx.send(f"***Timed OP Player:*** `{player}` : {time_limit}m :hourglass:")
+        else:
+            await ctx.send("**ERROR:** Problem changing OP status.")
+
         await mc_command(f"deop {player}")
+        if server_functions.mc_log(player):
+            await mc_command(f"say ---INFO--- {player} is no longer OP.")
+            await ctx.send(f"***Timed OP Player:*** `{player}` : {time_limit}m :hourglass:")
+        else:
+            await ctx.send("**ERROR:** Problem removing OP status.")
+
         await ctx.send(f"Removed `{player}` OP status!")
         lprint(ctx, f"Remove OP {player}")
 
@@ -702,12 +724,13 @@ class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['info', 'stat', 'stats'])
+    @commands.command(aliases=['stat', 'stats', 'status', 'showserverstatus', 'sstatus', 'sss'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
         embed = discord.Embed(title='Server Status :gear:')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
+        embed.add_field(name='Current Server',
+                        value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
         embed.add_field(name='Address', value=f"IP: `{server_functions.server_ip}`\nURL: `{server_functions.server_url}`", inline=False)
@@ -781,7 +804,7 @@ class Server(commands.Cog):
 
         if 'now' in now:
             await mc_command('save-all')
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
             await mc_command('stop')
         else:
             await mc_command('say ---WARNING--- Server will halt in 15s!')
@@ -790,9 +813,10 @@ class Server(commands.Cog):
             await mc_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
             await mc_command('save-all')
+            await asyncio.sleep(3)
             await mc_command('stop')
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(5)
         await ctx.send("**Server HALTED** :stop_sign:")
         server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
@@ -814,7 +838,7 @@ class Server(commands.Cog):
         await ctx.send("***Restarting...*** :arrows_counterclockwise:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
     @commands.command(aliases=['version', 'v', 'serverv'])
@@ -862,7 +886,7 @@ class Server(commands.Cog):
 
         server_functions.edit_file(target_property, value)
         fetched_property = server_functions.edit_file(target_property)
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
 
         if fetched_property:
             await ctx.send(f"`{fetched_property[0].strip()}`")
@@ -926,7 +950,6 @@ class Server(commands.Cog):
             await ctx.send(f"Current MOTD: `{motd_property[1]}`")
             lprint("Fetched MOTD: " + motd_property[1].strip())
 
-
     @commands.command(aliases=['serverrcon'])
     async def rcon(self, ctx, state=''):
         """
@@ -982,6 +1005,7 @@ class Server(commands.Cog):
 
         lprint(ctx, "Server Updated.")
 
+
 # ========== World backup/restore functions.
 class World_Backups(commands.Cog):
     def __init__(self, bot):
@@ -1035,16 +1059,16 @@ class World_Backups(commands.Cog):
         await mc_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}")
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
         await mc_command(f"save-all")
-        await asyncio.sleep(5)
+        await asyncio.sleep(3)
 
         new_backup = server_functions.backup_world(name)
         if new_backup:
-            await ctx.send(f"Cloned and archived your world to:\n`{new_backup}`")
+            await ctx.send(f"**New World Backup:**\n`{new_backup}`")
         else:
             await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
 
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
-        lprint(ctx, "New backup: " + new_backup)
+        lprint(ctx, "New world backup: " + new_backup)
 
     @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
     async def worldbackuprestore(self, ctx, index='', now=''):
@@ -1100,10 +1124,11 @@ class World_Backups(commands.Cog):
             return False
 
         to_delete = server_functions.get_world_from_index(index)
+        await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
         server_functions.delete_world(to_delete)
 
-        await ctx.send(f"World as been incinerated!")
-        lprint(ctx, "Deleted: " + to_delete)
+        await ctx.send(f"**World Backup Deleted** :wastebasket:")
+        lprint(ctx, "Deleted world backup: " + to_delete)
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx, now=''):
@@ -1115,7 +1140,7 @@ class World_Backups(commands.Cog):
 
         await mc_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
         await ctx.send(":fire:**INCINERATED**:fire:")
-        await ctx.send("**NOTE:** Next startup will take longer, to generate new world. Also, server settings will be preserved, this does not include data like player's gamemode status, inventory, etc.")
+        await ctx.send("**NOTE:** Next launch may take longer.")
 
         if await mc_status() is True:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
@@ -1131,7 +1156,7 @@ class Server_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['selectserver', 'sselect', 'servers', 'ss'])
+    @commands.command(aliases=['sselect', 'servers', 'serverslist', 'ss', 'sl'])
     async def serverselect(self, ctx, name=''):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -1150,13 +1175,14 @@ class Server_Backups(commands.Cog):
                 # Shows server name, description, location, and start command.
                 embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
-            await ctx.send(f"Current Server: `{server_functions.server_selected[0]}`")
-
+            await ctx.send(f"**Current Server:** `{server_functions.server_selected[0]}`")
         elif name in server_functions.server_list.keys():
             server_functions.server_selected = server_functions.server_list[name]
             server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server_selected[0]}"
             server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
+        else:
+            await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
     @commands.command(aliases=['serverbackups', 'serverbl', 'sblist', 'sbl'])
     async def serverbackupslist(self, ctx, amount=10):
@@ -1183,8 +1209,8 @@ class Server_Backups(commands.Cog):
         await ctx.send(embed=embed)
 
         await ctx.send("Use `?serverrestore <index>` to restore server.")
-        await ctx.send("**WARNING:** Restore will overwrite current server. Make a backup using `?serverbackup <codename>`.")
-        lprint(ctx, f"Fetched latest {amount} world saves.")
+        await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
+        lprint(ctx, f"Fetched {amount} world backups.")
 
     @commands.command(aliases=['serverbackup', 'serverbn', 'sbnew', 'sbn'])
     async def serverbackupnew(self, ctx, *name):
@@ -1209,12 +1235,12 @@ class Server_Backups(commands.Cog):
         await asyncio.sleep(5)
         new_backup = server_functions.backup_server(name)
         if new_backup:
-            await ctx.send(f"New backup:\n`{new_backup}`.")
+            await ctx.send(f"**New Server Backup:**\n`{new_backup}`.")
         else:
-            await ctx.send("**ERROR:** Creating server backup failed!")
+            await ctx.send("**ERROR:** Server backup failed! :interrobang:")
 
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
-        lprint(ctx, "New backup: " + new_backup)
+        lprint(ctx, "New server backup: " + new_backup)
 
     @commands.command(aliases=['serverrestore', 'sbrestore', 'serverbr', 'sbr'])
     async def serverbackuprestore(self, ctx, index='', now=''):
@@ -1245,7 +1271,7 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         if server_functions.restore_server(fetched_restore):
-            await ctx.send("**Server Restored!** :desktop::leftwards_arrow_with_hook: ")
+            await ctx.send("**Server Restored** :desktop::leftwards_arrow_with_hook: ")
         else:
             await ctx.send("**ERROR:** Could not restore server!")
 
@@ -1269,10 +1295,11 @@ class Server_Backups(commands.Cog):
             return False
 
         to_delete = server_functions.get_server_from_index(index)
+        await ctx.send("****Deleting Server Backup...*** :floppy_disk::wastebasket:")
         server_functions.delete_server(to_delete)
 
-        await ctx.send(f"Server backup deleted!")
-        lprint(ctx, "Deleted: " + to_delete)
+        await ctx.send(f"**Server Backup Deleted** :wastebasket:")
+        lprint(ctx, "Deleted server backup: " + to_delete)
 
     @commands.command(aliases=['resetserver', 'newserver'])
     async def serverreset(self, ctx):
@@ -1313,20 +1340,19 @@ class Bot_Functions(commands.Cog):
         Show bot log.
 
         Args:
-            lines [int:5]: Number of most recent lines to show. Max of 20 lines.
+            lines [int:5]: Number of most recent lines to show.
 
         Usage:
             ?botlog
             ?blog 15
         """
 
-        if lines > 20:
-            await ctx.send("Can fetch 20 lines or less.")
-            return
+        log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
 
-        log_data = server_functions.mc_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True)
+        for line in log_data.split('\n'):
+            await ctx.send(f"`{line}`")
 
-        await ctx.send(f"`{log_data}`")
+        await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {lines} lines from bot log.")
 
     @commands.command(aliases=['updatebot', 'bupdate', 'bu'])
@@ -1394,11 +1420,13 @@ class Bot_Functions(commands.Cog):
         await ctx.send(f"Server IP: `{server_functions.server_ip}`\nAlternative Address: `{server_functions.server_url}`")
         lprint(ctx, 'Fetched server address.')
 
-    @commands.command(aliases=['commandhelp', 'mchelp', 'mch', 'mcc', 'commandlist', 'mccommandlist'])
-    async def mccommands(self, ctx):
-        embed = discord.Embed(title='List of Minecraft server commands for JE.',
-                              url='https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                              description='Only JE (Java Edition) commands will work.')
+    @commands.command(aliases=['showlinks', 'usefullinks'])
+    async def links(self, ctx):
+        embed = discord.Embed(title='Useful Websites :computer:')
+
+        for name, url in server_functions.useful_websites.items():
+            embed.add_field(name=name, value=url, inline=False)
+
         await ctx.send(embed=embed)
 
 
@@ -1406,9 +1434,10 @@ class Bot_Functions(commands.Cog):
 for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
-if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
-            'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
+# Disable certain commands depending on if using Tmux, RCON, or subprocess.
 if_no_tmux = ['serverstart', 'serverrestart']
+if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
+                 'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
 
 if server_functions.server_files_access is False and server_functions.use_rcon is True:
     for command in if_no_tmux:
