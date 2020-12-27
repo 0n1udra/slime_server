@@ -34,10 +34,10 @@ mc_path = '/mnt/c/Users/DT/Desktop/MC'
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
 server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui' ],
                'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui",],
-               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"{mc_path}/valhesia3/ServerStart.sh"],
+               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"java -jar -Xms3G -Xmx6G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AlwaysPreTouch forge-1.16.4-35.1.13.jar nogui"],
                }
 
-server_selected = server_list['papermc']
+server_selected = server_list['valhesia3']
 server_path = f"{mc_path}/{server_selected[0]}"
 
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -55,8 +55,15 @@ disable_inputs = ['disable', 'deactivate', 'false', 'off']
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 mc_active_status = False
 mc_subprocess = None
-
 log_lines_limit = 100  # Limit how max number of log lines to read.
+
+useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://files.minecraftforge.net/',
+                   'CurseForge Download': 'https://curseforge.overwolf.com/',
+                   'Valhesia 3.1': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-3',
+                   'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
+                   'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
+                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
+                   }
 
 if use_rcon is True:
     import mctools, re

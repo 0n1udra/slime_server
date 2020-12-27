@@ -1417,11 +1417,27 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
     async def ip(self, ctx):
+        """
+        Shows IP address for server.
+
+        Usage:
+            ?ip
+            ?address
+        """
+
         await ctx.send(f"Server IP: `{server_functions.server_ip}`\nAlternative Address: `{server_functions.server_url}`")
         lprint(ctx, 'Fetched server address.')
 
-    @commands.command(aliases=['showlinks', 'usefullinks'])
+    @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
     async def links(self, ctx):
+        """
+        Shows list of useful websites.
+
+        Usage:
+            ?links
+            ?sites
+        """
+
         embed = discord.Embed(title='Useful Websites :computer:')
 
         for name, url in server_functions.useful_websites.items():
