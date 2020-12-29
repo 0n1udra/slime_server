@@ -40,7 +40,7 @@ def start_tmux_session():
     time.sleep(1)
 
 
-def start_server_func():
+def start_bot():
     if server_functions.use_tmux is True:
         os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
         if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
@@ -50,10 +50,10 @@ def start_server_func():
         print("Start server with ?start command in Discord.")
         input("Enter to exit > ")
 
-def start_bot_func():
+def start_server():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
-    if server_functions.use_tmux:
+    if server_functions.use_tmux is True:
         server_functions.mc_start()
     else:
         bot.run(TOKEN)
@@ -98,18 +98,19 @@ if __name__ == '__main__':
         if server_functions.use_rcon is True:
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
 
-    if 'startboth' in sys.argv:
-        start_server_func()
-        start_bot_func()
-
-    if 'startserver' in sys.argv:
-        start_server_func()
-
-    if 'startbot' in sys.argv:
-        start_bot_func()
-
     if 'starttmux' in sys.argv and server_functions.use_tmux:
         start_tmux_session()
+        time.sleep(1)
+
+    if 'startbot' in sys.argv:
+        start_bot()
+
+    if 'startserver' in sys.argv:
+        start_server()
+
+    if 'startboth' in sys.argv:
+        start_server()
+        start_bot()
 
     if 'attachtmux' in sys.argv:
         os.system("tmux attach -t mcserver")
