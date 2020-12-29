@@ -971,7 +971,7 @@ class Server(commands.Cog):
         else:
             await ctx.send("Need a true or false argument (in lowercase).")
 
-    @commands.command(aliases=['updateserver', 'supdate', 'su'])
+    @commands.command(aliases=['updateserver', 'su'])
     async def serverupdate(self, ctx, now=''):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
@@ -1011,7 +1011,7 @@ class World_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['worldbackups', 'worldbl', 'wbl'])
+    @commands.command(aliases=['worldbackups', 'wbl', 'backuplist'])
     async def worldbackupslist(self, ctx, amount=10):
         """
         Show world backups.
@@ -1038,7 +1038,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} most recent world saves.")
 
-    @commands.command(aliases=['worldbackup', 'worldbn', 'wbn'])
+    @commands.command(aliases=['worldbackup', 'wbn', 'backup'])
     async def worldbackupnew(self, ctx, *name):
         """
         new backup of current world.
@@ -1070,7 +1070,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
+    @commands.command(aliases=['worldrestore', 'restoreworld', 'wbr', 'wr'])
     async def worldbackuprestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
@@ -1105,7 +1105,7 @@ class World_Backups(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('serverstart'))
 
-    @commands.command(aliases=['worlddelete', 'worldbackupd', 'wbackupdelete', 'wbd'])
+    @commands.command(aliases=['worlddelete', 'backupdelete', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
         """
         Delete a world backup.
@@ -1184,7 +1184,7 @@ class Server_Backups(commands.Cog):
         else:
             await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
-    @commands.command(aliases=['serverbackups', 'serverbl', 'sblist', 'sbl'])
+    @commands.command(aliases=['serverbackups', 'sbl'])
     async def serverbackupslist(self, ctx, amount=10):
         """
         List server backups.
@@ -1212,8 +1212,8 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups.")
 
-    @commands.command(aliases=['serverbackup', 'serverbn', 'sbnew', 'sbn'])
-    async def serverbackupnew(self, ctx, *name):
+    @commands.command(aliases=['backupserver', 'sbn'])
+    async def serverbackup(self, ctx, *name):
         """
         New backup of server files (not just world save).
 
@@ -1242,7 +1242,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-    @commands.command(aliases=['serverrestore', 'sbrestore', 'serverbr', 'sbr'])
+    @commands.command(aliases=['serverrestore', 'restoreserver', 'sbrestore', 'serverbr', 'sbr'])
     async def serverbackuprestore(self, ctx, index='', now=''):
         """
         Restore server backup.
@@ -1275,7 +1275,7 @@ class Server_Backups(commands.Cog):
         else:
             await ctx.send("**ERROR:** Could not restore server!")
 
-    @commands.command(aliases=['serverdelete', 'serverbd', 'deleteserverbackup', 'serverdeletebackup', 'sdeletebackup', 'sbdelete', 'sbd'])
+    @commands.command(aliases=['serverdelete', 'deleteserverbackup', 'serverdeletebackup', 'sbd'])
     async def serverbackupdelete(self, ctx, index=''):
         """
         Delete a server backup.
