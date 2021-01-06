@@ -65,7 +65,7 @@ def mc_start():
         return "Error starting server."
 
 # Sends command to tmux window running server.
-async def mc_command(command, stop_at_checker=True):
+async def mc_command(command, stop_at_checker=True, bot_ctx=None):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -74,6 +74,7 @@ async def mc_command(command, stop_at_checker=True):
     Args:
         command: Command to send.
         stop_at_checker [bool:True]: Only returns log output under sent status_checker
+        botx_ctx [Discord_bot_object:None]: Pass in bot object to send messages.
 
     Returns:
         bool: If error sending command to server, sends False boolean.
@@ -96,11 +97,17 @@ async def mc_command(command, stop_at_checker=True):
 
     elif use_tmux is True:
         os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
-        await asyncio.sleep(2)
-        if os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER') != 0:
-            return True
+        await asyncio.sleep(1)
+        if not mc_log(status_checker):
+            if bot_ctx:
+                await bot_ctx.send("Server not active.")
+                return False
+        await asyncio.sleep(1)
+        os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
     else:
-        return "Error sending command to server."
+        if bot_ctx:
+            await bot_ctx.send("**ERROR:** Trouble sending command.")
+        return False
 
     time.sleep(1)
     if stop_at_checker is True:
@@ -131,7 +138,7 @@ def mc_rcon(command=''):
         return mc_rcon_client.command(command)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match='placeholder_match', file_path=f"{server_path}/logs/latest.log", lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str='placeholder_stopgap', return_reversed=False):
+def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
     """
     Read latest.log file under server/logs folder.
 
@@ -149,6 +156,14 @@ def mc_log(match='placeholder_match', file_path=f"{server_path}/logs/latest.log"
     Returns:
 
     """
+    if match is None:
+        match = 'placeholder_match'
+
+    if file_path is None:
+        file_path = f"{server_path}/logs/latest.log"
+
+    if stopgap_str is None:
+        stopgap_str = 'placeholder_stopgap'
 
     if not os.path.isfile(file_path):
         return False

@@ -41,7 +41,6 @@ Server Backups, `?serverbackupslist` `?serverbackups [amount]`, Get list of serv
 Server New Backup, `?serverbackup <codename>`, Create backup of all server files.
 Server Delete backup, `?serverdelete <index>`, Get index number from `?serverbackups`.
 Server Restore, `?serverbackuprestore` '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
-Server Reset, `?serverreset`, Deletes all server files, make a backup beforehand if needed. make a backup beforehand if neededd, downloads latest server jar from official website and launches (do not need to edit eula.txt).
 Server Update, `?serverupdate` `?su [now]`, Updates server.jar from official Minecraft website.
 Properties File, `?property` `?p <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
 Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.

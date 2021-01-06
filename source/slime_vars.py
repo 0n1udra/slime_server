@@ -32,12 +32,13 @@ rcon_port = 25575
 mc_path = '/mnt/c/Users/DT/Desktop/MC'
 
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui' ],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui",],
+server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui'],
+               'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui"],
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"java -jar -Xms3G -Xmx6G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AlwaysPreTouch forge-1.16.4-35.1.13.jar nogui"],
+               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
                }
 
-server_selected = server_list['valhesia3']
+server_selected = server_list['vanilla']
 server_path = f"{mc_path}/{server_selected[0]}"
 
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -46,7 +47,7 @@ server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 # ========== Bot Config
 
 # Default values.
-autosave_status = True
+autosave_status = False
 autosave_interval = 30
 
 enable_inputs = ['enable', 'activate', 'true', 'on']

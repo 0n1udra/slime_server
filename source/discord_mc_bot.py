@@ -47,7 +47,9 @@ class Basics(commands.Cog):
         """
 
         args = format_args(args)
-        await mc_command(f"{args}")
+        if not await mc_command(f"{args}", bot_ctx=ctx):
+            return
+
         lprint(ctx, "Sent command: " + args)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
 
@@ -64,13 +66,13 @@ class Basics(commands.Cog):
         """
 
         msg = format_args(msg, return_empty_str=True)
-        await mc_command('say ' + msg)
+
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
-            await ctx.send("Message circulated to all active players :loudspeaker:")
-
-        lprint(ctx, f"Server said: {msg}")
+            if await mc_command('say ' + msg, bot_ctx=ctx):
+                await ctx.send("Message circulated to all active players :loudspeaker:")
+                lprint(ctx, f"Server said: {msg}")
 
     @commands.command(aliases=['whisper', 't', 'w'])
     async def tell(self, ctx, player='', *msg):
@@ -91,13 +93,18 @@ class Basics(commands.Cog):
             await ctx.send("Usage: `?t <player> <message>`\nExample: `?t MysticFrogo sup hundo`")
             return False
 
-        await mc_command(f"tell {player} {msg}")
+        if not await mc_command(f"tell {player} {msg}", bot_ctx=ctx):
+            return
+
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @commands.command(aliases=['pl', 'playerlist', 'playerslist', 'listplayers', 'listplayer', 'player', 'list'])
+    @commands.command(aliases=['pl', 'playerlist','listplayers', 'list'])
     async def players(self, ctx):
         """Show list of online players."""
+
+        if not await mc_command("", bot_ctx=ctx):
+            return
 
         response = await mc_command("list")
 
@@ -177,7 +184,9 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---WARNING--- {player} will be EXTERMINATED! : {reason}")
+        if not await mc_command(f"say ---WARNING--- {player} will be EXTERMINATED! : {reason}", bot_ctx=ctx):
+            return
+
         await mc_command(f'kill {player}')
 
         await ctx.send(f"`{player}` :gun: assassinated!")
@@ -203,7 +212,9 @@ class Player(commands.Cog):
             await ctx.send("Usage: `?dpk <player> <seconds> [reason]`\nExample: `?dpk MysticFrogo 5 Because he took my diamonds!`")
             return False
 
-        await mc_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}")
+        if not await mc_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}", bot_ctx=ctx):
+            return
+        
         await ctx.send(f"Killing {player} in {delay}s :bomb:")
         await asyncio.sleep(delay)
         await mc_command(f'kill {player}')
@@ -231,7 +242,9 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- Flinging {player} towards {target} in 5s : {reason}")
+        if not await mc_command(f"say ---INFO--- Flinging {player} towards {target} in 5s : {reason}", bot_ctx=ctx):
+            return
+
         await asyncio.sleep(5)
         await mc_command(f"tp {player} {target}")
 
@@ -258,7 +271,9 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say {player} now in {mode}: {reason}")
+        if not await mc_command(f"say {player} now in {mode}: {reason}", bot_ctx=ctx):
+            return
+
         await mc_command(f"gamemode {mode} {player}")
 
         await ctx.send(f"`{player}` is now in `{mode}` indefinitely.")
@@ -285,7 +300,9 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- {player} set to {mode} for {duration}s : {reason}")
+        if not await mc_command(f"say ---INFO--- {player} set to {mode} for {duration}s : {reason}", bot_ctx=ctx):
+            return
+
         await mc_command(f"gamemode {mode} {player}")
         await ctx.send(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
         lprint(ctx, f"Set gamemode: {player} for {duration}s")
@@ -320,7 +337,9 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}')
+        if not await mc_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}', bot_ctx=ctx):
+            return
+
         await asyncio.sleep(5)
         await mc_command(f"kick {player}")
 
@@ -346,7 +365,9 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}")
+        if not await mc_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}", bot_ctx=ctx):
+            return
+
         await asyncio.sleep(5)
 
         await mc_command(f"ban {player} {reason}")
@@ -373,7 +394,9 @@ class Permissions(commands.Cog):
             return False
 
         reason = format_args(reason)
-        await mc_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:")
+        if not await mc_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:", bot_ctx=ctx):
+            return
+
         await mc_command(f"pardon {player}")
 
         await ctx.send(f"Cleansed `{player}` :flag_white:")
@@ -382,6 +405,9 @@ class Permissions(commands.Cog):
     @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
         """Show list of current bans."""
+
+        if not await mc_command("", bot_ctx=ctx):
+            return
 
         # Gets online players, formats output for Discord depending on using RCON or reading from server log.
         banned_players = ''
@@ -451,6 +477,13 @@ class Permissions(commands.Cog):
             ?whitelist reload
         """
 
+        if not arg:
+            await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
+            return False
+
+        if not await mc_command("", bot_ctx=ctx):
+            return
+
         if arg.lower() in server_functions.enable_inputs:
             await mc_command('whitelist on')
             await ctx.send("**Whitelist ACTIVE**")
@@ -473,9 +506,10 @@ class Permissions(commands.Cog):
             await mc_command('whitelist reload')
             await ctx.send("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
 
-        elif arg == 'enforce' and (not arg2 or 'status' in arg2):  # Shows if enforce-whitelist status.
+        elif arg == 'enforce' and (not arg2 or 'status' in arg2):  # Shows if passed in ?enforce-whitelist status.
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist')
-            await ctx.send(f"\nUsage examples for enforce: `?whitelist enforce true`, `?whitelist enforce false`.")
+            await ctx.send(f"\nUsage Examples: `?whitelist enforce true`, `?whitelist enforce false`.")
+            return False
         elif arg == 'enforce' and arg2 in ['true', 'on']:
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'true')
         elif arg == 'enforce' and arg2 in ['false', 'off']:
@@ -490,11 +524,10 @@ class Permissions(commands.Cog):
             players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
             lprint(ctx, f"Showing whitelist: {log_data[1]}")
-
-            await ctx.send(f"\nUsage examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
-        else:
-            await ctx.send("Command error.")
+            await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
             return False
+        else:
+            await ctx.send("**ERROR:** Something went wrong.")
 
     @commands.command(aliases=['ol', 'ops', 'listops'])
     async def oplist(self, ctx):
@@ -527,6 +560,9 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
             return False
 
+        if not await mc_command("", bot_ctx=ctx):
+            return
+
         reason = format_args(reason)
         _, status_checker = await mc_command(f"op {player}")
         if server_functions.mc_log(player, stopgap_str=status_checker):
@@ -554,6 +590,9 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
             return False
 
+        if not await mc_command("", bot_ctx=ctx):
+            return
+
         reason = format_args(reason)
         _, status_checker = await mc_command(f"deop {player}")
         if server_functions.mc_log(player, stopgap_str=status_checker):
@@ -578,11 +617,13 @@ class Permissions(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?top <player> <minutes> [reason]``\nExample: `?top R3diculous Testing purposes`")
+            await ctx.send("Usage: `?top <player> <minutes> [reason]`\nExample: `?top R3diculous Testing purposes`")
             return False
 
         reason = format_args(reason)
-        await mc_command(f"OP {player} for {time_limit}m : {reason}")
+        if not await mc_command(f"OP {player} for {time_limit}m : {reason}", bot_ctx=ctx):
+            return
+
         lprint(ctx, f"OP {player} for {time_limit}.")
         await asyncio.sleep(time_limit * 60)
 
@@ -615,7 +656,9 @@ class World(commands.Cog):
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
-        await mc_command('save-all')
+        if not await mc_command('save-all', bot_ctx=ctx):
+            return
+
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved world.")
@@ -635,7 +678,7 @@ class World(commands.Cog):
         """
 
         if not arg:
-            await ctx.send(f"Usage examples:\nUpdate interval (minutes) `?autosave 60`, turn on `?autosave on`.")
+            await ctx.send(f"Usage Examples: Update interval (minutes) `?autosave 60`, turn on `?autosave on`.")
 
         try:
             arg = int(arg)
@@ -665,7 +708,7 @@ class World(commands.Cog):
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
-        await mc_command('save-all')
+        mc_command('save-all')
         lprint(f"Autosaved, interval: {server_functions.autosave_interval}m")
 
     @autosave_loop.before_loop
@@ -691,7 +734,9 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        await mc_command(f'weather {state} {duration}')
+        if not await mc_command(f'weather {state} {duration}', bot_ctx=ctx):
+            return
+
         if duration:
             await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
         else:
@@ -710,6 +755,9 @@ class World(commands.Cog):
             ?settime day
             ?time 12
         """
+
+        if not await mc_command("", bot_ctx=ctx):
+            return
 
         if set_time:
             await mc_command(f"time set {set_time}")
@@ -785,7 +833,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting server.")
 
-    @commands.command(aliases=['stop', 'halt', 'serverhalt'])
+    @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
     async def serverstop(self, ctx, now=''):
         """
         Stop server, gives players 15s warning.
@@ -798,9 +846,12 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if await mc_status() is False:
+        if not await mc_status():
             await ctx.send("**Server INACTIVE** :red_circle:")
-            return False
+            return
+
+        if not await mc_command("", bot_ctx=ctx):
+            return
 
         if 'now' in now:
             await mc_command('save-all')
@@ -1011,7 +1062,7 @@ class World_Backups(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['worldbackups', 'wbl', 'backuplist'])
+    @commands.command(aliases=['worldbackups', 'backuplist', 'wbl'])
     async def worldbackupslist(self, ctx, amount=10):
         """
         Show world backups.
@@ -1038,7 +1089,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} most recent world saves.")
 
-    @commands.command(aliases=['worldbackup', 'wbn', 'backup'])
+    @commands.command(aliases=['worldbackup', 'backup', 'backupworld', 'wbn'])
     async def worldbackupnew(self, ctx, *name):
         """
         new backup of current world.
@@ -1054,23 +1105,24 @@ class World_Backups(commands.Cog):
         if not name:
             await ctx.send("Usage: `?wbn <name>`\nExample: `?wbn Before the reckoning`")
             return False
-
         name = format_args(name)
-        await mc_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}")
-        await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        await mc_command(f"save-all")
-        await asyncio.sleep(3)
 
+        if await mc_command("", bot_ctx=ctx):
+            await mc_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}")
+            await mc_command(f"save-all")
+            await asyncio.sleep(3)
+
+        await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
         new_backup = server_functions.backup_world(name)
         if new_backup:
-            await ctx.send(f"**New World Backup:**\n`{new_backup}`")
+            await ctx.send(f"**New World Backup:** `{new_backup}`")
         else:
             await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
 
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @commands.command(aliases=['worldrestore', 'restoreworld', 'wbr', 'wr'])
+    @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
     async def worldbackuprestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
@@ -1093,17 +1145,15 @@ class World_Backups(commands.Cog):
 
         fetched_restore = server_functions.get_world_from_index(index)
         lprint(ctx, "World restoring to: " + fetched_restore)
-        await ctx.send(f"***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook: `{fetched_restore}`")
-        await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
-        await asyncio.sleep(5)
+        await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
+        if not await mc_command("", bot_ctx=ctx):
+            await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
+            await asyncio.sleep(5)
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('serverstop'), now=now)  # Stops if server is running.
-
+        await ctx.send(f"***Restored World:*** `{fetched_restore}`")
         server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
-
-        await ctx.invoke(self.bot.get_command('serverstart'))
 
     @commands.command(aliases=['worlddelete', 'backupdelete', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
@@ -1127,7 +1177,7 @@ class World_Backups(commands.Cog):
         await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
         server_functions.delete_world(to_delete)
 
-        await ctx.send(f"**World Backup Deleted** :wastebasket:")
+        await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
@@ -1138,7 +1188,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await mc_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
+        await mc_command("say ---WARNING--- Project Rebirth will commence in T-5s!", bot_ctx=ctx)
         await ctx.send(":fire:**INCINERATED**:fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
@@ -1212,8 +1262,8 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups.")
 
-    @commands.command(aliases=['backupserver', 'sbn'])
-    async def serverbackup(self, ctx, *name):
+    @commands.command(aliases=['serverbackup', 'sbn'])
+    async def serverbackupnew(self, ctx, *name):
         """
         New backup of server files (not just world save).
 
@@ -1229,20 +1279,21 @@ class Server_Backups(commands.Cog):
             return False
 
         name = format_args(name)
-        await ctx.send("***Creating Server Backup...*** :new::floppy_disk:")
-        await mc_command(f"save-all")
+        await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
+        if await mc_command("", bot_ctx=ctx):
+            await mc_command(f"save-all")
 
         await asyncio.sleep(5)
         new_backup = server_functions.backup_server(name)
         if new_backup:
-            await ctx.send(f"**New Server Backup:**\n`{new_backup}`.")
+            await ctx.send(f"**New Server Backup:** `{new_backup}`")
         else:
             await ctx.send("**ERROR:** Server backup failed! :interrobang:")
 
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-    @commands.command(aliases=['serverrestore', 'restoreserver', 'sbrestore', 'serverbr', 'sbr'])
+    @commands.command(aliases=['serverrestore', 'sbr'])
     async def serverbackuprestore(self, ctx, index='', now=''):
         """
         Restore server backup.
@@ -1263,19 +1314,19 @@ class Server_Backups(commands.Cog):
 
         fetched_restore = server_functions.get_server_from_index(index)
         lprint(ctx, "Server restoring to: " + fetched_restore)
-        await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook: `{fetched_restore}`")
-        await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
-        await asyncio.sleep(5)
+        await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
         if await mc_status() is True:
+            await mc_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
+            await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         if server_functions.restore_server(fetched_restore):
-            await ctx.send("**Server Restored** :desktop::leftwards_arrow_with_hook: ")
+            await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else:
             await ctx.send("**ERROR:** Could not restore server!")
 
-    @commands.command(aliases=['serverdelete', 'deleteserverbackup', 'serverdeletebackup', 'sbd'])
+    @commands.command(aliases=['serverdelete', 'sbd'])
     async def serverbackupdelete(self, ctx, index=''):
         """
         Delete a server backup.
@@ -1295,25 +1346,11 @@ class Server_Backups(commands.Cog):
             return False
 
         to_delete = server_functions.get_server_from_index(index)
-        await ctx.send("****Deleting Server Backup...*** :floppy_disk::wastebasket:")
+        await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
         server_functions.delete_server(to_delete)
 
-        await ctx.send(f"**Server Backup Deleted** :wastebasket:")
+        await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
-
-    @commands.command(aliases=['resetserver', 'newserver'])
-    async def serverreset(self, ctx):
-        """Deletes all current server files, keeps world and server backups."""
-
-        await mc_command("say ---WARNING--- Resetting server in 5s!")
-        await ctx.send("**Resetting Server...** :o:")
-        await ctx.send("**NOTE:** Next startup will take longer, to setup server and generate new world. Also `server.properties` file will reset!")
-
-        if await mc_status() is True:
-            await ctx.invoke(self.bot.get_command('serverstop'))
-
-        server_functions.restore_server(reset=True)
-        lprint(ctx, "Server Reset.")
 
 
 # ========== Extra: restart bot, botlog, get ip, help2.
