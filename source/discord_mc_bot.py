@@ -99,7 +99,7 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @commands.command(aliases=['pl', 'playerlist','listplayers', 'list'])
+    @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx):
         """Show list of online players."""
 
@@ -214,7 +214,7 @@ class Player(commands.Cog):
 
         if not await mc_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}", bot_ctx=ctx):
             return
-        
+
         await ctx.send(f"Killing {player} in {delay}s :bomb:")
         await asyncio.sleep(delay)
         await mc_command(f'kill {player}')
@@ -237,7 +237,7 @@ class Player(commands.Cog):
             ?tp Jesse Steve
         """
 
-        if not player or target:
+        if not player or not target:
             await ctx.send("Usage: `?tp <player> <target_player> [reason]`\nExample: `?tp R3diculous MysticFrogo I need to see him now!`")
             return False
 
@@ -248,7 +248,7 @@ class Player(commands.Cog):
         await asyncio.sleep(5)
         await mc_command(f"tp {player} {target}")
 
-        await ctx.send(f"`{player}` and {target} touchin real close now.")
+        await ctx.send(f"**Teleported:** `{player}` to `{target}`")
         lprint(ctx, f"Teleported {player} to {target}")
 
     @commands.command(aliases=['gm'])
@@ -266,7 +266,7 @@ class Player(commands.Cog):
             ?gm Jesse survival
         """
 
-        if not player or not mode:
+        if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
             await ctx.send(f"Usage: `?gm <name> <mode> [reason]`\nExample: `?gm MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
             return False
 
@@ -280,7 +280,7 @@ class Player(commands.Cog):
         lprint(ctx, f"Set {player} to: {mode}")
 
     @commands.command(aliases=['gamemodetimed', 'timedgm', 'tgm', 'gmt'])
-    async def timedgamemode(self, ctx, player='', mode='creative', duration=60, *reason):
+    async def timedgamemode(self, ctx, player='', mode='', duration=60, *reason):
         """
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
@@ -295,7 +295,7 @@ class Player(commands.Cog):
             ?tgm Jesse adventure Jesse going on a adventure.
         """
 
-        if not player:
+        if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
             await ctx.send("Usage: `?tgm <player> <mode> <seconds> [reason]`\nExample: `?tgm MysticFrogo spectator 120 Needs a time out`")
             return False
 
@@ -419,11 +419,14 @@ class Permissions(commands.Cog):
             else:
                 data = response.split(':', 1)
                 for line in data[1].split('.'):
+                    line = server_functions.remove_ansi(line)
                     line = line.split(':')
                     reason = server_functions.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
                     player = line[0].split(' ')[0].strip()
                     banner = line[0].split(' ')[-1].strip()
-                    banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+                    if len(player) < 2:
+                        continue
+                    banned_players += f"`{player}` banned by `{banner}` : `{reason}`\n"
 
                 banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
 
@@ -444,7 +447,7 @@ class Permissions(commands.Cog):
                     player = ban_log_line[0].split(' ')[1].strip()
                     banner = ban_log_line[0].split(' ')[-1].strip()
                     reason = ban_log_line[-1].strip()
-                    banned_players += f"`{player}` banned by `{banner}`: `{reason}`\n"
+                    banned_players += f"`{player}` banned by `{banner}` : `{reason}`\n"
             else:
                 banned_players = '**ERROR:** Trouble fetching ban list.'
 
@@ -479,7 +482,6 @@ class Permissions(commands.Cog):
 
         if not arg:
             await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
-            return False
 
         if not await mc_command("", bot_ctx=ctx):
             return
@@ -495,7 +497,7 @@ class Permissions(commands.Cog):
 
         elif arg == 'add' and arg2:
             await mc_command(f"whitelist {arg} {arg2}")
-            await ctx.send(f"Added `{arg2}` to whitelist  :paper_with_curl::pen_fountain:")
+            await ctx.send(f"Added `{arg2}` to whitelist  :page_with_curl::pen_fountain:")
             lprint(ctx, f"Added to whitelist: {arg2}")
         elif arg == 'remove' and arg2:
             await mc_command(f"whitelist {arg} {arg2}")
@@ -516,15 +518,19 @@ class Permissions(commands.Cog):
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'false')
 
         elif not arg or arg == 'list':
-            await mc_command('whitelist list')
-            await asyncio.sleep(2)
-            # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-            log_data = server_functions.mc_log('whitelisted players:').split(':')[-2:]
+            if use_rcon:
+                log_data = await mc_command('whitelist list')
+                log_data = server_functions.remove_ansi(log_data).split(':')
+            else:
+                await mc_command('whitelist list')
+                # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
+                log_data = server_functions.mc_log('whitelisted players:').split(':')[-2:]
+                await asyncio.sleep(2)
+
             # Then, formats player names in Discord `player` markdown.
             players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
             lprint(ctx, f"Showing whitelist: {log_data[1]}")
-            await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
             return False
         else:
             await ctx.send("**ERROR:** Something went wrong.")
@@ -564,10 +570,16 @@ class Permissions(commands.Cog):
             return
 
         reason = format_args(reason)
-        _, status_checker = await mc_command(f"op {player}")
-        if server_functions.mc_log(player, stopgap_str=status_checker):
+
+        if use_rcon:
+            command_success = await mc_command(f"op {player}")
+        else:
+            _, status_checker = await mc_command(f"op {player}")
+            command_success = server_functions.mc_log(player, stopgap_str=status_checker)
+
+        if command_success:
             await mc_command(f"say ---INFO--- {player} is now OP : {reason}")
-            await ctx.send(f"**New OP Player:** {player}")
+            await ctx.send(f"**New OP Player:** `{player}`")
         else:
             await ctx.send("**ERROR:** Problem setting OP status.")
         lprint(ctx, f"New server op: {player}")
@@ -594,10 +606,15 @@ class Permissions(commands.Cog):
             return
 
         reason = format_args(reason)
-        _, status_checker = await mc_command(f"deop {player}")
-        if server_functions.mc_log(player, stopgap_str=status_checker):
+        if use_rcon:
+            command_success = await mc_command(f"deop {player}")
+        else:
+            _, status_checker = await mc_command(f"deop {player}")
+            command_success = server_functions.mc_log(player, stopgap_str=status_checker)
+
+        if command_success:
             await mc_command(f"say ---INFO--- {player} no longer OP : {reason}")
-            await ctx.send(f"**Player OP Removed:** {player}")
+            await ctx.send(f"**Player OP Removed:** `{player}`")
         else:
             await ctx.send("**ERROR:** Problem removing OP status.")
         lprint(ctx, f"Removed server OP: {player}")
@@ -620,28 +637,12 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?top <player> <minutes> [reason]`\nExample: `?top R3diculous Testing purposes`")
             return False
 
-        reason = format_args(reason)
-        if not await mc_command(f"OP {player} for {time_limit}m : {reason}", bot_ctx=ctx):
-            return
-
-        lprint(ctx, f"OP {player} for {time_limit}.")
+        await mc_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
+        await ctx.send(f"***Temporary OP:*** `{player}` for {time_limit}m :hourglass:")
+        lprint(f"Temporary OP: {player} for {time_limit}m")
+        await ctx.invoke(self.bot.get_command('opadd'), player, *reason)
         await asyncio.sleep(time_limit * 60)
-
-        if server_functions.mc_log(player):
-            await mc_command(f"say ---INFO--- {player} is OP for {time_limit}m : {reason}")
-            await ctx.send(f"***Timed OP Player:*** `{player}` : {time_limit}m :hourglass:")
-        else:
-            await ctx.send("**ERROR:** Problem changing OP status.")
-
-        await mc_command(f"deop {player}")
-        if server_functions.mc_log(player):
-            await mc_command(f"say ---INFO--- {player} is no longer OP.")
-            await ctx.send(f"***Timed OP Player:*** `{player}` : {time_limit}m :hourglass:")
-        else:
-            await ctx.send("**ERROR:** Problem removing OP status.")
-
-        await ctx.send(f"Removed `{player}` OP status!")
-        lprint(ctx, f"Remove OP {player}")
+        await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
 
 # ========== World weather, time.
@@ -885,6 +886,7 @@ class Server(commands.Cog):
             ?reboot now
         """
 
+        await mc_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting server.")
         await ctx.send("***Restarting...*** :arrows_counterclockwise:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
