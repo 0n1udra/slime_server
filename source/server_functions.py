@@ -102,7 +102,6 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
             if bot_ctx:
                 await bot_ctx.send("Server not active.")
                 return False
-        await asyncio.sleep(1)
         os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
     else:
         if bot_ctx:
@@ -158,12 +157,14 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
     """
     if match is None:
         match = 'placeholder_match'
+    match = match.lower()
 
     if file_path is None:
         file_path = f"{server_path}/logs/latest.log"
 
     if stopgap_str is None:
         stopgap_str = 'placeholder_stopgap'
+    stopgap_str = stopgap_str.lower()
 
     if not os.path.isfile(file_path):
         return False
@@ -189,13 +190,13 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
                         break
                 elif log_mode:
                     log_data += line
-                elif match in line:
+                elif match in line.lower():
                     log_data += line
                     if filter_mode is True and match_lines >= 1:
                         match_lines -= 1
                     else:
                         break
-                if stopgap_str in line:
+                if stopgap_str.lower() in line.lower():
                     break
 
     if log_data:
