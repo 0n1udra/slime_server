@@ -10,7 +10,7 @@ __status__ = "Development"
 
 
 def setup_directories():
-    """Create necessary directories."""
+    """ Create necessary directories. """
 
     try:
         os.makedirs(server_functions.server_path)
@@ -23,7 +23,7 @@ def setup_directories():
         print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
 def start_tmux_session():
-    """Starts detached Tmux session, with 2 panes, named 'mcserver'."""
+    """ Starts detached Tmux session, with 2 panes, named 'mcserver'. """
 
     try:
         os.system('tmux new -d -s mcserver')
@@ -51,7 +51,7 @@ def start_bot():
         input("Enter to exit > ")
 
 def start_server():
-    """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
+    """ Start Minecraft server, method varies depending on variables set in slime_vars.py. """
 
     if server_functions.use_tmux is True:
         server_functions.mc_start()

@@ -101,7 +101,7 @@ class Basics(commands.Cog):
 
     @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx):
-        """Show list of online players."""
+        """ Show list of online players. """
 
         if not await mc_command("", bot_ctx=ctx):
             return
@@ -404,7 +404,7 @@ class Permissions(commands.Cog):
 
     @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
-        """Show list of current bans."""
+        """ Show list of current bans. """
 
         if not await mc_command("", bot_ctx=ctx):
             return
