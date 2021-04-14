@@ -10,7 +10,7 @@ __status__ = "Development"
 
 
 def setup_directories():
-    """ Create necessary directories. """
+    """Create necessary directories."""
 
     try:
         os.makedirs(server_functions.server_path)
@@ -23,7 +23,7 @@ def setup_directories():
         print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
 def start_tmux_session():
-    """ Starts detached Tmux session, with 2 panes, named 'mcserver'. """
+    """Starts detached Tmux session, with 2 panes, named 'mcserver'."""
 
     try:
         os.system('tmux new -d -s mcserver')
@@ -40,6 +40,15 @@ def start_tmux_session():
     time.sleep(1)
 
 
+def new_tmux_window():
+    """Create a second tmux window."""
+
+    try:
+        os.system('tmux send-keys -t mcserver:1.0 "tmux new-window" ENTER')
+        print("Created second window.")
+    except:
+        print("Error creating second window.")
+
 def start_bot():
     if server_functions.use_tmux is True:
         os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
@@ -51,7 +60,7 @@ def start_bot():
         input("Enter to exit > ")
 
 def start_server():
-    """ Start Minecraft server, method varies depending on variables set in slime_vars.py. """
+    """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
     if server_functions.use_tmux is True:
         server_functions.mc_start()
@@ -81,6 +90,8 @@ def script_help():
     startserver --  Start MC server.
                     
     startboth   --  Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
+
+    newwindow   --  Creates second tmux window (for my personal setup).
     
     Note:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
@@ -107,6 +118,9 @@ if __name__ == '__main__':
 
     if 'startserver' in sys.argv:
         start_server()
+
+    if 'newwindow' in sys.argv:
+        new_tmux_window()
 
     if 'startboth' in sys.argv:
         start_server()
