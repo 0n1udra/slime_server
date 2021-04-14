@@ -22,7 +22,7 @@ use_subprocess = False
 # If you have local access to server files but not using Tmux, use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
 server_ip = ''  # Will be updated by get_server_ip function in server_functions.py on bot startup.
-server_url = '192.168.1.65'
+server_url = 'arcpy.asuscomm.com'
 rcon_pass = 'rconpass69'
 rcon_port = 25575
 
@@ -38,7 +38,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
                }
 
-server_selected = server_list['valhesia3']
+server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -47,7 +47,7 @@ server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 # ========== Bot Config
 
 # Default values.
-autosave_status = False
+autosave_status = True
 autosave_interval = 30
 
 enable_inputs = ['enable', 'activate', 'true', 'on']

@@ -253,9 +253,9 @@ def get_mc_motd():
         return "N/A"
 
 def get_server_ip():
+    global server_ip
     server_ip = requests.get('http://ip.42.pl/raw').text
     return server_ip
-server_ip = get_server_ip()
 
 # Gets server version from log file or gets latest version number from website.
 def mc_version():
