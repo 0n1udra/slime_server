@@ -253,9 +253,19 @@ def get_mc_motd():
         return "N/A"
 
 def get_server_ip():
+    """Updates server ip address varable using request.get()"""
     global server_ip
     server_ip = requests.get('http://ip.42.pl/raw').text
     return server_ip
+
+def check_server_url():
+    """Checks if server_url address works by pining it twice."""
+    ping = subprocess.Popen(['ping', '-c', '2', server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    ping_out, ping_error = ping.communicate()
+    if server_ip in str(ping_out):
+        return 'working'
+    return 'inactive'
+
 
 # Gets server version from log file or gets latest version number from website.
 def mc_version():

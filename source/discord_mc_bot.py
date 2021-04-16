@@ -782,7 +782,7 @@ class Server(commands.Cog):
                         value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
-        embed.add_field(name='Address', value=f"IP: `{server_functions.get_server_ip()}`\nURL: `{server_functions.server_url}`", inline=False)
+        embed.add_field(name='Address', value=f"IP: `{server_functions.get_server_ip()}`\nURL: `{server_functions.server_url}` ({server_functions.check_server_url()})", inline=False)
         embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
@@ -1467,7 +1467,8 @@ class Bot_Functions(commands.Cog):
             ?address
         """
 
-        await ctx.send(f"Server IP: `{server_functions.get_server_ip()}`\nAlternative Address: `{server_functions.server_url}`")
+        await ctx.send(f"Server IP: `{server_functions.get_server_ip()}`")
+        await ctx.send(f"Alternative Address: `{server_functions.server_url}` ({server_functions.check_server_url()})")
         lprint(ctx, 'Fetched server address.')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
