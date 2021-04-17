@@ -2,7 +2,7 @@ import time, sys, os
 from discord_mc_bot import bot, TOKEN
 import server_functions
 
-__version__ = "4.0"
+__version__ = "4.0.1"
 __author__ = "D Thomas"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -28,14 +28,12 @@ def start_tmux_session():
     try:
         os.system('tmux new -d -s mcserver')
         print("Started Tmux 'mcserver' detached session.")
-    except:
-        print("Error: Starting 'mcserver' detached session.")
+    except:print("Error: Starting 'mcserver' detached session.")
 
     try:
         os.system('tmux send-keys -t mcserver:1.0 "tmux split-window -v" ENTER')
         print("Created second tmux pane for Discord bot.")
-    except:
-        print("Error: Creating second tmux pane for Discord bot.")
+    except: print("Error: Creating second tmux pane for Discord bot.")
 
     time.sleep(1)
 
@@ -46,8 +44,7 @@ def new_tmux_window():
     try:
         os.system('tmux send-keys -t mcserver:1.0 "tmux new-window" ENTER')
         print("Created second window.")
-    except:
-        print("Error creating second window.")
+    except: print("Error creating second window.")
 
 def start_bot():
     if server_functions.use_tmux is True:
@@ -64,8 +61,7 @@ def start_server():
 
     if server_functions.use_tmux is True:
         server_functions.mc_start()
-    else:
-        bot.run(TOKEN)
+    else: bot.run(TOKEN)
 
 
 def script_help():
@@ -113,21 +109,16 @@ if __name__ == '__main__':
         start_tmux_session()
         time.sleep(1)
 
-    if 'startbot' in sys.argv:
-        start_bot()
+    if 'startbot' in sys.argv: start_bot()
 
-    if 'startserver' in sys.argv:
-        start_server()
+    if 'startserver' in sys.argv: start_server()
 
-    if 'newwindow' in sys.argv:
-        new_tmux_window()
+    if 'newwindow' in sys.argv: new_tmux_window()
 
     if 'startboth' in sys.argv:
         start_server()
         start_bot()
 
-    if 'attachtmux' in sys.argv:
-        os.system("tmux attach -t mcserver")
+    if 'attachtmux' in sys.argv: os.system("tmux attach -t mcserver")
 
-    if 'help' in sys.argv:
-        script_help()
+    if 'help' in sys.argv: script_help()
