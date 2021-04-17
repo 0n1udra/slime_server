@@ -665,9 +665,9 @@ class World(commands.Cog):
         else:
             server_functions.autosave_interval = arg
             server_functions.edit_file('autosave_interval', f" {arg}", server_functions.slime_vars_file)
-            return
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
+        arg = str(arg)
         if arg.lower() in server_functions.enable_inputs:
             server_functions.autosave_status = True
             self.autosave_loop.start()

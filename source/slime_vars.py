@@ -48,7 +48,7 @@ server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # Default values.
 autosave_status = True
-autosave_interval = 30
+autosave_interval = 60
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
