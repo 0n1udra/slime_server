@@ -117,7 +117,7 @@ class Basics(commands.Cog):
         player_names = log_data[-1]
         # If there's no players active, player_names will still contain some anso escape characters.
         if len(player_names.strip()) < 5:
-            await ctx.send(f"{text}. '¯\_(ツ)_/¯")
+            await ctx.send(f"{text}. ¯\_(ツ)_/¯")
         else:
             # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
             players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]

@@ -4915,3 +4915,508 @@ max-world-size=29999984
 [2021-01-06 21:22:26] (ARDU1N0#4107): Fetched banned list.
 [2021-01-06 21:22:34] (ARDU1N0#4107): Showing whitelist:  MysticFrogo, R3diculous
 
+[2021-01-06 21:53:51] (ARDU1N0#4107): Restarting bot.
+[2021-01-06 21:53:51] (Script): Server selected: valhesia3
+[2021-01-06 21:53:54] (Script): Bot PRIMED.
+[2021-01-11 19:48:20] (ARDU1N0#4107): Fetched 3 lines from server log.
+[2021-01-11 19:48:35] (ARDU1N0#4107): Restarting bot.
+[2021-01-11 19:48:38] (Script): Server selected: vanilla
+[2021-01-11 19:48:41] (Script): Bot PRIMED.
+[2021-01-11 19:48:48] (ARDU1N0#4107): Fetched 3 lines from server log.
+[2021-01-11 20:08:57] (ARDU1N0#4107): Restarting bot.
+[2021-01-11 20:08:57] (Script): Server selected: valhesia3
+[2021-01-11 20:09:00] (Script): Bot PRIMED.
+[2021-01-11 20:09:28] (ARDU1N0#4107): Fetched server status.
+[2021-01-11 20:09:28] (ARDU1N0#4107): Starting server.
+[2021-01-13 23:04:52] (ARDU1N0#4107): Restarting bot.
+[2021-01-13 23:04:55] (Script): Server selected: papermc
+[2021-01-13 23:04:58] (Script): Bot PRIMED.
+[2021-01-13 23:05:28] (ARDU1N0#4107): Restarting server.
+[2021-01-13 23:06:00] (ARDU1N0#4107): Fetched server status.
+[2021-01-13 23:06:00] (ARDU1N0#4107): Starting server.
+[2021-01-13 23:06:12] (ARDU1N0#4107): Fetched server status.
+[2021-01-13 23:06:12] (ARDU1N0#4107): Starting server.
+[2021-01-14 12:16:20] (ARDU1N0#4107): Fetched 10 world backups.
+[2021-01-14 12:17:33] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2021-01-14 12-17) 1.16.4 foo
+[2021-01-14 12:17:37] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2021-01-14 12:17:37] (ARDU1N0#4107): New world backup: (2021-01-14 12-17) 1.16.4 foo
+[2021-01-14 12:17:45] (ARDU1N0#4107): Server restoring to: (2020-12-18 21-40) 1.16.4 ok
+[2021-01-14 12:18:54] (ARDU1N0#4107): Fetched player list.
+[2021-01-14 12:18:54] (ARDU1N0#4107): Fetched server status.
+[2021-01-14 12:18:54] (ARDU1N0#4107): Starting server.
+[2021-01-14 12:20:09] (ARDU1N0#4107): Fetched 10 most recent world saves.
+[2021-01-14 12:20:13] (ARDU1N0#4107): World restoring to: (2021-01-14 12-17) 1.16.4 foo
+[2021-01-14 12:24:12] (ARDU1N0#4107): Fetched player list.
+[2021-01-14 12:24:12] (ARDU1N0#4107): Fetched server status.
+[2021-01-14 12:24:12] (ARDU1N0#4107): Starting server.
+[2021-01-17 11:49:20] (ARDU1N0#4107): Fetched player list.
+[2021-01-17 11:49:20] (ARDU1N0#4107): Fetched server status.
+[2021-01-24 13:22:09] (Script): Bot PRIMED.
+[2021-01-25 21:12:48] (ARDU1N0#4107): Fetched server address.
+[2021-01-25 21:13:39] (ARDU1N0#4107): Restarting bot.
+[2021-01-25 21:13:43] (Script): Server selected: valhesia3
+[2021-01-25 21:13:46] (Script): Bot PRIMED.
+[2021-01-25 21:13:51] (ARDU1N0#4107): Restarting server.
+[2021-01-25 21:14:23] (ARDU1N0#4107): Fetched server status.
+[2021-01-25 21:14:23] (ARDU1N0#4107): Starting server.
+[2021-01-25 21:14:42] (ARDU1N0#4107): Fetched server status.
+[2021-01-25 21:14:42] (ARDU1N0#4107): Starting server.
+[2021-01-25 21:15:00] (ARDU1N0#4107): Fetched server status.
+[2021-01-25 21:15:00] (ARDU1N0#4107): Starting server.
+[2021-01-27 13:52:03] (Script): Server selected: valhesia3
+[2021-01-27 13:52:07] (Script): Server selected: valhesia3
+[2021-01-27 13:52:11] (Script): Bot PRIMED.
+[2021-02-02 21:25:47] (Script): Server selected: valhesia3
+[2021-02-02 21:25:51] (Script): Server selected: valhesia3
+[2021-02-02 21:25:54] (Script): Bot PRIMED.
+[2021-02-07 11:17:07] (Script): Server selected: valhesia3
+[2021-02-07 11:17:10] (Script): Bot PRIMED.
+[2021-02-10 16:18:16] (Script): Server selected: valhesia3
+[2021-02-10 16:18:20] (Script): Server selected: valhesia3
+[2021-02-10 16:18:22] (Script): Bot PRIMED.
+[2021-02-10 20:14:06] (Script): Server selected: valhesia3
+[2021-02-10 20:14:09] (Script): Server selected: valhesia3
+[2021-02-10 20:14:13] (Script): Bot PRIMED.
+[2021-02-11 21:44:42] (Predisposition2Null#4107): Restarting bot.
+[2021-02-11 21:44:46] (Script): Server selected: papermc
+[2021-02-11 21:44:49] (Script): Bot PRIMED.
+[2021-02-11 21:45:23] (Predisposition2Null#4107): Fetched player list.
+[2021-02-11 21:45:23] (Predisposition2Null#4107): Fetched server status.
+[2021-02-11 21:45:23] (Predisposition2Null#4107): Starting server.
+[2021-02-23 17:58:41] (Script): Server selected: papermc
+[2021-02-23 17:58:44] (Script): Server selected: papermc
+[2021-02-23 17:58:47] (Script): Bot PRIMED.
+[2021-02-27 16:02:25] (Script): Server selected: papermc
+[2021-02-27 16:02:27] (Script): Server selected: papermc
+[2021-02-27 16:02:30] (Script): Bot PRIMED.
+[2021-02-27 16:02:53] (Predisposition2Null#4107): Fetched server status.
+[2021-02-28 14:54:36] (Script): Server selected: papermc
+[2021-02-28 14:54:40] (Script): Server selected: papermc
+[2021-02-28 14:54:42] (Script): Bot PRIMED.
+[2021-03-02 12:53:19] (Script): Server selected: papermc
+[2021-03-02 12:53:23] (Script): Server selected: papermc
+[2021-03-02 12:53:27] (Script): Bot PRIMED.
+[2021-03-03 21:10:10] (Script): Bot PRIMED.
+[2021-03-12 21:22:56] (Script): Bot PRIMED.
+[2021-03-14 18:26:15] (Script): Server selected: papermc
+[2021-03-14 18:26:26] (Script): Server selected: papermc
+[2021-03-14 18:26:34] (Script): Bot PRIMED.
+[2021-03-26 16:27:12] (Script): Bot PRIMED.
+[2021-03-26 17:35:14] (Script): Bot PRIMED.
+[2021-03-26 19:29:41] (Script): Server selected: papermc
+[2021-03-26 19:29:45] (Script): Server selected: papermc
+[2021-03-26 19:29:48] (Script): Bot PRIMED.
+[2021-03-27 22:40:53] (Script): Server selected: papermc
+[2021-03-27 22:40:56] (Script): Bot PRIMED.
+[2021-03-29 20:13:07] (Script): Server selected: papermc
+[2021-03-29 20:13:10] (Script): Server selected: papermc
+[2021-03-29 20:13:13] (Script): Bot PRIMED.
+[2021-03-29 20:40:04] (Script): Server selected: papermc
+[2021-03-29 20:40:07] (Script): Server selected: papermc
+[2021-03-29 20:40:10] (Script): Bot PRIMED.
+[2021-03-29 20:41:00] (Script): Server selected: papermc
+[2021-03-29 20:42:58] (Script): Server selected: papermc
+[2021-03-29 20:43:03] (Script): Server selected: papermc
+[2021-03-29 20:43:03] (Script): Server selected: papermc
+[2021-03-29 20:43:06] (Script): Bot PRIMED.
+[2021-03-29 20:46:59] (Script): Server selected: papermc
+[2021-03-29 20:47:04] (Script): Server selected: papermc
+[2021-03-29 20:47:04] (Script): Server selected: papermc
+[2021-03-29 20:47:08] (Script): Bot PRIMED.
+[2021-03-29 20:48:42] (Script): Server selected: papermc
+[2021-03-29 20:48:46] (Script): Server selected: papermc
+[2021-03-29 20:48:47] (Script): Server selected: papermc
+[2021-03-29 20:48:50] (Script): Bot PRIMED.
+[2021-04-01 21:00:10] (Script): Bot PRIMED.
+[2021-04-06 16:02:05] (Predisposition2Null#4107): Fetched server status.
+[2021-04-06 16:02:42] (Predisposition2Null#4107): Fetched player list.
+[2021-04-06 16:02:42] (Predisposition2Null#4107): Fetched server status.
+[2021-04-06 16:02:42] (Predisposition2Null#4107): Starting server.
+[2021-04-06 16:06:14] (Predisposition2Null#4107): Set r3diculous to: survival
+[2021-04-06 16:45:50] (FrogDog#4231): Fetched server address.
+[2021-04-06 16:47:44] (Predisposition2Null#4107): Server property: server-port=25565
+[2021-04-06 16:47:50] (Predisposition2Null#4107): Server property: Match not found.
+[2021-04-06 16:47:53] (Predisposition2Null#4107): Server property: server-ip=
+[2021-04-06 16:48:01] (Predisposition2Null#4107): Server property: online-mode=true
+[2021-04-06 16:49:04] (Predisposition2Null#4107): Fetched server address.
+[2021-04-06 16:54:43] (Predisposition2Null#4107): Restarting bot.
+[2021-04-06 16:54:46] (Script): Server selected: papermc
+[2021-04-06 16:54:49] (Script): Bot PRIMED.
+[2021-04-06 16:54:52] (Predisposition2Null#4107): Fetched server address.
+[2021-04-06 16:55:51] (Predisposition2Null#4107): Restarting bot.
+[2021-04-06 16:55:52] (Script): Server selected: papermc
+[2021-04-06 16:55:55] (Script): Bot PRIMED.
+[2021-04-06 16:58:39] (Predisposition2Null#4107): Stopping server.
+[2021-04-06 16:58:42] (Predisposition2Null#4107): World Reset.
+[2021-04-06 16:59:41] (Predisposition2Null#4107): Fetched server status.
+[2021-04-06 16:59:41] (Predisposition2Null#4107): Starting server.
+[2021-04-06 17:07:38] (Predisposition2Null#4107): Server property: spawn-protection=2
+[2021-04-06 17:08:01] (Predisposition2Null#4107): Server property: spawn-protection=0
+[2021-04-09 20:10:57] (FrogDog#4231): Fetched server address.
+[2021-04-09 21:40:40] (Predisposition2Null#4107): Server property: difficulty=normal
+[2021-04-14 04:48:55] (Script): Server selected: papermc
+[2021-04-14 04:48:59] (Script): Server selected: papermc
+[2021-04-14 04:49:00] (Script): Server selected: papermc
+[2021-04-14 04:49:02] (Script): Bot PRIMED.
+[2021-04-14 15:56:07] (FrogDog#5103): Fetched server status.
+[2021-04-14 15:56:57] (FrogDog#5103): Fetched player list.
+[2021-04-14 15:56:57] (FrogDog#5103): Fetched server status.
+[2021-04-14 15:56:57] (FrogDog#5103): Starting server.
+[2021-04-14 15:59:58] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-14 16:00:02] (Predisposition2Null#4107): Autosave on, interval: 30m
+[2021-04-14 16:00:02] (Script): Autosaved, interval: 30m
+[2021-04-14 16:00:03] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-14 16:01:12] (Predisposition2Null#4107): Fetched player list.
+[2021-04-14 16:01:12] (Predisposition2Null#4107): Fetched server status.
+[2021-04-14 16:01:53] (Predisposition2Null#4107): Fetched server address.
+[2021-04-14 16:03:20] (Predisposition2Null#4107): Restarting bot.
+[2021-04-14 16:03:21] (Script): Server selected: papermc
+[2021-04-14 16:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 16:03:23] (Script): Bot PRIMED.
+[2021-04-14 16:03:35] (Predisposition2Null#4107): Fetched player list.
+[2021-04-14 16:03:35] (Predisposition2Null#4107): Fetched server status.
+[2021-04-14 16:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 17:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 17:33:25] (Script): Autosaved, interval: 30m
+[2021-04-14 18:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 18:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 19:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 19:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 20:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 20:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 21:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 21:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 22:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 22:33:23] (Script): Autosaved, interval: 30m
+[2021-04-14 23:03:23] (Script): Autosaved, interval: 30m
+[2021-04-14 23:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 00:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 00:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 01:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 01:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 02:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 02:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 03:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 03:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 04:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 04:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 05:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 05:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 06:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 06:19:01] (FrogDog#5103): Fetched player list.
+[2021-04-15 06:19:01] (FrogDog#5103): Fetched server status.
+[2021-04-15 06:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 07:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 07:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 08:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 08:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 09:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 09:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 10:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 10:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 11:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 11:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 12:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 12:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 13:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 13:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 14:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 14:10:36] (Predisposition2Null#4107): Fetched player list.
+[2021-04-15 14:10:36] (Predisposition2Null#4107): Fetched server status.
+[2021-04-15 14:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 15:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 15:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 16:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 16:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 17:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 17:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 18:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 18:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 19:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 19:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 20:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 20:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 21:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 21:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 22:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 22:33:23] (Script): Autosaved, interval: 30m
+[2021-04-15 23:03:23] (Script): Autosaved, interval: 30m
+[2021-04-15 23:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 00:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 00:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 01:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 01:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 02:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 02:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 03:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 03:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 04:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 04:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 05:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 05:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 06:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 06:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 07:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 07:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 08:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 08:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 09:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 09:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 10:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 10:13:14] (Script): Bot PRIMED.
+[2021-04-16 10:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 11:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 11:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 12:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 12:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 13:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 13:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 14:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 14:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 15:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 15:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 16:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 16:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 17:03:23] (Script): Autosaved, interval: 30m
+[2021-04-16 17:33:23] (Script): Autosaved, interval: 30m
+[2021-04-16 17:34:06] (FrogDog#5103): Fetched player list.
+[2021-04-16 17:34:06] (FrogDog#5103): Fetched server status.
+[2021-04-16 17:36:23] (FrogDog#5103): Fetched server address.
+[2021-04-16 17:36:40] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 17:36:43] (Script): Server selected: papermc
+[2021-04-16 17:36:46] (Script): Autosaved, interval: 30m
+[2021-04-16 17:36:46] (Script): Bot PRIMED.
+[2021-04-16 17:36:47] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 17:37:00] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 17:59:10] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 17:59:10] (Script): Server selected: papermc
+[2021-04-16 17:59:18] (Script): Autosaved, interval: 30m
+[2021-04-16 17:59:18] (Script): Bot PRIMED.
+[2021-04-16 17:59:19] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 17:59:35] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 17:59:36] (Script): Server selected: papermc
+[2021-04-16 17:59:39] (Script): Autosaved, interval: 30m
+[2021-04-16 17:59:40] (Script): Bot PRIMED.
+[2021-04-16 17:59:42] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 18:00:45] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 18:00:46] (Script): Server selected: papermc
+[2021-04-16 18:00:48] (Script): Autosaved, interval: 30m
+[2021-04-16 18:00:48] (Script): Bot PRIMED.
+[2021-04-16 18:00:51] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 18:01:26] (Predisposition2Null#4107): Fetched player list.
+[2021-04-16 18:01:26] (Predisposition2Null#4107): Fetched server status.
+[2021-04-16 18:01:56] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 18:01:57] (Script): Server selected: papermc
+[2021-04-16 18:01:59] (Script): Autosaved, interval: 30m
+[2021-04-16 18:01:59] (Script): Bot PRIMED.
+[2021-04-16 18:02:13] (Predisposition2Null#4107): Fetched server address.
+[2021-04-16 18:02:14] (Predisposition2Null#4107): Fetched player list.
+[2021-04-16 18:02:14] (Predisposition2Null#4107): Fetched server status.
+[2021-04-16 18:31:59] (Script): Autosaved, interval: 30m
+[2021-04-16 19:01:59] (Script): Autosaved, interval: 30m
+[2021-04-16 19:31:59] (Script): Autosaved, interval: 30m
+[2021-04-16 20:01:59] (Script): Autosaved, interval: 30m
+[2021-04-16 20:31:59] (Script): Autosaved, interval: 30m
+[2021-04-16 20:56:36] (Predisposition2Null#4107): Saved world.
+[2021-04-16 20:59:38] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:01:59] (Script): Autosaved, interval: 30m
+[2021-04-16 21:07:15] (Predisposition2Null#4107): Autosave off
+[2021-04-16 21:07:15] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:07:17] (Predisposition2Null#4107): Autosave on, interval: 30m
+[2021-04-16 21:07:17] (Script): Autosaved, interval: 30m
+[2021-04-16 21:07:17] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:07:42] (Predisposition2Null#4107): Autosave off
+[2021-04-16 21:07:42] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:07:45] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 21:07:45] (Script): Server selected: papermc
+[2021-04-16 21:07:48] (Script): Bot PRIMED.
+[2021-04-16 21:08:02] (Predisposition2Null#4107): Autosave on, interval: 30m
+[2021-04-16 21:08:02] (Script): Autosaved, interval: 30m
+[2021-04-16 21:08:02] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:08:21] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 21:08:21] (Script): Server selected: papermc
+[2021-04-16 21:08:24] (Script): Bot PRIMED.
+[2021-04-16 21:08:26] (Script): Autosaved, interval: 30m
+[2021-04-16 21:09:18] (Predisposition2Null#4107): Autosave off
+[2021-04-16 21:09:18] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:09:24] (Predisposition2Null#4107): Autosave on, interval: 30m
+[2021-04-16 21:09:24] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 21:09:26] (Script): Autosaved, interval: 30m
+[2021-04-16 21:39:26] (Script): Autosaved, interval: 30m
+[2021-04-16 22:09:26] (Script): Autosaved, interval: 30m
+[2021-04-16 22:39:26] (Script): Autosaved, interval: 30m
+[2021-04-16 23:09:26] (Script): Autosaved, interval: 30m
+[2021-04-16 23:20:55] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 23:21:21] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 23:22:08] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 23:22:08] (Script): Server selected: papermc
+[2021-04-16 23:22:11] (Script): Bot PRIMED.
+[2021-04-16 23:22:12] (Script): Autosaved, interval: 60m
+[2021-04-16 23:22:13] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 23:22:35] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-16 23:23:30] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 23:23:30] (Script): Server selected: papermc
+[2021-04-16 23:23:33] (Script): Bot PRIMED.
+[2021-04-16 23:23:35] (Script): Autosaved, interval: 60m
+[2021-04-16 23:24:31] (Predisposition2Null#4107): Restarting bot.
+[2021-04-16 23:24:31] (Script): Server selected: papermc
+[2021-04-16 23:24:34] (Script): Bot PRIMED.
+[2021-04-16 23:24:35] (Script): Autosaved, interval: 60m
+[2021-04-16 23:24:35] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-17 00:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 01:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 02:24:36] (Script): Autosaved, interval: 60m
+[2021-04-17 03:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 04:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 05:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 06:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 07:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 08:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 09:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 10:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 11:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 12:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 13:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 14:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 15:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 16:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 17:24:36] (Script): Autosaved, interval: 60m
+[2021-04-17 18:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 19:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 20:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 20:44:53] (Predisposition2Null#4107): Fetched 10 most recent world saves.
+[2021-04-17 20:45:22] (Script): Backed up to: /mnt/c/Users/DT/Desktop/MC/world_backups/papermc/(2021-04-17 20-45) 1.16.3 after-raid
+[2021-04-17 20:45:23] (Predisposition2Null#4107): Fetched 10 most recent world saves.
+[2021-04-17 20:45:23] (Predisposition2Null#4107): New world backup: (2021-04-17 20-45) 1.16.3 after-raid
+[2021-04-17 21:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 22:24:35] (Script): Autosaved, interval: 60m
+[2021-04-17 23:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 00:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 01:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 02:24:36] (Script): Autosaved, interval: 60m
+[2021-04-18 03:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 04:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 05:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 06:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 07:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 08:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 09:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 10:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 10:50:27] (FrogDog#5103): Fetched player list.
+[2021-04-18 10:50:27] (FrogDog#5103): Fetched server status.
+[2021-04-18 10:51:33] (FrogDog#5103): Banned Smart : Babatunde
+[2021-04-18 10:53:18] (FrogDog#5103): Server said: what are you retards doing
+[2021-04-18 10:53:35] (FrogDog#5103): Server said: who is babatunde
+[2021-04-18 10:55:03] (FrogDog#5103): Server said: stop being islamaphobic
+[2021-04-18 10:55:17] (FrogDog#5103): Server said: I will literally ban you
+[2021-04-18 10:56:16] (FrogDog#5103): Banned smartbabatunde : No reason given.
+[2021-04-18 11:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 12:06:21] (Predisposition2Null#4107): Fetched 5 lines from server log.
+[2021-04-18 12:16:11] (Predisposition2Null#4107): Fetched banned list.
+[2021-04-18 12:17:01] (Predisposition2Null#4107): Pardoned smart : No reason given.
+[2021-04-18 12:17:10] (Predisposition2Null#4107): Pardoned test : No reason given.
+[2021-04-18 12:17:17] (Predisposition2Null#4107): Pardoned test2 : No reason given.
+[2021-04-18 12:17:28] (Predisposition2Null#4107): Fetched 5 lines from server log.
+[2021-04-18 12:17:41] (Predisposition2Null#4107): Fetched banned list.
+[2021-04-18 12:17:51] (Predisposition2Null#4107): Fetched player list.
+[2021-04-18 12:17:54] (Predisposition2Null#4107): Pardoned list : No reason given.
+[2021-04-18 12:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 13:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 14:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 15:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 16:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 17:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 18:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 19:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 20:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 21:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 22:24:35] (Script): Autosaved, interval: 60m
+[2021-04-18 23:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 00:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 01:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 02:24:36] (Script): Autosaved, interval: 60m
+[2021-04-19 03:24:36] (Script): Autosaved, interval: 60m
+[2021-04-19 04:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 05:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 06:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 07:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 08:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 09:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 10:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 11:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 11:43:29] (FrogDog#5103): Sent command: /give @mysticfrogo minecraft:name_tag 1
+[2021-04-19 11:43:31] (FrogDog#5103): Fetched 3 lines from server log.
+[2021-04-19 11:44:04] (FrogDog#5103): Sent command: /give @mysticfrogo minecraft:name_tag 1
+[2021-04-19 11:44:05] (FrogDog#5103): Fetched 3 lines from server log.
+[2021-04-19 11:44:39] (FrogDog#5103): Sent command: /give @MysticFrogo minecraft:name_tag 1
+[2021-04-19 11:44:40] (FrogDog#5103): Fetched 3 lines from server log.
+[2021-04-19 11:45:35] (FrogDog#5103): New server op: MysticFrogo
+[2021-04-19 11:46:45] (FrogDog#5103): Removed server OP: MysticFrogo
+[2021-04-19 12:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 13:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 14:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 14:53:51] (Predisposition2Null#4107): Fetched player list.
+[2021-04-19 14:53:51] (Predisposition2Null#4107): Fetched server status.
+[2021-04-19 15:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 16:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 17:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 18:24:35] (Script): Autosaved, interval: 60m
+[2021-04-19 18:58:10] (Predisposition2Null#4107): Fetched player list.
+[2021-04-19 18:58:15] (Script): Server selected: papermc
+[2021-04-19 18:58:18] (Script): Bot PRIMED.
+[2021-04-19 18:58:20] (Script): Autosaved, interval: 60m
+[2021-04-19 18:58:29] (Predisposition2Null#4107): Fetched 10 world backups.
+[2021-04-19 18:58:42] (Predisposition2Null#4107): Fetched player list.
+[2021-04-19 18:58:57] (Predisposition2Null#4107): Fetched player list.
+[2021-04-19 18:58:57] (Predisposition2Null#4107): Fetched server status.
+[2021-04-19 18:59:29] (Predisposition2Null#4107): Restarting bot.
+[2021-04-19 18:59:30] (Script): Server selected: papermc
+[2021-04-19 18:59:32] (Script): Bot PRIMED.
+[2021-04-19 18:59:34] (Script): Autosaved, interval: 60m
+[2021-04-19 18:59:39] (Predisposition2Null#4107): Restarting bot.
+[2021-04-19 18:59:40] (Script): Server selected: papermc
+[2021-04-19 18:59:43] (Script): Bot PRIMED.
+[2021-04-19 18:59:45] (Script): Autosaved, interval: 60m
+[2021-04-19 19:00:25] (Predisposition2Null#4107): Restarting bot.
+[2021-04-19 19:00:26] (Script): Server selected: papermc
+[2021-04-19 19:00:29] (Script): Bot PRIMED.
+[2021-04-19 19:00:31] (Script): Autosaved, interval: 60m
+[2021-04-19 19:03:23] (Predisposition2Null#4107): Restarting bot.
+[2021-04-19 19:03:24] (Script): Server selected: papermc
+[2021-04-19 19:03:28] (Script): Autosaved, interval: 60m
+[2021-04-19 19:06:32] (Predisposition2Null#4107): Fetched player list.
+[2021-04-19 19:06:36] (Predisposition2Null#4107): Restarting bot.
+[2021-04-19 19:06:37] (Script): Server selected: papermc
+[2021-04-19 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-19 19:24:08] (Predisposition2Null#4107): Fetched help page.
+[2021-04-19 19:24:43] (Predisposition2Null#4107): Fetched help page.
+[2021-04-19 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-19 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-19 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-19 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 13:34:48] (Predisposition2Null#4107): Fetched player list.
+[2021-04-20 13:54:07] (Predisposition2Null#4107): Fetched player list.
+[2021-04-20 13:54:07] (Predisposition2Null#4107): Fetched server status.
+[2021-04-20 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 22:06:41] (Script): Autosaved, interval: 60m
