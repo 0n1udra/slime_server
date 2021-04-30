@@ -3,6 +3,12 @@ from discord.ext import commands, tasks
 import server_functions
 from server_functions import lprint, use_rcon, format_args, mc_command, mc_status
 
+__version__ = "4.0.1"
+__author__ = "D Thomas"
+__email__ = "dt01@pm.me"
+__license__ = "GPL 3"
+__status__ = "Development"
+
 # Exits script if no token.
 if os.path.isfile(server_functions.bot_token_file):
     with open(server_functions.bot_token_file, 'r') as file:
@@ -23,7 +29,7 @@ async def on_ready():
         channel = bot.get_channel(server_functions.channel_id)
         await channel.send('**Bot PRIMED** :white_check_mark:')
 
-    lprint("Bot PRIMED.")
+    lprint(f"({__version__}) Bot PRIMED.")
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.

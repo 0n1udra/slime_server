@@ -5420,3 +5420,290 @@ max-world-size=29999984
 [2021-04-20 20:06:41] (Script): Autosaved, interval: 60m
 [2021-04-20 21:06:41] (Script): Autosaved, interval: 60m
 [2021-04-20 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-20 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-21 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-22 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 21:04:16] (やたし#7620): Kicked <@235148962103951360>
+[2021-04-23 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-23 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 06:04:39] (FrogDog#5103): Fetched player list.
+[2021-04-24 06:04:39] (FrogDog#5103): Fetched server status.
+[2021-04-24 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-24 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-25 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-26 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 04:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-27 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 04:07:03] (Script): Autosaved, interval: 60m
+[2021-04-28 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 21:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 22:06:41] (Script): Autosaved, interval: 60m
+[2021-04-28 23:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 00:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 01:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 02:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 03:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 04:06:43] (Script): Autosaved, interval: 60m
+[2021-04-29 05:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 06:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 07:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 08:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 09:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 10:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 11:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 12:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 13:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 14:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 15:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 16:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 17:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 18:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 19:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 20:06:41] (Script): Autosaved, interval: 60m
+[2021-04-29 20:22:14] (Predisposition2Null#4107): Stopping server.
+[2021-04-29 20:55:16] (Predisposition2Null#4107): Autosave off
+[2021-04-29 20:55:16] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 20:58:50] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 20:58:53] (Script): Server selected: papermc
+[2021-04-29 21:00:34] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:00:34] (Script): Server selected: papermc
+[2021-04-29 21:00:37] (Script): Bot PRIMED.
+[2021-04-29 21:03:31] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:03:31] (Script): Server selected: papermc
+[2021-04-29 21:03:34] (Script): Bot PRIMED.
+[2021-04-29 21:03:42] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:03:45] (Predisposition2Null#4107): Autosave on, interval: 60m
+[2021-04-29 21:03:45] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:03:47] (Script): Autosaved, interval: 60m
+[2021-04-29 21:03:56] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:04:09] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:04:09] (Script): Server selected: papermc
+[2021-04-29 21:04:11] (Script): Bot PRIMED.
+[2021-04-29 21:04:13] (Script): Autosaved, interval: 60m
+[2021-04-29 21:04:14] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:07:19] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:07:19] (Script): Server selected: papermc
+[2021-04-29 21:07:22] (Script): Bot PRIMED.
+[2021-04-29 21:07:24] (Script): Autosaved, interval: 60m
+[2021-04-29 21:07:58] (Predisposition2Null#4107): Fetched player list.
+[2021-04-29 21:07:58] (Predisposition2Null#4107): Fetched server status.
+[2021-04-29 21:07:58] (Predisposition2Null#4107): Starting server.
+[2021-04-29 21:10:24] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:10:25] (Script): Server selected: papermc
+[2021-04-29 21:10:27] (Script): Bot PRIMED.
+[2021-04-29 21:10:29] (Script): Autosaved, interval: 60m
+[2021-04-29 21:10:45] (Predisposition2Null#4107): Stopping server.
+[2021-04-29 21:11:59] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:15:45] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:15:46] (Script): Server selected: papermc
+[2021-04-29 21:15:48] (Script): Bot PRIMED.
+[2021-04-29 21:15:50] (Script): Autosaved, interval: 60m
+[2021-04-29 21:15:50] (Predisposition2Null#4107): Fetched autosave information.
+[2021-04-29 21:26:41] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:26:42] (Script): Server selected: papermc
+[2021-04-29 21:26:44] (Script): Bot PRIMED.
+[2021-04-29 21:26:46] (Script): Paused autosave loop, server currently inactive.
+[2021-04-29 21:26:55] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:26:55] (Script): Server selected: papermc
+[2021-04-29 21:26:57] (Script): Bot PRIMED.
+[2021-04-29 21:26:59] (Script): Paused autosave loop, server currently inactive.
+[2021-04-29 21:27:56] (Predisposition2Null#4107): Fetched player list.
+[2021-04-29 21:27:56] (Predisposition2Null#4107): Fetched server status.
+[2021-04-29 21:27:56] (Predisposition2Null#4107): Starting server.
+[2021-04-29 21:28:00] (Script): Autosaved, interval: 60m
+[2021-04-29 21:30:10] (Predisposition2Null#4107): Fetched player list.
+[2021-04-29 21:30:10] (Predisposition2Null#4107): Fetched server status.
+[2021-04-29 21:34:04] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:34:05] (Script): Server selected: papermc
+[2021-04-29 21:34:07] (Script): Bot PRIMED.
+[2021-04-29 21:34:11] (Script): Autosaved, interval: 60m
+[2021-04-29 21:34:18] (Predisposition2Null#4107): Fetched player list.
+[2021-04-29 21:34:18] (Predisposition2Null#4107): Fetched server status.
+[2021-04-29 21:37:35] (Predisposition2Null#4107): Restarting bot.
+[2021-04-29 21:37:35] (Script): Server selected: papermc
+[2021-04-29 21:37:37] (Script): Bot PRIMED.
+[2021-04-29 21:37:41] (Script): Autosaved, interval: 60m
+[2021-04-29 22:37:41] (Script): Autosaved, interval: 60m
+[2021-04-29 23:27:43] (Predisposition2Null#4107): Stopping server.
+[2021-04-30 00:04:43] (Script): Server selected: papermc
+[2021-04-30 00:04:47] (Script): Paused autosave loop, server currently inactive.
+[2021-04-30 00:07:24] (Script): Server selected: papermc
+[2021-04-30 00:07:27] (Script): (4.0.1) Bot PRIMED.
+[2021-04-30 00:07:29] (Script): Paused autosave loop, server currently inactive.

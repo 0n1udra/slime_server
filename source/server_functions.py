@@ -3,7 +3,6 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from slime_vars import *
 
-
 # Removes unwanted ANSI escape characters.
 def remove_ansi(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')

@@ -2,13 +2,6 @@ import time, sys, os
 from discord_mc_bot import bot, TOKEN
 import server_functions
 
-__version__ = "4.0.1"
-__author__ = "D Thomas"
-__email__ = "dt01@pm.me"
-__license__ = "GPL 3"
-__status__ = "Development"
-
-
 def setup_directories():
     """Create necessary directories."""
 
