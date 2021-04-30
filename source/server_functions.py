@@ -14,10 +14,8 @@ def lprint(arg1=None, arg2=None):
     if type(arg1) is str:
         msg, user = arg1, 'Script'  # If did not receive ctx object.
     else:
-        try:
-            user = arg1.message.author
-        except:
-            user = 'N/A'
+        try: user = arg1.message.author
+        except: user = 'N/A'
         msg = arg2
 
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
@@ -48,11 +46,9 @@ def mc_start():
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             mc_subprocess = subprocess.Popen(server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        except:
-            lprint("Error server starting subprocess")
+        except: lprint("Error server starting subprocess")
 
-        if type(mc_subprocess) == subprocess.Popen:
-            return True
+        if type(mc_subprocess) == subprocess.Popen: return True
 
     elif use_tmux is True:
         os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
@@ -61,8 +57,7 @@ def mc_start():
         # Tries starting new detached tmux session.
         if not os.system(f'tmux send-keys -t mcserver:1.0 "{server_selected[2]}" ENTER'):
             return True
-    else:
-        return "Error starting server."
+    else: return "Error starting server."
 
 # Sends command to tmux window running server.
 async def mc_command(command, stop_at_checker=True, bot_ctx=None):
@@ -85,15 +80,13 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
 
     status_checker = 'debug status_checker' + str(random.random())
 
-    if use_rcon is True:
-        return mc_rcon(command)
+    if use_rcon is True: return mc_rcon(command)
 
     elif use_subprocess is True:
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
-        else:
-            return False
+        else: return False
 
     elif use_tmux is True:
         os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
@@ -111,8 +104,7 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
     time.sleep(1)
     if stop_at_checker is True:
         return mc_log(command), status_checker
-    else:
-        return mc_log(command)
+    else: return mc_log(command)
 
 # Send commands to server using RCON.
 def mc_rcon(command=''):
@@ -133,8 +125,7 @@ def mc_rcon(command=''):
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
         return False
-    else:
-        return mc_rcon_client.command(command)
+    else: return mc_rcon_client.command(command)
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
 def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
@@ -159,25 +150,21 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
         match = 'placeholder_match'
     match = match.lower()
 
-    if file_path is None:
-        file_path = f"{server_path}/logs/latest.log"
+    if file_path is None: file_path = f"{server_path}/logs/latest.log"
 
     if stopgap_str is None:
         stopgap_str = 'placeholder_stopgap'
     stopgap_str = stopgap_str.lower()
 
-    if not os.path.isfile(file_path):
-        return False
+    if not os.path.isfile(file_path): return False
 
-    if filter_mode is True:
-        lines = log_lines_limit
+    if filter_mode is True: lines = log_lines_limit
 
     log_data = ''
     if normal_read is True:
         with open(file_path, 'r') as file:
             for line in file:
-                if match in line:
-                    return line
+                if match in line: return line
     else:
         with FileReadBackwards(file_path) as file:
             for i in range(lines):
@@ -194,10 +181,8 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
                     log_data += line
                     if filter_mode is True and match_lines >= 1:
                         match_lines -= 1
-                    else:
-                        break
-                if stopgap_str.lower() in line.lower():
-                    break
+                    else: break
+                if stopgap_str.lower() in line.lower(): break
 
     if log_data:
         if return_reversed is True:
@@ -218,8 +203,7 @@ async def mc_status():
 
     status_checker = 'debug status_checker' + str(random.random())
     log_data = await mc_command(status_checker)
-    if status_checker in str(log_data):
-        return True
+    if status_checker in str(log_data): return True
 
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping():
@@ -234,8 +218,7 @@ def mc_ping():
         stats = mctools.PINGClient(server_ip).get_stats()
     except ConnectionRefusedError:
         lprint("Ping Error: Connection Refused.")
-    else:
-        return stats
+    else: return stats
 
 def get_mc_motd():
     """
@@ -249,8 +232,7 @@ def get_mc_motd():
         return edit_file('motd')[1]
     elif use_rcon is True:
         return remove_ansi(mc_ping()['description'])
-    else:
-        return "N/A"
+    else: return "N/A"
 
 def get_server_ip():
     """Updates server ip address varable using request.get()"""
@@ -266,7 +248,6 @@ def check_server_url():
         return 'working'
     return 'inactive'
 
-
 # Gets server version from log file or gets latest version number from website.
 def mc_version():
     """
@@ -280,8 +261,7 @@ def mc_version():
         return mc_ping()['version']['name']
     elif server_files_access is True:
         return edit_file('version')[1]
-    else:
-        return 'N/A'
+    else: return 'N/A'
 
 def get_latest_version():
     """
@@ -348,8 +328,7 @@ def download_new_server():
     for i in div_agenda[0].find_all('a'):
         jar_download_url = f"{i.get('href')}"
 
-    if not jar_download_url:
-        return False
+    if not jar_download_url: return False
 
     # Saves new server.jar in current server.
     new_jar_data = requests.get(jar_download_url).content
@@ -410,13 +389,11 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
                     discord_return = f"`{'='.join(split_line)}`"
                     return_line = '='.join(split_line)
                     print(line, end='')
-            else:
-                print(line, end='')
+            else: print(line, end='')
 
     if return_line:
         return return_line, return_line.split('=')[1].strip()
-    else:
-        return "Match not found.", 'Match not found.'
+    else: return "Match not found.", 'Match not found.'
 
 def get_from_index(path, index):
     """
@@ -441,8 +418,7 @@ def fetch_backups(path):
     """
 
     backups = []
-    if not os.path.isdir(path):
-        return False
+    if not os.path.isdir(path): return False
 
     for index, item in enumerate(os.listdir(path)):
         if os.path.isdir(path + '/' + item):
@@ -459,8 +435,7 @@ def create_backup(name, src, dst):
         dst str: Destination for backup.
     """
 
-    if not os.path.isdir(dst):
-        os.makedirs(dst)
+    if not os.path.isdir(dst): os.makedirs(dst)
 
     folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
     new_name = f"({folder_timestamp}) {mc_version()} {name}"
@@ -484,20 +459,16 @@ def restore_backup(src, dst, reset=False):
         reset [bool:False]: Leave src folder empty and not copy backup to dst.
     """
 
-    try:
-        shutil.rmtree(dst)
-    except:
-        pass
+    try: shutil.rmtree(dst)
+    except: pass
 
     # Used in ?worldreset and ?serverreset Discord command to clear all world or server files.
-    if reset is True:
-        return True
+    if reset is True: return True
 
     try:
         shutil.copytree(src, dst)
         return True
-    except:
-        lprint("Error restoring: " + str(src + ' > ' + dst))
+    except: lprint("Error restoring: " + str(src + ' > ' + dst))
 
 def delete_backup(backup):
     """
@@ -510,8 +481,7 @@ def delete_backup(backup):
     try:
         shutil.rmtree(backup)
         return True
-    except:
-        lprint("Error deleting: " + str(backup))
+    except: lprint("Error deleting: " + str(backup))
 
 
 # ========== Discord commands.
