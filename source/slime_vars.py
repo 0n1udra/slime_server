@@ -5,7 +5,7 @@ slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_token_file = '/home/slime/mc_bot.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'
 
-channel_id = 754803768733728848  # Optionally add channel ID, so bot can send message when ready.
+channel_id = 833836053244149810  # Optionally add channel ID, send message indicating bot is ready.
 
 # ========== Interfacing Options
 
