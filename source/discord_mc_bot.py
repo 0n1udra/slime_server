@@ -627,6 +627,57 @@ class Permissions(commands.Cog):
 
 # ========== World weather, time.
 class World(commands.Cog):
+    def __init__(self, bot): self.bot = bot
+
+    @commands.command(aliases=['weather'])
+    async def setweather(self, ctx, state='', duration=0):
+        """
+        Set weather.
+
+        Args:
+            state: <clear/rain/thunder>: Weather to change to.
+            duration [int:0]: Duration in seconds.
+
+        Usage:
+            ?setweather rain
+            ?weather thunder 60
+        """
+
+        if not state:
+            await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
+            return False
+
+        if not await mc_command(f'weather {state} {duration}', bot_ctx=ctx): return
+
+        if duration:
+            await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
+        else: await ctx.send(f"Forecast entails `{state}`.")
+        lprint(ctx, f"Weather set to: {state} for {duration}s")
+
+    @commands.command(aliases=['time'])
+    async def settime(self, ctx, set_time=''):
+        """
+        Set time.
+
+        Args:
+            set_time [int:None]: Set time either using day|night|noon|midnight or numerically.
+
+        Usage:
+            ?settime day
+            ?time 12
+        """
+
+        if not await mc_command("", bot_ctx=ctx): return
+
+        if set_time:
+            await mc_command(f"time set {set_time}")
+            await ctx.send("Time Updated  :clock:")
+        else: await ctx.send("Need time input, like: `12`, `day`")
+        lprint(ctx, f"Timed set: {set_time}")
+
+
+# ========== Server: autosave loop, Start, Stop, Status, edit property, server log.
+class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -681,11 +732,17 @@ class World(commands.Cog):
 
         await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if server_functions.autosave_status else '**DISABLED**'}")
         await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
+        await ctx.send('**Note:** Auto save loop will pause when server is stopped with `?stop` command, and will unpause when server is started with `?start` command.')
         lprint(ctx, 'Fetched autosave information.')
 
     @tasks.loop(seconds=server_functions.autosave_interval * 60)
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
+
+        if not await mc_status():
+            self.autosave_loop.cancel()
+            lprint("Paused autosave loop, server currently inactive.")
+            return False
 
         await mc_command('save-all')
         lprint(f"Autosaved, interval: {server_functions.autosave_interval}m")
@@ -696,64 +753,12 @@ class World(commands.Cog):
 
         await self.bot.wait_until_ready()
 
-    @commands.command(aliases=['weather'])
-    async def setweather(self, ctx, state='', duration=0):
-        """
-        Set weather.
-
-        Args:
-            state: <clear/rain/thunder>: Weather to change to.
-            duration [int:0]: Duration in seconds.
-
-        Usage:
-            ?setweather rain
-            ?weather thunder 60
-        """
-
-        if not state:
-            await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
-            return False
-
-        if not await mc_command(f'weather {state} {duration}', bot_ctx=ctx): return
-
-        if duration:
-            await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
-        else: await ctx.send(f"Forecast entails `{state}`.")
-        lprint(ctx, f"Weather set to: {state} for {duration}s")
-
-    @commands.command(aliases=['time'])
-    async def settime(self, ctx, set_time=''):
-        """
-        Set time.
-
-        Args:
-            set_time [int:None]: Set time either using day|night|noon|midnight or numerically.
-
-        Usage:
-            ?settime day
-            ?time 12
-        """
-
-        if not await mc_command("", bot_ctx=ctx): return
-
-        if set_time:
-            await mc_command(f"time set {set_time}")
-            await ctx.send("Time Updated  :clock:")
-        else: await ctx.send("Need time input, like: `12`, `day`")
-        lprint(ctx, f"Timed set: {set_time}")
-
-
-# ========== Server: Start, Stop, Status, edit property, server log.
-class Server(commands.Cog):
-    def __init__(self, bot): self.bot = bot
-
     @commands.command(aliases=['stat', 'stats', 'status', 'showserverstatus', 'sstatus', 'sss'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
         embed = discord.Embed(title='Server Status :gear:')
-        embed.add_field(name='Current Server',
-                        value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.get_mc_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.mc_version()}", inline=False)
         embed.add_field(name='Address', value=f"IP: `{server_functions.get_server_ip()}`\nURL: `{server_functions.server_url}` ({server_functions.check_server_url()})", inline=False)
@@ -808,6 +813,10 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting server.")
 
+        if server_functions.autosave_status is True:
+            self.autosave_loop.start()
+            await ctx.send("Auto save loop: **UNPAUSED** :repeat:")
+
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
     async def serverstop(self, ctx, now=''):
         """
@@ -845,6 +854,10 @@ class Server(commands.Cog):
         await ctx.send("**Server HALTED** :stop_sign:")
         server_functions.mc_subprocess = None
         lprint(ctx, "Stopping server.")
+
+        if server_functions.autosave_status is True:
+            self.autosave_loop.cancel()
+            await ctx.send("Auto save loop: **PAUSED** :pause_button:")
 
     @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
     async def serverrestart(self, ctx, now=''):
@@ -1022,8 +1035,7 @@ class Server(commands.Cog):
             await ctx.send(f"Downloaded latest version: `{server}`")
             await asyncio.sleep(3)
             await ctx.invoke(self.bot.get_command('serverstart'))
-        else:
-            await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
+        else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
 
         lprint(ctx, "Server Updated.")
 
@@ -1200,8 +1212,7 @@ class Server_Backups(commands.Cog):
             server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server_selected[0]}"
             server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
-        else:
-            await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
+        else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
     @commands.command(aliases=['serverbackups', 'sbl'])
     async def serverbackupslist(self, ctx, amount=10):
@@ -1409,8 +1420,7 @@ class Bot_Functions(commands.Cog):
                     await message.remove_reaction(reaction, user)
 
                 # removes reactions if the user tries to go forward on the last page or backwards on the first page
-                else:
-                    await message.remove_reaction(reaction, user)
+                else: await message.remove_reaction(reaction, user)
 
             # end loop if user doesn't react after x seconds
             except asyncio.TimeoutError:
@@ -1460,12 +1470,10 @@ if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', '
                  'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
 
 if server_functions.server_files_access is False and server_functions.use_rcon is True:
-    for command in if_no_tmux:
-        bot.remove_command(command)
+    for command in if_no_tmux: bot.remove_command(command)
 
 if server_functions.use_tmux is False:
-    for command in if_no_tmux:
-        bot.remove_command(command)
+    for command in if_no_tmux: bot.remove_command(command)
 
 if __name__ == '__main__':
     bot.run(TOKEN)
