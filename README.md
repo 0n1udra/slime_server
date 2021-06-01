@@ -1,6 +1,4 @@
 ## Control Minecraft server with Discord bot.
-Minecraft Discord bot server control. 
-
 See [releases](https://github.com/0n1udra/slime_server/releases).
 
 ### Features:
@@ -24,7 +22,7 @@ Extra Modules:
 - [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (Find latest Minecraft version from website)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Read log file)
-- [mctools](https:  //pypi.org/project/mctools/) (RCON)
+- [mctools](https://pypi.org/project/mctools/) (RCON)
 
 
 ### Initial Startup:
