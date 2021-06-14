@@ -3,6 +3,8 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from slime_vars import *
 
+server_active = False
+
 # Removes unwanted ANSI escape characters.
 def remove_ansi(text):
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
@@ -59,7 +61,7 @@ def mc_start():
     else: return "Error starting server."
 
 # Sends command to tmux window running server.
-async def mc_command(command, stop_at_checker=True, bot_ctx=None):
+async def mc_command(command, stop_at_checker=True, bot_ctx=None, skip_check=False):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -75,11 +77,20 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
         str: Returns matched string if match found.
     """
 
-    global mc_subprocess
+    global mc_subprocess, server_active
+
+    # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
+    # Without this, the user might try sending multiple commands to a unreachable RCON server which will hold up the bot.
+    if not skip_check and not server_active and bot_ctx:
+        await bot_ctx.send("Server is **INACTIVE**\nUse `?stats` or `?check` to check if server is back online.")
+        return False
 
     status_checker = 'debug status_checker' + str(random.random())
 
-    if use_rcon is True: return mc_rcon(command)
+    if use_rcon is True:
+        if mc_ping():
+            return await mc_rcon(command)
+        else: return False
 
     elif use_subprocess is True:
         if mc_subprocess is not None:
@@ -88,16 +99,16 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
         else: return False
 
     elif use_tmux is True:
+        # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
         if not mc_log(status_checker):
             if bot_ctx:
-                await bot_ctx.send("Server not active.")
+                await bot_ctx.send("Server is **INACTIVE**")
                 return False
         os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
     else:
-        if bot_ctx:
-            await bot_ctx.send("**ERROR:** Trouble sending command.")
+        if bot_ctx: await bot_ctx.send("**ERROR:** Unable to send command.")
         return False
 
     time.sleep(1)
@@ -106,7 +117,7 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None):
     else: return mc_log(command)
 
 # Send commands to server using RCON.
-def mc_rcon(command=''):
+async def mc_rcon(command=''):
     """
     Send command to server with RCON.
 
@@ -118,13 +129,20 @@ def mc_rcon(command=''):
         str: Output from RCON.
     """
 
+    global server_active
+
     mc_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
     try:
         mc_rcon_client.login(rcon_pass)
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
+        server_active = False
         return False
-    else: return mc_rcon_client.command(command)
+    else:
+        server_active = True
+        return_data = mc_rcon_client.command(command)
+        mc_rcon_client.stop()
+        return return_data
 
 # Gets server output by reading log file, can also find response from command in log by finding matching string.
 def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
@@ -190,7 +208,6 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
 
 
 # ========== Getting Info: output, ping, reading files.
-
 # Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
 async def mc_status():
     """
@@ -200,9 +217,19 @@ async def mc_status():
         bool: returns True if server is online.
     """
 
+    global server_active
+
+    lprint("Checking server active status...")
     status_checker = 'debug status_checker' + str(random.random())
-    log_data = await mc_command(status_checker)
-    if status_checker in str(log_data): return True
+    log_data = await mc_command(status_checker, skip_check=True)
+    if status_checker in str(log_data):
+        lprint("Server Active.")
+        server_active = True
+        return True
+    else:
+        lprint("Server Inactive.")
+        server_active = False
+
 
 # Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
 def mc_ping():
@@ -213,11 +240,20 @@ def mc_ping():
         dict: Dictionary containing 'version', and 'description' (motd).
 
     """
+
+    global server_active
+
     try:
-        stats = mctools.PINGClient(server_ip).get_stats()
+        ping = mctools.PINGClient(server_ip)
+        stats = ping.get_stats()
+        ping.stop()
     except ConnectionRefusedError:
         lprint("Ping Error: Connection Refused.")
-    else: return stats
+        server_active = False
+        return False
+    else:
+        server_active = True
+        return stats
 
 def get_mc_motd():
     """
@@ -257,7 +293,8 @@ def mc_version():
     """
 
     if use_rcon is True:
-        return mc_ping()['version']['name']
+        try: return mc_ping()['version']['name']
+        except: return 'N/A'
     elif server_files_access is True:
         return edit_file('version')[1]
     else: return 'N/A'
