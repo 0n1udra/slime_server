@@ -5,7 +5,7 @@ slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_token_file = '/home/slime/mc_bot.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'  # Where to get new server.jar for the update feature.
 
-channel_id = 833836053244149810  # Optionally add channel ID, send message indicating bot is ready.
+channel_id = None  # Optionally add channel ID, send message indicating bot is ready.
 
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -22,8 +22,8 @@ use_tmux = True
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
 server_ip = ''  # Will be updated by get_server_ip function in server_functions.py on bot startup.
-server_url = 'arcpy.asuscomm.com'
-rcon_pass = 'rconpass69'
+server_url = ''
+rcon_pass = ''
 rcon_port = 25575
 
 # ========== Minecraft Server Config
@@ -32,11 +32,9 @@ mc_path = '/mnt/c/Users/DT/Desktop/MC'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui'],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java -Xmx3G -Xms1G -jar {mc_path}/vanilla/server.jar nogui"],
-               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"java -jar -Xms3G -Xmx6G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AlwaysPreTouch forge-1.16.4-35.1.13.jar nogui"],
-               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
-               }
+server_list = {
+    'papermc': ["papermc", 'Lightweight PaperMC.', f'java -Xmx3G -Xms1G -jar {mc_path}/papermc/server.jar nogui'],
+    }
 
 server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
@@ -56,13 +54,9 @@ mc_subprocess = None  # If using subprocess, this is will be the Minecraft serve
 log_lines_limit = 100  # Max number of log lines to read.
 
 # For '?links' command. Shows helpful websites.
-useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://files.minecraftforge.net/',
-                   'CurseForge Download': 'https://curseforge.overwolf.com/',
-                   'Valhesia 3.1': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-3',
-                   'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
-                   'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
-                   }
+useful_websites = {
+    'Forge Downnload (Download 35.1.13 Installer)': 'https://files.minecraftforge.net/',
+    }
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
