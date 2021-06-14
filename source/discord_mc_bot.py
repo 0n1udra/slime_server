@@ -20,7 +20,6 @@ else:
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
 
-
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
@@ -36,7 +35,7 @@ async def on_ready():
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['command', '/', 'c'])
+    @commands.command(aliases=['command', '/'])
     async def servercommand(self, ctx, *args):
         """
         Pass command directly to server.
@@ -745,6 +744,7 @@ class Server(commands.Cog):
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
+        await asyncio.sleep(5)
         if not await mc_status():
             self.autosave_loop.cancel()
             lprint("Paused autosave loop, server currently inactive.")
@@ -759,9 +759,20 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active'])
+    async def servercheck(self, ctx):
+        """Checks if server is online."""
+
+        await ctx.send('***Checking Server Status...***')
+        if await mc_status():
+            await ctx.send('Server is **ACTIVE**')
+        else: await ctx.send("Server is **INACTIVE**")
+
     @commands.command(aliases=['stat', 'stats', 'status', 'showserverstatus', 'sstatus', 'sss'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
+
+        await ctx.send('***Fetching Server Stats...***')
 
         embed = discord.Embed(title='Server Status :gear:')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await mc_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
