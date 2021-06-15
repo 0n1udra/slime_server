@@ -49,11 +49,11 @@ def start_bot():
         print("Start server with ?start command in Discord.")
         input("Enter to exit > ")
 
-def start_server():
+def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
     if server_functions.use_tmux is True:
-        server_functions.mc_start()
+        server_functions.server_start()
     else: bot.run(TOKEN)
 
 
@@ -104,12 +104,12 @@ if __name__ == '__main__':
 
     if 'startbot' in sys.argv: start_bot()
 
-    if 'startserver' in sys.argv: start_server()
+    if 'startserver' in sys.argv: server_start()
 
     if 'newwindow' in sys.argv: new_tmux_window()
 
     if 'startboth' in sys.argv:
-        start_server()
+        server_start()
         start_bot()
 
     if 'attachtmux' in sys.argv: os.system("tmux attach -t mcserver")
