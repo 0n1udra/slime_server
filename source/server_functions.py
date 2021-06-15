@@ -1,67 +1,22 @@
-import subprocess, requests, datetime, asyncio, random, time, csv, os, re
+import subprocess, datetime, asyncio, random, time
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
+from extra_functions import *
 from slime_vars import *
 
 server_active = False
+discord_channel = None
 
-# Removes unwanted ANSI escape characters.
-def remove_ansi(text):
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
+def channel_set(channel):
+    global discord_channel
+    discord_channel = channel
 
-# Outputs and logs used bot commands and which Discord user invoked them.
-def lprint(arg1=None, arg2=None):
-    if type(arg1) is str:
-        msg, user = arg1, 'Script'  # If did not receive ctx object.
-    else:
-        try: user = arg1.message.author
-        except: user = 'N/A'
-        msg = arg2
-
-    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
-    print(output)
-
-    # Logs output.
-    with open(bot_log_file, 'a') as file:
-        file.write(output + '\n')
-
-lprint("Server selected: " + server_selected[0])
+async def channel_send(msg):
+    if discord_channel: await discord_channel.send(msg)
 
 
 # ========== Server commands: start, send command, read log, etc
-def mc_start():
-    """
-    Start Minecraft server depending on whether you're using Tmux subprocess method.
-
-    Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
-
-    Returns:
-        bool: If successful boot.
-    """
-
-    global mc_subprocess
-
-    os.chdir(server_path)
-    if use_subprocess is True:
-        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
-        try:
-            mc_subprocess = subprocess.Popen(server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        except: lprint("Error server starting subprocess")
-
-        if type(mc_subprocess) == subprocess.Popen: return True
-
-    elif use_tmux is True:
-        os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
-
-        # Tries starting new detached tmux session.
-        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server_selected[2]}" ENTER'):
-            return True
-    else: return "Error starting server."
-
-# Sends command to tmux window running server.
-async def mc_command(command, stop_at_checker=True, bot_ctx=None, skip_check=False):
+async def server_command(command, stop_at_checker=True, bot_ctx=None, skip_check=False):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -82,14 +37,14 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None, skip_check=Fal
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to a unreachable RCON server which will hold up the bot.
     if not skip_check and not server_active and bot_ctx:
-        await bot_ctx.send("Server is **INACTIVE**\nUse `?stats` or `?check` to check if server is back online.")
+        await bot_ctx.send("**Server INACTIVE** :red_circle:\nUse `?stats` or `?check` to check if server is back online.")
         return False
 
     status_checker = 'debug status_checker' + str(random.random())
 
     if use_rcon is True:
-        if mc_ping():
-            return await mc_rcon(command)
+        if ping_server():
+            return await server_rcon(command)
         else: return False
 
     elif use_subprocess is True:
@@ -102,9 +57,9 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None, skip_check=Fal
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
-        if not mc_log(status_checker):
+        if not server_log(status_checker):
             if bot_ctx:
-                await bot_ctx.send("Server is **INACTIVE**")
+                await bot_ctx.send("**Server INACTIVE** :green_circle:")
                 return False
         os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
     else:
@@ -113,11 +68,10 @@ async def mc_command(command, stop_at_checker=True, bot_ctx=None, skip_check=Fal
 
     time.sleep(1)
     if stop_at_checker is True:
-        return mc_log(command), status_checker
-    else: return mc_log(command)
+        return server_log(command), status_checker
+    else: return server_log(command)
 
-# Send commands to server using RCON.
-async def mc_rcon(command=''):
+async def server_rcon(command=''):
     """
     Send command to server with RCON.
 
@@ -131,23 +85,49 @@ async def mc_rcon(command=''):
 
     global server_active
 
-    mc_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
+    server_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
     try:
-        mc_rcon_client.login(rcon_pass)
+        server_rcon_client.login(rcon_pass)
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
         server_active = False
         return False
     else:
         server_active = True
-        return_data = mc_rcon_client.command(command)
-        mc_rcon_client.stop()
+        return_data = server_rcon_client.command(command)
+        server_rcon_client.stop()
         return return_data
 
-# Gets server output by reading log file, can also find response from command in log by finding matching string.
-def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
+async def server_status(discord_msg=False):
     """
-    Read latest.log file under server/logs folder.
+    Gets server active status, by sending command to server and checking server log.
+
+    Returns:
+        bool: returns True if server is online.
+    """
+
+    global server_active
+
+    if discord_msg: await channel_send('***Checking Server Status...***')
+
+    lprint("Checking server active status...")
+    status_checker = 'debug status_checker' + str(random.random())
+    log_data = await server_command(status_checker, skip_check=True)
+    if status_checker in str(log_data):
+        lprint("Server Active.")
+        server_active = True
+        return True
+    else:
+        lprint("Server Inactive.")
+        server_active = False
+
+    if discord_msg: await channel_send("**Server ACTIVE** :green_circle:" if server_active else "**Server INACTIVE** :red_circle:")
+
+
+def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
+    """
+    Read latest.log file under server/logs folder. Can also find match.
+    What a fat ugly function you are :(
 
     Args:
         match [str]: Check for matching string.
@@ -206,33 +186,66 @@ def mc_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=Fal
             log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
         return log_data
 
-
-# ========== Getting Info: output, ping, reading files.
-# Get server active status, motd, and version information. Either using PINGClient or reading from local server files.
-async def mc_status():
+def server_start():
     """
-    Gets server active status, by sending command to server and checking server log.
+    Start Minecraft server depending on whether you're using Tmux subprocess method.
+
+    Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
 
     Returns:
-        bool: returns True if server is online.
+        bool: If successful boot.
     """
 
-    global server_active
+    global mc_subprocess
 
-    lprint("Checking server active status...")
-    status_checker = 'debug status_checker' + str(random.random())
-    log_data = await mc_command(status_checker, skip_check=True)
-    if status_checker in str(log_data):
-        lprint("Server Active.")
-        server_active = True
-        return True
-    else:
-        lprint("Server Inactive.")
-        server_active = False
+    os.chdir(server_path)
+    if use_subprocess is True:
+        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
+        try:
+            mc_subprocess = subprocess.Popen(server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        except: lprint("Error server starting subprocess")
 
+        if type(mc_subprocess) == subprocess.Popen: return True
 
-# Gets server stats from mctools PINGClient. Returned dictionary data contains ansi escape chars.
-def mc_ping():
+    elif use_tmux is True:
+        os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+
+        # Tries starting new detached tmux session.
+        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server_selected[2]}" ENTER'):
+            return True
+    else: return "Error starting server."
+
+def server_version():
+    """
+    Gets server version, either by reading server log or using PINGClient.
+
+    Returns:
+        str: Server version number.
+    """
+
+    if use_rcon is True:
+        try: return ping_server()['version']['name']
+        except: return 'N/A'
+    elif server_files_access is True:
+        return edit_file('version')[1]
+    else: return 'N/A'
+
+def server_motd():
+    """
+    Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
+
+    Returns:
+        str: Server motd.
+    """
+
+    if server_files_access is True:
+        return edit_file('motd')[1]
+    elif use_rcon is True:
+        return remove_ansi(ping_server()['description'])
+    else: return "N/A"
+
+def ping_server():
     """
     Gets server information using mctools.PINGClient()
 
@@ -248,58 +261,23 @@ def mc_ping():
         stats = ping.get_stats()
         ping.stop()
     except ConnectionRefusedError:
-        lprint("Ping Error: Connection Refused.")
+        lprint("Ping Error.")
         server_active = False
         return False
     else:
         server_active = True
         return stats
 
-def get_mc_motd():
-    """
-    Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
+def ping_url():
+    """Checks if server_url address works by pinging it twice."""
 
-    Returns:
-        str: Server motd.
-    """
-
-    if server_files_access is True:
-        return edit_file('motd')[1]
-    elif use_rcon is True:
-        return remove_ansi(mc_ping()['description'])
-    else: return "N/A"
-
-def get_server_ip():
-    """Updates server ip address varable using request.get()"""
-    global server_ip
-    server_ip = requests.get('http://ip.42.pl/raw').text
-    return server_ip
-
-def check_server_url():
-    """Checks if server_url address works by pining it twice."""
     ping = subprocess.Popen(['ping', '-c', '2', server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ping_out, ping_error = ping.communicate()
     if server_ip in str(ping_out):
         return 'working'
     return 'inactive'
 
-# Gets server version from log file or gets latest version number from website.
-def mc_version():
-    """
-    Gets server version, either by reading server log or using PINGClient.
-
-    Returns:
-        str: Server version number.
-    """
-
-    if use_rcon is True:
-        try: return mc_ping()['version']['name']
-        except: return 'N/A'
-    elif server_files_access is True:
-        return edit_file('version')[1]
-    else: return 'N/A'
-
-def get_latest_version():
+def check_latest_version():
     """
     Gets latest Minecraft server version number from official website using bs4.
 
@@ -312,41 +290,7 @@ def get_latest_version():
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
-# Used so Discord command arguments don't need qoutes.
-def format_args(args, return_empty_str=False):
-    """
-    Formats passed in *args from Discord command functions.
-    This is so quotes aren't necessary for Discord command arguments.
-
-    Args:
-        args: Passed in args to combine and return.
-        return_empty [bool:False]: returns empty str if passed in arguments aren't usable for Discord command.
-
-    Returns:
-        str: Arguments combines with spaces.
-    """
-
-    if args:
-        return ' '.join(args)
-    else:
-        if return_empty_str is True:
-            return ''
-        return "No reason given."
-
-# Gets data from json local file.
-def read_json(json_file):
-    os.chdir(bot_files_path)
-    with open(server_path + '/' + json_file) as file:
-        return [i for i in json.load(file)]
-
-def read_csv(csv_file):
-    os.chdir(bot_files_path)
-    with open(csv_file) as file:
-        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
-
-
-# ========== Extra: edit file, backup, restore
-def download_new_server():
+def get_latest_version():
     """
     Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
 
@@ -384,10 +328,11 @@ def download_new_server():
 
     return False
 
-# Reads, find, or replace properties in a .properties file, edits inplace using fileinput.
+
+# ========== For backup/restore functions.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     """
-    Edits server.properties file if received target_property and value.
+    Edits server.properties file if received target_property and value. Edits inplace with fileinput
     If receive no value, will return current set value if property exists.
 
     Args:
@@ -474,7 +419,7 @@ def create_backup(name, src, dst):
     if not os.path.isdir(dst): os.makedirs(dst)
 
     folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-    new_name = f"({folder_timestamp}) {mc_version()} {name}"
+    new_name = f"({folder_timestamp}) {server_version()} {name}"
     new_backup_path = dst + '/' + new_name
     shutil.copytree(src, new_backup_path)
 
