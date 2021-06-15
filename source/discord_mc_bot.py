@@ -1348,8 +1348,7 @@ class Server_Backups(commands.Cog):
 
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
@@ -1477,6 +1476,20 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=['setchannelid'])
+    async def setchannel(self, ctx):
+        """Sets channel_id variable, so bot can send messages without ctx."""
+
+        await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
+        server_functions.edit_file('channel_id', ctx.channel_id, server_functions.slime_vars_file)
+
+    @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
+    async def resetchannel(self, ctx):
+        """Resets channel_id variable to None."""
+
+        await ctx.send("Cleared `channel_id`")
+        server_functions.edit_file('channel_id', ' None', server_functions.slime_vars_file)
+
 
 # Adds functions to bot.
 for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
@@ -1493,5 +1506,4 @@ if server_functions.server_files_access is False and server_functions.use_rcon i
 if server_functions.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
 
-if __name__ == '__main__':
-    bot.run(TOKEN)
+if __name__ == '__main__': bot.run(TOKEN)
