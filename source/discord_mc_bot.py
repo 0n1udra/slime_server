@@ -108,6 +108,7 @@ class Basics(commands.Cog):
         """Show list of online players."""
 
         response = await server_command("list")
+        if not response: return
 
         await ctx.send("***Fetching Player List...***")
 
