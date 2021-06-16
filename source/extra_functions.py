@@ -26,7 +26,7 @@ def format_args(args, return_empty_str=False):
 
     Args:
         args: Passed in args to combine and return.
-        return_empty [bool:False]: returns empty str if passed in arguments aren't usable for Discord command.
+        return_empty (bool False): returns empty str if passed in arguments aren't usable for Discord command.
 
     Returns:
         str: Arguments combines with spaces.
