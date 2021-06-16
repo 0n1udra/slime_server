@@ -692,6 +692,7 @@ class Server(commands.Cog):
 
         if server_functions.autosave_status is True:
             self.autosave_loop.start()
+            lprint(f"Autosave task started (interval: {server_functions.autosave_interval}m)")
 
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
