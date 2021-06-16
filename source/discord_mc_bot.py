@@ -33,8 +33,6 @@ async def on_ready():
         server_functions.channel_set(channel)
         await server_functions.server_status(discord_msg=True)
 
-    #TODO create ?setchannelid ?resetchannelid
-
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
@@ -746,8 +744,7 @@ class Server(commands.Cog):
         lprint(ctx, 'Fetched autosave information')
 
 
-    @tasks.loop(seconds=5)
-    #@tasks.loop(seconds=server_functions.autosave_interval * 60)
+    @tasks.loop(seconds=server_functions.autosave_interval * 60)
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 

@@ -82,7 +82,7 @@ async def server_rcon(command=''):
     Send command to server with RCON.
 
     Args:
-        command: Minecraft command.
+        command (str ''): Minecraft server command.
 
     Returns:
         bool: Returns False if error connecting to RCON.
