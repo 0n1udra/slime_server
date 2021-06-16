@@ -16,7 +16,7 @@ async def channel_send(msg):
 
 
 # ========== Server commands: start, send command, read log, etc
-async def server_command(command, stop_at_checker=True, bot_ctx=None, skip_check=False):
+async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -24,8 +24,9 @@ async def server_command(command, stop_at_checker=True, bot_ctx=None, skip_check
 
     Args:
         command: Command to send.
-        stop_at_checker [bool:True]: Only returns log output under sent status_checker
-        botx_ctx [Discord_bot_object:None]: Pass in bot object to send messages.
+        stop_at_checker (bool True): Only returns log output under sent status_checker
+        skip_check (bool False): Skips server_active boolean check.
+        discord_msg (bool True): Send message indicating if server is inactive.
 
     Returns:
         bool: If error sending command to server, sends False boolean.
@@ -34,13 +35,16 @@ async def server_command(command, stop_at_checker=True, bot_ctx=None, skip_check
 
     global mc_subprocess, server_active
 
+    async def inactive_msg():
+        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?stats` or `?check` to check if server is back online.")
+
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to a unreachable RCON server which will hold up the bot.
-    if not skip_check and not server_active and bot_ctx:
-        await bot_ctx.send("**Server INACTIVE** :red_circle:\nUse `?stats` or `?check` to check if server is back online.")
+    if not skip_check and not server_active:
+        await inactive_msg()
         return False
 
-    status_checker = 'debug status_checker' + str(random.random())
+    status_checker = 'debug status_checker: ' + str(random.random())
 
     if use_rcon is True:
         if ping_server():
@@ -51,19 +55,21 @@ async def server_command(command, stop_at_checker=True, bot_ctx=None, skip_check
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
-        else: return False
+        else:
+            await inactive_msg()
+            return False
 
     elif use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
         if not server_log(status_checker):
-            if bot_ctx:
-                await bot_ctx.send("**Server INACTIVE** :green_circle:")
-                return False
+            await inactive_msg()
+            return False
         os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
+
     else:
-        if bot_ctx: await bot_ctx.send("**ERROR:** Unable to send command.")
+        await inactive_msg()
         return False
 
     time.sleep(1)
@@ -109,11 +115,13 @@ async def server_status(discord_msg=False):
     global server_active
 
     if discord_msg: await channel_send('***Checking Server Status...***')
-
     lprint("Checking server active status...")
-    status_checker = 'debug status_checker' + str(random.random())
-    log_data = await server_command(status_checker, skip_check=True)
+
+    # Creates random number to send in command, server is online if match is found in log.
+    status_checker = 'debug status_checker: ' + str(random.random())
+    log_data = await server_command(status_checker, skip_check=True, discord_msg=discord_msg)
     if status_checker in str(log_data):
+        if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
         lprint("Server Active.")
         server_active = True
         return True
@@ -121,24 +129,21 @@ async def server_status(discord_msg=False):
         lprint("Server Inactive.")
         server_active = False
 
-    if discord_msg: await channel_send("**Server ACTIVE** :green_circle:" if server_active else "**Server INACTIVE** :red_circle:")
-
-
 def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
     """
     Read latest.log file under server/logs folder. Can also find match.
     What a fat ugly function you are :(
 
     Args:
-        match [str]: Check for matching string.
-        file_path [str:latest.log]: File to read.
-        lines [int:15]: Number of most recent lines to return.
-        log_mode [bool:False]: Return x lines from log file, skips matching.
-        list_mode [bool:False]: Puts log lines in a list instead of single string.
-        normal_read [bool:False]: Reads file top down, defaults to bottom up using file-read-backwards module.
-        filter_mode [bool:False]: Don't stop at first match.
-        match_lines [int:10]: How many matches to find.
-        return_reversed [bool:False]: Returns so ordering is newest at bottom going up for older.
+        match (str): Check for matching string.
+        file_path (str latest.log): File to read.
+        lines (int 15): Number of most recent lines to return.
+        log_mode (bool False): Return x lines from log file, skips matching.
+        list_mode (bool False): Puts log lines in a list instead of single string.
+        normal_read (bool False): Reads file top down, defaults to bottom up using file-read-backwards module.
+        filter_mode (bool False): Don't stop at first match.
+        match_lines (int 10): How many matches to find.
+        return_reversed (bool False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
 
@@ -336,9 +341,9 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
     If receive no value, will return current set value if property exists.
 
     Args:
-        target_property [str:None]: Find Minecraft server property.
-        value [str:'']: If received argument, will change value.
-        file_path [str:server.properties]: File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
+        target_property (str None): Find Minecraft server property.
+        value (str ''): If received argument, will change value.
+        file_path (str server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
     Returns:
         str: If target_property was not found.
@@ -435,9 +440,9 @@ def restore_backup(src, dst, reset=False):
     Restores world or server backup. Overwrites existing files.
 
     Args:
-        src str: Backed up folder to copy to current server.
-        dst str: Location to copy backup to.
-        reset [bool:False]: Leave src folder empty and not copy backup to dst.
+        src (str): Backed up folder to copy to current server.
+        dst (str): Location to copy backup to.
+        reset (bool False): Leave src folder empty and not copy backup to dst.
     """
 
     try: shutil.rmtree(dst)
