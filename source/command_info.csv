@@ -1,6 +1,8 @@
 Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
+Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
+Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
 Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
 Server Select, `?serverselect` `?ss papermc`, Each server has their own backups and start command. Select server to change which one to start and use commands on.
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
