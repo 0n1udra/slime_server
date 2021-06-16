@@ -24,7 +24,7 @@ bot = commands.Bot(command_prefix='?')
 async def on_ready():
     await bot.wait_until_ready()
 
-    lprint(f"(v{__version__}) Bot PRIMED.")
+    lprint(f"Bot PRIMED (v{__version__})")
 
     if server_functions.channel_id:
         channel = bot.get_channel(server_functions.channel_id)
@@ -133,7 +133,7 @@ class Basics(commands.Cog):
             players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
             await ctx.send(text + ':\n' + ''.join(players_names))
 
-        lprint(ctx, "Fetched player list.")
+        lprint(ctx, "Fetched player list")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
     async def chatlog(self, ctx, lines=15):
@@ -159,7 +159,7 @@ class Basics(commands.Cog):
             except: pass
 
         await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched chat.")
+        lprint(ctx, f"Fetched chat log")
 
 
 # ========== Player: gamemode, kill, tp, etc
@@ -338,7 +338,7 @@ class Permissions(commands.Cog):
         await server_command(f"kick {player}")
 
         await ctx.send(f"`{player}` is outta here :wave:")
-        lprint(ctx, f"Kicked {player}")
+        lprint(ctx, f"Kicked: {player}")
 
     @commands.command(aliases=['exile', 'banish'])
     async def ban(self, ctx, player='', *reason):
@@ -443,7 +443,7 @@ class Permissions(commands.Cog):
             else: banned_players = '**ERROR:** Trouble fetching ban list.'
 
         await ctx.send(banned_players)
-        lprint(ctx, f"Fetched banned list.")
+        lprint(ctx, f"Fetched banned list")
 
     @commands.command(aliases=['wl', 'whitel', 'white', 'wlist'])
     async def whitelist(self, ctx, arg='', arg2=''):
@@ -481,11 +481,11 @@ class Permissions(commands.Cog):
         if arg.lower() in server_functions.enable_inputs:
             await server_command('whitelist on')
             await ctx.send("**Whitelist ACTIVE** ")
-            lprint(ctx, f"Whitelist activated.")
+            lprint(ctx, f"Whitelist: Enabled")
         elif arg.lower() in server_functions.disable_inputs:
             await server_command('whitelist off')
             await ctx.send("**Whitelist INACTIVE**")
-            lprint(ctx, f"Whitelist deactivated.")
+            lprint(ctx, f"Whitelist: Disabled")
 
         # Add/remove user to whitelist (one at a time).
         elif arg == 'add' and arg2:
@@ -540,7 +540,7 @@ class Permissions(commands.Cog):
             await ctx.send('\n'.join(op_players))
         else: await ctx.send("No players are OP.")
 
-        lprint(ctx, f"Fetched server operators list.")
+        lprint(ctx, f"Fetched server operators list")
 
     @commands.command(aliases=['op', 'addop'])
     async def opadd(self, ctx, player='', *reason):
@@ -702,7 +702,7 @@ class Server(commands.Cog):
 
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
-        lprint(ctx, "Saved world.")
+        lprint(ctx, "Saved World")
 
     @commands.command(aliases=['asave'])
     async def autosave(self, ctx, arg=''):
@@ -733,17 +733,17 @@ class Server(commands.Cog):
             server_functions.autosave_status = True
             self.autosave_loop.start()
             server_functions.edit_file('autosave_status', ' True', server_functions.slime_vars_file)
-            lprint(ctx, f'Autosave on, interval: {server_functions.autosave_interval}m')
+            lprint(ctx, f'Autosave: Enabled (interval: {server_functions.autosave_interval}m)')
         elif arg.lower() in server_functions.disable_inputs:
             server_functions.autosave_status = False
             self.autosave_loop.cancel()
             server_functions.edit_file('autosave_status', ' False', server_functions.slime_vars_file)
-            lprint(ctx, 'Autosave off')
+            lprint(ctx, 'Autosave: Disabled')
 
         await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if server_functions.autosave_status else '**DISABLED**'}")
         await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
-        await ctx.send('**Note:** Auto save loop will pause when server is stopped with `?stop` command, and will unpause when server is started with `?start` command.')
-        lprint(ctx, 'Fetched autosave information.')
+        await ctx.send('**Note:** Auto save loop will pause when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
+        lprint(ctx, 'Fetched autosave information')
 
 
     @tasks.loop(seconds=5)
@@ -751,11 +751,9 @@ class Server(commands.Cog):
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
-        if server_functions.server_active:
-            await server_command('save-all')
-            lprint(f"Autosaved, interval: {server_functions.autosave_interval}m")
-        else:
-            lprint("Paused autosave loop, server currently inactive.")
+        # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
+        if await server_command('save-all', discord_msg=False):
+            lprint(f"Autosaved (interval: {server_functions.autosave_interval}m)")
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -788,7 +786,7 @@ class Server(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('players'))
 
-        lprint(ctx, "Fetched server status.")
+        lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log'])
     async def serverlog(self, ctx, lines=5):
@@ -809,7 +807,7 @@ class Server(commands.Cog):
             await ctx.send(f"`{line}`")
 
         await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched {lines} lines from server log.")
+        lprint(ctx, f"Fetched {lines} server log lines")
 
     @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
     async def serverstart(self, ctx):
@@ -829,11 +827,7 @@ class Server(commands.Cog):
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
-        lprint(ctx, "Starting server.")
-
-        if server_functions.autosave_status is True:
-            self.autosave_loop.start()
-            await ctx.send("Auto save loop: **UNPAUSED** :repeat:")
+        lprint(ctx, "Starting Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
     async def serverstop(self, ctx, now=''):
@@ -867,11 +861,7 @@ class Server(commands.Cog):
         await asyncio.sleep(5)
         await ctx.send("**Server HALTED** :stop_sign:")
         server_functions.mc_subprocess = None
-        lprint(ctx, "Stopping server.")
-
-        if server_functions.autosave_status is True:
-            self.autosave_loop.cancel()
-            await ctx.send("Auto save loop: **PAUSED** :pause_button:")
+        lprint(ctx, "Stopping Server")
 
     @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
     async def serverrestart(self, ctx, now=''):
@@ -887,7 +877,7 @@ class Server(commands.Cog):
         """
 
         await server_command('say ---WARNING--- Server Rebooting...')
-        lprint(ctx, "Restarting server.")
+        lprint(ctx, "Restarting Server")
         await ctx.send("***Restarting...*** :arrows_counterclockwise:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -945,7 +935,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Server property: {fetched_property[0].strip()}")
         else:
             await ctx.send(f"**ERROR:** 404 Property not found.")
-            lprint(f"Matching property not found.")
+            lprint(f"Server property not found: {target_property}")
 
     @commands.command(aliases=['serveronlinemode', 'omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
@@ -962,7 +952,7 @@ class Server(commands.Cog):
 
         if not mode:
             await ctx.send(f"online mode: `{server_functions.edit_file('online-mode')[1]}`")
-            lprint(ctx, "Fetched online-mode state.")
+            lprint(ctx, "Fetched online-mode state")
         elif mode in ['true', 'false']:
             server_functions.edit_file('online-mode', mode)[0]
             property = server_functions.edit_file('online-mode')
@@ -1051,7 +1041,7 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstart'))
         else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
 
-        lprint(ctx, "Server Updated.")
+        lprint(ctx, "Server Updated")
 
 
 # ========== World backup/restore functions.
@@ -1083,7 +1073,7 @@ class World_Backups(commands.Cog):
         await ctx.send("Use `?worldrestore <index>` to restore world save.")
 
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
-        lprint(ctx, f"Fetched {amount} most recent world saves.")
+        lprint(ctx, f"Fetched {amount} world saves")
 
     @commands.command(aliases=['worldbackup', 'backup', 'backupworld', 'wbn'])
     async def worldbackupnew(self, ctx, *name):
@@ -1193,7 +1183,7 @@ class World_Backups(commands.Cog):
         server_functions.restore_world(reset=True)
         await asyncio.sleep(3)
 
-        lprint(ctx, "World Reset.")
+        lprint(ctx, "World Reset")
 
 
 # ========== Server backup/restore functions.
@@ -1253,7 +1243,7 @@ class Server_Backups(commands.Cog):
 
         await ctx.send("Use `?serverrestore <index>` to restore server.")
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
-        lprint(ctx, f"Fetched {amount} world backups.")
+        lprint(ctx, f"Fetched {amount} world backups")
 
     @commands.command(aliases=['serverbackup', 'sbn'])
     async def serverbackupnew(self, ctx, *name):
@@ -1350,7 +1340,7 @@ class Bot_Functions(commands.Cog):
         """Restart this bot."""
 
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
-        lprint(ctx, "Restarting bot.")
+        lprint(ctx, "Restarting bot...")
 
         if server_functions.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
@@ -1378,7 +1368,7 @@ class Bot_Functions(commands.Cog):
             await ctx.send(f"`{line}`")
 
         await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched {lines} lines from bot log.")
+        lprint(ctx, f"Fetched {lines} bot log lines.")
 
     @commands.command(aliases=['updatebot', 'bupdate', 'bu'])
     async def botupdate(self, ctx):
@@ -1390,7 +1380,7 @@ class Bot_Functions(commands.Cog):
     async def help2(self, ctx):
         """Shows help page with embed format, using reactions to navigate pages."""
 
-        lprint(ctx, "Fetched help page.")
+        lprint(ctx, "Fetched help page")
         current_command, embed_page, contents = 0, 1, []
         pages, current_page, page_limit = 3, 1, 15
 
@@ -1451,7 +1441,7 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send(f"Server IP: `{server_functions.get_public_ip()}`")
         await ctx.send(f"Alternative Address: `{server_functions.server_url}` ({server_functions.ping_url()})")
-        lprint(ctx, 'Fetched server address.')
+        lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
     async def links(self, ctx):
