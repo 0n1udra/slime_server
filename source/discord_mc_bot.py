@@ -1463,7 +1463,7 @@ class Bot_Functions(commands.Cog):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        server_functions.edit_file('channel_id', ctx.channel_id, server_functions.slime_vars_file)
+        server_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), server_functions.slime_vars_file)
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
