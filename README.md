@@ -1,5 +1,6 @@
 ## Control Minecraft server with Discord bot.
 See [releases](https://github.com/0n1udra/slime_server/releases).
+This branch is for discord-components to add buttons.
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -17,6 +18,7 @@ See [releases](https://github.com/0n1udra/slime_server/releases).
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
+- [discord-components](https://pypi.org/project/discord-components/)
 
 Extra Modules:
 - [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
