@@ -1,6 +1,7 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
 import server_functions
+from discord_components import DiscordComponents, Button
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
 
 __version__ = "4.1"
@@ -23,6 +24,7 @@ bot = commands.Bot(command_prefix='?')
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
+    DiscordComponents(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")
 
@@ -37,6 +39,21 @@ async def on_ready():
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
+
+    @commands.command(aliases=['panel', 'buttonspanel'])
+    async def controlpanel(self, ctx):
+        await ctx.send("t", components=[Button(label="WOW button!")])
+
+        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
+        await interaction.respond(content="Button clicked!")
+
+    @commands.command(aliases=['_buttons'])
+    async def _button(self, ctx):
+        await ctx.send("Hello, World!", components=[Button(label="WOW button!")])
+
+        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
+        print(interaction.responded)
+        await interaction.respond(content="Button clicked!")
 
     @commands.command(aliases=['command', '/'])
     async def servercommand(self, ctx, *args):
@@ -95,7 +112,7 @@ class Basics(commands.Cog):
 
         msg = format_args(msg)
         if not player or not msg:
-            await ctx.send("Usage: `?t <player> <message>`\nExample: `?t MysticFrogo sup hundo`")
+            await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
         if not await server_command(f"tell {player} {msg}"): return
@@ -180,7 +197,7 @@ class Player(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?pk <player> [reason]`\nExample: `?pk MysticFrogo 5 Because he killed my dog!`")
+            await ctx.send("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
             return False
 
         reason = format_args(reason)
@@ -208,7 +225,7 @@ class Player(commands.Cog):
 
         reason = format_args(reason)
         if not player:
-            await ctx.send("Usage: `?dpk <player> <seconds> [reason]`\nExample: `?dpk MysticFrogo 5 Because he took my diamonds!`")
+            await ctx.send("Usage: `?delaykill <player> <seconds> [reason]`\nExample: `?delaykill MysticFrogo 5 Because he took my diamonds!`")
             return False
 
         if not await server_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}"): return
@@ -236,7 +253,7 @@ class Player(commands.Cog):
         """
 
         if not player or not target:
-            await ctx.send("Usage: `?tp <player> <target_player> [reason]`\nExample: `?tp R3diculous MysticFrogo I need to see him now!`")
+            await ctx.send("Usage: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
             return False
 
         reason = format_args(reason)
@@ -264,7 +281,7 @@ class Player(commands.Cog):
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send(f"Usage: `?gm <name> <mode> [reason]`\nExample: `?gm MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
+            await ctx.send(f"Usage: `?gamemode <name> <mode> [reason]`\nExample: `?gamemode MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
             return False
 
         reason = format_args(reason)
@@ -623,7 +640,7 @@ class Permissions(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?top <player> <minutes> [reason]`\nExample: `?top R3diculous Testing purposes`")
+            await ctx.send("Usage: `?timedop <player> <minutes> [reason]`\nExample: `?timedop R3diculous Testing purposes`")
             return False
 
         await server_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
@@ -744,7 +761,6 @@ class Server(commands.Cog):
         await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
         await ctx.send('**Note:** Auto save loop will pause when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
         lprint(ctx, 'Fetched autosave information')
-
 
     @tasks.loop(seconds=server_functions.autosave_interval * 60)
     async def autosave_loop(self):
@@ -917,7 +933,7 @@ class Server(commands.Cog):
         """
 
         if not target_property:
-            await ctx.send("Usage: `?p <property_name> [new_value]`\nExample: `?p motd`, `?p motd Hello World!`")
+            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`")
             return False
 
         if value:
@@ -1088,7 +1104,7 @@ class World_Backups(commands.Cog):
         """
 
         if not name:
-            await ctx.send("Usage: `?wbn <name>`\nExample: `?wbn Before the reckoning`")
+            await ctx.send("Usage: `?worldbackup <name>`\nExample: `?worldbackup Before the reckoning`")
             return False
         name = format_args(name)
 
@@ -1122,7 +1138,7 @@ class World_Backups(commands.Cog):
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?wbr <index> [now]`\nExample: `?wbr 0 now`")
+            await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
 
         fetched_restore = server_functions.get_world_from_index(index)
@@ -1151,7 +1167,7 @@ class World_Backups(commands.Cog):
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?wbd <index>`\nExample: `?wbd 1`")
+            await ctx.send("Usage: `?worlddelete <index>`\nExample: `?worlddelete 1`")
             return False
 
         to_delete = server_functions.get_world_from_index(index)
@@ -1257,7 +1273,7 @@ class Server_Backups(commands.Cog):
         """
 
         if not name:
-            await ctx.send("Usage: `?sbn <name>`\nExample: `?wbn Everything just dandy`")
+            await ctx.send("Usage: `?serverbackup <name>`\nExample: `?serverbackup Everything just dandy`")
             return False
 
         name = format_args(name)
@@ -1288,7 +1304,7 @@ class Server_Backups(commands.Cog):
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?sbr <index> [now]`\nExample: `?sbr 2 now`")
+            await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
 
         fetched_restore = server_functions.get_server_from_index(index)
@@ -1319,7 +1335,7 @@ class Server_Backups(commands.Cog):
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?sbd <index>`\nExample: `?sbd 3`")
+            await ctx.send("Usage: `?serverdelete <index>`\nExample: `?serverdelete 3`")
             return False
 
         to_delete = server_functions.get_server_from_index(index)
