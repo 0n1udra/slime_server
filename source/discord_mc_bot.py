@@ -182,7 +182,7 @@ class Basics(commands.Cog):
 class Player(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['pk', 'playerkill'])
+    @commands.command(aliases=['playerkill', 'pk'])
     async def kill(self, ctx, player='', *reason):
         """
         Kill a player.
@@ -309,7 +309,7 @@ class Player(commands.Cog):
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send("Usage: `?tgm <player> <mode> <seconds> [reason]`\nExample: `?tgm MysticFrogo spectator 120 Needs a time out`")
+            await ctx.send("Usage: `?timedgamemode <player> <mode> <seconds> [reason]`\nExample: `?timedgamemode MysticFrogo spectator 120 Needs a time out`")
             return False
 
         reason = format_args(reason)
@@ -782,7 +782,7 @@ class Server(commands.Cog):
 
         await server_status(discord_msg=show_msg)
 
-    @commands.command(aliases=['stat', 'stats', 'status', 'showserverstatus', 'sstatus', 'sss'])
+    @commands.command(aliases=['stat', 'stats', 'status'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -1063,8 +1063,8 @@ class Server(commands.Cog):
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['worldbackups', 'backuplist', 'wbl'])
-    async def worldbackupslist(self, ctx, amount=10):
+    @commands.command(aliases=['worldbackupslist', 'backuplist', 'wl'])
+    async def worldbackups(self, ctx, amount=10):
         """
         Show world backups.
 
@@ -1090,8 +1090,8 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} world saves")
 
-    @commands.command(aliases=['worldbackup', 'backup', 'backupworld', 'wbn'])
-    async def worldbackupnew(self, ctx, *name):
+    @commands.command(aliases=['worldbackupnew', 'backupworld', 'wn'])
+    async def worldbackup(self, ctx, *name):
         """
         new backup of current world.
 
@@ -1121,8 +1121,8 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @commands.command(aliases=['worldrestore', 'wbr', 'wr'])
-    async def worldbackuprestore(self, ctx, index='', now=''):
+    @commands.command(aliases=['worldbackuprestore', 'wbr', 'wr'])
+    async def worldrestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
 
@@ -1153,8 +1153,8 @@ class World_Backups(commands.Cog):
         server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
-    @commands.command(aliases=['worlddelete', 'backupdelete', 'wbd'])
-    async def worldbackupdelete(self, ctx, index=''):
+    @commands.command(aliases=['worldbackupdelete', 'wd'])
+    async def worlddelete(self, ctx, index=''):
         """
         Delete a world backup.
 
@@ -1205,8 +1205,8 @@ class World_Backups(commands.Cog):
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['sselect', 'servers', 'serverslist', 'ss', 'sl'])
-    async def serverselect(self, ctx, name=''):
+    @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
+    async def servers(self, ctx, name=''):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
 
@@ -1232,8 +1232,8 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
-    @commands.command(aliases=['serverbackups', 'sbl'])
-    async def serverbackupslist(self, ctx, amount=10):
+    @commands.command(aliases=['serverbackupslist', 'sl'])
+    async def serverbackups(self, ctx, amount=10):
         """
         List server backups.
 
@@ -1260,8 +1260,8 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups")
 
-    @commands.command(aliases=['serverbackup', 'sbn'])
-    async def serverbackupnew(self, ctx, *name):
+    @commands.command(aliases=['serverbackup', 'sn'])
+    async def serverbackup(self, ctx, *name):
         """
         New backup of server files (not just world save).
 
@@ -1289,8 +1289,8 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-    @commands.command(aliases=['serverrestore', 'sbr'])
-    async def serverbackuprestore(self, ctx, index='', now=''):
+    @commands.command(aliases=['serverbackuprestore', 'sr'])
+    async def serverrestore(self, ctx, index='', now=''):
         """
         Restore server backup.
 
@@ -1320,8 +1320,8 @@ class Server_Backups(commands.Cog):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
-    @commands.command(aliases=['serverdelete', 'sbd'])
-    async def serverbackupdelete(self, ctx, index=''):
+    @commands.command(aliases=['sd'])
+    async def serverdelete(self, ctx, index=''):
         """
         Delete a server backup.
 
