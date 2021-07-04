@@ -4,7 +4,8 @@ import server_functions
 from discord_components import DiscordComponents, Button
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
 
-__version__ = "4.1"
+__version__ = "4.1.1"
+__date__ = '7/4/2021'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
