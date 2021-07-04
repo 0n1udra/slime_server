@@ -23,10 +23,10 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     If using RCON, will only return RCON returned data, can't read from server log.
 
     Args:
-        command: Command to send.
-        stop_at_checker (bool True): Only returns log output under sent status_checker
-        skip_check (bool False): Skips server_active boolean check.
-        discord_msg (bool True): Send message indicating if server is inactive.
+        command str: Command to send.
+        stop_at_checker bool(True): Only returns log output under sent status_checker
+        skip_check bool(False): Skips server_active boolean check.
+        discord_msg bool(True): Send message indicating if server is inactive.
 
     Returns:
         bool: If error sending command to server, sends False boolean.
@@ -82,7 +82,7 @@ async def server_rcon(command=''):
     Send command to server with RCON.
 
     Args:
-        command (str ''): Minecraft server command.
+        command str(''): Minecraft server command.
 
     Returns:
         bool: Returns False if error connecting to RCON.
@@ -135,15 +135,15 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
     What a fat ugly function you are :(
 
     Args:
-        match (str): Check for matching string.
-        file_path (str latest.log): File to read.
-        lines (int 15): Number of most recent lines to return.
-        log_mode (bool False): Return x lines from log file, skips matching.
-        list_mode (bool False): Puts log lines in a list instead of single string.
-        normal_read (bool False): Reads file top down, defaults to bottom up using file-read-backwards module.
-        filter_mode (bool False): Don't stop at first match.
-        match_lines (int 10): How many matches to find.
-        return_reversed (bool False): Returns so ordering is newest at bottom going up for older.
+        match str: Check for matching string.
+        file_path str(None): File to read. Defaults to server's latest.log
+        lines int(15): Number of most recent lines to return.
+        log_mode bool(False): Return x lines from log file, skips matching.
+        list_mode bool(False): Puts log lines in a list instead of single string.
+        normal_read bool(False): Reads file top down, defaults to bottom up using file-read-backwards module.
+        filter_mode bool(False): Don't stop at first match.
+        match_lines int(10): How many matches to find.
+        return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
 
@@ -341,9 +341,9 @@ def edit_file(target_property=None, value='', file_path=f"{server_path}/server.p
     If receive no value, will return current set value if property exists.
 
     Args:
-        target_property (str None): Find Minecraft server property.
-        value (str ''): If received argument, will change value.
-        file_path (str server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
+        target_property str(None): Find Minecraft server property.
+        value str(''): If received argument, will change value.
+        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
     Returns:
         str: If target_property was not found.
@@ -440,9 +440,9 @@ def restore_backup(src, dst, reset=False):
     Restores world or server backup. Overwrites existing files.
 
     Args:
-        src (str): Backed up folder to copy to current server.
-        dst (str): Location to copy backup to.
-        reset (bool False): Leave src folder empty and not copy backup to dst.
+        src str: Backed up folder to copy to current server.
+        dst str: Location to copy backup to.
+        reset bool(False): Leave src folder empty and not copy backup to dst.
     """
 
     try: shutil.rmtree(dst)
