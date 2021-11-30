@@ -36,17 +36,26 @@ Extra Modules:
 4. Use `?setchannel` command so you get important bot/server event updates.
 5. Read through the help pages with `?help` or `?help2` in Discord.
 
-## Using Virtualenv:
+## Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-virtualenv ~/pyenv/minecraft_discord_bot
+python venv ~/pyenv/minecraft_discord_bot
+```
+or
+```bash
+virtualenv ~/pyenvs/minecraft_discord_bot
+
 ```
 Activate new Python Virtualenv:
 ```bash
-source ~/pyenv/minecraft_discord_bot/bin/activate
+source ~/pyenvs/minecraft_discord_bot/bin/activate
 ```
 Install required Python modules:
 ```bash
-pip3 install discord asyncio file-read-backwards mctools
+pip install discord asyncio file-read-backwards mctools
+```
+or
+```bash
+pip install -r requirements.txt
 ```
 
