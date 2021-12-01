@@ -787,14 +787,13 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        await ctx.send('***Fetching Server Stats...***')
         await ctx.invoke(bot.get_command("check"))
 
         embed = discord.Embed(title='Server Status :gear:')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.server_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.server_version()}", inline=False)
-        embed.add_field(name='Address', value=f"IP: `{server_functions.get_public_ip()}`\nURL: `{server_functions.server_url}` ({server_functions.ping_url()})", inline=False)
+        embed.add_field(name='Address', value=f"IP: ||`{server_functions.get_public_ip()}`||\nURL: `{server_functions.server_url}` ({server_functions.ping_url()})", inline=False)
         embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
@@ -1455,8 +1454,8 @@ class Bot_Functions(commands.Cog):
             ?address
         """
 
-        await ctx.send(f"Server IP: `{server_functions.get_public_ip()}`")
-        await ctx.send(f"Alternative Address: `{server_functions.server_url}` ({server_functions.ping_url()})")
+        await ctx.send(f"Server IP: ||`{server_functions.get_public_ip()}`||")
+        await ctx.send(f"Alternative Address: ||`{server_functions.server_url}`|| ({server_functions.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
