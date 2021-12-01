@@ -6,6 +6,8 @@ def setup_directories():
     """Create necessary directories."""
 
     try:
+        # TODO Needed?
+        # Creates Server folder, folder for world backups, and folder for server backups.
         os.makedirs(server_functions.server_path)
         print("Created:", server_functions.server_path)
         os.makedirs(server_functions.world_backups_path)
@@ -90,6 +92,8 @@ def script_help():
 
 
 if __name__ == '__main__':
+    started_tmux = False
+
     if 'setup' in sys.argv:
         if server_functions.server_files_access is True:
             setup_directories()
@@ -99,19 +103,37 @@ if __name__ == '__main__':
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
 
     if 'starttmux' in sys.argv and server_functions.use_tmux:
+        started_tmux = True
         start_tmux_session()
         time.sleep(1)
 
-    if 'startbot' in sys.argv: start_bot()
+    if 'startbot' in sys.argv:
+        # If tmux variable enabled in slime_var.py, need starttmux parameter first.
+        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
+        start_bot()
 
-    if 'startserver' in sys.argv: server_start()
+    if 'startserver' in sys.argv:
+        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
+        server_start()
 
-    if 'newwindow' in sys.argv: new_tmux_window()
+    if 'newwindow' in sys.argv:
+        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
+        new_tmux_window()
 
     if 'startboth' in sys.argv:
+        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
         server_start()
         start_bot()
 
-    if 'attachtmux' in sys.argv: os.system("tmux attach -t mcserver")
+    if 'attachtmux' in sys.argv:
+        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
+        os.system("tmux attach -t mcserver")
+
+    # My personal shortcut.
+    if 'slime' in sys.argv:
+        start_tmux_session()
+        time.sleep(1)
+        start_bot()
+        os.system("tmux attach -t mcserver")
 
     if 'help' in sys.argv: script_help()
