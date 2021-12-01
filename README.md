@@ -1,5 +1,5 @@
 ## Control Minecraft server with Discord bot.
-See [releases](https://github.com/0n1udra/slime_server/releases).
+[releases](https://github.com/0n1udra/slime_server/releases)
 
 
 ### Features:
