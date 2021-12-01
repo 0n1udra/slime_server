@@ -1,6 +1,7 @@
 import time, sys, os
 from discord_mc_bot import bot, TOKEN
 import server_functions
+from slime_vars import tmux_session_name
 
 def setup_directories():
     """Create necessary directories."""
@@ -18,15 +19,15 @@ def setup_directories():
         print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
 def start_tmux_session():
-    """Starts detached Tmux session, with 2 panes, named 'mcserver'."""
+    """Starts detached Tmux session, with 2 panes, and sets name."""
 
     try:
-        os.system('tmux new -d -s mcserver')
-        print("Started Tmux 'mcserver' detached session.")
-    except:print("Error: Starting 'mcserver' detached session.")
+        os.system(f'tmux new -d -s {tmux_session_name}')
+        print(f"Started Tmux detached session.")
+    except:print(f"Error: Starting {tmux_session_name} detached session.")
 
     try:
-        os.system('tmux send-keys -t mcserver:1.0 "tmux split-window -v" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "tmux split-window -v" ENTER')
         print("Created second tmux pane for Discord bot.")
     except: print("Error: Creating second tmux pane for Discord bot.")
 
@@ -37,15 +38,15 @@ def new_tmux_window():
     """Create a second tmux window."""
 
     try:
-        os.system('tmux send-keys -t mcserver:1.0 "tmux new-window" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "tmux new-window" ENTER')
         print("Created second window.")
     except: print("Error creating second window.")
 
 def start_bot():
     if server_functions.use_tmux is True:
-        os.system(f'tmux send-keys -t mcserver:1.1 "cd {server_functions.bot_files_path}" ENTER')
-        if not os.system("tmux send-keys -t mcserver:1.1 'python3 discord_mc_bot.py' ENTER"):
-            print("Started bot in 'mcserver' tmux session, top pane.")
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.1 "cd {server_functions.bot_files_path}" ENTER')
+        if not os.system(f"tmux send-keys -t {tmux_session_name}:1.1 'python3 discord_mc_bot.py' ENTER"):
+            print(f"Started bot in {tmux_session_name} tmux session, top pane.")
             return True  # If os.system() return 0, means successful.
     else:
         print("Start server with ?start command in Discord.")
@@ -66,14 +67,14 @@ def script_help():
     
     help        --  Shows this help page.
     
-    setup       --  Create necessary folders. Starts 'mcserver' Tmux session in detached mode with 2 panes.
+    setup       --  Create necessary folders. Starts Tmux session in detached mode with 2 panes.
     
     update      --  Downloads latest server.jar file from official Minecraft website to server folder.
     
-    starttmux   --  Start Tmux session named 'mcserver' with 2 panes. 
+    starttmux   --  Start Tmux session named with 2 panes. 
                     Top pane for Minecraft server, bottom for bot.
                     
-    attachtmux --  Attaches to 'mcserver' session. 
+    attachtmux --  Attaches to session. 
                    Will not start Tmux, use starttmux or setup.
                     
     startbot    --  Start Discord bot.
@@ -92,8 +93,6 @@ def script_help():
 
 
 if __name__ == '__main__':
-    started_tmux = False
-
     if 'setup' in sys.argv:
         if server_functions.server_files_access is True:
             setup_directories()
@@ -103,37 +102,26 @@ if __name__ == '__main__':
             print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
 
     if 'starttmux' in sys.argv and server_functions.use_tmux:
-        started_tmux = True
         start_tmux_session()
         time.sleep(1)
 
-    if 'startbot' in sys.argv:
-        # If tmux variable enabled in slime_var.py, need starttmux parameter first.
-        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
-        start_bot()
+    if 'startbot' in sys.argv: start_bot()
 
-    if 'startserver' in sys.argv:
-        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
-        server_start()
+    if 'startserver' in sys.argv: server_start()
 
-    if 'newwindow' in sys.argv:
-        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
-        new_tmux_window()
+    if 'newwindow' in sys.argv: new_tmux_window()
 
     if 'startboth' in sys.argv:
-        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
         server_start()
         start_bot()
 
-    if 'attachtmux' in sys.argv:
-        if not started_tmux: print("ERROR: Need 'starttmux' parameter first.")
-        os.system("tmux attach -t mcserver")
+    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {tmux_session_name}")
 
     # My personal shortcut.
     if 'slime' in sys.argv:
         start_tmux_session()
         time.sleep(1)
         start_bot()
-        os.system("tmux attach -t mcserver")
+        os.system(f"tmux attach -t {tmux_session_name}")
 
     if 'help' in sys.argv: script_help()
