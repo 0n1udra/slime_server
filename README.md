@@ -1,7 +1,6 @@
 ## Control Minecraft server with Discord bot.
-See [releases](https://github.com/0n1udra/slime_server/releases).
+[Releases](https://github.com/0n1udra/slime_server/releases)
 
-This branch is for discord-components to add buttons.
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -12,21 +11,18 @@ This branch is for discord-components to add buttons.
 
 ### Requirements:
 - [Python3](https://www.python.org/)
-- [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If running server locally)
-- [Tmux](https://github.com/tmux/tmux/wiki) (Optional, but recommened)
-- [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Optional)
+- [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If hosting Minecraft server)
+- [Tmux](https://github.com/tmux/tmux/wiki) (If hosting Minecraft server)
+- [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)
 
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
-- [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [discord-components](https://pypi.org/project/discord-components/)
-
-
-Extra Modules:
+- [asyncio](https://docs.python.org/3/library/asyncio.html)
+- [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
+- [mctools](https://pypi.org/project/mctools/) (If using RCON)
 - [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
-- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (Find latest Minecraft version from website)
-- [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Read log file)
-- [mctools](https://pypi.org/project/mctools/) (RCON)
+- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
 ### Setup:
