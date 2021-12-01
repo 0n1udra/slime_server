@@ -2,7 +2,7 @@ import os
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_token_file = '/home/slime/mc_bot.token'
+bot_token_file = '/home/0n1udra/keys/mc_bot.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'  # Where to get new server.jar for the update feature.
 
 # Optionally add channel ID, send message indicating bot is ready.
