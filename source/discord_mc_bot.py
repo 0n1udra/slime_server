@@ -788,7 +788,7 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         await ctx.send('***Fetching Server Stats...***')
-        ctx.invoke(bot.get_command("check"))
+        await ctx.invoke(bot.get_command("check"))
 
         embed = discord.Embed(title='Server Status :gear:')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
