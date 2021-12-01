@@ -1,7 +1,6 @@
 ## Control Minecraft server with Discord bot.
 See [releases](https://github.com/0n1udra/slime_server/releases).
 
-This branch is for discord-components to add buttons.
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
