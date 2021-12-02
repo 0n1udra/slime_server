@@ -2,12 +2,11 @@ import os
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_token_file = '/home/slime/mc_bot.token'
+bot_token_file = '/home/0n1udra/keys/mc_bot.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'  # Where to get new server.jar for the update feature.
 
 # Optionally add channel ID, send message indicating bot is ready.
-channel_id = 833836053244149810
-
+channel_id = 860361620492255292
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
@@ -18,18 +17,18 @@ use_subprocess = False
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
-
+tmux_session_name = 'sess'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
-server_ip = ''  # Will be updated by get_public_ip function in server_functions.py on bot startup.
+server_ip = ''  # Will be updated by ip_ip function in server_functions.py on bot startup.
 server_url = 'arcpy.asuscomm.com'
 rcon_pass = 'rconpass420'
 rcon_port = 25575
 
 # ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
-mc_path = '/mnt/c/Users/DT/Desktop/MC'
+mc_path = '/home/0n1udra/Games/Minecraft'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}

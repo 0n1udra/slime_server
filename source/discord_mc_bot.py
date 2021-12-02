@@ -1,10 +1,11 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
-import server_functions
 from discord_components import DiscordComponents, Button
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
+import server_functions
 
-__version__ = "4.1"
+__version__ = "4.1.2"
+__date__ = '12/1/2021'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -16,7 +17,7 @@ if os.path.isfile(server_functions.bot_token_file):
         TOKEN = file.readline()
 else:
     print("Missing Token File:", server_functions.bot_token_file)
-    exit()
+    sys.exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
@@ -56,12 +57,12 @@ class Basics(commands.Cog):
         await interaction.respond(content="Button clicked!")
 
     @commands.command(aliases=['command', '/'])
-    async def servercommand(self, ctx, *args):
+    async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
 
         Args:
-            command (str): Server command, do not include the slash /.
+            *command str: Server command, do not include the slash /.
 
         Usage:
             ?command broadcast Hello Everyone!
@@ -70,10 +71,10 @@ class Basics(commands.Cog):
         Note: You will get the latest 2 lines from server output, if you need more use ?log.
         """
 
-        args = format_args(args)
-        if not await server_command(f"{args}"): return False
+        command = format_args(command)
+        if not await server_command(f"{command}"): return False
 
-        lprint(ctx, "Sent command: " + args)
+        lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
 
     @commands.command(aliases=['broadcast', 's'])
@@ -82,7 +83,7 @@ class Basics(commands.Cog):
         sends message to all online players.
 
         Args:
-            msg (str): Message to broadcast.
+            *msg str: Message to broadcast.
 
         Usage:
             ?s Hello World!
@@ -102,8 +103,8 @@ class Basics(commands.Cog):
         Message online player directly.
 
         Args:
-            player (str): Player name, casing does not matter.
-            msg (str): The message, no need for quotes.
+            player str(''): Player name, casing does not matter.
+            *msg str: The message, no need for quotes.
 
         Usage:
             ?tell Steve Hello there!
@@ -157,7 +158,7 @@ class Basics(commands.Cog):
         Shows chat log. Does not include whispers.
 
         Args:
-            lines (int 15): How many log lines to look through. This is not how many chat lines to show.
+            lines int(15): How many log lines to look through. This is not how many chat lines to show.
         """
 
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_balloon:")
@@ -188,8 +189,8 @@ class Player(commands.Cog):
         Kill a player.
 
         Args:
-            player (str): Target player, casing does not matter.
-            reason (str): Reason for kill, do not put in quotes.
+            player str(''): Target player, casing does not matter.
+            *reason str: Reason for kill, do not put in quotes.
 
         Usage:
             ?kill Steve Because he needs to die!
@@ -214,9 +215,9 @@ class Player(commands.Cog):
         Kill player after time elapsed.
 
         Args:
-            player (str): Target player.
-            delay (int 5): Wait time in seconds.
-            reason (str): Reason for kill.
+            player str(''): Target player.
+            delay int(5): Wait time in seconds.
+            *reason str: Reason for kill.
 
         Usage:
             ?delayedkill Steve 5 Do I need a reason?
@@ -243,9 +244,9 @@ class Player(commands.Cog):
         Teleport player to another player.
 
         Args:
-            player (str): Player to teleport.
-            target (str): Destination, player to teleport to.
-            reason (str): Reason for teleport.
+            player str(''): Player to teleport.
+            target str(''): Destination, player to teleport to.
+            *reason str: Reason for teleport.
 
         Usage:
             ?teleport Steve Jesse I wanted to see him
@@ -271,9 +272,9 @@ class Player(commands.Cog):
         Change player's gamemode.
 
         Args:
-            player (str): Target player.
-            mode (str): Game mode survival|adventure|creative|spectator.
-            reeason (str): Optional reason for gamemode change.
+            player str(''): Target player.
+            mode str(''): Game mode survival|adventure|creative|spectator.
+            *reason str: Optional reason for gamemode change.
 
         Usage:
             ?gamemode Steve creative In creative for test purposes.
@@ -298,10 +299,10 @@ class Player(commands.Cog):
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
         Args:
-            player (str): Target player.
-            state (str creative): Game mode survival/adventure/creative/spectator. Default is creative for 30s.
-            duration (int 30): Duration in seconds.
-            *reason (str): Reason for change.
+            player str(''): Target player.
+            mode str('creative'): Game mode survival/adventure/creative/spectator. Default is creative for 30s.
+            duration int(30): Duration in seconds.
+            *reason str: Reason for change.
 
         Usage:
             ?timedgamemode Steve spectator Steve needs a time out!
@@ -325,7 +326,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` is back to survival.")
 
 
-# ========== Permissions: Ban, Whitelist, Kick, OP.
+# ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -335,8 +336,8 @@ class Permissions(commands.Cog):
         Kick player from server.
 
         Args:
-            player (str): Player to kick.
-            reason (str): Optional reason for kick.
+            player str(''): Player to kick.
+            reason str: Optional reason for kick.
 
         Usage:
             ?kick Steve Because he was trolling
@@ -362,8 +363,8 @@ class Permissions(commands.Cog):
         Ban player from server.
 
         Args:
-            player (str): Player to ban.
-            reason (str): Reason for ban.
+            player str(''): Player to ban.
+            reason str: Reason for ban.
 
         Usage:
             ?ban Steve Player killing
@@ -391,8 +392,8 @@ class Permissions(commands.Cog):
         Pardon (unban) player.
 
         Args:
-            player (str): Player to pardon.
-            reason (str): Reason for pardon.
+            player str(''): Player to pardon.
+            *reason str: Reason for pardon.
 
         Usage:
             ?pardon Steve He has turn over a new leaf.
@@ -467,8 +468,8 @@ class Permissions(commands.Cog):
         Whitelist commands. Turn on/off, add/remove, etc.
 
         Args:
-            arg (str ''): User passed in arguments for whitelist command, see below for arguments and usage.
-            player (str ''): Specify player or to specify more options for other arguments, like enforce for example.
+            arg str(''): User passed in arguments for whitelist command, see below for arguments and usage.
+            player str(''): Specify player or to specify more options for other arguments, like enforce for example.
 
         Discord Args:
             list: Show whitelist, same as if no arguments.
@@ -564,8 +565,8 @@ class Permissions(commands.Cog):
         Add server operator (OP).
 
         Args:
-            player (str): Player to make server operator.
-            reason (str): Optional reason for new OP status.
+            player str(''): Player to make server operator.
+            *reason str: Optional reason for new OP status.
 
         Usage:
             ?opadd Steve Testing purposes
@@ -598,8 +599,8 @@ class Permissions(commands.Cog):
         Remove player OP status (deop).
 
         Args:
-            player (str): Target player.
-            reason (str): Reason for deop.
+            player str: Target player.
+            reason str: Reason for deop.
 
         Usage:
             ?opremove Steve abusing goodhood.
@@ -631,8 +632,8 @@ class Permissions(commands.Cog):
         Set player as OP for x seconds.
 
         Args:
-            player (str ''): Target player.
-            time_limit (int 1): Time limit in seconds.
+            player str(''): Target player.
+            time_limit int(1: Time limit in seconds.
 
         Usage:
             ?timedop Steve 30 Need to check something real quick.
@@ -651,7 +652,7 @@ class Permissions(commands.Cog):
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
 
-# ========== World weather, time.
+# ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -661,8 +662,8 @@ class World(commands.Cog):
         Set weather.
 
         Args:
-            state: <clear/rain/thunder>: Weather to change to.
-            duration (int 0): Duration in seconds.
+            state str(''): <clear/rain/thunder>: Weather to change to.
+            duration int(0): Duration in seconds.
 
         Usage:
             ?setweather rain
@@ -686,7 +687,7 @@ class World(commands.Cog):
         Set time.
 
         Args:
-            set_time (int ''): Set time either using day|night|noon|midnight or numerically.
+            set_time int(''): Set time either using day|night|noon|midnight or numerically.
 
         Usage:
             ?settime day
@@ -702,7 +703,7 @@ class World(commands.Cog):
         lprint(ctx, f"Timed set: {set_time}")
 
 
-# ========== Server: autosave loop, Start, Stop, Status, edit property, server log.
+# ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -727,7 +728,7 @@ class Server(commands.Cog):
         Sends save-all command at interval of x minutes.
 
         Args:
-            arg: turn on/off autosave, or set interval in minutes.
+            arg int(''): turn on/off autosave, or set interval in minutes.
 
         Usage:
             ?autosave
@@ -786,14 +787,13 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        await ctx.send('***Fetching Server Stats...***')
-        ctx.invoke(bot.get_command("check"))
+        await ctx.invoke(bot.get_command("check"))
 
         embed = discord.Embed(title='Server Status :gear:')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.server_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.server_version()}", inline=False)
-        embed.add_field(name='Address', value=f"IP: `{server_functions.get_public_ip()}`\nURL: `{server_functions.server_url}` ({server_functions.ping_url()})", inline=False)
+        embed.add_field(name='Address', value=f"IP: ||`{server_functions.get_public_ip()}`||\nURL: `{server_functions.server_url}` ({server_functions.ping_url()})", inline=False)
         embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
@@ -809,7 +809,7 @@ class Server(commands.Cog):
         Show server log.
 
         Args:
-            lines (int 5): How many most recent lines to show. Max of 20 lines!
+            lines int(5): How many most recent lines to show. Max of 20 lines!
 
         Usage:
             ?serverlog
@@ -850,7 +850,7 @@ class Server(commands.Cog):
         Stop server, gives players 15s warning.
 
         Args:
-            now (str): Stops server immediately without giving online players 15s warning.
+            now str(''): Stops server immediately without giving online players 15s warning.
 
         Usage:
             ?stop
@@ -884,7 +884,7 @@ class Server(commands.Cog):
         Restarts server with 15s warning to players.
 
         Args:
-            now (str): Restarts server immediately without giving online players 15s warning.
+            now str: Restarts server immediately without giving online players 15s warning.
 
         Usage:
             ?restart
@@ -923,8 +923,8 @@ class Server(commands.Cog):
         Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
 
         Args:
-            target_property (str ''): Target property to change, must be exact in casing and spelling and some may include a dash -.
-            value (str): New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
+            target_property str(''): Target property to change, must be exact in casing and spelling and some may include a dash -.
+            *value str: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
 
         Usage:
             ?property motd
@@ -958,7 +958,7 @@ class Server(commands.Cog):
         Check or enable/disable onlinemode property. Restart required.
 
         Args:
-            mode <true/false>: Update onlinemode property in server.properties file. Must be in lowercase.
+            mode str(''): Update onlinemode property in server.properties file. Must be in lowercase.
 
         Usage:
             ?onlinemode true
@@ -982,7 +982,7 @@ class Server(commands.Cog):
         Check or Update motd property. Restart required.
 
         Args:
-            message (str): New message for message of the day for server. No quotes needed.
+            *message str: New message for message of the day for server. No quotes needed.
 
         Usage:
             ?motd
@@ -1011,7 +1011,7 @@ class Server(commands.Cog):
         Check RCON status, enable/disable enable-rcon property. Restart required.
 
         Args:
-            state <true/false>: Set enable-rcon property in server.properties file, true or false must be in lowercase.
+            state str(''): Set enable-rcon property in server.properties file, true or false must be in lowercase.
 
         Usage:
             ?rcon
@@ -1033,7 +1033,7 @@ class Server(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
 
         Args:
-            now (str): Stops server immediately without giving online players 15s warning.
+            now str(''): Stops server immediately without giving online players 15s warning.
         """
 
         if 'vanilla' not in server_functions.server_selected:
@@ -1058,8 +1058,6 @@ class Server(commands.Cog):
 
         lprint(ctx, "Server Updated")
 
-
-# ========== World backup/restore functions.
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -1069,11 +1067,11 @@ class World_Backups(commands.Cog):
         Show world backups.
 
         Args:
-            amount (int 5): Number of most recent backups to show.
+            amount int(10): Number of most recent backups to show.
 
         Usage:
             ?saves
-            ?saves 10
+            ?saves 15
         """
 
         embed = discord.Embed(title='World Backups :tools:')
@@ -1096,7 +1094,7 @@ class World_Backups(commands.Cog):
         new backup of current world.
 
         Args:
-            name (str): Keywords or codename for new save. No quotes needed.
+            *name str: Keywords or codename for new save. No quotes needed.
 
         Usage:
             ?backup everything not on fire
@@ -1129,8 +1127,8 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
 
         Args:
-            index (int ''): Get index with ?saves command.
-            now (str): Skip 15s wait to stop server. E.g. ?restore 0 now
+            index int(''): Get index with ?saves command.
+            now str='': Skip 15s wait to stop server. E.g. ?restore 0 now
 
         Usage:
             ?restore 3
@@ -1159,7 +1157,7 @@ class World_Backups(commands.Cog):
         Delete a world backup.
 
         Args:
-            index (int): Get index with ?saves command.
+            index int(''): Get index with ?saves command.
 
         Usage:
             ?delete 0
@@ -1200,8 +1198,6 @@ class World_Backups(commands.Cog):
 
         lprint(ctx, "World Reset")
 
-
-# ========== Server backup/restore functions.
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -1211,7 +1207,7 @@ class Server_Backups(commands.Cog):
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
 
         Args:
-            name: name of server to select, use ?selectserver list or without arguments to show list.
+            name str(''): name of server to select, use ?selectserver list or without arguments to show list.
 
         Usage:
             ?selectserver list
@@ -1238,7 +1234,7 @@ class Server_Backups(commands.Cog):
         List server backups.
 
         Args:
-            amount (int 5): How many most recent backups to show.
+            amount int(5): How many most recent backups to show.
 
         Usage:
             ?serversaves
@@ -1266,7 +1262,7 @@ class Server_Backups(commands.Cog):
         New backup of server files (not just world save).
 
         Args:
-            name (str): Keyword or codename for save.
+            name str: Keyword or codename for save.
 
         Usage:
             ?serverbackup Dec checkpoint
@@ -1295,8 +1291,8 @@ class Server_Backups(commands.Cog):
         Restore server backup.
 
         Args:
-            index (int ''): Get index number from ?serversaves command.
-            now (str ''): Stop server without 15s wait.
+            index int(''): Get index number from ?serversaves command.
+            now str(''): Stop server without 15s wait.
 
         Usage:
             ?serverrestore 0
@@ -1326,7 +1322,7 @@ class Server_Backups(commands.Cog):
         Delete a server backup.
 
         Args:
-            index (int): Index of server save, get with ?serversaves command.
+            index int: Index of server save, get with ?serversaves command.
 
         Usage:
             ?serverdelete 0
@@ -1369,7 +1365,7 @@ class Bot_Functions(commands.Cog):
         Show bot log.
 
         Args:
-            lines (int 5): Number of most recent lines to show.
+            lines int(5): Number of most recent lines to show.
 
         Usage:
             ?botlog
@@ -1454,8 +1450,8 @@ class Bot_Functions(commands.Cog):
             ?address
         """
 
-        await ctx.send(f"Server IP: `{server_functions.get_public_ip()}`")
-        await ctx.send(f"Alternative Address: `{server_functions.server_url}` ({server_functions.ping_url()})")
+        await ctx.send(f"Server IP: ||`{server_functions.get_public_ip()}`||")
+        await ctx.send(f"Alternative Address: ||`{server_functions.server_url}`|| ({server_functions.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])

@@ -1,11 +1,74 @@
-import subprocess, datetime, asyncio, random, time
+import subprocess, requests, datetime, asyncio, random, time, csv, os, re
+import mctools
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
-from extra_functions import *
 from slime_vars import *
 
 server_active = False
 discord_channel = None
+
+# ========== Extra Functions: start, send command, read log, etc
+def lprint(arg1=None, arg2=None):
+    """Prints and Logs events in file."""
+    if type(arg1) is str:
+        msg, user = arg1, 'Script'  # If did not receive ctx object.
+    else:
+        try: user = arg1.message.author
+        except: user = 'N/A'
+        msg = arg2
+
+    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
+    print(output)
+
+    # Logs output.
+    with open(bot_log_file, 'a') as file:
+        file.write(output + '\n')
+
+lprint("Server selected: " + server_selected[0])
+
+def format_args(args, return_empty_str=False):
+    """
+    Formats passed in *args from Discord command functions.
+    This is so quotes aren't necessary for Discord command arguments.
+
+    Args:
+        args str: Passed in args to combine and return.
+        return_empty bool(False): returns empty str if passed in arguments aren't usable for Discord command.
+
+    Returns:
+        str: Arguments combines with spaces.
+    """
+
+    if args:
+        return ' '.join(args)
+    else:
+        if return_empty_str is True:
+            return ''
+        return "No reason given."
+
+def remove_ansi(text):
+    """Removes ANSI escape characters."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+def read_json(json_file):
+    """Read .json files."""
+    os.chdir(bot_files_path)
+    with open(server_path + '/' + json_file) as file:
+        return [i for i in json.load(file)]
+
+def read_csv(csv_file):
+    """Read .csv files."""
+    os.chdir(bot_files_path)
+    with open(csv_file) as file:
+        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
+
+def get_public_ip():
+    """Gets your public IP address, to updates server ip address varable using request.get()"""
+
+    global server_ip
+    server_ip = requests.get('http://ip.42.pl/raw').text
+    return server_ip
 
 def channel_set(channel):
     global discord_channel
@@ -15,7 +78,7 @@ async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
 
-# ========== Server commands: start, send command, read log, etc
+# ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
@@ -23,10 +86,10 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     If using RCON, will only return RCON returned data, can't read from server log.
 
     Args:
-        command: Command to send.
-        stop_at_checker (bool True): Only returns log output under sent status_checker
-        skip_check (bool False): Skips server_active boolean check.
-        discord_msg (bool True): Send message indicating if server is inactive.
+        command str: Command to send.
+        stop_at_checker bool(True): Only returns log output under sent status_checker
+        skip_check bool(False): Skips server_active boolean check.
+        discord_msg bool(True): Send message indicating if server is inactive.
 
     Returns:
         bool: If error sending command to server, sends False boolean.
@@ -61,12 +124,12 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     elif use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
-        os.system(f'tmux send-keys -t mcserver:1.0 "{status_checker}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
         if not server_log(status_checker):
             await inactive_msg()
             return False
-        os.system(f'tmux send-keys -t mcserver:1.0 "{command}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{command}" ENTER')
 
     else:
         await inactive_msg()
@@ -82,7 +145,7 @@ async def server_rcon(command=''):
     Send command to server with RCON.
 
     Args:
-        command (str ''): Minecraft server command.
+        command str(''): Minecraft server command.
 
     Returns:
         bool: Returns False if error connecting to RCON.
@@ -135,15 +198,15 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
     What a fat ugly function you are :(
 
     Args:
-        match (str): Check for matching string.
-        file_path (str latest.log): File to read.
-        lines (int 15): Number of most recent lines to return.
-        log_mode (bool False): Return x lines from log file, skips matching.
-        list_mode (bool False): Puts log lines in a list instead of single string.
-        normal_read (bool False): Reads file top down, defaults to bottom up using file-read-backwards module.
-        filter_mode (bool False): Don't stop at first match.
-        match_lines (int 10): How many matches to find.
-        return_reversed (bool False): Returns so ordering is newest at bottom going up for older.
+        match str: Check for matching string.
+        file_path str(None): File to read. Defaults to server's latest.log
+        lines int(15): Number of most recent lines to return.
+        log_mode bool(False): Return x lines from log file, skips matching.
+        list_mode bool(False): Puts log lines in a list instead of single string.
+        normal_read bool(False): Reads file top down, defaults to bottom up using file-read-backwards module.
+        filter_mode bool(False): Don't stop at first match.
+        match_lines int(10): How many matches to find.
+        return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
 
@@ -213,11 +276,11 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif use_tmux is True:
-        os.system('tmux send-keys -t mcserver:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(f'tmux send-keys -t mcserver:1.0 "cd {server_path}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "cd {server_path}" ENTER')
 
         # Tries starting new detached tmux session.
-        if not os.system(f'tmux send-keys -t mcserver:1.0 "{server_selected[2]}" ENTER'):
+        if not os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{server_selected[2]}" ENTER'):
             return True
     else: return "Error starting server."
 
@@ -334,16 +397,16 @@ def get_latest_version():
     return False
 
 
-# ========== For backup/restore functions.
+# ========== Backup/Restore.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     """
     Edits server.properties file if received target_property and value. Edits inplace with fileinput
     If receive no value, will return current set value if property exists.
 
     Args:
-        target_property (str None): Find Minecraft server property.
-        value (str ''): If received argument, will change value.
-        file_path (str server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
+        target_property str(None): Find Minecraft server property.
+        value str(''): If received argument, will change value.
+        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
     Returns:
         str: If target_property was not found.
@@ -440,9 +503,9 @@ def restore_backup(src, dst, reset=False):
     Restores world or server backup. Overwrites existing files.
 
     Args:
-        src (str): Backed up folder to copy to current server.
-        dst (str): Location to copy backup to.
-        reset (bool False): Leave src folder empty and not copy backup to dst.
+        src str: Backed up folder to copy to current server.
+        dst str: Location to copy backup to.
+        reset bool(False): Leave src folder empty and not copy backup to dst.
     """
 
     try: shutil.rmtree(dst)
@@ -470,7 +533,7 @@ def delete_backup(backup):
     except: lprint("Error deleting: " + str(backup))
 
 
-# ========== Discord commands.
+# ========== Discord Commands.
 def get_server_from_index(index):
     """Returns server backup full path from passed in index number."""
     return get_from_index(server_backups_path, index)
