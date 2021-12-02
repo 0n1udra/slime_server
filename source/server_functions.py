@@ -1,11 +1,74 @@
-import subprocess, datetime, asyncio, random, time
+import subprocess, requests, datetime, asyncio, random, time, csv, os, re
+import mctools
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
-from extra_functions import *
 from slime_vars import *
 
 server_active = False
 discord_channel = None
+
+# ========== Extra Functions: start, send command, read log, etc
+def lprint(arg1=None, arg2=None):
+    """Prints and Logs events in file."""
+    if type(arg1) is str:
+        msg, user = arg1, 'Script'  # If did not receive ctx object.
+    else:
+        try: user = arg1.message.author
+        except: user = 'N/A'
+        msg = arg2
+
+    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
+    print(output)
+
+    # Logs output.
+    with open(bot_log_file, 'a') as file:
+        file.write(output + '\n')
+
+lprint("Server selected: " + server_selected[0])
+
+def format_args(args, return_empty_str=False):
+    """
+    Formats passed in *args from Discord command functions.
+    This is so quotes aren't necessary for Discord command arguments.
+
+    Args:
+        args str: Passed in args to combine and return.
+        return_empty bool(False): returns empty str if passed in arguments aren't usable for Discord command.
+
+    Returns:
+        str: Arguments combines with spaces.
+    """
+
+    if args:
+        return ' '.join(args)
+    else:
+        if return_empty_str is True:
+            return ''
+        return "No reason given."
+
+def remove_ansi(text):
+    """Removes ANSI escape characters."""
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', text)
+
+def read_json(json_file):
+    """Read .json files."""
+    os.chdir(bot_files_path)
+    with open(server_path + '/' + json_file) as file:
+        return [i for i in json.load(file)]
+
+def read_csv(csv_file):
+    """Read .csv files."""
+    os.chdir(bot_files_path)
+    with open(csv_file) as file:
+        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
+
+def get_public_ip():
+    """Gets your public IP address, to updates server ip address varable using request.get()"""
+
+    global server_ip
+    server_ip = requests.get('http://ip.42.pl/raw').text
+    return server_ip
 
 def channel_set(channel):
     global discord_channel
@@ -15,7 +78,7 @@ async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
 
-# ========== Server commands: start, send command, read log, etc
+# ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
@@ -334,7 +397,7 @@ def get_latest_version():
     return False
 
 
-# ========== For backup/restore functions.
+# ========== Backup/Restore.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     """
     Edits server.properties file if received target_property and value. Edits inplace with fileinput
@@ -470,7 +533,7 @@ def delete_backup(backup):
     except: lprint("Error deleting: " + str(backup))
 
 
-# ========== Discord commands.
+# ========== Discord Commands.
 def get_server_from_index(index):
     """Returns server backup full path from passed in index number."""
     return get_from_index(server_backups_path, index)
