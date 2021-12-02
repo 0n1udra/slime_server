@@ -1,11 +1,11 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
-import server_functions
 from discord_components import DiscordComponents, Button
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
+import server_functions
 
-__version__ = "4.1.1"
-__date__ = '7/4/2021'
+__version__ = "4.1.2"
+__date__ = '12/1/2021'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -17,7 +17,7 @@ if os.path.isfile(server_functions.bot_token_file):
         TOKEN = file.readline()
 else:
     print("Missing Token File:", server_functions.bot_token_file)
-    exit()
+    sys.exit()
 
 # Make sure this doesn't conflict with other bots.
 bot = commands.Bot(command_prefix='?')
@@ -326,7 +326,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` is back to survival.")
 
 
-# ========== Permissions: Ban, Whitelist, Kick, OP.
+# ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -652,7 +652,7 @@ class Permissions(commands.Cog):
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
 
-# ========== World weather, time.
+# ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -703,7 +703,7 @@ class World(commands.Cog):
         lprint(ctx, f"Timed set: {set_time}")
 
 
-# ========== Server: autosave loop, Start, Stop, Status, edit property, server log.
+# ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -1058,8 +1058,6 @@ class Server(commands.Cog):
 
         lprint(ctx, "Server Updated")
 
-
-# ========== World backup/restore functions.
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -1200,8 +1198,6 @@ class World_Backups(commands.Cog):
 
         lprint(ctx, "World Reset")
 
-
-# ========== Server backup/restore functions.
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 

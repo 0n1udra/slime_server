@@ -1,7 +1,7 @@
 import time, sys, os
 from discord_mc_bot import bot, TOKEN
-import server_functions
 from slime_vars import tmux_session_name
+import server_functions
 
 def setup_directories():
     """Create necessary directories."""
@@ -19,28 +19,19 @@ def setup_directories():
         print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
 
 def start_tmux_session():
-    """Starts detached Tmux session, with 2 panes, and sets name."""
+    """Starts Tmux session in detached mode, with 2 panes, and sets name."""
 
     try:
         os.system(f'tmux new -d -s {tmux_session_name}')
         print(f"Started Tmux detached session.")
-    except:print(f"Error: Starting {tmux_session_name} detached session.")
+    except: print(f"Error: Starting {tmux_session_name} detached session.")
 
     try:
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "tmux split-window -v" ENTER')
+        os.system(f'tmux split-window -v -t {tmux_session_name}:1.0')
         print("Created second tmux pane for Discord bot.")
     except: print("Error: Creating second tmux pane for Discord bot.")
 
     time.sleep(1)
-
-
-def new_tmux_window():
-    """Create a second tmux window."""
-
-    try:
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "tmux new-window" ENTER')
-        print("Created second window.")
-    except: print("Error creating second window.")
 
 def start_bot():
     if server_functions.use_tmux is True:
@@ -59,32 +50,20 @@ def server_start():
         server_functions.server_start()
     else: bot.run(TOKEN)
 
-
+# TODO add update      - Downloads latest server.jar file from official Minecraft website to server folder.
 def script_help():
     help = """
     python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
     python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
     
-    help        --  Shows this help page.
-    
-    setup       --  Create necessary folders. Starts Tmux session in detached mode with 2 panes.
-    
-    update      --  Downloads latest server.jar file from official Minecraft website to server folder.
-    
-    starttmux   --  Start Tmux session named with 2 panes. 
-                    Top pane for Minecraft server, bottom for bot.
-                    
-    attachtmux --  Attaches to session. 
-                   Will not start Tmux, use starttmux or setup.
-                    
-    startbot    --  Start Discord bot.
+    help        - Shows this help page.
+    setup       - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
+    starttmux   - Start Tmux session named with 2 panes. Top pane for Minecraft server, bottom for bot.
+    startbot    - Start Discord bot.
+    startserver - Start MC server.
+    startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
+    attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
 
-    startserver --  Start MC server.
-                    
-    startboth   --  Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
-
-    newwindow   --  Creates second tmux window (for my personal setup).
-    
     Note:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
             Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then start server and bot, then attach to Tmux session.
@@ -108,8 +87,6 @@ if __name__ == '__main__':
     if 'startbot' in sys.argv: start_bot()
 
     if 'startserver' in sys.argv: server_start()
-
-    if 'newwindow' in sys.argv: new_tmux_window()
 
     if 'startboth' in sys.argv:
         server_start()
