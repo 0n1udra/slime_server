@@ -1,6 +1,8 @@
 ## Control Minecraft server with Discord bot.
 #### Branch for button and list functionalty with discord-components module.
 
+![slime_bot_capture1](https://user-images.githubusercontent.com/15573136/144681834-7d147087-1a1c-4c4b-ac96-37f0cda421d3.png)
+
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
 
