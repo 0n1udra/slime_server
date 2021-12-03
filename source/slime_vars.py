@@ -21,7 +21,7 @@ tmux_session_name = 'sess'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
-server_ip = ''  # Will be updated by ip_ip function in server_functions.py on bot startup.
+server_ip = ''  # Will be updated by ip_ip function in backend_functions.py on bot startup.
 server_url = 'arcpy.asuscomm.com'
 rcon_pass = 'rconpass420'
 rcon_port = 25575

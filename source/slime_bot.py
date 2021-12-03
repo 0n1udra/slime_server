@@ -2,8 +2,8 @@ import discord, asyncio, os, sys
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
-from server_functions import lprint, use_rcon, format_args, server_command, server_status
-import server_functions
+from backend_functions import lprint, use_rcon, format_args, server_command, server_status
+import backend_functions
 
 __version__ = "4.1.2"
 __date__ = '12/1/2021'
@@ -13,11 +13,11 @@ __license__ = "GPL 3"
 __status__ = "Development"
 
 # Exits script if no token.
-if os.path.isfile(server_functions.bot_token_file):
-    with open(server_functions.bot_token_file, 'r') as file:
+if os.path.isfile(backend_functions.bot_token_file):
+    with open(backend_functions.bot_token_file, 'r') as file:
         TOKEN = file.readline()
 else:
-    print("Missing Token File:", server_functions.bot_token_file)
+    print("Missing Token File:", backend_functions.bot_token_file)
     sys.exit()
 
 # Make sure this doesn't conflict with other bots.
@@ -29,12 +29,12 @@ async def on_ready():
 
     lprint(f"Bot PRIMED (v{__version__})")
 
-    if server_functions.channel_id:
-        channel = bot.get_channel(server_functions.channel_id)
+    if backend_functions.channel_id:
+        channel = bot.get_channel(backend_functions.channel_id)
         await channel.send('**Bot PRIMED** :white_check_mark:')
 
-        server_functions.channel_set(channel)
-        await server_functions.server_status(discord_msg=True)
+        backend_functions.channel_set(channel)
+        await backend_functions.server_status(discord_msg=True)
 
         await channel.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
         components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
@@ -51,49 +51,6 @@ async def on_button_click(interaction):
 @bot.event
 async def on_select_option(interaction):
     await interaction.respond(content=f"{interaction.values[0]} selected!")
-
-@bot.command()
-async def select2(ctx):
-    await ctx.send(
-        "Selects2!",
-        components=[Select(placeholder="Select something2", custom_id="select2",
-                options=[SelectOption(label="a", value="a"),
-                         SelectOption(label="b", value="b"),
-                         ],
-            )
-        ],
-    )
-
-@bot.command()
-async def button(ctx):
-    await ctx.send("Buttons!", components=[Button(label="Button", custom_id="button1")])
-    interaction = await bot.wait_for(
-        "button_click", check=lambda inter: inter.custom_id == "button1"
-    )
-    await interaction.send(content="Button Clicked")
-
-
-@bot.command()
-async def select(ctx):
-    await ctx.send(
-        "Selects!",
-        components=[
-            Select(
-                placeholder="Select something!",
-                options=[
-                    SelectOption(label="a", value="a"),
-                    SelectOption(label="b", value="b"),
-                ],
-                custom_id="select1",
-            )
-        ],
-    )
-
-    interaction = await bot.wait_for(
-        "select_option", check=lambda inter: inter.custom_id == "select1"
-    )
-    await interaction.send(content=f"{interaction.values[0]} selected!")
-
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.
@@ -185,7 +142,7 @@ class Basics(commands.Cog):
         if use_rcon is True: log_data = response
         else:
             await asyncio.sleep(2)
-            log_data = server_functions.server_log('players online')
+            log_data = backend_functions.server_log('players online')
 
         if not log_data:
             await ctx.send("**ERROR:** Trouble fetching player list.")
@@ -215,7 +172,7 @@ class Basics(commands.Cog):
 
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
-        log_data = server_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
@@ -480,9 +437,9 @@ class Permissions(commands.Cog):
             else:
                 data = response.split(':', 1)
                 for line in data[1].split('.'):
-                    line = server_functions.remove_ansi(line)
+                    line = backend_functions.remove_ansi(line)
                     line = line.split(':')
-                    reason = server_functions.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
+                    reason = backend_functions.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
                     player = line[0].split(' ')[0].strip()
                     banner = line[0].split(' ')[-1].strip()
                     if len(player) < 2:
@@ -492,7 +449,7 @@ class Permissions(commands.Cog):
                 banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
 
         else:
-            if log_data := server_functions.server_log('banlist'):
+            if log_data := backend_functions.server_log('banlist'):
                 for line in filter(None, log_data.split('\n')):  # Filters out blank lines you sometimes get.
                     if 'There are no bans' in line:
                         banned_players = 'No exiled ones!'
@@ -549,11 +506,11 @@ class Permissions(commands.Cog):
             return
 
         # Enable/disable whitelisting.
-        if arg.lower() in server_functions.enable_inputs:
+        if arg.lower() in backend_functions.enable_inputs:
             await server_command('whitelist on')
             await ctx.send("**Whitelist ACTIVE** ")
             lprint(ctx, f"Whitelist: Enabled")
-        elif arg.lower() in server_functions.disable_inputs:
+        elif arg.lower() in backend_functions.disable_inputs:
             await server_command('whitelist off')
             await ctx.send("**Whitelist INACTIVE**")
             lprint(ctx, f"Whitelist: Disabled")
@@ -587,11 +544,11 @@ class Permissions(commands.Cog):
         elif not arg or arg == 'list':
             if use_rcon:
                 log_data = await server_command('whitelist list')
-                log_data = server_functions.remove_ansi(log_data).split(':')
+                log_data = backend_functions.remove_ansi(log_data).split(':')
             else:
                 await server_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-                log_data = server_functions.server_log('whitelisted players:')
+                log_data = backend_functions.server_log('whitelisted players:')
                 if not log_data:
                     await ctx.send('No whitelisted')
                     return
@@ -611,7 +568,7 @@ class Permissions(commands.Cog):
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['name']}`" for i in server_functions.read_json('ops.json')]
+        op_players = [f"`{i['name']}`" for i in backend_functions.read_json('ops.json')]
         if op_players:
             await ctx.send(f"**OP List** :scroll:")
             await ctx.send('\n'.join(op_players))
@@ -645,7 +602,7 @@ class Permissions(commands.Cog):
             command_success = await server_command(f"op {player}")
         else:
             _, status_checker = await server_command(f"op {player}")
-            command_success = server_functions.server_log(player, stopgap_str=status_checker)
+            command_success = backend_functions.server_log(player, stopgap_str=status_checker)
 
         if command_success:
             await server_command(f"say ---INFO--- {player} is now OP : {reason}")
@@ -678,7 +635,7 @@ class Permissions(commands.Cog):
             command_success = await server_command(f"deop {player}")
         else:
             _, status_checker = await server_command(f"deop {player}")
-            command_success = server_functions.server_log(player, stopgap_str=status_checker)
+            command_success = backend_functions.server_log(player, stopgap_str=status_checker)
 
         if command_success:
             await server_command(f"say ---INFO--- {player} no longer OP : {reason}")
@@ -768,9 +725,9 @@ class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        if server_functions.autosave_status is True:
+        if backend_functions.autosave_status is True:
             self.autosave_loop.start()
-            lprint(f"Autosave task started (interval: {server_functions.autosave_interval}m)")
+            lprint(f"Autosave task started (interval: {backend_functions.autosave_interval}m)")
 
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
@@ -814,34 +771,34 @@ class Server(commands.Cog):
         try: arg = int(arg)
         except: pass
         else:
-            server_functions.autosave_interval = arg
-            server_functions.edit_file('autosave_interval', f" {arg}", server_functions.slime_vars_file)
+            backend_functions.autosave_interval = arg
+            backend_functions.edit_file('autosave_interval', f" {arg}", backend_functions.slime_vars_file)
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
-        if arg.lower() in server_functions.enable_inputs:
-            server_functions.autosave_status = True
+        if arg.lower() in backend_functions.enable_inputs:
+            backend_functions.autosave_status = True
             self.autosave_loop.start()
-            server_functions.edit_file('autosave_status', ' True', server_functions.slime_vars_file)
-            lprint(ctx, f'Autosave: Enabled (interval: {server_functions.autosave_interval}m)')
-        elif arg.lower() in server_functions.disable_inputs:
-            server_functions.autosave_status = False
+            backend_functions.edit_file('autosave_status', ' True', backend_functions.slime_vars_file)
+            lprint(ctx, f'Autosave: Enabled (interval: {backend_functions.autosave_interval}m)')
+        elif arg.lower() in backend_functions.disable_inputs:
+            backend_functions.autosave_status = False
             self.autosave_loop.cancel()
-            server_functions.edit_file('autosave_status', ' False', server_functions.slime_vars_file)
+            backend_functions.edit_file('autosave_status', ' False', backend_functions.slime_vars_file)
             lprint(ctx, 'Autosave: Disabled')
 
-        await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if server_functions.autosave_status else '**DISABLED**'}")
-        await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
+        await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if backend_functions.autosave_status else '**DISABLED**'}")
+        await ctx.send(f"Auto save interval: **{backend_functions.autosave_interval}** minutes.")
         await ctx.send('**Note:** Auto save loop will pause when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
         lprint(ctx, 'Fetched autosave information')
 
-    @tasks.loop(seconds=server_functions.autosave_interval * 60)
+    @tasks.loop(seconds=backend_functions.autosave_interval * 60)
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await server_command('save-all', discord_msg=False):
-            lprint(f"Autosaved (interval: {server_functions.autosave_interval}m)")
+            lprint(f"Autosaved (interval: {backend_functions.autosave_interval}m)")
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -862,13 +819,13 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command("servercheck"))
 
         embed = discord.Embed(title='Server Status')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
-        embed.add_field(name='MOTD', value=f"{server_functions.server_motd()}", inline=False)
-        embed.add_field(name='Version', value=f"{server_functions.server_version()}", inline=False)
-        embed.add_field(name='Address', value=f"IP: ||`{server_functions.get_public_ip()}`||\nURL: ||`{server_functions.server_url}`|| ({server_functions.ping_url()})", inline=False)
-        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
-        embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
-        embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {backend_functions.server_selected[0]}\nDescription: {backend_functions.server_selected[1]}\n", inline=False)
+        embed.add_field(name='MOTD', value=f"{backend_functions.server_motd()}", inline=False)
+        embed.add_field(name='Version', value=f"{backend_functions.server_version()}", inline=False)
+        embed.add_field(name='Address', value=f"IP: ||`{backend_functions.get_public_ip()}`||\nURL: ||`{backend_functions.server_url}`|| ({backend_functions.ping_url()})", inline=False)
+        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if backend_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{backend_functions.autosave_interval}** minutes", inline=False)
+        embed.add_field(name='Location', value=f"`{backend_functions.server_path}`", inline=False)
+        embed.add_field(name='Start Command', value=f"`{backend_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
         await ctx.invoke(self.bot.get_command('players'))
@@ -892,7 +849,7 @@ class Server(commands.Cog):
         """
 
         await ctx.send(f"***Loading {lines} Bot Log Lines*** :tools:")
-        log_data = server_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
 
@@ -912,7 +869,7 @@ class Server(commands.Cog):
             return False
 
         await ctx.send("***Launching Server...*** :rocket:")
-        server_functions.server_start()
+        backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
 
@@ -951,7 +908,7 @@ class Server(commands.Cog):
 
         await asyncio.sleep(5)
         await ctx.send("**Server HALTED** :stop_sign:")
-        server_functions.mc_subprocess = None
+        backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
     @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
@@ -979,7 +936,7 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = server_functions.server_version()
+        response = backend_functions.server_version()
         await ctx.send(f"Current version: `{response}`")
         lprint("Fetched Minecraft server version: " + response)
 
@@ -987,7 +944,7 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = server_functions.check_latest_version()
+        response = backend_functions.check_latest_version()
         await ctx.send(f"Latest version: `{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
 
@@ -1023,8 +980,8 @@ class Server(commands.Cog):
             value = ' '.join(value)
         else: value = ''
 
-        server_functions.edit_file(target_property, value)
-        fetched_property = server_functions.edit_file(target_property)
+        backend_functions.edit_file(target_property, value)
+        fetched_property = backend_functions.edit_file(target_property)
         await asyncio.sleep(2)
 
         if fetched_property:
@@ -1048,11 +1005,11 @@ class Server(commands.Cog):
         """
 
         if not mode:
-            await ctx.send(f"online mode: `{server_functions.edit_file('online-mode')[1]}`")
+            await ctx.send(f"online mode: `{backend_functions.edit_file('online-mode')[1]}`")
             lprint(ctx, "Fetched online-mode state")
         elif mode in ['true', 'false']:
-            server_functions.edit_file('online-mode', mode)[0]
-            property = server_functions.edit_file('online-mode')
+            backend_functions.edit_file('online-mode', mode)[0]
+            property = backend_functions.edit_file('online-mode')
             await ctx.send(f"Updated online mode: `{property[1]}`")
             await ctx.send("**Note:** Server restart required for change to take effect.")
             lprint(ctx, f"Updated online-mode: {property[1].strip()}")
@@ -1074,10 +1031,10 @@ class Server(commands.Cog):
         message = format_args(message, return_empty_str=True)
 
         if use_rcon:
-            motd_property = server_functions.server_motd()
-        elif server_functions.server_files_access:
-            server_functions.edit_file('motd', message)
-            motd_property = server_functions.edit_file('motd')
+            motd_property = backend_functions.server_motd()
+        elif backend_functions.server_files_access:
+            backend_functions.edit_file('motd', message)
+            motd_property = backend_functions.edit_file('motd')
         else: motd_property = '**ERROR:** Fetching server motd failed.'
 
         if message:
@@ -1103,7 +1060,7 @@ class Server(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            response = server_functions.edit_file('enable-rcon', state)
+            response = backend_functions.edit_file('enable-rcon', state)
             await ctx.send(f"`{response[0]}`")
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
@@ -1118,8 +1075,8 @@ class Server(commands.Cog):
             now str(''): Stops server immediately without giving online players 15s warning.
         """
 
-        if 'vanilla' not in server_functions.server_selected:
-            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{server_functions.server_selected[0]}` selected.")
+        if 'vanilla' not in backend_functions.server_selected:
+            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{backend_functions.server_selected[0]}` selected.")
             return False
 
         lprint(ctx, "Updating server.jar...")
@@ -1130,7 +1087,7 @@ class Server(commands.Cog):
         await asyncio.sleep(5)
 
         await ctx.send("***Downloading latest server.jar***")
-        server = server_functions.get_latest_version()
+        server = backend_functions.get_latest_version()
 
         if server is True:
             await ctx.send(f"Downloaded latest version: `{server}`")
@@ -1157,7 +1114,7 @@ class World_Backups(commands.Cog):
         """
 
         embed = discord.Embed(title='World Backups :floppy_disk:')
-        worlds = server_functions.fetch_worlds()
+        worlds = backend_functions.fetch_worlds()
         if worlds is False:
             await ctx.send("No world backups found.")
             return False
@@ -1193,7 +1150,7 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(3)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        new_backup = server_functions.backup_world(name)
+        new_backup = backend_functions.backup_world(name)
         if new_backup:
             await ctx.send(f"**New World Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
@@ -1221,7 +1178,7 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
 
-        fetched_restore = server_functions.get_world_from_index(index)
+        fetched_restore = backend_functions.get_world_from_index(index)
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
         if await server_status():
@@ -1230,7 +1187,7 @@ class World_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
-        server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
+        backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
     @commands.command(aliases=['deleteworld', 'wd'])
@@ -1250,9 +1207,9 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worlddelete <index>`\nExample: `?worlddelete 1`")
             return False
 
-        to_delete = server_functions.get_world_from_index(index)
+        to_delete = backend_functions.get_world_from_index(index)
         await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
-        server_functions.delete_world(to_delete)
+        backend_functions.delete_world(to_delete)
 
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
@@ -1275,7 +1232,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**Finished.**")
         await ctx.send("You can now start the server with `?start`.")
 
-        server_functions.restore_world(reset=True)
+        backend_functions.restore_world(reset=True)
         await asyncio.sleep(3)
 
         lprint(ctx, "World Reset")
@@ -1298,15 +1255,15 @@ class Server_Backups(commands.Cog):
 
         if not name or 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
-            for server in server_functions.server_list.values():
+            for server in backend_functions.server_list.values():
                 # Shows server name, description, location, and start command.
-                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
+                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{backend_functions.mc_path}/{backend_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
-            await ctx.send(f"**Current Server:** `{server_functions.server_selected[0]}`")
-        elif name in server_functions.server_list.keys():
-            server_functions.server_selected = server_functions.server_list[name]
-            server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server_selected[0]}"
-            server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
+            await ctx.send(f"**Current Server:** `{backend_functions.server_selected[0]}`")
+        elif name in backend_functions.server_list.keys():
+            backend_functions.server_selected = backend_functions.server_list[name]
+            backend_functions.server_path = f"{backend_functions.mc_path}/{backend_functions.server_selected[0]}"
+            backend_functions.edit_file('server_selected', f" server_list['{name}']", backend_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
@@ -1324,7 +1281,7 @@ class Server_Backups(commands.Cog):
         """
 
         embed = discord.Embed(title='Server Backups :floppy_disk:')
-        servers = server_functions.fetch_servers()
+        servers = backend_functions.fetch_servers()
 
         if servers is False:
             await ctx.send("No server backups found.")
@@ -1359,7 +1316,7 @@ class Server_Backups(commands.Cog):
         if not await server_command(f"save-all"): return
 
         await asyncio.sleep(5)
-        new_backup = server_functions.backup_server(name)
+        new_backup = backend_functions.backup_server(name)
         if new_backup:
             await ctx.send(f"**New Server Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Server backup failed! :interrobang:")
@@ -1385,7 +1342,7 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
 
-        fetched_restore = server_functions.get_server_from_index(index)
+        fetched_restore = backend_functions.get_server_from_index(index)
         lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
@@ -1394,7 +1351,7 @@ class Server_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if server_functions.restore_server(fetched_restore):
+        if backend_functions.restore_server(fetched_restore):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
@@ -1416,9 +1373,9 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverdelete <index>`\nExample: `?serverdelete 3`")
             return False
 
-        to_delete = server_functions.get_server_from_index(index)
+        to_delete = backend_functions.get_server_from_index(index)
         await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
-        server_functions.delete_server(to_delete)
+        backend_functions.delete_server(to_delete)
 
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
@@ -1443,7 +1400,7 @@ class Bot_Functions(commands.Cog):
             Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
         ], [
             Button(label="Disable Autosave", emoji='\U0001F4BE',
-                   custom_id="autosaveoff") if server_functions.autosave_status else \
+                   custom_id="autosaveoff") if backend_functions.autosave_status else \
             Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
             Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
             Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackup"),
@@ -1482,10 +1439,10 @@ class Bot_Functions(commands.Cog):
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
-        if server_functions.use_subprocess is True:
+        if backend_functions.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
-        os.chdir(server_functions.bot_files_path)
+        os.chdir(backend_functions.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
@@ -1501,7 +1458,7 @@ class Bot_Functions(commands.Cog):
             ?blog 15
         """
 
-        log_data = server_functions.server_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(file_path=backend_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
 
         await ctx.send(f"***Loading {lines} Server Log Lines*** :tools:")
         # Shows server log line by line.
@@ -1529,7 +1486,7 @@ class Bot_Functions(commands.Cog):
             return discord.Embed(title=f'Help Page {page}/{pages} :question:')
 
         embed = new_embed(embed_page)
-        for command in server_functions.read_csv('command_info.csv'):
+        for command in backend_functions.read_csv('command_info.csv'):
             if not command: continue
 
             embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
@@ -1580,8 +1537,8 @@ class Bot_Functions(commands.Cog):
             ?address
         """
 
-        await ctx.send(f"Server IP: ||`{server_functions.get_public_ip()}`||")
-        await ctx.send(f"Alternative Address: ||`{server_functions.server_url}`|| ({server_functions.ping_url()})")
+        await ctx.send(f"Server IP: ||`{backend_functions.get_public_ip()}`||")
+        await ctx.send(f"Alternative Address: ||`{backend_functions.server_url}`|| ({backend_functions.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
@@ -1597,7 +1554,7 @@ class Bot_Functions(commands.Cog):
         embed = discord.Embed(title='Useful Websites :computer:')
 
         # Creates embed of links from useful_websites dictionary from slime_vars.py.
-        for name, url in server_functions.useful_websites.items():
+        for name, url in backend_functions.useful_websites.items():
             embed.add_field(name=name, value=url, inline=False)
 
         await ctx.send(embed=embed)
@@ -1607,14 +1564,14 @@ class Bot_Functions(commands.Cog):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        server_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), server_functions.slime_vars_file)
+        backend_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), backend_functions.slime_vars_file)
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
         """Resets channel_id variable to None."""
 
         await ctx.send("Cleared `channel_id`")
-        server_functions.edit_file('channel_id', ' None', server_functions.slime_vars_file)
+        backend_functions.edit_file('channel_id', ' None', backend_functions.slime_vars_file)
 
 
 # Adds functions to bot.
@@ -1626,10 +1583,10 @@ if_no_tmux = ['serverstart', 'serverrestart']
 if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
                  'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
 
-if server_functions.server_files_access is False and server_functions.use_rcon is True:
+if backend_functions.server_files_access is False and backend_functions.use_rcon is True:
     for command in if_no_tmux: bot.remove_command(command)
 
-if server_functions.use_tmux is False:
+if backend_functions.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
 
 if __name__ == '__main__': bot.run(TOKEN)
