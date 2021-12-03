@@ -1,6 +1,7 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
-from discord_components import DiscordComponents, Button
+#from discord_components import DiscordComponents, Button
+from discord_components import DiscordComponents, Button,  Select, SelectOption, ComponentsBot
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
 import server_functions
 
@@ -20,7 +21,7 @@ else:
     sys.exit()
 
 # Make sure this doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?')
+bot = ComponentsBot(command_prefix='?')
 
 @bot.event
 async def on_ready():
@@ -36,17 +37,34 @@ async def on_ready():
         server_functions.channel_set(channel)
         await server_functions.server_status(discord_msg=True)
 
+        await channel.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
+        components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                     Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+
+@bot.event
+async def on_button_click(interaction):
+    # Need to respond with type=6, or proceeding code will execute twice.
+    await interaction.respond(type=6)
+
+    ctx = await bot.get_context(interaction.message)
+    await ctx.invoke(bot.get_command(str(interaction.custom_id)))
+
+@bot.command()
+async def select2(ctx):
+    await ctx.send(
+        "Selects2!",
+        components=[Select(placeholder="Select something2", custom_id="select2",
+                options=[SelectOption(label="a", value="a"),
+                         SelectOption(label="b", value="b"),
+                         ],
+            )
+        ],
+    )
+
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
-
-    @commands.command(aliases=['panel', 'buttonspanel'])
-    async def controlpanel(self, ctx):
-        await ctx.send("t", components=[Button(label="WOW button!")])
-
-        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
-        await interaction.respond(content="Button clicked!")
 
     @commands.command(aliases=['_buttons'])
     async def _button(self, ctx):
@@ -161,7 +179,7 @@ class Basics(commands.Cog):
             lines int(15): How many log lines to look through. This is not how many chat lines to show.
         """
 
-        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_balloon:")
+        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         log_data = server_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
         try: log_data = log_data.strip().split('\n')
@@ -492,7 +510,9 @@ class Permissions(commands.Cog):
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if can send command to server.
-        if not await server_status: return
+        if not await server_status():
+            await ctx.send("Server Offline.")
+            return
 
         # Enable/disable whitelisting.
         if arg.lower() in server_functions.enable_inputs:
@@ -537,13 +557,19 @@ class Permissions(commands.Cog):
             else:
                 await server_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-                log_data = server_functions.server_log('whitelisted players:').split(':')[-2:]
-                await asyncio.sleep(2)
+                log_data = server_functions.server_log('whitelisted players:')
+                if not log_data:
+                    await ctx.send('No whitelisted')
+                    return
+                await asyncio.sleep(1)
+                log_data = log_data.split(':')[-2:]
 
+            await ctx.send('***Whitelisted*** :page_with_curl:')
             # Then, formats player names in Discord `player` markdown.
             players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
             lprint(ctx, f"Showing whitelist: {log_data[1]}")
+            await ctx.send("-----END-----")
             return False
         else: await ctx.send("**ERROR:** Something went wrong.")
 
@@ -722,6 +748,18 @@ class Server(commands.Cog):
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved World")
 
+    @commands.command()
+    async def autosaveon(self, ctx):
+        """Enables autosave."""
+
+        await ctx.invoke(self.bot.get_command('autosave'), arg='on')
+
+    @commands.command()
+    async def autosaveoff(self, ctx):
+        """Disables autosave."""
+
+        await ctx.invoke(self.bot.get_command('autosave'), arg='off')
+
     @commands.command(aliases=['asave'])
     async def autosave(self, ctx, arg=''):
         """
@@ -787,9 +825,9 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        await ctx.invoke(bot.get_command("servercheck"))
+        await ctx.invoke(self.bot.get_command("servercheck"))
 
-        embed = discord.Embed(title='Server Status :gear:')
+        embed = discord.Embed(title='Server Status')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{server_functions.server_motd()}", inline=False)
         embed.add_field(name='Version', value=f"{server_functions.server_version()}", inline=False)
@@ -800,11 +838,14 @@ class Server(commands.Cog):
         await ctx.send(embed=embed)
 
         await ctx.invoke(self.bot.get_command('players'))
+        await ctx.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
+                       components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                                    Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
 
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log'])
-    async def serverlog(self, ctx, lines=5):
+    async def serverlog(self, ctx, lines=10):
         """
         Show server log.
 
@@ -816,7 +857,7 @@ class Server(commands.Cog):
             ?log 10
         """
 
-        await ctx.send(f"***Loading {lines} Log Lines*** :tools:")
+        await ctx.send(f"***Loading {lines} Bot Log Lines*** :tools:")
         log_data = server_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
@@ -842,6 +883,7 @@ class Server(commands.Cog):
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
+        await ctx.invoke(self.bot.get_command('control_panel_msg'))
         lprint(ctx, "Starting Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
@@ -893,7 +935,7 @@ class Server(commands.Cog):
 
         await server_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
-        await ctx.send("***Restarting...*** :arrows_counterclockwise:")
+        await ctx.send("***Restarting...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await asyncio.sleep(3)
@@ -914,6 +956,12 @@ class Server(commands.Cog):
         response = server_functions.check_latest_version()
         await ctx.send(f"Latest version: `{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
+
+    @commands.command()
+    async def propertiesall(self, ctx):
+        """Shows full server properties file."""
+
+        await ctx.invoke(self.bot.get_command('properties'), target_property='all')
 
     @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property='', *value):
@@ -1074,7 +1122,7 @@ class World_Backups(commands.Cog):
             ?saves 15
         """
 
-        embed = discord.Embed(title='World Backups :tools:')
+        embed = discord.Embed(title='World Backups :floppy_disk:')
         worlds = server_functions.fetch_worlds()
         if worlds is False:
             await ctx.send("No world backups found.")
@@ -1241,7 +1289,7 @@ class Server_Backups(commands.Cog):
             ?serversaves 10
         """
 
-        embed = discord.Embed(title='Server Backups :tools:')
+        embed = discord.Embed(title='Server Backups :floppy_disk:')
         servers = server_functions.fetch_servers()
 
         if servers is False:
@@ -1346,6 +1394,53 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    @commands.command()
+    async def control_panel_msg(self, ctx):
+        """Shows message and button to open the control panel."""
+
+        await ctx.send(components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel")]])
+
+    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel'])
+    async def controlpanel(self, ctx):
+        await ctx.send("***Control Panel***\nServer:", components=[[
+            Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
+            Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
+            Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop") if await server_status() else \
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
+        ], [
+            Button(label="Disable Autosave", emoji='\U0001F4BE',
+                   custom_id="autosaveoff") if server_functions.autosave_status else \
+            Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
+            Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
+            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackup"),
+            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackup"),
+        ], [
+            Button(label="Server Version", emoji='\U00002139', custom_id="serverversion"),
+            Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
+            Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
+            Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
+        ]])
+
+        await ctx.send("Players:", components=[[
+            Button(label="Player List", emoji='\U0001F5B1', custom_id="playerlist"),
+            Button(label="Chat Log", emoji='\U0001F5E8', custom_id="chatlog"),
+            Button(label="Show Banned", emoji='\U0001F6AB', custom_id="banlist"),
+            Button(label="Show Whitelist", emoji='\U0001F4C3', custom_id="whitelist"),
+            Button(label="Show OP List", emoji='\U0001F4DC', custom_id="oplist"),
+        ]])
+
+        await ctx.send("Bot:", components=[[
+            Button(label='Restart Bot', emoji='\U0001F501', custom_id="restartbot"),
+            Button(label='Set Channel ID', emoji='\U0001FA9B', custom_id="setchannelid"),
+            Button(label="Bot Logs", emoji='\U0001F4C3', custom_id="botlog"),
+        ]])
+
+        await ctx.send("Extra:", components=[[
+            Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
+            Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
+            Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
+        ]])
+
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
         """Restart this bot."""
@@ -1360,7 +1455,7 @@ class Bot_Functions(commands.Cog):
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
-    async def botlog(self, ctx, lines=5):
+    async def botlog(self, ctx, lines=10):
         """
         Show bot log.
 
@@ -1374,6 +1469,7 @@ class Bot_Functions(commands.Cog):
 
         log_data = server_functions.server_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
 
+        await ctx.send(f"***Loading {lines} Server Log Lines*** :tools:")
         # Shows server log line by line.
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
