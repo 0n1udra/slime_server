@@ -1,7 +1,7 @@
 import discord, asyncio, os, sys
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
-from discord_components import DiscordComponents, Button,  Select, SelectOption, ComponentsBot
+from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
 from server_functions import lprint, use_rcon, format_args, server_command, server_status
 import server_functions
 
@@ -26,7 +26,6 @@ bot = ComponentsBot(command_prefix='?')
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
-    DiscordComponents(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")
 
@@ -49,6 +48,10 @@ async def on_button_click(interaction):
     ctx = await bot.get_context(interaction.message)
     await ctx.invoke(bot.get_command(str(interaction.custom_id)))
 
+@bot.event
+async def on_select_option(interaction):
+    await interaction.respond(content=f"{interaction.values[0]} selected!")
+
 @bot.command()
 async def select2(ctx):
     await ctx.send(
@@ -60,6 +63,37 @@ async def select2(ctx):
             )
         ],
     )
+
+@bot.command()
+async def button(ctx):
+    await ctx.send("Buttons!", components=[Button(label="Button", custom_id="button1")])
+    interaction = await bot.wait_for(
+        "button_click", check=lambda inter: inter.custom_id == "button1"
+    )
+    await interaction.send(content="Button Clicked")
+
+
+@bot.command()
+async def select(ctx):
+    await ctx.send(
+        "Selects!",
+        components=[
+            Select(
+                placeholder="Select something!",
+                options=[
+                    SelectOption(label="a", value="a"),
+                    SelectOption(label="b", value="b"),
+                ],
+                custom_id="select1",
+            )
+        ],
+    )
+
+    interaction = await bot.wait_for(
+        "select_option", check=lambda inter: inter.custom_id == "select1"
+    )
+    await interaction.send(content=f"{interaction.values[0]} selected!")
+
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.
@@ -564,7 +598,7 @@ class Permissions(commands.Cog):
                 await asyncio.sleep(1)
                 log_data = log_data.split(':')[-2:]
 
-            await ctx.send('***Whitelisted*** :page_with_curl:')
+            await ctx.send('**Whitelisted** :page_with_curl:')
             # Then, formats player names in Discord `player` markdown.
             players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
@@ -1195,7 +1229,7 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        await ctx.send(f"***Restored World:*** `{fetched_restore}`")
+        await ctx.send(f"**Restored World:** `{fetched_restore}`")
         server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
@@ -1402,11 +1436,11 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel'])
     async def controlpanel(self, ctx):
-        await ctx.send("***Control Panel***\nServer:", components=[[
+        await ctx.send("**Control Panel**\nServer:", components=[[
             Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
-            Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
             Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop") if await server_status() else \
             Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
+            Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
         ], [
             Button(label="Disable Autosave", emoji='\U0001F4BE',
                    custom_id="autosaveoff") if server_functions.autosave_status else \
