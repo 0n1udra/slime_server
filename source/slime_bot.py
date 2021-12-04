@@ -218,8 +218,8 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` :gun: assassinated!")
         lprint(ctx, f"Killed: {player}")
 
-    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'dpk', 'dk'])
-    async def delaykill(self, ctx, player='', delay=5, *reason):
+    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'waitkill', 'dw'])
+    async def killwait(self, ctx, player='', delay=5, *reason):
         """
         Kill player after time elapsed.
 
@@ -235,7 +235,7 @@ class Player(commands.Cog):
 
         reason = format_args(reason)
         if not player:
-            await ctx.send("Usage: `?delaykill <player> <seconds> [reason]`\nExample: `?delaykill MysticFrogo 5 Because he took my diamonds!`")
+            await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
 
         if not await server_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}"): return
@@ -302,8 +302,8 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` is now in `{mode}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
 
-    @commands.command(aliases=['gamemodetimed', 'timedgm', 'tgm', 'gmt'])
-    async def timedgamemode(self, ctx, player='', mode='', duration=60, *reason):
+    @commands.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
+    async def gamemodetimed(self, ctx, player='', mode='', duration=60, *reason):
         """
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
@@ -314,12 +314,12 @@ class Player(commands.Cog):
             *reason str: Reason for change.
 
         Usage:
-            ?timedgamemode Steve spectator Steve needs a time out!
+            ?gamemodetimed Steve spectator Steve needs a time out!
             ?tgm Jesse adventure Jesse going on a adventure.
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send("Usage: `?timedgamemode <player> <mode> <seconds> [reason]`\nExample: `?timedgamemode MysticFrogo spectator 120 Needs a time out`")
+            await ctx.send("Usage: `?gamemodetimed <player> <mode> <seconds> [reason]`\nExample: `?gamemodetimed MysticFrogo spectator 120 Needs a time out`")
             return False
 
         reason = format_args(reason)
@@ -643,8 +643,8 @@ class Permissions(commands.Cog):
         else: await ctx.send("**ERROR:** Problem removing OP status.")
         lprint(ctx, f"Removed server OP: {player}")
 
-    @commands.command(aliases=['optimed', 'top'])
-    async def timedop(self, ctx, player='', time_limit=1, *reason):
+    @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
+    async def optimed(self, ctx, player='', time_limit=1, *reason):
         """
         Set player as OP for x seconds.
 
@@ -653,12 +653,12 @@ class Permissions(commands.Cog):
             time_limit int(1: Time limit in seconds.
 
         Usage:
-            ?timedop Steve 30 Need to check something real quick.
+            ?optimed Steve 30 Need to check something real quick.
             ?top jesse 60
         """
 
         if not player:
-            await ctx.send("Usage: `?timedop <player> <minutes> [reason]`\nExample: `?timedop R3diculous Testing purposes`")
+            await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
             return False
 
         await server_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
@@ -673,8 +673,8 @@ class Permissions(commands.Cog):
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['weather'])
-    async def setweather(self, ctx, state='', duration=0):
+    @commands.command(aliases=['weather', 'setweather'])
+    async def weatherset(self, ctx, state='', duration=0):
         """
         Set weather.
 
@@ -683,7 +683,7 @@ class World(commands.Cog):
             duration int(0): Duration in seconds.
 
         Usage:
-            ?setweather rain
+            ?weatherset rain
             ?weather thunder 60
         """
 
@@ -691,15 +691,50 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if not await server_command(f'weather {state} {duration}', bot_ctx=ctx): return
+        if not await server_command(f'weather {state} {duration}'): return
 
-        if duration:
-            await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
-        else: await ctx.send(f"Forecast entails `{state}`.")
-        lprint(ctx, f"Weather set to: {state} for {duration}s")
+        await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
+        lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
 
-    @commands.command(aliases=['time'])
-    async def settime(self, ctx, set_time=''):
+    @commands.command(aliases=['enableweather', 'weatherenable'])
+    async def weatheron(self, ctx):
+        """Enable weather cycle."""
+
+        await server_command(f'gamerule doWeatherCycle true')
+        await ctx.send("Weather cycle **ENABLED**")
+        lprint(ctx, 'Weather Cycle: Enabled')
+
+    @commands.command(aliases=['disableweather', 'weatherdisable'])
+    async def weatheroff(self, ctx):
+        """Disable weather cycle."""
+
+        await server_command(f'gamerule doWeatherCycle false')
+        await ctx.send("Weather cycle **DISABLED**")
+        lprint(ctx, 'Weather Cycle: Disabled')
+
+    @commands.command(aliases=['clearweather', 'weathersetclear'])
+    async def weatherclear(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['rainweather', 'weathersetrain'])
+    async def weatherrain(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['thunderweather', 'weathersetthunder'])
+    async def weatherthunder(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['time', 'settime'])
+    async def timeset(self, ctx, set_time=''):
         """
         Set time.
 
@@ -707,7 +742,7 @@ class World(commands.Cog):
             set_time int(''): Set time either using day|night|noon|midnight or numerically.
 
         Usage:
-            ?settime day
+            ?timeset day
             ?time 12
         """
 
@@ -719,33 +754,34 @@ class World(commands.Cog):
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
 
-    @commands.command(aliaases=['daytime', 'setday', 'settimeday'])
-    async def setdaytime(self, ctx):
+    @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
+    async def timeday(self, ctx):
         """Set time to day."""
 
-        await ctx.invoke(self.bot.get_command('settime'), set_time='10000')
+        await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
 
-    @commands.command(aliases=['nighttime', 'setnight', 'settimenight'])
-    async def setnighttime(self, ctx):
+    @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
+    async def timenight(self, ctx):
         """Set time to night."""
 
-        await ctx.invoke(self.bot.get_command('settime'), set_time='14000')
+        await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
 
-    @commands.command(aliases=['enabledaylightcycle'])
-    async def enabletime(self, ctx):
+    @commands.command(aliases=['enabletime', 'timecycleon'])
+    async def timeon(self, ctx):
         """Enable day light cycle."""
 
         await server_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle ENABLED")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
-    @commands.command(aliases=['disbaledaylightcycle'])
-    async def disabletime(self, ctx):
+    @commands.command(aliases=['diabletime', 'timecycleoff'])
+    async def timeoff(self, ctx):
         """Disable day light cycle."""
 
         await server_command(f'gamerule doDaylghtCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
+
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
@@ -1249,7 +1285,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!", bot_ctx=ctx)
+        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
         await ctx.send(":fire:**Project Rebirth Commencing**:fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
@@ -1470,14 +1506,21 @@ class Bot_Functions(commands.Cog):
     @commands.command(aliases=['envpanel'])
     async def worldpanel(self, ctx):
         await ctx.send("**World Panel**\nTime:", components=[[
-            Button(label='Day', emoji='\U00002600', custom_id="setdaytime"),
-            Button(label="Night", emoji='\U0001F319', custom_id="setnighttime"),
-            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="enabletime"),
-            Button(label='Disable Time', emoji='\U0001F534', custom_id="disabletime"),
+            Button(label='Day', emoji='\U00002600', custom_id="timeday"),
+            Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
+            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
+            Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
+        ]])
+
+        await ctx.send("Weather:", components=[[
+            Button(label='Clear', emoji='\U00002600', custom_id="weatherclear"),
+            Button(label="Rain", emoji='\U0001F327', custom_id="weatherrain"),
+            Button(label='Thunder', emoji='\U000026C8', custom_id="weatherthunder"),
+            Button(label='Enable Weather', emoji='\U0001F7E2', custom_id="weatheron"),
+            Button(label='Disable Weather', emoji='\U0001F534', custom_id="weatheroff"),
         ]])
 
         lprint(ctx, 'Opened world panel')
-
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
