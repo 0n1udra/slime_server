@@ -97,7 +97,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     Returns:
         bool: If error sending command to server, sends False boolean.
-        str: Returns matched string if match found.
+        list: Returns list containing match from server_log if found, and random_number used.
     """
 
     global mc_subprocess, server_active
@@ -116,7 +116,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     if use_rcon is True:
         if ping_server():
-            return await server_rcon(command)
+            return [await server_rcon(command), None]
         else: return False
 
     elif use_subprocess is True:
@@ -141,9 +141,10 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         return False
 
     time.sleep(1)
+    return_data = [server_log(command), None]
     if stop_at_checker is True:
-        return server_log(command), status_checker
-    else: return server_log(command)
+        return_data[1] = random_number
+    return return_data
 
 async def server_rcon(command=''):
     """

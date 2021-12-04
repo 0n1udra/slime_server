@@ -24,7 +24,7 @@ else:
 bot = ComponentsBot(command_prefix='?')
 
 # ========== Variables
-teleport_selection = [None, None]
+teleport_selection = [None, None, None]
 player_selection = None
 
 # ========== Bot
@@ -319,6 +319,26 @@ class Player(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('teleport'), target=teleport_selection[0], destination=teleport_selection[1])
 
+    @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
+    async def playerlocate(self, ctx, player=''):
+        """Gets player's location coordinates."""
+
+        if response := await server_command(f"data get entity {player} Pos"):
+            log_data = backend_functions.server_log('entity data', stopgap_str=response[1])
+            # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+            # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+            if log_data:
+                location = log_data.split('[')[3][:-3].replace('d,', '')
+                await ctx.send(f"Located `{player}`: `{location}`")
+                lprint(ctx, f"Located {player}: {location}")
+
+                return location
+        await ctx.send(f"**ERROR:** Could not get location.")
+
+    @commands.command()
+    async def _locate_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('playerlocate'), player=player_selection)
+
     @commands.command(aliases=['gm'])
     async def gamemode(self, ctx, player='', mode='', *reason):
         """
@@ -339,11 +359,11 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say {player} now in {mode.upper()} : {reason}"): return
+        if not await server_command(f"say {player} now in {mode} : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
 
-        await ctx.send(f"`{player}` is now in `{mode}` indefinitely.")
+        await ctx.send(f"`{player}` is now in `{mode.upper()}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
 
     @commands.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
@@ -518,7 +538,7 @@ class Permissions(commands.Cog):
         if not await server_status(): return
 
         banned_players = ''
-        response = await server_command("banlist")
+        response = await server_command("banlist")[0]
 
         if use_rcon is True:
             if 'There are no bans' in response:
@@ -632,7 +652,7 @@ class Permissions(commands.Cog):
         # List whitelisted.
         elif not arg or arg == 'list':
             if use_rcon:
-                log_data = await server_command('whitelist list')
+                log_data = await server_command('whitelist list')[1]
                 log_data = backend_functions.remove_ansi(log_data).split(':')
             else:
                 await server_command('whitelist list')
@@ -688,11 +708,11 @@ class Permissions(commands.Cog):
         reason = format_args(reason)
 
         if use_rcon:
-            command_success = await server_command(f"op {player}")
+            command_success = await server_command(f"op {player}")[0]
         else:
             # Checks if successful op by looking for certain keywords in log.
-            _, status_checker = await server_command(f"op {player}")
-            command_success = backend_functions.server_log(player, stopgap_str=status_checker)
+            response = await server_command(f"op {player}")
+            command_success = backend_functions.server_log(player, stopgap_str=response[1])
 
         if command_success:
             await server_command(f"say ---INFO--- {player} is now OP : {reason}")
@@ -722,10 +742,10 @@ class Permissions(commands.Cog):
 
         reason = format_args(reason)
         if use_rcon:
-            command_success = await server_command(f"deop {player}")
+            command_success = await server_command(f"deop {player}")[0]
         else:
-            _, status_checker = await server_command(f"deop {player}")
-            command_success = backend_functions.server_log(player, stopgap_str=status_checker)
+            response = await server_command(f"deop {player}")
+            command_success = backend_functions.server_log(player, stopgap_str=response[1])
 
         if command_success:
             await server_command(f"say ---INFO--- {player} no longer OP : {reason}")
@@ -1654,6 +1674,7 @@ class Bot_Functions(commands.Cog):
         await ctx.send('Actions:', components=[[
             Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
             Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
+            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
         ], [
             Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
             Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
