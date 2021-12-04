@@ -45,6 +45,11 @@ def format_args(args, return_empty_str=False):
             return ''
         return "No reason given."
 
+def get_datetime():
+    """Returns date and time. (2021-12-04 01-49)"""
+
+    return datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
+
 def remove_ansi(text):
     """Removes ANSI escape characters."""
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
@@ -294,8 +299,10 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif server_files_access is True:
-        return edit_file('version')[1]
-    else: return 'N/A'
+        returned_data = edit_file('version')[1]
+        if 'not' not in returned_data:
+            return returned_data
+    return 'N/A'
 
 def server_motd():
     """
@@ -508,9 +515,9 @@ def create_backup(name, src, dst):
 
     if not os.path.isdir(dst): os.makedirs(dst)
 
-    folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-    new_name = f"({folder_timestamp}) {server_version()} {name}"
-    new_backup_path = dst + '/' + new_name
+    version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
+    new_name = f"({get_datetime()}) {version}{name}"
+    new_backup_path = dst + '/' + new_name.strip()
     shutil.copytree(src, new_backup_path)
 
     if os.path.isdir(new_backup_path):

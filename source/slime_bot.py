@@ -1191,7 +1191,7 @@ class Server(commands.Cog):
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist'])
+    @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
     async def worldbackups(self, ctx, amount=10):
         """
         Show world backups.
@@ -1218,7 +1218,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} world saves")
 
-    @commands.command(aliases=['backupworld', 'wn'])
+    @commands.command(aliases=['backupworld', 'newworldbackup', 'worldbackupnew', 'wbn'])
     async def worldbackup(self, ctx, *name):
         """
         new backup of current world.
@@ -1249,14 +1249,13 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-
-    @commands.command(aliases=['wbd'])
+    @commands.command(aliases=['deleteworldbackup'])
     async def worldbackupdate(self, ctx):
         """Creates world backup with current date and time as name."""
 
-        print(datetime.strftime('%X %x'))
+        await ctx.invoke(self.bot.get_command('worldbackup'), '')
 
-    @commands.command(aliases=['restoreworld', 'wbr', 'wr'])
+    @commands.command(aliases=['restoreworld', 'worldbackuprestore', 'wbr'])
     async def worldrestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
@@ -1288,7 +1287,7 @@ class World_Backups(commands.Cog):
         backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(3)
 
-    @commands.command(aliases=['deleteworld', 'wd'])
+    @commands.command(aliases=['deleteworld', 'wbd'])
     async def worlddelete(self, ctx, index=''):
         """
         Delete a world backup.
@@ -1365,7 +1364,7 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
-    @commands.command(aliases=['serverbackupslist', 'sl'])
+    @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
         """
         List server backups.
@@ -1393,7 +1392,13 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups")
 
-    @commands.command(aliases=['backupserver', 'sn'])
+    @commands.command(aliases=['deleteserverbackup'])
+    async def serverbackupdate(self, ctx):
+        """Creates server backup with current date and time as name."""
+
+        await ctx.invoke(self.bot.get_command('serverbackup'), '')
+
+    @commands.command(aliases=['backupserver', 'newserverbackup', 'serverbackupnew', 'sbn'])
     async def serverbackup(self, ctx, *name):
         """
         New backup of server files (not just world save).
@@ -1422,7 +1427,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-    @commands.command(aliases=['restoreserver', 'sr'])
+    @commands.command(aliases=['restoreserver', 'serverbackuprestore', 'restoreserverbackup', 'sbr'])
     async def serverrestore(self, ctx, index='', now=''):
         """
         Restore server backup.
@@ -1453,7 +1458,7 @@ class Server_Backups(commands.Cog):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
-    @commands.command(aliases=['sd', 'deleteserver'])
+    @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
     async def serverdelete(self, ctx, index=''):
         """
         Delete a server backup.
@@ -1524,18 +1529,6 @@ class Bot_Functions(commands.Cog):
            Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
         ]])
 
-        await ctx.send("Bot:", components=[[
-            Button(label='Restart Bot', emoji='\U0001F501', custom_id="restartbot"),
-            Button(label='Set Channel ID', emoji='\U0001FA9B', custom_id="setchannelid"),
-            Button(label="Bot Logs", emoji='\U0001F4C3', custom_id="botlog"),
-        ]])
-
-        await ctx.send("Extra:", components=[[
-            Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
-            Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
-            Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
-        ]])
-
         await ctx.send("Time:", components=[[
             Button(label='Day', emoji='\U00002600', custom_id="timeday"),
             Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
@@ -1549,6 +1542,18 @@ class Bot_Functions(commands.Cog):
             Button(label='Thunder', emoji='\U000026C8', custom_id="weatherthunder"),
             Button(label='Enable Weather', emoji='\U0001F7E2', custom_id="weatheron"),
             Button(label='Disable Weather', emoji='\U0001F534', custom_id="weatheroff"),
+        ]])
+
+        await ctx.send("Bot:", components=[[
+            Button(label='Restart Bot', emoji='\U0001F501', custom_id="restartbot"),
+            Button(label='Set Channel ID', emoji='\U0001FA9B', custom_id="setchannelid"),
+            Button(label="Bot Logs", emoji='\U0001F4C3', custom_id="botlog"),
+        ]])
+
+        await ctx.send("Extra:", components=[[
+            Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
+            Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
+            Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
         ]])
 
         lprint(ctx, 'Opened control panel')
