@@ -185,11 +185,11 @@ async def server_status(discord_msg=False):
     log_data = await server_command(status_checker, skip_check=True, discord_msg=discord_msg)
     if status_checker in str(log_data):
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
-        lprint("Server Active")
+        lprint("Server Status: Active")
         server_active = True
         return True
     else:
-        lprint("Server Inactive")
+        lprint("Server Status: Inactive")
         server_active = False
 
 def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
