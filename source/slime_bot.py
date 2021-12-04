@@ -314,12 +314,18 @@ class Player(commands.Cog):
 
         else:
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
+            await ctx.send(f"***Teleporting in 5s...***")
+
+            # Gets coordinates for target and destination.
+            target_info = f'{target} ~ {await backend_functions.get_location(target)}'
+            dest_coord = await backend_functions.get_location(destination)
+            destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
 
             await asyncio.sleep(5)
             await server_command(f"tp {target} {destination}")
 
-            await ctx.send(f"**Teleported:** `{target}` to `{destination}`")
-            lprint(ctx, f"Teleported {target} to {destination}")
+            await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
+            lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
 
     @commands.command()
     async def _teleport_selected(self, ctx):
@@ -1415,7 +1421,7 @@ class World_Backups(commands.Cog):
         """
 
         await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
-        await ctx.send(":fire:**Project Rebirth Commencing**:fire:")
+        await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
         if await server_status() is True:
