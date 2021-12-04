@@ -264,7 +264,7 @@ class Player(commands.Cog):
         await ctx.invoke(self.bot.get_command('kill'), target=player_selection)
 
     @commands.command(aliases=['tp'])
-    async def teleport(self, ctx, target='', destination='', *reason):
+    async def teleport(self, ctx, target='', *destination):
         """
         Teleport player to another player.
 
@@ -277,6 +277,10 @@ class Player(commands.Cog):
             ?teleport Steve Jesse I wanted to see him
             ?tp Jesse Steve
         """
+
+        # Allows you to teleport to coordinates.
+        try: destination = ' '.join(destination)
+        except: destination = destination[0]
 
         # Will not show select components if received usable parameters.
         if not target or not destination:
@@ -301,8 +305,7 @@ class Player(commands.Cog):
             ])
 
         else:
-            reason = format_args(reason)
-            if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s : {reason}"): return
+            if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
 
             await asyncio.sleep(5)
             await server_command(f"tp {target} {destination}")
