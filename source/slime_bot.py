@@ -22,14 +22,17 @@ else:
 
 # Make sure this doesn't conflict with other bots.
 bot = ComponentsBot(command_prefix='?')
+channel = None
 
 # ========== Variables
-teleport_selection = [None, None, None]
+teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 player_selection = None
 
 # ========== Bot
 @bot.event
 async def on_ready():
+    global channel
+
     await bot.wait_until_ready()
 
     lprint(f"Bot PRIMED (v{__version__})")
@@ -50,6 +53,10 @@ async def on_button_click(interaction):
     # Need to respond with type=6, or proceeding code will execute twice.
     await interaction.respond(type=6)
 
+    if interaction.custom_id == '_teleport_selected':
+        teleport_selection[2] = await backend_functions.get_location(teleport_selection[0])
+
+    # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
     ctx = await bot.get_context(interaction.message)
     await ctx.invoke(bot.get_command(str(interaction.custom_id)))
 
@@ -301,7 +308,8 @@ class Player(commands.Cog):
                     placeholder="Destination",
                     options=[SelectOption(label=i, value=i) for i in players[1]],
                 ),
-                Button(label='Teleport!', custom_id='_teleport_selected')
+                [Button(label='Teleport', custom_id='_teleport_selected'),
+                 Button(label='Return', custom_id='_return_selected')]
             ])
 
         else:
@@ -317,22 +325,21 @@ class Player(commands.Cog):
     async def _teleport_selected(self, ctx):
         """Teleports selected targets from ?teleport command when use Teleport! button."""
 
-        await ctx.invoke(self.bot.get_command('teleport'), target=teleport_selection[0], destination=teleport_selection[1])
+        await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
+
+    @commands.command()
+    async def _return_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[2])
 
     @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
     async def playerlocate(self, ctx, player=''):
         """Gets player's location coordinates."""
 
-        if response := await server_command(f"data get entity {player} Pos"):
-            log_data = backend_functions.server_log('entity data', stopgap_str=response[1])
-            # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
-            # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-            if log_data:
-                location = log_data.split('[')[3][:-3].replace('d,', '')
-                await ctx.send(f"Located `{player}`: `{location}`")
-                lprint(ctx, f"Located {player}: {location}")
+        if location := backend_functions.get_player_location(player):
+            await ctx.send(f"Located `{player}`: `{location}`")
+            lprint(ctx, f"Located {player}: {location}")
+            return location
 
-                return location
         await ctx.send(f"**ERROR:** Could not get location.")
 
     @commands.command()

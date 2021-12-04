@@ -426,6 +426,17 @@ async def get_player_list():
 
         return text + ':\n' + ''.join(player_names_discord), player_names
 
+async def get_location(player=''):
+    """Gets player's location coordinates."""
+
+    if response := await server_command(f"data get entity {player} Pos"):
+        log_data = server_log('entity data', stopgap_str=response[1])
+        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+        if log_data:
+            location = log_data.split('[')[3][:-3].replace('d,', '')
+            return location
+
 
 # ========== Backup/Restore.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
