@@ -631,6 +631,7 @@ class Permissions(commands.Cog):
         if use_rcon:
             command_success = await server_command(f"op {player}")
         else:
+            # Checks if successful op by looking for certain keywords in log.
             _, status_checker = await server_command(f"op {player}")
             command_success = backend_functions.server_log(player, stopgap_str=status_checker)
 

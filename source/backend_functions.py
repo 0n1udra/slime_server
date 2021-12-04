@@ -111,7 +111,8 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         await inactive_msg()
         return False
 
-    status_checker = 'debug status_checker: ' + str(random.random())
+    status_checker_command, random_number = 'locatebiome ', str(random.random())
+    status_checker = status_checker_command + random_number
 
     if use_rcon is True:
         if ping_server():
@@ -130,7 +131,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
-        if not server_log(status_checker):
+        if not server_log(random_number):
             await inactive_msg()
             return False
         os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{command}" ENTER')
@@ -212,24 +213,23 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
         return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
-
+        log_data (str): Returns found match log line or multiple lines from log.
     """
-    if match is None:
-        match = 'placeholder_match'
+
+    if match is None: match = 'placeholder_match'
     match = match.lower()
 
-    if file_path is None: file_path = f"{server_path}/logs/latest.log"
-
-    if stopgap_str is None:
-        stopgap_str = 'placeholder_stopgap'
+    if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
     stopgap_str = stopgap_str.lower()
 
+    # Defaults file to server log.
+    if file_path is None: file_path = f"{server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
     if filter_mode is True: lines = log_lines_limit
 
     log_data = ''
-    if normal_read is True:
+    if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line: return line
@@ -237,7 +237,7 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
         with FileReadBackwards(file_path) as file:
             for i in range(lines):
                 line = file.readline()
-                if 'banlist' in match:
+                if 'banlist' in match:  # How ugly :(
                     if 'was banned by' in line:  # finds log lines that shows banned players.
                         log_data += line
                     elif ']: There are' in line:  # finds the end so it doesn't return everything from log other then banned users.
