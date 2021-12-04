@@ -422,9 +422,9 @@ async def get_player_list():
     else:
         player_names = [f"{i.strip()[:-4]}\n" if use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+        #player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
 
-        return text + ':\n' + ''.join(player_names_discord), player_names
+        return player_names, text
 
 async def get_location(player=''):
     """Gets player's location coordinates."""
