@@ -23,6 +23,11 @@ else:
 # Make sure this doesn't conflict with other bots.
 bot = ComponentsBot(command_prefix='?')
 
+# ========== Variables
+teleport_selection = [None, None]
+player_selection = None
+
+# ========== Bot
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
@@ -50,14 +55,14 @@ async def on_button_click(interaction):
 
 @bot.event
 async def on_select_option(interaction):
+    global player_selection
     await interaction.respond(type=6)
 
     # Updates teleport_selection corresponding value based on which selection box is updated.
     if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0]
     if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0]
 
-# ========== Variables
-teleport_selection = [None, None]
+    if interaction.custom_id == 'player_select': player_selection = interaction.values[0]
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.
@@ -180,12 +185,12 @@ class Player(commands.Cog):
         lprint(ctx, "Fetched player list")
 
     @commands.command(aliases=['playerkill', 'pk'])
-    async def kill(self, ctx, player='', *reason):
+    async def kill(self, ctx, target='', *reason):
         """
         Kill a player.
 
         Args:
-            player str(''): Target player, casing does not matter.
+            target str(''): Target player, casing does not matter.
             *reason str: Reason for kill, do not put in quotes.
 
         Usage:
@@ -193,25 +198,25 @@ class Player(commands.Cog):
             ?pk Steve
         """
 
-        if not player:
+        if not target:
             await ctx.send("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say ---WARNING--- {player} will be EXTERMINATED! : {reason}"): return
+        if not await server_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}"): return
 
-        await server_command(f'kill {player}')
+        await server_command(f'kill {target}')
 
-        await ctx.send(f"`{player}` :gun: assassinated!")
-        lprint(ctx, f"Killed: {player}")
+        await ctx.send(f"`{target}` :gun: assassinated!")
+        lprint(ctx, f"Killed: {target}")
 
     @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'waitkill', 'dw'])
-    async def killwait(self, ctx, player='', delay=5, *reason):
+    async def killwait(self, ctx, target='', delay=5, *reason):
         """
         Kill player after time elapsed.
 
         Args:
-            player str(''): Target player.
+            target str(''): Target player.
             delay int(5): Wait time in seconds.
             *reason str: Reason for kill.
 
@@ -221,18 +226,18 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        if not player:
+        if not target:
             await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
 
-        if not await server_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}"): return
+        if not await server_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}"): return
 
-        await ctx.send(f"Killing {player} in {delay}s :bomb:")
+        await ctx.send(f"Killing {target} in {delay}s :bomb:")
         await asyncio.sleep(delay)
-        await server_command(f'kill {player}')
+        await server_command(f'kill {target}')
 
-        await ctx.send(f"`{player}` soul has been freed.")
-        lprint(ctx, f"Delay killed: {player}")
+        await ctx.send(f"`{target}` soul has been freed.")
+        lprint(ctx, f"Delay killed: {target}")
 
     @commands.command(aliases=['killallplayers', 'kilkillkill'])
     async def _killplayers(self, ctx):
@@ -248,9 +253,15 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['killrandom', 'killrandomplayer'])
     async def _killrando(self, ctx):
-        await ctx.send("Killed random player!")
+        await ctx.send("Killed random player! :game_die::knife:")
         await backend_functions.server_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
+
+    @commands.command()
+    async def _kill_selected(self, ctx):
+        """Kills selected player from player panel."""
+
+        await ctx.invoke(self.bot.get_command('kill'), target=player_selection)
 
     @commands.command(aliases=['tp'])
     async def teleport(self, ctx, target='', destination='', *reason):
@@ -325,7 +336,7 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say {player} now in {mode}: {reason}"): return
+        if not await server_command(f"say {player} now in {mode.upper()} : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
 
@@ -353,16 +364,53 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say ---INFO--- {player} set to {mode} for {duration}s : {reason}"): return
+        if not await server_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
         await ctx.send(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
         lprint(ctx, f"Set gamemode: {player} for {duration}s")
 
         await asyncio.sleep(duration)
-        await server_command(f"say ---INFO--- Times up! {player} is now back to survival.")
+        await server_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
         await server_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
+
+    @commands.command()
+    async def _survival_selected(self, ctx):
+        """Changes selected player to survival."""
+
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='survival')
+
+    @commands.command()
+    async def _adventure_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='adventure')
+
+    @commands.command()
+    async def _creative_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='creative')
+
+    @commands.command()
+    async def _spectator_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='spectator')
+
+    @commands.command(aliases=['clear'])
+    async def clearinventory(self, ctx, target):
+        """Clears player inventory."""
+
+        if not target:
+            await ctx.send("Usage: `?clear <player>")
+            return False
+
+        if not await server_command(f"say ---WARNING--- {target} will lose everything!"): return
+
+        await server_command(f'clear {target}')
+
+        await ctx.send(f"`{target}` inventory cleared")
+        lprint(ctx, f"Cleared: {target}")
+
+    @commands.command()
+    async def _clear_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
 
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
@@ -424,6 +472,14 @@ class Permissions(commands.Cog):
 
         await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
+
+    @commands.command()
+    async def _kick_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('kick'), player=player_selection)
+
+    @commands.command()
+    async def _ban_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('ban'), player=player_selection)
 
     @commands.command(aliases=['unban'])
     async def pardon(self, ctx, player='', *reason):
@@ -698,6 +754,14 @@ class Permissions(commands.Cog):
         await ctx.invoke(self.bot.get_command('opadd'), player, *reason)
         await asyncio.sleep(time_limit * 60)
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
+
+    @commands.command()
+    async def _opadd_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('opadd'), player=player_selection)
+
+    @commands.command()
+    async def _opremove_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
 
 # ========== World: weather, time.
@@ -1514,7 +1578,7 @@ class Bot_Functions(commands.Cog):
         ], [
             Button(label="Disable Autosave", emoji='\U0001F4BE',
                    custom_id="autosaveoff") if backend_functions.autosave_status else \
-                Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
+            Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
             Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
             Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackupdate"),
             Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackupdate"),
@@ -1570,16 +1634,35 @@ class Bot_Functions(commands.Cog):
         lprint(ctx, 'Opened secret panel')
 
     @commands.command(aliases=['player', 'ppanel'])
-    async def playerpanel(self, ctx):
-        players = await backend_functions.get_player_list()
+    async def playerpanel(self, ctx, player=''):
 
-        await ctx.send("Teleport Player 1 to Player 2:", components=[
+        players = await backend_functions.get_player_list()
+        if not players: players = [[], ["No Players Online"]]
+
+        await ctx.send("**Player Panel** :control_knobs:", components=[
             Select(
-                custom_id="Teleporter",
-                placeholder="Target",
-                options=[SelectOption(label='All Players', value='@a')] +
+                custom_id='player_select',
+                placeholder="Select Player",
+                options=[SelectOption(label=player, value=player, default=True) if player else
+                         SelectOption(label='All Players', value='@a')] +
                         [SelectOption(label=i, value=i) for i in players[1]],
             ), ])
+
+        await ctx.send('Actions:', components=[[
+            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
+            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
+        ], [
+            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
+            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
+            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
+            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
+
+        ], [
+            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
+            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
+            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
+            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
+        ]])
 
         lprint(ctx, 'Opened player panel')
 
