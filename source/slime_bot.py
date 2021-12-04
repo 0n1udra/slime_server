@@ -179,15 +179,17 @@ class Player(commands.Cog):
         """Show list of online players."""
 
         player_list = await backend_functions.get_player_list()
-        if not player_list:
-            await ctx.send("**ERROR:** Trouble fetching player list.")
-            return
 
         await ctx.send("***Fetching Player List...***")
-
-        if player_list is None:
+        print(player_list)
+        if not player_list:
             await ctx.send(f"No players online. ¯\_(ツ)_/¯")
-        else: await ctx.send(player_list[0])
+        else:
+            new_player_list = []
+            for i in player_list[0]:
+                new_player_list.append(f'`{i} ({await backend_functions.get_location(i)})`')
+            await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
+            await ctx.send("-----END-----")
 
         lprint(ctx, "Fetched player list")
 
@@ -301,13 +303,13 @@ class Player(commands.Cog):
                     placeholder="Target",
                     options=[SelectOption(label='All Players', value='@a')] +
                             [SelectOption(label='Random Player', value='@r')] +
-                            [SelectOption(label=i, value=i) for i in players[1]],
+                            [SelectOption(label=i, value=i) for i in players[0]],
                 ),
-                Select(
-                    custom_id="teleport_destination",
-                    placeholder="Destination",
-                    options=[SelectOption(label=i, value=i) for i in players[1]],
-                ),
+                Select(custom_id="teleport_destination",
+                       placeholder="Destination",
+                       options=[SelectOption(label=i, value=i) for i in players[0]] +
+                               [SelectOption(label='Random Player', value='@r')],
+                       ),
                 [Button(label='Teleport', custom_id='_teleport_selected'),
                  Button(label='Return', custom_id='_return_selected')]
             ])
@@ -1627,7 +1629,8 @@ class Bot_Functions(commands.Cog):
             Button(label="Show Whitelist", emoji='\U0001F4C3', custom_id="whitelist"),
             Button(label="Show OP List", emoji='\U0001F4DC', custom_id="oplist"),
         ], [
-           Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
+            Button(label='Player Panel', emoji='\U0001F39B', custom_id='playerpanel'),
+            Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
         ]])
 
         await ctx.send("Time & Weather:", components=[[
@@ -1675,14 +1678,13 @@ class Bot_Functions(commands.Cog):
         players = await backend_functions.get_player_list()
         if not players: players = [[], ["No Players Online"]]
 
-        await ctx.send("**Player Panel** :control_knobs:", components=[
-            Select(
-                custom_id='player_select',
-                placeholder="Select Player",
-                options=[SelectOption(label=player, value=player, default=True) if player else
-                         SelectOption(label='All Players', value='@a')] +
-                        [SelectOption(label=i, value=i) for i in players[1]],
-            ), ])
+        await ctx.send("**Player Panel**", components=[
+            Select(custom_id='player_select',
+                   placeholder="Select Player",
+                   options=[SelectOption(label=player, value=player, default=True) if player else
+                            SelectOption(label='All Players', value='@a')] +
+                           [SelectOption(label=i, value=i) for i in players[0]],
+            ),])
 
         await ctx.send('Actions:', components=[[
             Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
@@ -1693,7 +1695,6 @@ class Bot_Functions(commands.Cog):
             Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
             Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
             Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
-
         ], [
             Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
             Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
