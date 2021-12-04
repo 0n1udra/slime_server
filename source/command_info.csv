@@ -55,5 +55,6 @@ Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
 Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 Bot Info, `?botinfo`, Get this bot's version and other info.
-[HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
+Secret Panel, `?secretpanel`, `?sp`, ?????????
+[HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Deletes world save, new one generated at start. Will not make backup||
 

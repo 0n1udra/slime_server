@@ -1,4 +1,4 @@
-import discord, asyncio, os, sys
+import discord, asyncio, datetime, os, sys
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
@@ -50,7 +50,14 @@ async def on_button_click(interaction):
 
 @bot.event
 async def on_select_option(interaction):
-    await interaction.respond(content=f"{interaction.values[0]} selected!")
+    await interaction.respond(type=6)
+
+    # Updates teleport_selection corresponding value based on which selection box is updated.
+    if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0]
+    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0]
+
+# ========== Variables
+teleport_selection = [None, None]
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.
@@ -227,8 +234,26 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` soul has been freed.")
         lprint(ctx, f"Delay killed: {player}")
 
+    @commands.command(aliases=['killallplayers', 'kilkillkill'])
+    async def _killplayers(self, ctx):
+        await ctx.send("All players killed!")
+        await backend_functions.server_command('kill @a')
+        lprint(ctx, 'Killed: All Players')
+
+    @commands.command(aliases=['killeverything', 'killallentities'])
+    async def _killentities(self, ctx):
+        await ctx.send("All entities killed!")
+        await backend_functions.server_command('kill @e')
+        lprint(ctx, 'Killed: All Entities')
+
+    @commands.command(aliases=['killrandom', 'killrandomplayer'])
+    async def _killrando(self, ctx):
+        await ctx.send("Killed random player!")
+        await backend_functions.server_command('kill @r')
+        lprint(ctx, 'Killed: Random Player')
+
     @commands.command(aliases=['tp'])
-    async def teleport(self, ctx, player='', target='', *reason):
+    async def teleport(self, ctx, target='', destination='', *reason):
         """
         Teleport player to another player.
 
@@ -242,18 +267,43 @@ class Player(commands.Cog):
             ?tp Jesse Steve
         """
 
-        if not player or not target:
-            await ctx.send("Usage: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
-            return False
+        # Will not show select components if received usable parameters.
+        if not target or not destination:
+            await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
 
-        reason = format_args(reason)
-        if not await server_command(f"say ---INFO--- Flinging {player} towards {target} in 5s : {reason}"): return
+            players = await backend_functions.get_player_list()  # Get list of online players.
+            # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
+            await ctx.send("Teleport Player 1 to Player 2:", components=[
+                Select(
+                    custom_id="teleport_target",
+                    placeholder="Target",
+                    options=[SelectOption(label='All Players', value='@a')] +
+                            [SelectOption(label='Random Player', value='@r')] +
+                            [SelectOption(label=i, value=i) for i in players[1]],
+                ),
+                Select(
+                    custom_id="teleport_destination",
+                    placeholder="Destination",
+                    options=[SelectOption(label=i, value=i) for i in players[1]],
+                ),
+                Button(label='Teleport!', custom_id='_teleport_selected')
+            ])
 
-        await asyncio.sleep(5)
-        await server_command(f"tp {player} {target}")
+        else:
+            reason = format_args(reason)
+            if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s : {reason}"): return
 
-        await ctx.send(f"**Teleported:** `{player}` to `{target}`")
-        lprint(ctx, f"Teleported {player} to {target}")
+            await asyncio.sleep(5)
+            await server_command(f"tp {target} {destination}")
+
+            await ctx.send(f"**Teleported:** `{target}` to `{destination}`")
+            lprint(ctx, f"Teleported {target} to {destination}")
+
+    @commands.command()
+    async def _teleport_selected(self, ctx):
+        """Teleports selected targets from ?teleport command when use Teleport! button."""
+
+        await ctx.invoke(self.bot.get_command('teleport'), target=teleport_selection[0], destination=teleport_selection[1])
 
     @commands.command(aliases=['gm'])
     async def gamemode(self, ctx, player='', mode='', *reason):
@@ -1199,6 +1249,13 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
+
+    @commands.command(aliases=['wbd'])
+    async def worldbackupdate(self, ctx):
+        """Creates world backup with current date and time as name."""
+
+        print(datetime.strftime('%X %x'))
+
     @commands.command(aliases=['restoreworld', 'wbr', 'wr'])
     async def worldrestore(self, ctx, index='', now=''):
         """
@@ -1448,8 +1505,8 @@ class Bot_Functions(commands.Cog):
                    custom_id="autosaveoff") if backend_functions.autosave_status else \
             Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
             Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
-            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackup"),
-            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackup"),
+            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackupdate"),
+            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackupdate"),
         ], [
             Button(label="Server Version", emoji='\U00002139', custom_id="serverversion"),
             Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
@@ -1463,6 +1520,8 @@ class Bot_Functions(commands.Cog):
             Button(label="Show Banned", emoji='\U0001F6AB', custom_id="banlist"),
             Button(label="Show Whitelist", emoji='\U0001F4C3', custom_id="whitelist"),
             Button(label="Show OP List", emoji='\U0001F4DC', custom_id="oplist"),
+        ], [
+           Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
         ]])
 
         await ctx.send("Bot:", components=[[
@@ -1475,15 +1534,9 @@ class Bot_Functions(commands.Cog):
             Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
             Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
             Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
-        ], [
-            Button(label='Time/Weather Panel', emoji='\U0001F39B', custom_id='worldpanel')
         ]])
 
-        lprint(ctx, 'Opened control panel')
-
-    @commands.command(aliases=['envpanel'])
-    async def worldpanel(self, ctx):
-        await ctx.send("**World Panel**\nTime:", components=[[
+        await ctx.send("Time:", components=[[
             Button(label='Day', emoji='\U00002600', custom_id="timeday"),
             Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
             Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
@@ -1498,8 +1551,19 @@ class Bot_Functions(commands.Cog):
             Button(label='Disable Weather', emoji='\U0001F534', custom_id="weatheroff"),
         ]])
 
-        lprint(ctx, 'Opened world panel')
+        lprint(ctx, 'Opened control panel')
 
+    @commands.command(aliases=['sp', 'hiddenpanel'])
+    async def secretpanel(self, ctx):
+        await ctx.send("**Secret Panel**", components=[[
+            Button(label='Kill Players', emoji='\U0001F4A3', custom_id="_killplayers"),
+            Button(label="Kill Entities", emoji='\U0001F4A5', custom_id="_killentities"),
+            Button(label='Kill Rando', emoji='\U00002753', custom_id="_killrando"),
+        ], [
+            Button(label='HADES Protocol', emoji='\U0001F480', custom_id="hades"),
+        ]])
+
+        lprint(ctx, 'Opened secret panel')
 
     @commands.command(aliases=['player', 'ppanel'])
     async def playerpanel(self, ctx):
@@ -1507,10 +1571,10 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send("Teleport Player 1 to Player 2:", components=[
             Select(
-                custom_id="select1",
+                custom_id="Teleporter",
                 placeholder="Target",
                 options=[SelectOption(label='All Players', value='@a')] +
-                        [SelectOption(label=i, value=i) for i in players[0]],
+                        [SelectOption(label=i, value=i) for i in players[1]],
             ), ])
 
         lprint(ctx, 'Opened player panel')

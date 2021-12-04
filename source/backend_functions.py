@@ -419,7 +419,6 @@ async def get_player_list():
         return text + ':\n' + ''.join(player_names_discord), player_names
 
 
-
 # ========== Backup/Restore.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
     """
