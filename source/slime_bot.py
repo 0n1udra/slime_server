@@ -57,14 +57,6 @@ async def on_select_option(interaction):
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['_buttons'])
-    async def _button(self, ctx):
-        await ctx.send("Hello, World!", components=[Button(label="WOW button!")])
-
-        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
-        print(interaction.responded)
-        await interaction.respond(content="Button clicked!")
-
     @commands.command(aliases=['command', '/'])
     async def servercommand(self, ctx, *command):
         """
@@ -100,7 +92,8 @@ class Basics(commands.Cog):
 
         msg = format_args(msg, return_empty_str=True)
 
-        if not msg: await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
+        if not msg:
+            await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
             if await server_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
@@ -130,6 +123,38 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
+    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
+    async def chatlog(self, ctx, lines=15):
+        """
+        Shows chat log. Does not include whispers.
+
+        Args:
+            lines int(15): How many log lines to look through. This is not how many chat lines to show.
+        """
+
+        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
+
+        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
+        try:
+            log_data = log_data.strip().split('\n')
+        except:
+            await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
+            return False
+
+        for line in log_data:
+            try:
+                line = line.split(']')
+                await ctx.send(f"`{str(line[0][1:] + ':' + line[2][1:])}`")
+            except: pass
+
+        await ctx.send("-----END-----")
+        lprint(ctx, f"Fetched chat log")
+
+
+# ========== Player: gamemode, kill, tp, etc
+class Player(commands.Cog):
+    def __init__(self, bot): self.bot = bot
+
     @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx):
         """Show list of online players."""
@@ -139,7 +164,9 @@ class Basics(commands.Cog):
 
         await ctx.send("***Fetching Player List...***")
 
-        if use_rcon is True: log_data = response
+        # Need to read server log after sending RCON command to get data.
+        if use_rcon is True:
+            log_data = response
         else:
             await asyncio.sleep(2)
             log_data = backend_functions.server_log('players online')
@@ -160,37 +187,6 @@ class Basics(commands.Cog):
             await ctx.send(text + ':\n' + ''.join(players_names))
 
         lprint(ctx, "Fetched player list")
-
-    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=15):
-        """
-        Shows chat log. Does not include whispers.
-
-        Args:
-            lines int(15): How many log lines to look through. This is not how many chat lines to show.
-        """
-
-        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
-
-        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
-        try: log_data = log_data.strip().split('\n')
-        except:
-            await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
-            return False
-
-        for line in log_data:
-            try:
-                line = line.split(']')
-                await ctx.send(f"`{str(line[0][1:] + ':' + line[2][1:])}`")
-            except: pass
-
-        await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched chat log")
-
-
-# ========== Player: gamemode, kill, tp, etc
-class Player(commands.Cog):
-    def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['playerkill', 'pk'])
     async def kill(self, ctx, player='', *reason):
@@ -1072,10 +1068,10 @@ class Server(commands.Cog):
             lprint(ctx, "Fetched online-mode state")
         elif mode in ['true', 'false']:
             backend_functions.edit_file('online-mode', mode)[0]
-            property = backend_functions.edit_file('online-mode')
-            await ctx.send(f"Updated online mode: `{property[1]}`")
+            server_property = backend_functions.edit_file('online-mode')
+            await ctx.send(f"Updated online mode: `{server_property[1]}`")
             await ctx.send("**Note:** Server restart required for change to take effect.")
-            lprint(ctx, f"Updated online-mode: {property[1].strip()}")
+            lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     @commands.command(aliases=['updatemotd', 'servermotd'])
@@ -1521,6 +1517,25 @@ class Bot_Functions(commands.Cog):
         ]])
 
         lprint(ctx, 'Opened world panel')
+
+    @commands.command(aliases=['ppanel'])
+    async def playerpanel(self, ctx):
+        await ctx.send("**World Panel**\nTime:", components=[[
+            Button(label='Day', emoji='\U00002600', custom_id="timeday"),
+            Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
+            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
+            Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
+        ]])
+
+        await ctx.send("Teleport Player 1 to Player 2:", components=[
+            Select(
+                custom_id="select1",
+                placeholder="Target",
+                options=[SelectOption(label='All Players', value='@a')] +
+                        [SelectOption(label=i, value=i) for i in mylist],
+            ), ])
+
+        lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
