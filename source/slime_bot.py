@@ -1506,17 +1506,17 @@ class Bot_Functions(commands.Cog):
             Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
             Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
         ], [
-            Button(label="Disable Autosave", emoji='\U0001F4BE',
-                   custom_id="autosaveoff") if backend_functions.autosave_status else \
-            Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
-            Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
-            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackupdate"),
-            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackupdate"),
-        ], [
             Button(label="Server Version", emoji='\U00002139', custom_id="serverversion"),
             Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
             Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
             Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
+        ], [
+            Button(label="Disable Autosave", emoji='\U0001F4BE',
+                   custom_id="autosaveoff") if backend_functions.autosave_status else \
+                Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
+            Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
+            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackupdate"),
+            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackupdate"),
         ]])
 
         await ctx.send("Players:", components=[[
@@ -1529,14 +1529,12 @@ class Bot_Functions(commands.Cog):
            Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
         ]])
 
-        await ctx.send("Time:", components=[[
+        await ctx.send("Time & Weather:", components=[[
             Button(label='Day', emoji='\U00002600', custom_id="timeday"),
             Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
             Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
             Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
-        ]])
-
-        await ctx.send("Weather:", components=[[
+        ], [
             Button(label='Clear', emoji='\U00002600', custom_id="weatherclear"),
             Button(label="Rain", emoji='\U0001F327', custom_id="weatherrain"),
             Button(label='Thunder', emoji='\U000026C8', custom_id="weatherthunder"),
