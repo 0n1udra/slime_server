@@ -715,10 +715,37 @@ class World(commands.Cog):
 
         if set_time:
             await server_command(f"time set {set_time}")
-            await ctx.send("Time Updated  :clock:")
+            await ctx.send("Time Updated  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
 
+    @commands.command(aliaases=['daytime', 'setday', 'settimeday'])
+    async def setdaytime(self, ctx):
+        """Set time to day."""
+
+        await ctx.invoke(self.bot.get_command('settime'), set_time='10000')
+
+    @commands.command(aliases=['nighttime', 'setnight', 'settimenight'])
+    async def setnighttime(self, ctx):
+        """Set time to night."""
+
+        await ctx.invoke(self.bot.get_command('settime'), set_time='14000')
+
+    @commands.command(aliases=['enabledaylightcycle'])
+    async def enabletime(self, ctx):
+        """Enable day light cycle."""
+
+        await server_command(f'gamerule doDaylightCycle true')
+        await ctx.send("Daylight cycle ENABLED")
+        lprint(ctx, 'Daylight Cycle: Enabled')
+
+    @commands.command(aliases=['disbaledaylightcycle'])
+    async def disabletime(self, ctx):
+        """Disable day light cycle."""
+
+        await server_command(f'gamerule doDaylghtCycle false')
+        await ctx.send("Daylight cycle DISABLED")
+        lprint(ctx, 'Daylight Cycle: Disabled')
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
@@ -1434,9 +1461,23 @@ class Bot_Functions(commands.Cog):
             Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
             Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
             Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
+        ], [
+            Button(label='Time/Weather Panel', emoji='\U0001F39B', custom_id='worldpanel')
         ]])
 
         lprint(ctx, 'Opened control panel')
+
+    @commands.command(aliases=['envpanel'])
+    async def worldpanel(self, ctx):
+        await ctx.send("**World Panel**\nTime:", components=[[
+            Button(label='Day', emoji='\U00002600', custom_id="setdaytime"),
+            Button(label="Night", emoji='\U0001F319', custom_id="setnighttime"),
+            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="enabletime"),
+            Button(label='Disable Time', emoji='\U0001F534', custom_id="disabletime"),
+        ]])
+
+        lprint(ctx, 'Opened world panel')
+
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
