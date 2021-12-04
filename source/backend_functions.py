@@ -39,8 +39,7 @@ def format_args(args, return_empty_str=False):
         str: Arguments combines with spaces.
     """
 
-    if args:
-        return ' '.join(args)
+    if args: return ' '.join(args)
     else:
         if return_empty_str is True:
             return ''
@@ -155,8 +154,7 @@ async def server_rcon(command=''):
     global server_active
 
     server_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
-    try:
-        server_rcon_client.login(rcon_pass)
+    try: server_rcon_client.login(rcon_pass)
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
         server_active = False
@@ -181,14 +179,14 @@ async def server_status(discord_msg=False):
     lprint("Checking server active status...")
 
     # Creates random number to send in command, server is online if match is found in log.
-    status_checker = 'debug status_checker: ' + str(random.random())
-    log_data = await server_command(status_checker, skip_check=True, discord_msg=discord_msg)
-    if status_checker in str(log_data):
+    response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
+    if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
         lprint("Server Status: Active")
         server_active = True
         return True
     else:
+        # server_command will send a discord message if server is inactive, so it's unneeded here.
         lprint("Server Status: Inactive")
         server_active = False
 
@@ -395,6 +393,31 @@ def get_latest_version():
         lprint(f"Error saving new jar file: {server_path}")
 
     return False
+
+async def get_player_list():
+    response = await server_command("list")
+    if not response: return False
+
+    # Gets data from RCON response or reads server log for line containing player names.
+    if use_rcon is True: log_data = response
+    else:
+        await asyncio.sleep(1)
+        log_data = server_log('players online')
+
+    if not log_data: return False
+
+    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+    text = log_data[-2]  # There are 2 of a max of 20 players online
+    player_names = log_data[-1]  # R3diculous, MysticFrogo
+    # If there's no players active, player_names will still contain some anso escape characters.
+    if len(player_names.strip()) < 5: return None
+    else:
+        player_names = [f"{i.strip()[:-4]}\n" if use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+        player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+
+        return text + ':\n' + ''.join(player_names_discord), player_names
+
 
 
 # ========== Backup/Restore.

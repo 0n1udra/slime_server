@@ -159,32 +159,16 @@ class Player(commands.Cog):
     async def players(self, ctx):
         """Show list of online players."""
 
-        response = await server_command("list")
-        if not response: return
+        player_list = await backend_functions.get_player_list()
+        if not player_list:
+            await ctx.send("**ERROR:** Trouble fetching player list.")
+            return
 
         await ctx.send("***Fetching Player List...***")
 
-        # Need to read server log after sending RCON command to get data.
-        if use_rcon is True:
-            log_data = response
-        else:
-            await asyncio.sleep(2)
-            log_data = backend_functions.server_log('players online')
-
-        if not log_data:
-            await ctx.send("**ERROR:** Trouble fetching player list.")
-            return False
-
-        log_data = log_data.split(':')
-        text = log_data[-2]
-        player_names = log_data[-1]
-        # If there's no players active, player_names will still contain some anso escape characters.
-        if len(player_names.strip()) < 5:
-            await ctx.send(f"{text}. ¯\_(ツ)_/¯")
-        else:
-            # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-            players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-            await ctx.send(text + ':\n' + ''.join(players_names))
+        if player_list is None:
+            await ctx.send(f"No players online. ¯\_(ツ)_/¯")
+        else: await ctx.send(player_list[0])
 
         lprint(ctx, "Fetched player list")
 
@@ -875,8 +859,6 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        await ctx.invoke(self.bot.get_command("servercheck"))
-
         embed = discord.Embed(title='Server Status')
         embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {backend_functions.server_selected[0]}\nDescription: {backend_functions.server_selected[1]}\n", inline=False)
         embed.add_field(name='MOTD', value=f"{backend_functions.server_motd()}", inline=False)
@@ -1518,21 +1500,17 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened world panel')
 
-    @commands.command(aliases=['ppanel'])
+
+    @commands.command(aliases=['player', 'ppanel'])
     async def playerpanel(self, ctx):
-        await ctx.send("**World Panel**\nTime:", components=[[
-            Button(label='Day', emoji='\U00002600', custom_id="timeday"),
-            Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
-            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
-            Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
-        ]])
+        players = await backend_functions.get_player_list()
 
         await ctx.send("Teleport Player 1 to Player 2:", components=[
             Select(
                 custom_id="select1",
                 placeholder="Target",
                 options=[SelectOption(label='All Players', value='@a')] +
-                        [SelectOption(label=i, value=i) for i in mylist],
+                        [SelectOption(label=i, value=i) for i in players[0]],
             ), ])
 
         lprint(ctx, 'Opened player panel')
