@@ -33,7 +33,7 @@ async def on_ready():
         channel = bot.get_channel(backend_functions.channel_id)
         await channel.send('**Bot PRIMED** :white_check_mark:')
 
-        backend_functions.channel_set(channel)
+        backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status(discord_msg=True)
 
         await channel.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
@@ -1386,12 +1386,16 @@ class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command()
+    async def botinfo(self, ctx):
+        pass
+
+    @commands.command()
     async def control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
         await ctx.send(components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel")]])
 
-    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel'])
+    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
     async def controlpanel(self, ctx):
         await ctx.send("**Control Panel**\nServer:", components=[[
             Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
@@ -1431,6 +1435,8 @@ class Bot_Functions(commands.Cog):
             Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
             Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
         ]])
+
+        lprint(ctx, 'Opened control panel')
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):

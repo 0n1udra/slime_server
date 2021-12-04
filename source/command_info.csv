@@ -1,6 +1,7 @@
 Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
+Control Panel, `?controlpanel` `?panel` `?cp`, Show control panel buttons for quick action.
 Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
 Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
 Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
@@ -53,5 +54,6 @@ Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version fr
 Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
 Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
+Bot Info, `?botinfo`, Get this bot's version and other info.
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
 
