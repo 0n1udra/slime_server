@@ -27,6 +27,8 @@ channel = None
 # ========== Variables
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 player_selection = None
+restore_world_selection = restore_server_selection = None
+current_components = []
 
 # ========== Bot
 @bot.event
@@ -44,7 +46,7 @@ async def on_ready():
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status(discord_msg=True)
 
-        await channel.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
+        await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
         components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
                      Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
 
@@ -62,12 +64,17 @@ async def on_button_click(interaction):
 
 @bot.event
 async def on_select_option(interaction):
-    global player_selection
+    global player_selection, restore_world_selection, restore_server_selection
+
     await interaction.respond(type=6)
 
     # Updates teleport_selection corresponding value based on which selection box is updated.
     if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0]
     if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0]
+
+    # World/server backup panel
+    if interaction.custom_id == 'restore_server_selection': restore_server_selection = interaction.values[0]
+    if interaction.custom_id == 'restore_world_selection': restore_world_selection = interaction.values[0]
 
     if interaction.custom_id == 'player_select': player_selection = interaction.values[0]
 
@@ -1025,10 +1032,7 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{backend_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-        await ctx.invoke(self.bot.get_command('players'))
-        await ctx.send(content='Click for control panel or Server Status page, or use `?help` for all commands.',
-                       components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                    Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
         lprint(ctx, "Fetched server status")
 
@@ -1071,7 +1075,7 @@ class Server(commands.Cog):
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
-        await ctx.invoke(self.bot.get_command('control_panel_msg'))
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Starting Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
@@ -1392,7 +1396,14 @@ class World_Backups(commands.Cog):
 
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
         backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
-        await asyncio.sleep(3)
+        await asyncio.sleep(5)
+
+        await ctx.send("Start server with `?start` or click button", components=[
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+
+    @commands.command()
+    async def _restore_world_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
 
     @commands.command(aliases=['deleteworld', 'wbd'])
     async def worlddelete(self, ctx, index=''):
@@ -1417,6 +1428,11 @@ class World_Backups(commands.Cog):
 
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
+
+    @commands.command()
+    async def _delete_world_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('worlddelete'), index=restore_world_selection)
+        await ctx.invoke(self.bot.get_command('worldrestorepanel'))
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx, now=''):
@@ -1565,6 +1581,13 @@ class Server_Backups(commands.Cog):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
+        await ctx.send("Start server with `?start` or click button", components=[
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+
+    @commands.command()
+    async def _restore_server_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
+
     @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
     async def serverdelete(self, ctx, index=''):
         """
@@ -1590,26 +1613,46 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
+    @commands.command()
+    async def _delete_server_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
+        await ctx.invoke(self.bot.get_command('serverrestorepanel'))
 
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
+
+    async def _delete_current_components(self):
+        """Clears out used components so user don't run in to problems and conflicts."""
+
+        global current_components
+
+        for i in current_components:
+            try: await i.delete()
+            except: pass
+        current_components = []
 
     @commands.command()
     async def botinfo(self, ctx):
         pass
 
     @commands.command()
-    async def control_panel_msg(self, ctx):
+    async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
-        await ctx.send(components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel")]])
+        await ctx.invoke(self.bot.get_command('players'))
+        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
+                       components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                                    Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
 
     @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
     async def controlpanel(self, ctx):
+        """Quick action buttons."""
+
         await ctx.send("**Control Panel**\nServer:", components=[[
             Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
-            Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop") if await server_status() else \
+            Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop")
+            if await server_status() else
             Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
             Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
         ], [
@@ -1617,13 +1660,18 @@ class Bot_Functions(commands.Cog):
             Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
             Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
             Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
+        ]])
+
+        await ctx.send("Saving & Backups:", components=[[
+            Button(label="Backup World", emoji='\U0001F195', custom_id="worldbackupdate"),
+            Button(label="Backup Server", emoji='\U0001F195', custom_id="serverbackupdate"),
+            Button(label='Show World Backups', emoji='\U0001F4BE', custom_id="restoreworldpanel"),
+            Button(label="Show Server Backups", emoji='\U0001F4BE', custom_id="restoreserverpanel"),
         ], [
-            Button(label="Disable Autosave", emoji='\U0001F4BE',
-                   custom_id="autosaveoff") if backend_functions.autosave_status else \
+            Button(label="Disable Autosave", emoji='\U0001F504', custom_id="autosaveoff") \
+            if backend_functions.autosave_status else
             Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
-            Button(label="Save World", emoji='\U0001F4BE', custom_id="saveall"),
-            Button(label="New World Backup", emoji='\U0001F4BE', custom_id="worldbackupdate"),
-            Button(label="New Server Backup", emoji='\U0001F4BE', custom_id="serverbackupdate"),
+            Button(label="Save World", emoji='\U0001F30E', custom_id="saveall"),
         ]])
 
         await ctx.send("Players:", components=[[
@@ -1716,37 +1764,55 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened player panel')
 
-    @commands.command()
-    async def restorepanel(self, ctx, player=''):
+    @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
+    async def worldrestorepanel(self, ctx):
+        """Restore/delete selected world backup."""
 
-        players = await backend_functions.get_player_list()
-        if not players: players = [[], ["No Players Online"]]
+        global restore_world_selection, current_components
+        restore_world_selection = None  # Resets selection to avoid conflicts.
+        await self._delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
 
-        await ctx.send("**Restore Panel**", components=[
-            Select(custom_id='player_select',
-                   placeholder="Select Backup",
-                   options=[SelectOption(label=player, value=player, default=True) if player else
-                            SelectOption(label='All Players', value='@a')] +
-                           [SelectOption(label=i, value=i) for i in players[0]],
-                   ),])
+        backups = backend_functions.fetch_worlds()
+        if not backups: await ctx.send("No world backups")
 
-        await ctx.send('Actions:', components=[[
-            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
-            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
-            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
-        ], [
-            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
-            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
-            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
-            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
-        ], [
-            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
-            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
-            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
-            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
+        selection_msg = await ctx.send("**Restore World Panel**", components=[
+            Select(custom_id='restore_world_selection',
+                   placeholder="Select World Backup",
+                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
+                   )])
+
+        button_msg = await ctx.send("Actions:", components=[[
+            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_world_selected"),
+            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_world_selected"),
         ]])
 
-        lprint(ctx, 'Opened player panel')
+        current_components += selection_msg, button_msg
+        lprint(ctx, 'Opened restore world panel')
+
+    @commands.command(aliases=['restoreserverpanel', 'srpanel', 'srp'])
+    async def serverrestorepanel(self, ctx):
+        """Restore/delete selected server backup."""
+
+        global restore_server_selection, current_components
+        restore_server_selection = None
+        await self._delete_current_components()
+
+        backups = backend_functions.fetch_servers()
+        if not backups: await ctx.send("No server backups")
+
+        selection_msg = await ctx.send("**Restore Server Panel**", components=[
+            Select(custom_id='restore_server_selection',
+                   placeholder="Select Server Backup",
+                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
+                   )])
+
+        button_msg = await ctx.send("Actions:", components=[[
+            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_server_selected"),
+            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_server_selected"),
+        ]])
+
+        current_components += selection_msg, button_msg
+        lprint(ctx, 'Opened restore server panel')
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
