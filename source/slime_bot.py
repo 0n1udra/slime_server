@@ -287,6 +287,9 @@ class Player(commands.Cog):
             ?tp Jesse Steve
         """
 
+        global teleport_selection
+        teleport_selection = [None, None, None]
+
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)
         except: destination = destination[0]
@@ -297,7 +300,7 @@ class Player(commands.Cog):
 
             players = await backend_functions.get_player_list()  # Get list of online players.
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
-            await ctx.send("Teleport Player 1 to Player 2:", components=[
+            await ctx.send("**Teleport**", components=[
                 Select(
                     custom_id="teleport_target",
                     placeholder="Target",
@@ -1675,17 +1678,57 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['player', 'ppanel'])
     async def playerpanel(self, ctx, player=''):
+        """Select player from list (or all, random) and use quick action buttons."""
 
-        players = await backend_functions.get_player_list()
-        if not players: players = [[], ["No Players Online"]]
+        global player_selection
+        player_selection = None
+
+        players = await backend_functions.get_player_list()  # Gets list of online players
+        if not players: players = [[], ["No Players Online"]]  # Lets user know there are no online players
+        # Sets selection to player parameter if received one.
+        select_playeropt = []
+        if player: select_playeropt = [SelectOption(label=player, value=player, default=True)]
 
         await ctx.send("**Player Panel**", components=[
             Select(custom_id='player_select',
                    placeholder="Select Player",
+                   options=select_playeropt +
+                           [SelectOption(label='All Players', value='@a')] +
+                           [SelectOption(label='Random Player', value='@r')] +
+                           [SelectOption(label=i, value=i) for i in players[0]],
+                   )])
+
+        await ctx.send('Actions:', components=[[
+            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
+            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
+            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
+        ], [
+            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
+            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
+            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
+            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
+        ], [
+            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
+            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
+            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
+            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
+        ]])
+
+        lprint(ctx, 'Opened player panel')
+
+    @commands.command()
+    async def restorepanel(self, ctx, player=''):
+
+        players = await backend_functions.get_player_list()
+        if not players: players = [[], ["No Players Online"]]
+
+        await ctx.send("**Restore Panel**", components=[
+            Select(custom_id='player_select',
+                   placeholder="Select Backup",
                    options=[SelectOption(label=player, value=player, default=True) if player else
                             SelectOption(label='All Players', value='@a')] +
                            [SelectOption(label=i, value=i) for i in players[0]],
-            ),])
+                   ),])
 
         await ctx.send('Actions:', components=[[
             Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
