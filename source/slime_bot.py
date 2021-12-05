@@ -1199,8 +1199,9 @@ class Server(commands.Cog):
         """
 
         if not mode:
-            await ctx.send(f"online mode: `{backend_functions.edit_file('online-mode')[1]}`")
-            lprint(ctx, "Fetched online-mode state")
+            online_mode = backend_functions.edit_file('online-mode')[1]
+            await ctx.send(f"online mode: `{online_mode}`")
+            lprint(ctx, f"Fetched online-mode state: {online_mode}")
         elif mode in ['true', 'false']:
             backend_functions.edit_file('online-mode', mode)[0]
             server_property = backend_functions.edit_file('online-mode')
