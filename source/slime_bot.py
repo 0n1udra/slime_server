@@ -78,6 +78,15 @@ async def on_select_option(interaction):
 
     if interaction.custom_id == 'player_select': player_selection = interaction.values[0]
 
+async def _delete_current_components():
+    """Clears out used components so user don't run in to problems and conflicts."""
+
+    global current_components
+
+    for i in current_components:
+        try: await i.delete()
+        except: pass
+    current_components = []
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
@@ -1403,6 +1412,7 @@ class World_Backups(commands.Cog):
 
     @commands.command()
     async def _restore_world_selected(self, ctx):
+        await _delete_current_components()
         await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
 
     @commands.command(aliases=['deleteworld', 'wbd'])
@@ -1586,6 +1596,7 @@ class Server_Backups(commands.Cog):
 
     @commands.command()
     async def _restore_server_selected(self, ctx):
+        await _delete_current_components()
         await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
 
     @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
@@ -1621,16 +1632,6 @@ class Server_Backups(commands.Cog):
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
-
-    async def _delete_current_components(self):
-        """Clears out used components so user don't run in to problems and conflicts."""
-
-        global current_components
-
-        for i in current_components:
-            try: await i.delete()
-            except: pass
-        current_components = []
 
     @commands.command()
     async def botinfo(self, ctx):
@@ -1770,7 +1771,7 @@ class Bot_Functions(commands.Cog):
 
         global restore_world_selection, current_components
         restore_world_selection = None  # Resets selection to avoid conflicts.
-        await self._delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
+        await _delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
 
         backups = backend_functions.fetch_worlds()
         if not backups: await ctx.send("No world backups")
@@ -1795,7 +1796,7 @@ class Bot_Functions(commands.Cog):
 
         global restore_server_selection, current_components
         restore_server_selection = None
-        await self._delete_current_components()
+        await _delete_current_components()
 
         backups = backend_functions.fetch_servers()
         if not backups: await ctx.send("No server backups")
