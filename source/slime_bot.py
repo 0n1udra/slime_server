@@ -5,8 +5,8 @@ from discord_components import DiscordComponents, Button, ButtonStyle,  Select, 
 from backend_functions import lprint, use_rcon, format_args, server_command, server_status
 import backend_functions
 
-__version__ = "4.1.2"
-__date__ = '12/1/2021'
+__version__ = "5.0"
+__date__ = '12/4/2021'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -315,6 +315,10 @@ class Player(commands.Cog):
             await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
 
             players = await backend_functions.get_player_list()  # Get list of online players.
+            if not players:
+                await ctx.send("No players online")
+                return
+
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
             await ctx.send("**Teleport**", components=[
                 Select(
@@ -1004,7 +1008,7 @@ class Server(commands.Cog):
 
         await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if backend_functions.autosave_status else '**DISABLED**'}")
         await ctx.send(f"Auto save interval: **{backend_functions.autosave_interval}** minutes.")
-        await ctx.send('**Note:** Auto save loop will pause when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
+        await ctx.send('**Note:** Auto save loop will pause(not same as disabled) when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
         lprint(ctx, 'Fetched autosave information')
 
     @tasks.loop(seconds=backend_functions.autosave_interval * 60)
@@ -1026,6 +1030,7 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await server_status(discord_msg=show_msg)
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
     @commands.command(aliases=['stat', 'stats', 'status'])
     async def serverstatus(self, ctx):
@@ -1041,8 +1046,8 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{backend_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
+        await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
-
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log'])
@@ -1641,7 +1646,6 @@ class Bot_Functions(commands.Cog):
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
-        await ctx.invoke(self.bot.get_command('players'))
         await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
                        components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
                                     Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
@@ -1671,7 +1675,7 @@ class Bot_Functions(commands.Cog):
         ], [
             Button(label="Disable Autosave", emoji='\U0001F504', custom_id="autosaveoff") \
             if backend_functions.autosave_status else
-            Button(label="Enable Autosave", emoji='\U0001F4BE', custom_id="autosaveon"),
+            Button(label="Enable Autosave", emoji='\U0001F504', custom_id="autosaveon"),
             Button(label="Save World", emoji='\U0001F30E', custom_id="saveall"),
         ]])
 
