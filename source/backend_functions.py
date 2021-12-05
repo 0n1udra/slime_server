@@ -39,12 +39,16 @@ def format_args(args, return_empty_str=False):
         str: Arguments combines with spaces.
     """
 
-    if args:
-        return ' '.join(args)
+    if args: return ' '.join(args)
     else:
         if return_empty_str is True:
             return ''
         return "No reason given."
+
+def get_datetime():
+    """Returns date and time. (2021-12-04 01-49)"""
+
+    return datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 
 def remove_ansi(text):
     """Removes ANSI escape characters."""
@@ -93,7 +97,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     Returns:
         bool: If error sending command to server, sends False boolean.
-        str: Returns matched string if match found.
+        list: Returns list containing match from server_log if found, and random_number used.
     """
 
     global mc_subprocess, server_active
@@ -107,11 +111,12 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         await inactive_msg()
         return False
 
-    status_checker = 'debug status_checker: ' + str(random.random())
+    status_checker_command, random_number = 'locatebiome ', str(random.random())
+    status_checker = status_checker_command + random_number
 
     if use_rcon is True:
         if ping_server():
-            return await server_rcon(command)
+            return [await server_rcon(command), None]
         else: return False
 
     elif use_subprocess is True:
@@ -126,7 +131,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
-        if not server_log(status_checker):
+        if not server_log(random_number):
             await inactive_msg()
             return False
         os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{command}" ENTER')
@@ -136,9 +141,10 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         return False
 
     time.sleep(1)
+    return_data = [server_log(command), None]
     if stop_at_checker is True:
-        return server_log(command), status_checker
-    else: return server_log(command)
+        return_data[1] = random_number
+    return return_data
 
 async def server_rcon(command=''):
     """
@@ -155,8 +161,7 @@ async def server_rcon(command=''):
     global server_active
 
     server_rcon_client = mctools.RCONClient(server_ip, port=rcon_port)
-    try:
-        server_rcon_client.login(rcon_pass)
+    try: server_rcon_client.login(rcon_pass)
     except ConnectionError:
         lprint(f"Error Connecting to RCON: {server_ip} : {rcon_port}")
         server_active = False
@@ -181,15 +186,15 @@ async def server_status(discord_msg=False):
     lprint("Checking server active status...")
 
     # Creates random number to send in command, server is online if match is found in log.
-    status_checker = 'debug status_checker: ' + str(random.random())
-    log_data = await server_command(status_checker, skip_check=True, discord_msg=discord_msg)
-    if status_checker in str(log_data):
+    response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
+    if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
-        lprint("Server Active")
+        lprint("Server Status: Active")
         server_active = True
         return True
     else:
-        lprint("Server Inactive")
+        # server_command will send a discord message if server is inactive, so it's unneeded here.
+        lprint("Server Status: Inactive")
         server_active = False
 
 def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
@@ -209,24 +214,23 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
         return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
-
+        log_data (str): Returns found match log line or multiple lines from log.
     """
-    if match is None:
-        match = 'placeholder_match'
+
+    if match is None: match = 'placeholder_match'
     match = match.lower()
 
-    if file_path is None: file_path = f"{server_path}/logs/latest.log"
-
-    if stopgap_str is None:
-        stopgap_str = 'placeholder_stopgap'
+    if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
     stopgap_str = stopgap_str.lower()
 
+    # Defaults file to server log.
+    if file_path is None: file_path = f"{server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
     if filter_mode is True: lines = log_lines_limit
 
     log_data = ''
-    if normal_read is True:
+    if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line: return line
@@ -234,7 +238,7 @@ def server_log(match=None, file_path=None, lines=50, normal_read=False, log_mode
         with FileReadBackwards(file_path) as file:
             for i in range(lines):
                 line = file.readline()
-                if 'banlist' in match:
+                if 'banlist' in match:  # How ugly :(
                     if 'was banned by' in line:  # finds log lines that shows banned players.
                         log_data += line
                     elif ']: There are' in line:  # finds the end so it doesn't return everything from log other then banned users.
@@ -296,8 +300,10 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif server_files_access is True:
-        return edit_file('version')[1]
-    else: return 'N/A'
+        returned_data = edit_file('version')[1]
+        if 'not' not in returned_data:
+            return returned_data
+    return 'N/A'
 
 def server_motd():
     """
@@ -396,6 +402,41 @@ def get_latest_version():
 
     return False
 
+async def get_player_list():
+    response = await server_command("list")
+    if not response: return False
+
+    # Gets data from RCON response or reads server log for line containing player names.
+    if use_rcon is True: log_data = response
+    else:
+        await asyncio.sleep(1)
+        log_data = server_log('players online')
+
+    if not log_data: return False
+
+    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+    text = log_data[-2]  # There are 2 of a max of 20 players online
+    player_names = log_data[-1]  # R3diculous, MysticFrogo
+    # If there's no players active, player_names will still contain some anso escape characters.
+    if len(player_names.strip()) < 5: return None
+    else:
+        player_names = [f"{i.strip()[:-4]}\n" if use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+        #player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+
+        return player_names, text
+
+async def get_location(player=''):
+    """Gets player's location coordinates."""
+
+    if response := await server_command(f"data get entity {player} Pos"):
+        log_data = server_log('entity data', stopgap_str=response[1])
+        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+        if log_data:
+            location = log_data.split('[')[3][:-3].replace('d,', '')
+            return location
+
 
 # ========== Backup/Restore.
 def edit_file(target_property=None, value='', file_path=f"{server_path}/server.properties"):
@@ -486,9 +527,9 @@ def create_backup(name, src, dst):
 
     if not os.path.isdir(dst): os.makedirs(dst)
 
-    folder_timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-    new_name = f"({folder_timestamp}) {server_version()} {name}"
-    new_backup_path = dst + '/' + new_name
+    version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
+    new_name = f"({get_datetime()}) {version}{name}"
+    new_backup_path = dst + '/' + new_name.strip()
     shutil.copytree(src, new_backup_path)
 
     if os.path.isdir(new_backup_path):

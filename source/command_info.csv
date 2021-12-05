@@ -1,6 +1,7 @@
 Command Name, `?command` `?c <required> [optional]`, Description.
 Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
+Control Panel, `?controlpanel` `?panel` `?cp`, Show control panel buttons for quick action.
 Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
 Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
 Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
@@ -26,16 +27,16 @@ Ban, `?ban <player> [reason]`, After 5s bans player, providing reason is optiona
 Ban List, `?banlist` `?bl`, Shows banned players with the reason why.
 Pardon, `?pardon` `?unban <player> [reason]`, Pardons (unbans) player, reason can be optional.
 Kill, `?kill` `?pk <target> [reason]`, Kill player, default reason 'No reason given'.
-Kill Delayed, `?delayedkill` `?dk <target> <seconds> [reason]`, Kills target after x seconds.
+Kill Delayed, `?killwait` `?dw <target> <seconds> [reason]`, Kills target after waiting for x seconds.
 Teleport, `?teleport` `?tp <select_user> <target_user> [reason]`, After 5s teleports player to targeted player.
 Game Mode, `?gamemode` `?gm <player> <mode> [reason]`, Set player's game mode.
-Game Mode Timed, `?timedgamemode` `?tgm <player> <mode> <duration> [reason]`, Timed game mode change.
+Game Mode Timed, `?gamemodetimed` `?tgm <player> <mode> <duration> [reason]`, Timed game mode change.
 Weather, `?weather <clear/rain/thunder> [minutes]`, Sets weather for x minutes, 0 for random.
 Time, `?time <time>`, Set time, examples: 800, 1300, day/night/noon/midnight.
 OP List, `?oplist`, Shows list of server operators.
 OP Add, `?opadd <player>`, Sets player as server operator.
 OP Remove, `?opremove <player>`, Remove players OP privileges.
-OP Timed, `?timedop` `?top <player> <minutes>`, Set player to OP for a set time in minutes.
+OP Timed, `?optimed` `?opt <player> <minutes>`, Set player to OP for a set time in minutes.
 World Backups, `?worldbackupslist` `?backups [amount]`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
 World New Backup, `?worldbackupnew <codename>`, Create a new backup, need to provide a name or keywords. Cannot overwrite existing backup, use `?delete` first.
 World Restore, `?worldbackuprestore` `?worldrestore <index>`, Restore to a saved backup, need to input a index number you get from `?saves`.
@@ -53,5 +54,7 @@ Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version fr
 Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
 Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
-[HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Only deletes world save, generates new one on start. This will not make backup, do so if needed!||
+Bot Info, `?botinfo`, Get this bot's version and other info.
+Secret Panel, `?secretpanel`, `?sp`, ?????????
+[HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Deletes world save, new one generated at start. Will not make backup||
 

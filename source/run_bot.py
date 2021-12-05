@@ -1,7 +1,7 @@
 import time, sys, os
-from discord_mc_bot import bot, TOKEN
+from slime_bot import bot, TOKEN
 from slime_vars import tmux_session_name
-import server_functions
+import backend_functions
 
 def setup_directories():
     """Create necessary directories."""
@@ -9,14 +9,14 @@ def setup_directories():
     try:
         # TODO Needed?
         # Creates Server folder, folder for world backups, and folder for server backups.
-        os.makedirs(server_functions.server_path)
-        print("Created:", server_functions.server_path)
-        os.makedirs(server_functions.world_backups_path)
-        print("Created:", server_functions.world_backups_path)
-        os.makedirs(server_functions.server_backups_path)
-        print("Created:", server_functions.server_backups_path)
+        os.makedirs(backend_functions.server_path)
+        print("Created:", backend_functions.server_path)
+        os.makedirs(backend_functions.world_backups_path)
+        print("Created:", backend_functions.world_backups_path)
+        os.makedirs(backend_functions.server_backups_path)
+        print("Created:", backend_functions.server_backups_path)
     except:
-        print("Error: Something went wrong setup up necessary directory structure at:", server_functions.server_path)
+        print("Error: Something went wrong setup up necessary directory structure at:", backend_functions.server_path)
 
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
@@ -34,9 +34,9 @@ def start_tmux_session():
     time.sleep(1)
 
 def start_bot():
-    if server_functions.use_tmux is True:
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.1 "cd {server_functions.bot_files_path}" ENTER')
-        if not os.system(f"tmux send-keys -t {tmux_session_name}:1.1 'python3 discord_mc_bot.py' ENTER"):
+    if backend_functions.use_tmux is True:
+        os.system(f'tmux send-keys -t {tmux_session_name}:1.1 "cd {backend_functions.bot_files_path}" ENTER')
+        if not os.system(f"tmux send-keys -t {tmux_session_name}:1.1 'python3 slime_bot.py' ENTER"):
             print(f"Started bot in {tmux_session_name} tmux session, top pane.")
             return True  # If os.system() return 0, means successful.
     else:
@@ -46,8 +46,8 @@ def start_bot():
 def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
-    if server_functions.use_tmux is True:
-        server_functions.server_start()
+    if backend_functions.use_tmux is True:
+        backend_functions.server_start()
     else: bot.run(TOKEN)
 
 # TODO add update      - Downloads latest server.jar file from official Minecraft website to server folder.
@@ -73,14 +73,14 @@ def script_help():
 
 if __name__ == '__main__':
     if 'setup' in sys.argv:
-        if server_functions.server_files_access is True:
+        if backend_functions.server_files_access is True:
             setup_directories()
-        if server_functions.use_tmux is True:
+        if backend_functions.use_tmux is True:
             start_tmux_session()
-        if server_functions.use_rcon is True:
-            print("Using RCON. Make sure relevant variables are set properly in server_functions.py.")
+        if backend_functions.use_rcon is True:
+            print("Using RCON. Make sure relevant variables are set properly in backend_functions.py.")
 
-    if 'starttmux' in sys.argv and server_functions.use_tmux:
+    if 'starttmux' in sys.argv and backend_functions.use_tmux:
         start_tmux_session()
         time.sleep(1)
 

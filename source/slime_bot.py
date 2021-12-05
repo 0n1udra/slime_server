@@ -1,60 +1,96 @@
-import discord, asyncio, os, sys
+import discord, asyncio, datetime, os, sys
 from discord.ext import commands, tasks
-from discord_components import DiscordComponents, Button
-from server_functions import lprint, use_rcon, format_args, server_command, server_status
-import server_functions
+#from discord_components import DiscordComponents, Button
+from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
+from backend_functions import lprint, use_rcon, format_args, server_command, server_status
+import backend_functions
 
-__version__ = "4.1.2"
-__date__ = '12/1/2021'
+__version__ = "5.0"
+__date__ = '12/4/2021'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
 __status__ = "Development"
 
 # Exits script if no token.
-if os.path.isfile(server_functions.bot_token_file):
-    with open(server_functions.bot_token_file, 'r') as file:
+if os.path.isfile(backend_functions.bot_token_file):
+    with open(backend_functions.bot_token_file, 'r') as file:
         TOKEN = file.readline()
 else:
-    print("Missing Token File:", server_functions.bot_token_file)
+    print("Missing Token File:", backend_functions.bot_token_file)
     sys.exit()
 
 # Make sure this doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?')
+bot = ComponentsBot(command_prefix='?')
+channel = None
 
+# ========== Variables
+teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
+player_selection = None
+restore_world_selection = restore_server_selection = None
+current_components = []
+
+# ========== Bot
 @bot.event
 async def on_ready():
+    global channel
+
     await bot.wait_until_ready()
-    DiscordComponents(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")
 
-    if server_functions.channel_id:
-        channel = bot.get_channel(server_functions.channel_id)
+    if backend_functions.channel_id:
+        channel = bot.get_channel(backend_functions.channel_id)
         await channel.send('**Bot PRIMED** :white_check_mark:')
 
-        server_functions.channel_set(channel)
-        await server_functions.server_status(discord_msg=True)
+        backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
+        await backend_functions.server_status(discord_msg=True)
 
+        await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
+        components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                     Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+
+@bot.event
+async def on_button_click(interaction):
+    # Need to respond with type=6, or proceeding code will execute twice.
+    await interaction.respond(type=6)
+
+    if interaction.custom_id == '_teleport_selected':
+        teleport_selection[2] = await backend_functions.get_location(teleport_selection[0])
+
+    # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
+    ctx = await bot.get_context(interaction.message)
+    await ctx.invoke(bot.get_command(str(interaction.custom_id)))
+
+@bot.event
+async def on_select_option(interaction):
+    global player_selection, restore_world_selection, restore_server_selection
+
+    await interaction.respond(type=6)
+
+    # Updates teleport_selection corresponding value based on which selection box is updated.
+    if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0]
+    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0]
+
+    # World/server backup panel
+    if interaction.custom_id == 'restore_server_selection': restore_server_selection = interaction.values[0]
+    if interaction.custom_id == 'restore_world_selection': restore_world_selection = interaction.values[0]
+
+    if interaction.custom_id == 'player_select': player_selection = interaction.values[0]
+
+async def _delete_current_components():
+    """Clears out used components so user don't run in to problems and conflicts."""
+
+    global current_components
+
+    for i in current_components:
+        try: await i.delete()
+        except: pass
+    current_components = []
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
-
-    @commands.command(aliases=['panel', 'buttonspanel'])
-    async def controlpanel(self, ctx):
-        await ctx.send("t", components=[Button(label="WOW button!")])
-
-        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
-        await interaction.respond(content="Button clicked!")
-
-    @commands.command(aliases=['_buttons'])
-    async def _button(self, ctx):
-        await ctx.send("Hello, World!", components=[Button(label="WOW button!")])
-
-        interaction = await bot.wait_for("button_click", check=lambda i: i.component.label.startswith("WOW"))
-        print(interaction.responded)
-        await interaction.respond(content="Button clicked!")
 
     @commands.command(aliases=['command', '/'])
     async def servercommand(self, ctx, *command):
@@ -91,7 +127,8 @@ class Basics(commands.Cog):
 
         msg = format_args(msg, return_empty_str=True)
 
-        if not msg: await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
+        if not msg:
+            await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
             if await server_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
@@ -121,37 +158,6 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
-    async def players(self, ctx):
-        """Show list of online players."""
-
-        response = await server_command("list")
-        if not response: return
-
-        await ctx.send("***Fetching Player List...***")
-
-        if use_rcon is True: log_data = response
-        else:
-            await asyncio.sleep(2)
-            log_data = server_functions.server_log('players online')
-
-        if not log_data:
-            await ctx.send("**ERROR:** Trouble fetching player list.")
-            return False
-
-        log_data = log_data.split(':')
-        text = log_data[-2]
-        player_names = log_data[-1]
-        # If there's no players active, player_names will still contain some anso escape characters.
-        if len(player_names.strip()) < 5:
-            await ctx.send(f"{text}. ¯\_(ツ)_/¯")
-        else:
-            # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-            players_names = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-            await ctx.send(text + ':\n' + ''.join(players_names))
-
-        lprint(ctx, "Fetched player list")
-
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
     async def chatlog(self, ctx, lines=15):
         """
@@ -161,10 +167,11 @@ class Basics(commands.Cog):
             lines int(15): How many log lines to look through. This is not how many chat lines to show.
         """
 
-        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_balloon:")
+        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
-        log_data = server_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
-        try: log_data = log_data.strip().split('\n')
+        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
+        try:
+            log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
@@ -183,13 +190,32 @@ class Basics(commands.Cog):
 class Player(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
+    async def players(self, ctx):
+        """Show list of online players."""
+
+        player_list = await backend_functions.get_player_list()
+
+        await ctx.send("***Fetching Player List...***")
+        print(player_list)
+        if not player_list:
+            await ctx.send(f"No players online. ¯\_(ツ)_/¯")
+        else:
+            new_player_list = []
+            for i in player_list[0]:
+                new_player_list.append(f'`{i} ({await backend_functions.get_location(i)})`')
+            await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
+            await ctx.send("-----END-----")
+
+        lprint(ctx, "Fetched player list")
+
     @commands.command(aliases=['playerkill', 'pk'])
-    async def kill(self, ctx, player='', *reason):
+    async def kill(self, ctx, target='', *reason):
         """
         Kill a player.
 
         Args:
-            player str(''): Target player, casing does not matter.
+            target str(''): Target player, casing does not matter.
             *reason str: Reason for kill, do not put in quotes.
 
         Usage:
@@ -197,25 +223,25 @@ class Player(commands.Cog):
             ?pk Steve
         """
 
-        if not player:
+        if not target:
             await ctx.send("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say ---WARNING--- {player} will be EXTERMINATED! : {reason}"): return
+        if not await server_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}"): return
 
-        await server_command(f'kill {player}')
+        await server_command(f'kill {target}')
 
-        await ctx.send(f"`{player}` :gun: assassinated!")
-        lprint(ctx, f"Killed: {player}")
+        await ctx.send(f"`{target}` :gun: assassinated!")
+        lprint(ctx, f"Killed: {target}")
 
-    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'dpk', 'dk'])
-    async def delaykill(self, ctx, player='', delay=5, *reason):
+    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'waitkill', 'dw'])
+    async def killwait(self, ctx, target='', delay=5, *reason):
         """
         Kill player after time elapsed.
 
         Args:
-            player str(''): Target player.
+            target str(''): Target player.
             delay int(5): Wait time in seconds.
             *reason str: Reason for kill.
 
@@ -225,21 +251,45 @@ class Player(commands.Cog):
         """
 
         reason = format_args(reason)
-        if not player:
-            await ctx.send("Usage: `?delaykill <player> <seconds> [reason]`\nExample: `?delaykill MysticFrogo 5 Because he took my diamonds!`")
+        if not target:
+            await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
 
-        if not await server_command(f"say ---WARNING--- {player} will self-destruct in {delay}s : {reason}"): return
+        if not await server_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}"): return
 
-        await ctx.send(f"Killing {player} in {delay}s :bomb:")
+        await ctx.send(f"Killing {target} in {delay}s :bomb:")
         await asyncio.sleep(delay)
-        await server_command(f'kill {player}')
+        await server_command(f'kill {target}')
 
-        await ctx.send(f"`{player}` soul has been freed.")
-        lprint(ctx, f"Delay killed: {player}")
+        await ctx.send(f"`{target}` soul has been freed.")
+        lprint(ctx, f"Delay killed: {target}")
+
+    @commands.command(aliases=['killallplayers', 'kilkillkill'])
+    async def _killplayers(self, ctx):
+        await ctx.send("All players killed!")
+        await backend_functions.server_command('kill @a')
+        lprint(ctx, 'Killed: All Players')
+
+    @commands.command(aliases=['killeverything', 'killallentities'])
+    async def _killentities(self, ctx):
+        await ctx.send("All entities killed!")
+        await backend_functions.server_command('kill @e')
+        lprint(ctx, 'Killed: All Entities')
+
+    @commands.command(aliases=['killrandom', 'killrandomplayer'])
+    async def _killrando(self, ctx):
+        await ctx.send("Killed random player! :game_die::knife:")
+        await backend_functions.server_command('kill @r')
+        lprint(ctx, 'Killed: Random Player')
+
+    @commands.command()
+    async def _kill_selected(self, ctx):
+        """Kills selected player from player panel."""
+
+        await ctx.invoke(self.bot.get_command('kill'), target=player_selection)
 
     @commands.command(aliases=['tp'])
-    async def teleport(self, ctx, player='', target='', *reason):
+    async def teleport(self, ctx, target='', *destination):
         """
         Teleport player to another player.
 
@@ -253,18 +303,79 @@ class Player(commands.Cog):
             ?tp Jesse Steve
         """
 
-        if not player or not target:
-            await ctx.send("Usage: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
-            return False
+        global teleport_selection
+        teleport_selection = [None, None, None]
 
-        reason = format_args(reason)
-        if not await server_command(f"say ---INFO--- Flinging {player} towards {target} in 5s : {reason}"): return
+        # Allows you to teleport to coordinates.
+        try: destination = ' '.join(destination)
+        except: destination = destination[0]
 
-        await asyncio.sleep(5)
-        await server_command(f"tp {player} {target}")
+        # Will not show select components if received usable parameters.
+        if not target or not destination:
+            await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
 
-        await ctx.send(f"**Teleported:** `{player}` to `{target}`")
-        lprint(ctx, f"Teleported {player} to {target}")
+            players = await backend_functions.get_player_list()  # Get list of online players.
+            if not players:
+                await ctx.send("No players online")
+                return
+
+            # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
+            await ctx.send("**Teleport**", components=[
+                Select(
+                    custom_id="teleport_target",
+                    placeholder="Target",
+                    options=[SelectOption(label='All Players', value='@a')] +
+                            [SelectOption(label='Random Player', value='@r')] +
+                            [SelectOption(label=i, value=i) for i in players[0]],
+                ),
+                Select(custom_id="teleport_destination",
+                       placeholder="Destination",
+                       options=[SelectOption(label=i, value=i) for i in players[0]] +
+                               [SelectOption(label='Random Player', value='@r')],
+                       ),
+                [Button(label='Teleport', custom_id='_teleport_selected'),
+                 Button(label='Return', custom_id='_return_selected')]
+            ])
+
+        else:
+            if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
+            await ctx.send(f"***Teleporting in 5s...***")
+
+            # Gets coordinates for target and destination.
+            target_info = f'{target} ~ {await backend_functions.get_location(target)}'
+            dest_coord = await backend_functions.get_location(destination)
+            destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
+
+            await asyncio.sleep(5)
+            await server_command(f"tp {target} {destination}")
+
+            await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
+            lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
+
+    @commands.command()
+    async def _teleport_selected(self, ctx):
+        """Teleports selected targets from ?teleport command when use Teleport! button."""
+
+        await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
+
+    @commands.command()
+    async def _return_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[2])
+
+    @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
+    async def playerlocate(self, ctx, player=''):
+        """Gets player's location coordinates."""
+
+        if location := backend_functions.get_player_location(player):
+            await ctx.send(f"Located `{player}`: `{location}`")
+            lprint(ctx, f"Located {player}: {location}")
+            return location
+
+        await ctx.send(f"**ERROR:** Could not get location.")
+
+    @commands.command()
+    async def _locate_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('playerlocate'), player=player_selection)
 
     @commands.command(aliases=['gm'])
     async def gamemode(self, ctx, player='', mode='', *reason):
@@ -286,15 +397,15 @@ class Player(commands.Cog):
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say {player} now in {mode}: {reason}"): return
+        if not await server_command(f"say {player} now in {mode} : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
 
-        await ctx.send(f"`{player}` is now in `{mode}` indefinitely.")
+        await ctx.send(f"`{player}` is now in `{mode.upper()}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
 
-    @commands.command(aliases=['gamemodetimed', 'timedgm', 'tgm', 'gmt'])
-    async def timedgamemode(self, ctx, player='', mode='', duration=60, *reason):
+    @commands.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
+    async def gamemodetimed(self, ctx, player='', mode='', duration=60, *reason):
         """
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
@@ -305,25 +416,62 @@ class Player(commands.Cog):
             *reason str: Reason for change.
 
         Usage:
-            ?timedgamemode Steve spectator Steve needs a time out!
+            ?gamemodetimed Steve spectator Steve needs a time out!
             ?tgm Jesse adventure Jesse going on a adventure.
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send("Usage: `?timedgamemode <player> <mode> <seconds> [reason]`\nExample: `?timedgamemode MysticFrogo spectator 120 Needs a time out`")
+            await ctx.send("Usage: `?gamemodetimed <player> <mode> <seconds> [reason]`\nExample: `?gamemodetimed MysticFrogo spectator 120 Needs a time out`")
             return False
 
         reason = format_args(reason)
-        if not await server_command(f"say ---INFO--- {player} set to {mode} for {duration}s : {reason}"): return
+        if not await server_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
         await ctx.send(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
         lprint(ctx, f"Set gamemode: {player} for {duration}s")
 
         await asyncio.sleep(duration)
-        await server_command(f"say ---INFO--- Times up! {player} is now back to survival.")
+        await server_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
         await server_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
+
+    @commands.command()
+    async def _survival_selected(self, ctx):
+        """Changes selected player to survival."""
+
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='survival')
+
+    @commands.command()
+    async def _adventure_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='adventure')
+
+    @commands.command()
+    async def _creative_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='creative')
+
+    @commands.command()
+    async def _spectator_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='spectator')
+
+    @commands.command(aliases=['clear'])
+    async def clearinventory(self, ctx, target):
+        """Clears player inventory."""
+
+        if not target:
+            await ctx.send("Usage: `?clear <player>")
+            return False
+
+        if not await server_command(f"say ---WARNING--- {target} will lose everything!"): return
+
+        await server_command(f'clear {target}')
+
+        await ctx.send(f"`{target}` inventory cleared")
+        lprint(ctx, f"Cleared: {target}")
+
+    @commands.command()
+    async def _clear_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
 
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
@@ -386,6 +534,14 @@ class Permissions(commands.Cog):
         await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
 
+    @commands.command()
+    async def _kick_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('kick'), player=player_selection)
+
+    @commands.command()
+    async def _ban_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('ban'), player=player_selection)
+
     @commands.command(aliases=['unban'])
     async def pardon(self, ctx, player='', *reason):
         """
@@ -420,7 +576,7 @@ class Permissions(commands.Cog):
         if not await server_status(): return
 
         banned_players = ''
-        response = await server_command("banlist")
+        response = await server_command("banlist")[0]
 
         if use_rcon is True:
             if 'There are no bans' in response:
@@ -428,9 +584,9 @@ class Permissions(commands.Cog):
             else:
                 data = response.split(':', 1)
                 for line in data[1].split('.'):
-                    line = server_functions.remove_ansi(line)
+                    line = backend_functions.remove_ansi(line)
                     line = line.split(':')
-                    reason = server_functions.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
+                    reason = backend_functions.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
                     player = line[0].split(' ')[0].strip()
                     banner = line[0].split(' ')[-1].strip()
                     if len(player) < 2:
@@ -440,7 +596,7 @@ class Permissions(commands.Cog):
                 banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
 
         else:
-            if log_data := server_functions.server_log('banlist'):
+            if log_data := backend_functions.server_log('banlist'):
                 for line in filter(None, log_data.split('\n')):  # Filters out blank lines you sometimes get.
                     if 'There are no bans' in line:
                         banned_players = 'No exiled ones!'
@@ -492,14 +648,16 @@ class Permissions(commands.Cog):
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if can send command to server.
-        if not await server_status: return
+        if not await server_status():
+            await ctx.send("Server Offline.")
+            return
 
         # Enable/disable whitelisting.
-        if arg.lower() in server_functions.enable_inputs:
+        if arg.lower() in backend_functions.enable_inputs:
             await server_command('whitelist on')
             await ctx.send("**Whitelist ACTIVE** ")
             lprint(ctx, f"Whitelist: Enabled")
-        elif arg.lower() in server_functions.disable_inputs:
+        elif arg.lower() in backend_functions.disable_inputs:
             await server_command('whitelist off')
             await ctx.send("**Whitelist INACTIVE**")
             lprint(ctx, f"Whitelist: Disabled")
@@ -532,18 +690,24 @@ class Permissions(commands.Cog):
         # List whitelisted.
         elif not arg or arg == 'list':
             if use_rcon:
-                log_data = await server_command('whitelist list')
-                log_data = server_functions.remove_ansi(log_data).split(':')
+                log_data = await server_command('whitelist list')[1]
+                log_data = backend_functions.remove_ansi(log_data).split(':')
             else:
                 await server_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-                log_data = server_functions.server_log('whitelisted players:').split(':')[-2:]
-                await asyncio.sleep(2)
+                log_data = backend_functions.server_log('whitelisted players:')
+                if not log_data:
+                    await ctx.send('No whitelisted')
+                    return
+                await asyncio.sleep(1)
+                log_data = log_data.split(':')[-2:]
 
+            await ctx.send('**Whitelisted** :page_with_curl:')
             # Then, formats player names in Discord `player` markdown.
             players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
             lprint(ctx, f"Showing whitelist: {log_data[1]}")
+            await ctx.send("-----END-----")
             return False
         else: await ctx.send("**ERROR:** Something went wrong.")
 
@@ -551,7 +715,7 @@ class Permissions(commands.Cog):
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['name']}`" for i in server_functions.read_json('ops.json')]
+        op_players = [f"`{i['name']}`" for i in backend_functions.read_json('ops.json')]
         if op_players:
             await ctx.send(f"**OP List** :scroll:")
             await ctx.send('\n'.join(op_players))
@@ -582,10 +746,11 @@ class Permissions(commands.Cog):
         reason = format_args(reason)
 
         if use_rcon:
-            command_success = await server_command(f"op {player}")
+            command_success = await server_command(f"op {player}")[0]
         else:
-            _, status_checker = await server_command(f"op {player}")
-            command_success = server_functions.server_log(player, stopgap_str=status_checker)
+            # Checks if successful op by looking for certain keywords in log.
+            response = await server_command(f"op {player}")
+            command_success = backend_functions.server_log(player, stopgap_str=response[1])
 
         if command_success:
             await server_command(f"say ---INFO--- {player} is now OP : {reason}")
@@ -615,10 +780,10 @@ class Permissions(commands.Cog):
 
         reason = format_args(reason)
         if use_rcon:
-            command_success = await server_command(f"deop {player}")
+            command_success = await server_command(f"deop {player}")[0]
         else:
-            _, status_checker = await server_command(f"deop {player}")
-            command_success = server_functions.server_log(player, stopgap_str=status_checker)
+            response = await server_command(f"deop {player}")
+            command_success = backend_functions.server_log(player, stopgap_str=response[1])
 
         if command_success:
             await server_command(f"say ---INFO--- {player} no longer OP : {reason}")
@@ -626,8 +791,8 @@ class Permissions(commands.Cog):
         else: await ctx.send("**ERROR:** Problem removing OP status.")
         lprint(ctx, f"Removed server OP: {player}")
 
-    @commands.command(aliases=['optimed', 'top'])
-    async def timedop(self, ctx, player='', time_limit=1, *reason):
+    @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
+    async def optimed(self, ctx, player='', time_limit=1, *reason):
         """
         Set player as OP for x seconds.
 
@@ -636,12 +801,12 @@ class Permissions(commands.Cog):
             time_limit int(1: Time limit in seconds.
 
         Usage:
-            ?timedop Steve 30 Need to check something real quick.
+            ?optimed Steve 30 Need to check something real quick.
             ?top jesse 60
         """
 
         if not player:
-            await ctx.send("Usage: `?timedop <player> <minutes> [reason]`\nExample: `?timedop R3diculous Testing purposes`")
+            await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
             return False
 
         await server_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
@@ -651,13 +816,21 @@ class Permissions(commands.Cog):
         await asyncio.sleep(time_limit * 60)
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
+    @commands.command()
+    async def _opadd_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('opadd'), player=player_selection)
+
+    @commands.command()
+    async def _opremove_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
+
 
 # ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['weather'])
-    async def setweather(self, ctx, state='', duration=0):
+    @commands.command(aliases=['weather', 'setweather'])
+    async def weatherset(self, ctx, state='', duration=0):
         """
         Set weather.
 
@@ -666,7 +839,7 @@ class World(commands.Cog):
             duration int(0): Duration in seconds.
 
         Usage:
-            ?setweather rain
+            ?weatherset rain
             ?weather thunder 60
         """
 
@@ -674,15 +847,50 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if not await server_command(f'weather {state} {duration}', bot_ctx=ctx): return
+        if not await server_command(f'weather {state} {duration}'): return
 
-        if duration:
-            await ctx.send(f"I see some `{state}` in the near future, {duration}s.")
-        else: await ctx.send(f"Forecast entails `{state}`.")
-        lprint(ctx, f"Weather set to: {state} for {duration}s")
+        await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
+        lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
 
-    @commands.command(aliases=['time'])
-    async def settime(self, ctx, set_time=''):
+    @commands.command(aliases=['enableweather', 'weatherenable'])
+    async def weatheron(self, ctx):
+        """Enable weather cycle."""
+
+        await server_command(f'gamerule doWeatherCycle true')
+        await ctx.send("Weather cycle **ENABLED**")
+        lprint(ctx, 'Weather Cycle: Enabled')
+
+    @commands.command(aliases=['disableweather', 'weatherdisable'])
+    async def weatheroff(self, ctx):
+        """Disable weather cycle."""
+
+        await server_command(f'gamerule doWeatherCycle false')
+        await ctx.send("Weather cycle **DISABLED**")
+        lprint(ctx, 'Weather Cycle: Disabled')
+
+    @commands.command(aliases=['clearweather', 'weathersetclear'])
+    async def weatherclear(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['rainweather', 'weathersetrain'])
+    async def weatherrain(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['thunderweather', 'weathersetthunder'])
+    async def weatherthunder(self, ctx):
+        """Set weather to clear."""
+
+        await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
+        lprint(ctx, 'Weather: Disabled')
+
+    @commands.command(aliases=['time', 'settime'])
+    async def timeset(self, ctx, set_time=''):
         """
         Set time.
 
@@ -690,7 +898,7 @@ class World(commands.Cog):
             set_time int(''): Set time either using day|night|noon|midnight or numerically.
 
         Usage:
-            ?settime day
+            ?timeset day
             ?time 12
         """
 
@@ -698,9 +906,37 @@ class World(commands.Cog):
 
         if set_time:
             await server_command(f"time set {set_time}")
-            await ctx.send("Time Updated  :clock:")
+            await ctx.send("Time Updated  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
+
+    @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
+    async def timeday(self, ctx):
+        """Set time to day."""
+
+        await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
+
+    @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
+    async def timenight(self, ctx):
+        """Set time to night."""
+
+        await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
+
+    @commands.command(aliases=['enabletime', 'timecycleon'])
+    async def timeon(self, ctx):
+        """Enable day light cycle."""
+
+        await server_command(f'gamerule doDaylightCycle true')
+        await ctx.send("Daylight cycle ENABLED")
+        lprint(ctx, 'Daylight Cycle: Enabled')
+
+    @commands.command(aliases=['diabletime', 'timecycleoff'])
+    async def timeoff(self, ctx):
+        """Disable day light cycle."""
+
+        await server_command(f'gamerule doDaylghtCycle false')
+        await ctx.send("Daylight cycle DISABLED")
+        lprint(ctx, 'Daylight Cycle: Disabled')
 
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
@@ -708,9 +944,9 @@ class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        if server_functions.autosave_status is True:
+        if backend_functions.autosave_status is True:
             self.autosave_loop.start()
-            lprint(f"Autosave task started (interval: {server_functions.autosave_interval}m)")
+            lprint(f"Autosave task started (interval: {backend_functions.autosave_interval}m)")
 
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
@@ -721,6 +957,18 @@ class Server(commands.Cog):
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved World")
+
+    @commands.command()
+    async def autosaveon(self, ctx):
+        """Enables autosave."""
+
+        await ctx.invoke(self.bot.get_command('autosave'), arg='on')
+
+    @commands.command()
+    async def autosaveoff(self, ctx):
+        """Disables autosave."""
+
+        await ctx.invoke(self.bot.get_command('autosave'), arg='off')
 
     @commands.command(aliases=['asave'])
     async def autosave(self, ctx, arg=''):
@@ -742,34 +990,34 @@ class Server(commands.Cog):
         try: arg = int(arg)
         except: pass
         else:
-            server_functions.autosave_interval = arg
-            server_functions.edit_file('autosave_interval', f" {arg}", server_functions.slime_vars_file)
+            backend_functions.autosave_interval = arg
+            backend_functions.edit_file('autosave_interval', f" {arg}", backend_functions.slime_vars_file)
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
-        if arg.lower() in server_functions.enable_inputs:
-            server_functions.autosave_status = True
+        if arg.lower() in backend_functions.enable_inputs:
+            backend_functions.autosave_status = True
             self.autosave_loop.start()
-            server_functions.edit_file('autosave_status', ' True', server_functions.slime_vars_file)
-            lprint(ctx, f'Autosave: Enabled (interval: {server_functions.autosave_interval}m)')
-        elif arg.lower() in server_functions.disable_inputs:
-            server_functions.autosave_status = False
+            backend_functions.edit_file('autosave_status', ' True', backend_functions.slime_vars_file)
+            lprint(ctx, f'Autosave: Enabled (interval: {backend_functions.autosave_interval}m)')
+        elif arg.lower() in backend_functions.disable_inputs:
+            backend_functions.autosave_status = False
             self.autosave_loop.cancel()
-            server_functions.edit_file('autosave_status', ' False', server_functions.slime_vars_file)
+            backend_functions.edit_file('autosave_status', ' False', backend_functions.slime_vars_file)
             lprint(ctx, 'Autosave: Disabled')
 
-        await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if server_functions.autosave_status else '**DISABLED**'}")
-        await ctx.send(f"Auto save interval: **{server_functions.autosave_interval}** minutes.")
-        await ctx.send('**Note:** Auto save loop will pause when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
+        await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if backend_functions.autosave_status else '**DISABLED**'}")
+        await ctx.send(f"Auto save interval: **{backend_functions.autosave_interval}** minutes.")
+        await ctx.send('**Note:** Auto save loop will pause(not same as disabled) when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
         lprint(ctx, 'Fetched autosave information')
 
-    @tasks.loop(seconds=server_functions.autosave_interval * 60)
+    @tasks.loop(seconds=backend_functions.autosave_interval * 60)
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await server_command('save-all', discord_msg=False):
-            lprint(f"Autosaved (interval: {server_functions.autosave_interval}m)")
+            lprint(f"Autosaved (interval: {backend_functions.autosave_interval}m)")
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -782,29 +1030,28 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await server_status(discord_msg=show_msg)
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
     @commands.command(aliases=['stat', 'stats', 'status'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        await ctx.invoke(bot.get_command("check"))
-
-        embed = discord.Embed(title='Server Status :gear:')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {server_functions.server_selected[0]}\nDescription: {server_functions.server_selected[1]}\n", inline=False)
-        embed.add_field(name='MOTD', value=f"{server_functions.server_motd()}", inline=False)
-        embed.add_field(name='Version', value=f"{server_functions.server_version()}", inline=False)
-        embed.add_field(name='Address', value=f"IP: ||`{server_functions.get_public_ip()}`||\nURL: `{server_functions.server_url}` ({server_functions.ping_url()})", inline=False)
-        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if server_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{server_functions.autosave_interval}** minutes", inline=False)
-        embed.add_field(name='Location', value=f"`{server_functions.server_path}`", inline=False)
-        embed.add_field(name='Start Command', value=f"`{server_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
+        embed = discord.Embed(title='Server Status')
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {backend_functions.server_selected[0]}\nDescription: {backend_functions.server_selected[1]}\n", inline=False)
+        embed.add_field(name='MOTD', value=f"{backend_functions.server_motd()}", inline=False)
+        embed.add_field(name='Version', value=f"{backend_functions.server_version()}", inline=False)
+        embed.add_field(name='Address', value=f"IP: ||`{backend_functions.get_public_ip()}`||\nURL: ||`{backend_functions.server_url}`|| ({backend_functions.ping_url()})", inline=False)
+        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if backend_functions.autosave_status is True else '**DISABLED**'}\nInterval: **{backend_functions.autosave_interval}** minutes", inline=False)
+        embed.add_field(name='Location', value=f"`{backend_functions.server_path}`", inline=False)
+        embed.add_field(name='Start Command', value=f"`{backend_functions.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
         await ctx.invoke(self.bot.get_command('players'))
-
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log'])
-    async def serverlog(self, ctx, lines=5):
+    async def serverlog(self, ctx, lines=10):
         """
         Show server log.
 
@@ -816,8 +1063,8 @@ class Server(commands.Cog):
             ?log 10
         """
 
-        await ctx.send(f"***Loading {lines} Log Lines*** :tools:")
-        log_data = server_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
+        await ctx.send(f"***Loading {lines} Bot Log Lines*** :tools:")
+        log_data = backend_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
 
@@ -837,11 +1084,12 @@ class Server(commands.Cog):
             return False
 
         await ctx.send("***Launching Server...*** :rocket:")
-        server_functions.server_start()
+        backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
+        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Starting Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
@@ -875,7 +1123,7 @@ class Server(commands.Cog):
 
         await asyncio.sleep(5)
         await ctx.send("**Server HALTED** :stop_sign:")
-        server_functions.mc_subprocess = None
+        backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
     @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
@@ -893,7 +1141,7 @@ class Server(commands.Cog):
 
         await server_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
-        await ctx.send("***Restarting...*** :arrows_counterclockwise:")
+        await ctx.send("***Restarting...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await asyncio.sleep(3)
@@ -903,7 +1151,7 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = server_functions.server_version()
+        response = backend_functions.server_version()
         await ctx.send(f"Current version: `{response}`")
         lprint("Fetched Minecraft server version: " + response)
 
@@ -911,9 +1159,15 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = server_functions.check_latest_version()
+        response = backend_functions.check_latest_version()
         await ctx.send(f"Latest version: `{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
+
+    @commands.command()
+    async def propertiesall(self, ctx):
+        """Shows full server properties file."""
+
+        await ctx.invoke(self.bot.get_command('properties'), target_property='all')
 
     @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property='', *value):
@@ -941,8 +1195,8 @@ class Server(commands.Cog):
             value = ' '.join(value)
         else: value = ''
 
-        server_functions.edit_file(target_property, value)
-        fetched_property = server_functions.edit_file(target_property)
+        backend_functions.edit_file(target_property, value)
+        fetched_property = backend_functions.edit_file(target_property)
         await asyncio.sleep(2)
 
         if fetched_property:
@@ -966,14 +1220,15 @@ class Server(commands.Cog):
         """
 
         if not mode:
-            await ctx.send(f"online mode: `{server_functions.edit_file('online-mode')[1]}`")
-            lprint(ctx, "Fetched online-mode state")
+            online_mode = backend_functions.edit_file('online-mode')[1]
+            await ctx.send(f"online mode: `{online_mode}`")
+            lprint(ctx, f"Fetched online-mode state: {online_mode}")
         elif mode in ['true', 'false']:
-            server_functions.edit_file('online-mode', mode)[0]
-            property = server_functions.edit_file('online-mode')
-            await ctx.send(f"Updated online mode: `{property[1]}`")
+            backend_functions.edit_file('online-mode', mode)[0]
+            server_property = backend_functions.edit_file('online-mode')
+            await ctx.send(f"Updated online mode: `{server_property[1]}`")
             await ctx.send("**Note:** Server restart required for change to take effect.")
-            lprint(ctx, f"Updated online-mode: {property[1].strip()}")
+            lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     @commands.command(aliases=['updatemotd', 'servermotd'])
@@ -992,10 +1247,10 @@ class Server(commands.Cog):
         message = format_args(message, return_empty_str=True)
 
         if use_rcon:
-            motd_property = server_functions.server_motd()
-        elif server_functions.server_files_access:
-            server_functions.edit_file('motd', message)
-            motd_property = server_functions.edit_file('motd')
+            motd_property = backend_functions.server_motd()
+        elif backend_functions.server_files_access:
+            backend_functions.edit_file('motd', message)
+            motd_property = backend_functions.edit_file('motd')
         else: motd_property = '**ERROR:** Fetching server motd failed.'
 
         if message:
@@ -1021,7 +1276,7 @@ class Server(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            response = server_functions.edit_file('enable-rcon', state)
+            response = backend_functions.edit_file('enable-rcon', state)
             await ctx.send(f"`{response[0]}`")
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
@@ -1036,8 +1291,8 @@ class Server(commands.Cog):
             now str(''): Stops server immediately without giving online players 15s warning.
         """
 
-        if 'vanilla' not in server_functions.server_selected:
-            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{server_functions.server_selected[0]}` selected.")
+        if 'vanilla' not in backend_functions.server_selected:
+            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{backend_functions.server_selected[0]}` selected.")
             return False
 
         lprint(ctx, "Updating server.jar...")
@@ -1048,7 +1303,7 @@ class Server(commands.Cog):
         await asyncio.sleep(5)
 
         await ctx.send("***Downloading latest server.jar***")
-        server = server_functions.get_latest_version()
+        server = backend_functions.get_latest_version()
 
         if server is True:
             await ctx.send(f"Downloaded latest version: `{server}`")
@@ -1061,7 +1316,7 @@ class Server(commands.Cog):
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist'])
+    @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
     async def worldbackups(self, ctx, amount=10):
         """
         Show world backups.
@@ -1074,8 +1329,8 @@ class World_Backups(commands.Cog):
             ?saves 15
         """
 
-        embed = discord.Embed(title='World Backups :tools:')
-        worlds = server_functions.fetch_worlds()
+        embed = discord.Embed(title='World Backups :floppy_disk:')
+        worlds = backend_functions.fetch_worlds()
         if worlds is False:
             await ctx.send("No world backups found.")
             return False
@@ -1088,7 +1343,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} world saves")
 
-    @commands.command(aliases=['backupworld', 'wn'])
+    @commands.command(aliases=['backupworld', 'newworldbackup', 'worldbackupnew', 'wbn'])
     async def worldbackup(self, ctx, *name):
         """
         new backup of current world.
@@ -1111,7 +1366,7 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(3)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        new_backup = server_functions.backup_world(name)
+        new_backup = backend_functions.backup_world(name)
         if new_backup:
             await ctx.send(f"**New World Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
@@ -1119,7 +1374,13 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @commands.command(aliases=['restoreworld', 'wbr', 'wr'])
+    @commands.command(aliases=['deleteworldbackup'])
+    async def worldbackupdate(self, ctx):
+        """Creates world backup with current date and time as name."""
+
+        await ctx.invoke(self.bot.get_command('worldbackup'), '')
+
+    @commands.command(aliases=['restoreworld', 'worldbackuprestore', 'wbr'])
     async def worldrestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
@@ -1139,7 +1400,7 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
 
-        fetched_restore = server_functions.get_world_from_index(index)
+        fetched_restore = backend_functions.get_world_from_index(index)
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
         if await server_status():
@@ -1147,11 +1408,19 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        await ctx.send(f"***Restored World:*** `{fetched_restore}`")
-        server_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
-        await asyncio.sleep(3)
+        await ctx.send(f"**Restored World:** `{fetched_restore}`")
+        backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
+        await asyncio.sleep(5)
 
-    @commands.command(aliases=['deleteworld', 'wd'])
+        await ctx.send("Start server with `?start` or click button", components=[
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+
+    @commands.command()
+    async def _restore_world_selected(self, ctx):
+        await _delete_current_components()
+        await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
+
+    @commands.command(aliases=['deleteworld', 'wbd'])
     async def worlddelete(self, ctx, index=''):
         """
         Delete a world backup.
@@ -1168,12 +1437,17 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worlddelete <index>`\nExample: `?worlddelete 1`")
             return False
 
-        to_delete = server_functions.get_world_from_index(index)
+        to_delete = backend_functions.get_world_from_index(index)
         await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
-        server_functions.delete_world(to_delete)
+        backend_functions.delete_world(to_delete)
 
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
+
+    @commands.command()
+    async def _delete_world_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('worlddelete'), index=restore_world_selection)
+        await ctx.invoke(self.bot.get_command('worldrestorepanel'))
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx, now=''):
@@ -1183,8 +1457,8 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!", bot_ctx=ctx)
-        await ctx.send(":fire:**Project Rebirth Commencing**:fire:")
+        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
+        await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
         if await server_status() is True:
@@ -1193,7 +1467,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**Finished.**")
         await ctx.send("You can now start the server with `?start`.")
 
-        server_functions.restore_world(reset=True)
+        backend_functions.restore_world(reset=True)
         await asyncio.sleep(3)
 
         lprint(ctx, "World Reset")
@@ -1216,19 +1490,19 @@ class Server_Backups(commands.Cog):
 
         if not name or 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
-            for server in server_functions.server_list.values():
+            for server in backend_functions.server_list.values():
                 # Shows server name, description, location, and start command.
-                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{server_functions.mc_path}/{server_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
+                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{backend_functions.mc_path}/{backend_functions.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
-            await ctx.send(f"**Current Server:** `{server_functions.server_selected[0]}`")
-        elif name in server_functions.server_list.keys():
-            server_functions.server_selected = server_functions.server_list[name]
-            server_functions.server_path = f"{server_functions.mc_path}/{server_functions.server_selected[0]}"
-            server_functions.edit_file('server_selected', f" server_list['{name}']", server_functions.slime_vars_file)
+            await ctx.send(f"**Current Server:** `{backend_functions.server_selected[0]}`")
+        elif name in backend_functions.server_list.keys():
+            backend_functions.server_selected = backend_functions.server_list[name]
+            backend_functions.server_path = f"{backend_functions.mc_path}/{backend_functions.server_selected[0]}"
+            backend_functions.edit_file('server_selected', f" server_list['{name}']", backend_functions.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
-    @commands.command(aliases=['serverbackupslist', 'sl'])
+    @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
         """
         List server backups.
@@ -1241,8 +1515,8 @@ class Server_Backups(commands.Cog):
             ?serversaves 10
         """
 
-        embed = discord.Embed(title='Server Backups :tools:')
-        servers = server_functions.fetch_servers()
+        embed = discord.Embed(title='Server Backups :floppy_disk:')
+        servers = backend_functions.fetch_servers()
 
         if servers is False:
             await ctx.send("No server backups found.")
@@ -1256,7 +1530,13 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups")
 
-    @commands.command(aliases=['backupserver', 'sn'])
+    @commands.command(aliases=['deleteserverbackup'])
+    async def serverbackupdate(self, ctx):
+        """Creates server backup with current date and time as name."""
+
+        await ctx.invoke(self.bot.get_command('serverbackup'), '')
+
+    @commands.command(aliases=['backupserver', 'newserverbackup', 'serverbackupnew', 'sbn'])
     async def serverbackup(self, ctx, *name):
         """
         New backup of server files (not just world save).
@@ -1277,7 +1557,7 @@ class Server_Backups(commands.Cog):
         if not await server_command(f"save-all"): return
 
         await asyncio.sleep(5)
-        new_backup = server_functions.backup_server(name)
+        new_backup = backend_functions.backup_server(name)
         if new_backup:
             await ctx.send(f"**New Server Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Server backup failed! :interrobang:")
@@ -1285,7 +1565,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-    @commands.command(aliases=['restoreserver', 'sr'])
+    @commands.command(aliases=['restoreserver', 'serverbackuprestore', 'restoreserverbackup', 'sbr'])
     async def serverrestore(self, ctx, index='', now=''):
         """
         Restore server backup.
@@ -1303,7 +1583,7 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
 
-        fetched_restore = server_functions.get_server_from_index(index)
+        fetched_restore = backend_functions.get_server_from_index(index)
         lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
@@ -1312,11 +1592,19 @@ class Server_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if server_functions.restore_server(fetched_restore):
+        if backend_functions.restore_server(fetched_restore):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
-    @commands.command(aliases=['sd', 'deleteserver'])
+        await ctx.send("Start server with `?start` or click button", components=[
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+
+    @commands.command()
+    async def _restore_server_selected(self, ctx):
+        await _delete_current_components()
+        await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
+
+    @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
     async def serverdelete(self, ctx, index=''):
         """
         Delete a server backup.
@@ -1334,17 +1622,202 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverdelete <index>`\nExample: `?serverdelete 3`")
             return False
 
-        to_delete = server_functions.get_server_from_index(index)
+        to_delete = backend_functions.get_server_from_index(index)
         await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
-        server_functions.delete_server(to_delete)
+        backend_functions.delete_server(to_delete)
 
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
+    @commands.command()
+    async def _delete_server_selected(self, ctx):
+        await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
+        await ctx.invoke(self.bot.get_command('serverrestorepanel'))
 
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
+
+    @commands.command()
+    async def botinfo(self, ctx):
+        pass
+
+    @commands.command()
+    async def _control_panel_msg(self, ctx):
+        """Shows message and button to open the control panel."""
+
+        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
+                       components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                                    Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+
+    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
+    async def controlpanel(self, ctx):
+        """Quick action buttons."""
+
+        await ctx.send("**Control Panel**\nServer:", components=[[
+            Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
+            Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop")
+            if await server_status() else
+            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
+            Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
+        ], [
+            Button(label="Server Version", emoji='\U00002139', custom_id="serverversion"),
+            Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
+            Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
+            Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
+        ]])
+
+        await ctx.send("Saving & Backups:", components=[[
+            Button(label="Backup World", emoji='\U0001F195', custom_id="worldbackupdate"),
+            Button(label="Backup Server", emoji='\U0001F195', custom_id="serverbackupdate"),
+            Button(label='Show World Backups', emoji='\U0001F4BE', custom_id="restoreworldpanel"),
+            Button(label="Show Server Backups", emoji='\U0001F4BE', custom_id="restoreserverpanel"),
+        ], [
+            Button(label="Disable Autosave", emoji='\U0001F504', custom_id="autosaveoff") \
+            if backend_functions.autosave_status else
+            Button(label="Enable Autosave", emoji='\U0001F504', custom_id="autosaveon"),
+            Button(label="Save World", emoji='\U0001F30E', custom_id="saveall"),
+        ]])
+
+        await ctx.send("Players:", components=[[
+            Button(label="Player List", emoji='\U0001F5B1', custom_id="playerlist"),
+            Button(label="Chat Log", emoji='\U0001F5E8', custom_id="chatlog"),
+            Button(label="Show Banned", emoji='\U0001F6AB', custom_id="banlist"),
+            Button(label="Show Whitelist", emoji='\U0001F4C3', custom_id="whitelist"),
+            Button(label="Show OP List", emoji='\U0001F4DC', custom_id="oplist"),
+        ], [
+            Button(label='Player Panel', emoji='\U0001F39B', custom_id='playerpanel'),
+            Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
+        ]])
+
+        await ctx.send("Time & Weather:", components=[[
+            Button(label='Day', emoji='\U00002600', custom_id="timeday"),
+            Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
+            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
+            Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
+        ], [
+            Button(label='Clear', emoji='\U00002600', custom_id="weatherclear"),
+            Button(label="Rain", emoji='\U0001F327', custom_id="weatherrain"),
+            Button(label='Thunder', emoji='\U000026C8', custom_id="weatherthunder"),
+            Button(label='Enable Weather', emoji='\U0001F7E2', custom_id="weatheron"),
+            Button(label='Disable Weather', emoji='\U0001F534', custom_id="weatheroff"),
+        ]])
+
+        await ctx.send("Bot:", components=[[
+            Button(label='Restart Bot', emoji='\U0001F501', custom_id="restartbot"),
+            Button(label='Set Channel ID', emoji='\U0001FA9B', custom_id="setchannelid"),
+            Button(label="Bot Logs", emoji='\U0001F4C3', custom_id="botlog"),
+        ]])
+
+        await ctx.send("Extra:", components=[[
+            Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
+            Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
+            Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
+        ]])
+
+        lprint(ctx, 'Opened control panel')
+
+    @commands.command(aliases=['sp', 'hiddenpanel'])
+    async def secretpanel(self, ctx):
+        await ctx.send("**Secret Panel**", components=[[
+            Button(label='Kill Players', emoji='\U0001F4A3', custom_id="_killplayers"),
+            Button(label="Kill Entities", emoji='\U0001F4A5', custom_id="_killentities"),
+            Button(label='Kill Rando', emoji='\U00002753', custom_id="_killrando"),
+        ], [
+            Button(label='HADES Protocol', emoji='\U0001F480', custom_id="hades"),
+        ]])
+
+        lprint(ctx, 'Opened secret panel')
+
+    @commands.command(aliases=['player', 'ppanel'])
+    async def playerpanel(self, ctx, player=''):
+        """Select player from list (or all, random) and use quick action buttons."""
+
+        global player_selection
+        player_selection = None
+
+        players = await backend_functions.get_player_list()  # Gets list of online players
+        if not players: players = [[], ["No Players Online"]]  # Lets user know there are no online players
+        # Sets selection to player parameter if received one.
+        select_playeropt = []
+        if player: select_playeropt = [SelectOption(label=player, value=player, default=True)]
+
+        await ctx.send("**Player Panel**", components=[
+            Select(custom_id='player_select',
+                   placeholder="Select Player",
+                   options=select_playeropt +
+                           [SelectOption(label='All Players', value='@a')] +
+                           [SelectOption(label='Random Player', value='@r')] +
+                           [SelectOption(label=i, value=i) for i in players[0]],
+                   )])
+
+        await ctx.send('Actions:', components=[[
+            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
+            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
+            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
+        ], [
+            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
+            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
+            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
+            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
+        ], [
+            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
+            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
+            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
+            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
+        ]])
+
+        lprint(ctx, 'Opened player panel')
+
+    @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
+    async def worldrestorepanel(self, ctx):
+        """Restore/delete selected world backup."""
+
+        global restore_world_selection, current_components
+        restore_world_selection = None  # Resets selection to avoid conflicts.
+        await _delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
+
+        backups = backend_functions.fetch_worlds()
+        if not backups: await ctx.send("No world backups")
+
+        selection_msg = await ctx.send("**Restore World Panel**", components=[
+            Select(custom_id='restore_world_selection',
+                   placeholder="Select World Backup",
+                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
+                   )])
+
+        button_msg = await ctx.send("Actions:", components=[[
+            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_world_selected"),
+            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_world_selected"),
+        ]])
+
+        current_components += selection_msg, button_msg
+        lprint(ctx, 'Opened restore world panel')
+
+    @commands.command(aliases=['restoreserverpanel', 'srpanel', 'srp'])
+    async def serverrestorepanel(self, ctx):
+        """Restore/delete selected server backup."""
+
+        global restore_server_selection, current_components
+        restore_server_selection = None
+        await _delete_current_components()
+
+        backups = backend_functions.fetch_servers()
+        if not backups: await ctx.send("No server backups")
+
+        selection_msg = await ctx.send("**Restore Server Panel**", components=[
+            Select(custom_id='restore_server_selection',
+                   placeholder="Select Server Backup",
+                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
+                   )])
+
+        button_msg = await ctx.send("Actions:", components=[[
+            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_server_selected"),
+            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_server_selected"),
+        ]])
+
+        current_components += selection_msg, button_msg
+        lprint(ctx, 'Opened restore server panel')
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
@@ -1353,14 +1826,14 @@ class Bot_Functions(commands.Cog):
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
-        if server_functions.use_subprocess is True:
+        if backend_functions.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
-        os.chdir(server_functions.bot_files_path)
+        os.chdir(backend_functions.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
-    async def botlog(self, ctx, lines=5):
+    async def botlog(self, ctx, lines=10):
         """
         Show bot log.
 
@@ -1372,8 +1845,9 @@ class Bot_Functions(commands.Cog):
             ?blog 15
         """
 
-        log_data = server_functions.server_log(file_path=server_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(file_path=backend_functions.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
 
+        await ctx.send(f"***Loading {lines} Server Log Lines*** :tools:")
         # Shows server log line by line.
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
@@ -1399,7 +1873,7 @@ class Bot_Functions(commands.Cog):
             return discord.Embed(title=f'Help Page {page}/{pages} :question:')
 
         embed = new_embed(embed_page)
-        for command in server_functions.read_csv('command_info.csv'):
+        for command in backend_functions.read_csv('command_info.csv'):
             if not command: continue
 
             embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
@@ -1450,8 +1924,8 @@ class Bot_Functions(commands.Cog):
             ?address
         """
 
-        await ctx.send(f"Server IP: ||`{server_functions.get_public_ip()}`||")
-        await ctx.send(f"Alternative Address: ||`{server_functions.server_url}`|| ({server_functions.ping_url()})")
+        await ctx.send(f"Server IP: ||`{backend_functions.get_public_ip()}`||")
+        await ctx.send(f"Alternative Address: ||`{backend_functions.server_url}`|| ({backend_functions.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
@@ -1467,7 +1941,7 @@ class Bot_Functions(commands.Cog):
         embed = discord.Embed(title='Useful Websites :computer:')
 
         # Creates embed of links from useful_websites dictionary from slime_vars.py.
-        for name, url in server_functions.useful_websites.items():
+        for name, url in backend_functions.useful_websites.items():
             embed.add_field(name=name, value=url, inline=False)
 
         await ctx.send(embed=embed)
@@ -1477,14 +1951,14 @@ class Bot_Functions(commands.Cog):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        server_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), server_functions.slime_vars_file)
+        backend_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), backend_functions.slime_vars_file)
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
         """Resets channel_id variable to None."""
 
         await ctx.send("Cleared `channel_id`")
-        server_functions.edit_file('channel_id', ' None', server_functions.slime_vars_file)
+        backend_functions.edit_file('channel_id', ' None', backend_functions.slime_vars_file)
 
 
 # Adds functions to bot.
@@ -1496,10 +1970,10 @@ if_no_tmux = ['serverstart', 'serverrestart']
 if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
                  'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
 
-if server_functions.server_files_access is False and server_functions.use_rcon is True:
+if backend_functions.server_files_access is False and backend_functions.use_rcon is True:
     for command in if_no_tmux: bot.remove_command(command)
 
-if server_functions.use_tmux is False:
+if backend_functions.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
 
 if __name__ == '__main__': bot.run(TOKEN)

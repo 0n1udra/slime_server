@@ -1,5 +1,12 @@
 ## Control Minecraft server with Discord bot.
+#### Branch for button and list functionalty with discord-components module.
+
 [Releases](https://github.com/0n1udra/slime_server/releases)
+
+<img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">
+
+<img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">
+
 
 
 ### Features:
@@ -28,7 +35,7 @@
 ### Setup:
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).
 2. Update `slime_vars.py` variables.
-3. Run `python3 run_bot.py help` for how to setup, or run `discord_mc_bot.py` directly.
+3. Run `python3 run_bot.py help` to setup tmux and/or run bot.
 4. Use `?setchannel` command so you get important bot/server event updates.
 5. Read through the help pages with `?help` or `?help2` in Discord.
 
