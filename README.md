@@ -1,5 +1,4 @@
 ## Control Minecraft server with Discord bot.
-#### Branch for button and list functionalty with discord-components module.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
@@ -42,20 +41,20 @@
 ## Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-python venv ~/pyenv/minecraft_discord_bot
+python venv ~/pyenvs/slime_bot
 ```
 or
 ```bash
-virtualenv ~/pyenvs/minecraft_discord_bot
+virtualenv ~/pyenvs/slime_bot
 
 ```
 Activate new Python Virtualenv:
 ```bash
-source ~/pyenvs/minecraft_discord_bot/bin/activate
+source ~/pyenvs/slime_bot/bin/activate
 ```
 Install required Python modules:
 ```bash
-pip install discord asyncio file-read-backwards mctools
+pip install discord.py discord-components asyncio file-read-backwards mctools
 ```
 or
 ```bash
