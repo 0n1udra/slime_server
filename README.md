@@ -41,16 +41,16 @@
 ## Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-python venv ~/pyenvs/slime_bot
+python venv ~/pyenvs/slime_server
 ```
 or
 ```bash
-virtualenv ~/pyenvs/slime_bot
+virtualenv ~/pyenvs/slime_server
 
 ```
 Activate new Python Virtualenv:
 ```bash
-source ~/pyenvs/slime_bot/bin/activate
+source ~/pyenvs/slime_server/bin/activate
 ```
 Install required Python modules:
 ```bash
