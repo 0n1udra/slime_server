@@ -1,8 +1,10 @@
 import os
 
+bot_token_file = '/home/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
+pyenv_activate_command = 'source /home/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
+
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_token_file = '/home/0n1udra/keys/slime_server.token'
 new_server_url = 'https://www.minecraft.net/en-us/download/server'  # Where to get new server.jar for the update feature.
 
 # Optionally add channel ID, send message indicating bot is ready.

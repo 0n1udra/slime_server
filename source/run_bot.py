@@ -1,6 +1,6 @@
 import time, sys, os
 from slime_bot import bot, TOKEN
-from slime_vars import tmux_session_name
+from slime_vars import tmux_session_name, pyenv_activate_command
 import backend_functions
 
 def setup_directories():
@@ -35,6 +35,8 @@ def start_tmux_session():
 
 def start_bot():
     if backend_functions.use_tmux is True:
+        if pyenv_activate_command: os.system(f"tmux send-keys -t {tmux_session_name}:0.1 '{pyenv_activate_command}' ENTER")  # Sources pyenv if set in slime_vars.
+
         os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {backend_functions.bot_files_path}" ENTER')
         if not os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 slime_bot.py' ENTER"):
             print(f"Started bot in {tmux_session_name} tmux session, top pane.")
