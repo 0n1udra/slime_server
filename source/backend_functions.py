@@ -129,12 +129,12 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     elif use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{status_checker}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:0.0 "{status_checker}" ENTER')
         await asyncio.sleep(1)
         if not server_log(random_number):
             await inactive_msg()
             return False
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{command}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:0.0 "{command}" ENTER')
 
     else:
         await inactive_msg()
@@ -280,11 +280,11 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif use_tmux is True:
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "cd {server_path}" ENTER')
+        os.system(f'tmux send-keys -t {tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        os.system(f'tmux send-keys -t {tmux_session_name}:0.0 "cd {server_path}" ENTER')
 
         # Tries starting new detached tmux session.
-        if not os.system(f'tmux send-keys -t {tmux_session_name}:1.0 "{server_selected[2]}" ENTER'):
+        if not os.system(f'tmux send-keys -t {tmux_session_name}:0.0 "{server_selected[2]}" ENTER'):
             return True
     else: return "Error starting server."
 

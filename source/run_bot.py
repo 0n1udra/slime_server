@@ -27,7 +27,7 @@ def start_tmux_session():
     except: print(f"Error: Starting {tmux_session_name} detached session.")
 
     try:
-        os.system(f'tmux split-window -v -t {tmux_session_name}:1.0')
+        os.system(f'tmux split-window -v -t {tmux_session_name}:0.0')
         print("Created second tmux pane for Discord bot.")
     except: print("Error: Creating second tmux pane for Discord bot.")
 
@@ -35,8 +35,8 @@ def start_tmux_session():
 
 def start_bot():
     if backend_functions.use_tmux is True:
-        os.system(f'tmux send-keys -t {tmux_session_name}:1.1 "cd {backend_functions.bot_files_path}" ENTER')
-        if not os.system(f"tmux send-keys -t {tmux_session_name}:1.1 'python3 slime_bot.py' ENTER"):
+        os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {backend_functions.bot_files_path}" ENTER')
+        if not os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 slime_bot.py' ENTER"):
             print(f"Started bot in {tmux_session_name} tmux session, top pane.")
             return True  # If os.system() return 0, means successful.
     else:
