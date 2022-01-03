@@ -92,6 +92,39 @@ async def _delete_current_components():
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    @commands.command(aliases=['zlog'])
+    async def zomboidlog(self, ctx, lines=5):
+        """Show Project Zomboid log lines."""
+
+        await ctx.send(f"***Loading {lines} Zomboid Log Lines*** :tools:")
+        log_data = backend_functions.zomboid_log(lines=lines)
+        for line in log_data.split('\n'):
+            if line: await ctx.send(f"`{line}`")
+        await ctx.send("-----END-----")
+        lprint(ctx, f"Fetched {lines} zomboid server log lines")
+
+    @commands.command(aliases=['zcommand', '/z'])
+    async def zomboidcommand(self, ctx, *command):
+        """
+        Pass command directly to Project Zomboid server.
+
+        Args:
+            *command str: Server command, do not include the slash /.
+
+        Note: Currently no feedback.
+        """
+
+        command = format_args(command)
+        await backend_functions.zomboid_command(f"{command}")
+        await asyncio.sleep(1)
+
+        for line in backend_functions.zomboid_log().split('\n'):
+            await ctx.send(f"`{line}`")
+
+        await ctx.send("-----END-----")
+
+        lprint(ctx, "Sent zomboid command: " + command)
+
     @commands.command(aliases=['command', '/'])
     async def servercommand(self, ctx, *command):
         """
@@ -1019,6 +1052,8 @@ class Server(commands.Cog):
         if await server_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {backend_functions.autosave_interval}m)")
 
+        await backend_functions.zomboid_command('save')
+
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
         """Makes sure bot is ready before autosave_loop can be used."""
@@ -1066,8 +1101,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Loading {lines} Bot Log Lines*** :tools:")
         log_data = backend_functions.server_log(lines=lines, log_mode=True, return_reversed=True)
         for line in log_data.split('\n'):
-            await ctx.send(f"`{line}`")
-
+            if line: await ctx.send(f"`{line}`")
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {lines} server log lines")
 
