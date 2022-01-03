@@ -6,7 +6,7 @@ from backend_functions import lprint, use_rcon, format_args, server_command, ser
 import backend_functions
 
 __version__ = "5.0"
-__date__ = '12/4/2021'
+__date__ = '2022/01/02'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"

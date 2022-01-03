@@ -50,9 +50,6 @@ world_backups_path, server_backups_path = f"{mc_path}/world_backups/{server_sele
 autosave_status = False
 autosave_interval = 60
 
-enable_inputs = ['enable', 'activate', 'true', 'on']
-disable_inputs = ['disable', 'deactivate', 'false', 'off']
-
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 mc_active_status = False  # If Minecraft server is running.
 mc_subprocess = None  # If using subprocess, this is will be the Minecraft server.

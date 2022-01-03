@@ -7,6 +7,9 @@ from slime_vars import *
 server_active = False
 discord_channel = None
 
+enable_inputs = ['enable', 'activate', 'true', 'on']
+disable_inputs = ['disable', 'deactivate', 'false', 'off']
+
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(arg1=None, arg2=None):
     """Prints and Logs events in file."""
