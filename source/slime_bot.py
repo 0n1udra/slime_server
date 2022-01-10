@@ -44,10 +44,11 @@ async def on_ready():
         await channel.send('**Bot PRIMED** :white_check_mark:')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
-        await backend_functions.server_status(discord_msg=True)
+        await backend_functions.server_status()
 
         await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
-        components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+        components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
+                     Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
                      Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
 
 @bot.event
@@ -89,8 +90,9 @@ async def _delete_current_components():
     current_components = []
 
 
-# ========== Valheim Server
-class Valheim(commands.Cog):
+
+# ========== Other Games: Valheim, Project Zomboid
+class Other_Games(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['servers', 'game'])
@@ -140,11 +142,7 @@ class Valheim(commands.Cog):
 
         lprint(ctx, "Halting Valheim Server")
 
-
-# ========== Project Zomboid Server
-class Zomboid(commands.Cog):
-    def __init__(self, bot): self.bot = bot
-
+    # ===== Proect Zomboid
     @commands.command(aliases=['zlog'])
     async def zomboidlog(self, ctx, lines=5):
         """Show Project Zomboid log lines."""
@@ -1193,7 +1191,7 @@ class Server(commands.Cog):
     @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
     async def serverstart(self, ctx):
         """
-        Start server.
+        Start Minecraft server.
 
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
@@ -1208,13 +1206,12 @@ class Server(commands.Cog):
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
-        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Starting Minecraft Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
     async def serverstop(self, ctx, now=''):
         """
-        Stop server, gives players 15s warning.
+        Stop Minecraft server, gives players 15s warning.
 
         Args:
             now str(''): Stops server immediately without giving online players 15s warning.
@@ -2081,7 +2078,7 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-for cog in [Valheim, Zomboid, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+for cog in [Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
