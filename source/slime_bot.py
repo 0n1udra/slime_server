@@ -88,8 +88,61 @@ async def _delete_current_components():
         except: pass
     current_components = []
 
-# ========== Basics: Say, whisper, online players, server command pass through.
-class Basics(commands.Cog):
+
+# ========== Valheim Server
+class Valheim(commands.Cog):
+    def __init__(self, bot): self.bot = bot
+
+    @commands.command(aliases=['servers', 'game'])
+    async def games(self, ctx):
+        """Quickly start/stop games."""
+
+        await ctx.send("**Valheim** :axe:", components=[[
+            Button(label="Start Valheim", custom_id="valheimstart"),
+            Button(label="Stop Valheim", custom_id="valheimstop")
+            ]])
+
+        await ctx.send("**Zomboid** :zombie:", components=[[
+            Button(label="Start Zomboid", custom_id="zomboidstart"),
+            Button(label="Stop Zomboid", custom_id="zomboidstop")
+            ]])
+
+        await ctx.send("**Minecraft** :pick:", components=[[
+            Button(label="Start Minecraft", custom_id="serverstart"),
+            Button(label="Stop Minecraft", custom_id="serverstop")
+        ]])
+
+    @commands.command(aliases=['v/', 'vcommand'])
+    async def valheimcommand(self, ctx, *command):
+        """Sends command to vhserver"""
+
+        command = format_args(command)
+        await backend_functions.valheim_command(command)
+        await ctx.send("Sent Command to vhserver")
+
+        lprint(ctx, "Sent Valheim command: " + command)
+
+    @commands.command(aliases=['vstart', 'startvalheim'])
+    async def valheimstart(self, ctx):
+        """Starts Valheim server."""
+
+        await backend_functions.valheim_command('start')
+        await ctx.send("***Launching Valheim Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
+
+        lprint(ctx, "Launching Valheim Server")
+
+    @commands.command(aliases=['vstop', 'stopvalheim'])
+    async def valheimstop(self, ctx):
+        """Stops Valheim server."""
+
+        await backend_functions.valheim_command('stop')
+        await ctx.send("**Halted Valheim Server** :stop_sign:")
+
+        lprint(ctx, "Halting Valheim Server")
+
+
+# ========== Project Zomboid Server
+class Zomboid(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['zlog'])
@@ -103,7 +156,7 @@ class Basics(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {lines} zomboid server log lines")
 
-    @commands.command(aliases=['zcommand', '/z'])
+    @commands.command(aliases=['zcommand', 'z/'])
     async def zomboidcommand(self, ctx, *command):
         """
         Pass command directly to Project Zomboid server.
@@ -123,9 +176,41 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
 
-        lprint(ctx, "Sent zomboid command: " + command)
+        lprint(ctx, "Sent Zomboid command: " + command)
 
-    @commands.command(aliases=['command', '/'])
+    @commands.command(aliases=['zstart', 'startzomboid'])
+    async def zomboidstart(self, ctx):
+        """Starts Project Zomboid server."""
+
+        await backend_functions.zomboid_command(f'/home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/start-server.sh')
+        await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
+
+        lprint(ctx, "Launching Project Zomboid Server")
+
+    @commands.command(aliases=['zstop', 'stopzomboid'])
+    async def zomboidstop(self, ctx):
+        """Stops Project Zomboid server."""
+
+        await backend_functions.zomboid_command('quit')
+        await ctx.send("**Halted Project Zomboid Server** :stop_sign:")
+
+        lprint(ctx, "Project Zomboid Stopped")
+
+    @commands.command(aliases=['zsave', 'savezomboid'])
+    async def zomboidsave(self, ctx):
+        """Save Project Zomboid."""
+
+        await backend_functions.zomboid_command('save')
+        await ctx.send("World Saved")
+
+        lprint(ctx, "Saved Project Zomboid")
+
+# ========== Basics: Say, whisper, online players, server command pass through.
+class Basics(commands.Cog):
+
+    def __init__(self, bot): self.bot = bot
+
+    @commands.command(aliases=['mcommand', 'm/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
@@ -141,7 +226,7 @@ class Basics(commands.Cog):
         """
 
         command = format_args(command)
-        if not await server_command(f"{command}"): return False
+        if not await server_command(command): return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -1117,14 +1202,14 @@ class Server(commands.Cog):
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        await ctx.send("***Launching Server...*** :rocket:")
+        await ctx.send("***Launching Minecraft Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
-        lprint(ctx, "Starting Server")
+        lprint(ctx, "Starting Minecraft Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
     async def serverstop(self, ctx, now=''):
@@ -1147,7 +1232,7 @@ class Server(commands.Cog):
             await server_command('stop')
         else:
             await server_command('say ---WARNING--- Server will halt in 15s!')
-            await ctx.send("***Halting in 15s...***")
+            await ctx.send("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
             await server_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
@@ -1156,7 +1241,7 @@ class Server(commands.Cog):
             await server_command('stop')
 
         await asyncio.sleep(5)
-        await ctx.send("**Server HALTED** :stop_sign:")
+        await ctx.send("**Halted Minecraft Server** :stop_sign:")
         backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
@@ -1175,7 +1260,7 @@ class Server(commands.Cog):
 
         await server_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
-        await ctx.send("***Restarting...*** :repeat:")
+        await ctx.send("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await asyncio.sleep(3)
@@ -1510,7 +1595,7 @@ class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
-    async def servers(self, ctx, name=''):
+    async def serverlist(self, ctx, name=''):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
 
@@ -1996,7 +2081,7 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+for cog in [Valheim, Zomboid, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.

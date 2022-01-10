@@ -85,6 +85,33 @@ async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
 
+# ========== Valheim Functions
+async def valheim_command(command):
+    """Use vhserver script"""
+
+    os.system(f'~/Games/valheim/vhserver {command}')
+
+
+# ========== Project Zomboid Functions
+async def zomboid_command(command):
+    """Sends command to tmux 0.1 Project Zomboid server."""
+
+    os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "{command}" ENTER')
+
+def zomboid_log(lines=5):
+    """
+    """
+
+    file_path = '/home/0n1udra/Zomboid/server-console.txt'
+    log_data = ''
+    with FileReadBackwards(file_path) as file:
+        for i in range(lines):
+
+            log_data += file.readline()
+            print(log_data.strip())
+
+        if log_data: return '\n'.join(list(reversed(log_data.split('\n'))))[1:]
+
 # ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
@@ -148,25 +175,6 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     if stop_at_checker is True:
         return_data[1] = random_number
     return return_data
-
-async def zomboid_command(command):
-    """Sends command to tmux 0.1 Project Zomboid server."""
-
-    os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "{command}" ENTER')
-
-def zomboid_log(lines=5):
-    """
-    """
-
-    file_path = '/home/0n1udra/Zomboid/server-console.txt'
-    log_data = ''
-    with FileReadBackwards(file_path) as file:
-        for i in range(lines):
-
-            log_data += file.readline()
-            print(log_data.strip())
-
-        if log_data: return '\n'.join(list(reversed(log_data.split('\n'))))[1:]
 
 async def server_rcon(command=''):
     """
