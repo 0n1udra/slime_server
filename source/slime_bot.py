@@ -1089,7 +1089,6 @@ class Server(commands.Cog):
         await asyncio.sleep(20)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
-        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Starting Server")
 
     @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
