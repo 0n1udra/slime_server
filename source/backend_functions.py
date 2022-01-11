@@ -188,7 +188,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     stopgap_str = stopgap_str.lower()
 
     # Checks if file exists.
-    if file_path is None: return False
+    if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
     if filter_mode is True: lines = slime_vars.log_lines_limit
