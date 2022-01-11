@@ -160,14 +160,6 @@ class Other_Games(commands.Cog):
         # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
         await get_log_lines(ctx, 'Valheim', lines, '/home/0n1udra/Games/valheim/log/console/vhserver-console.log', filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
-    @commands.command(aliases=['vplog'])
-    async def valheimplayerlog(self, ctx, lines=10):
-        """Show Valheim log lines with 'Got character' filter."""
-
-        slime_vars.log_lines_limit = 99999
-        await get_log_lines(ctx, 'Valheim', lines, '/home/0n1udra/Games/valheim/log/console/vhserver-console.log', filter_mode=True, match='Got character')
-        slime_vars.log_lines_limit = 100
-
     # ===== Project Zomboid
     @commands.command(aliases=['zlog'])
     async def zomboidlog(self, ctx, lines=10):
