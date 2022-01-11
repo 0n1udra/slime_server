@@ -197,7 +197,8 @@ class Other_Games(commands.Cog):
     async def zomboidstart(self, ctx):
         """Starts Project Zomboid server."""
 
-        await backend_functions.zomboid_command(f'/home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/start-server.sh')
+        await backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+        await backend_functions.zomboid_command(f'./start-server.sh')
         await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
 
         lprint(ctx, "Launching Project Zomboid Server")
@@ -783,7 +784,6 @@ class Permissions(commands.Cog):
         if not await server_status():
             await ctx.send("Server Offline.")
             return
-
         # Enable/disable whitelisting.
         if arg.lower() in backend_functions.enable_inputs:
             await server_command('whitelist on')

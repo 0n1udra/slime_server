@@ -20,7 +20,7 @@ async def valheim_command(command):
 async def zomboid_command(command):
     """Sends command to tmux 0.1 Project Zomboid server."""
 
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 
 # ========== Extra Functions: start, send command, read log, etc
