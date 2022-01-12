@@ -218,7 +218,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
 
                 elif match in line.lower():
                     log_data += line
-                    if filter_mode is True and match_lines >= 1: match_lines -= 1
+                    if filter_mode is True and match_lines > 1: match_lines -= 1
                     else: break
                 if stopgap_str.lower() in line.lower(): break
 
