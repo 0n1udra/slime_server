@@ -158,7 +158,7 @@ class Other_Games(commands.Cog):
         """Show Valheim log lines."""
 
         # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
-        await get_log_lines(ctx, 'Valheim', lines, '/home/0n1udra/Games/valheim/log/console/vhserver-console.log', filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
+        await get_log_lines(ctx, 'Valheim', lines, '/home/0n1udra/Games/valheim/log/console/vhserver-console.log', match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
     # ===== Project Zomboid
     @commands.command(aliases=['zlog'])
