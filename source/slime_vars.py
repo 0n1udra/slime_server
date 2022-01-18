@@ -1,5 +1,10 @@
 import os
 
+# Other Games
+valheim_path = '/home/0n1udra/Games/valheim'
+valheim_log_path = '/home/0n1udra/Games/valheim/log/console/vhserver-console.log'
+
+
 bot_token_file = '/home/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
 pyenv_activate_command = 'source /home/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
 

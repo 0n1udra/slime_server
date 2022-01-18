@@ -1,4 +1,4 @@
-import discord, asyncio, datetime, os, sys
+import discord, subprocess, asyncio, datetime, os, sys
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
@@ -139,26 +139,38 @@ class Other_Games(commands.Cog):
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-        await backend_functions.valheim_command('start')
         await ctx.send("***Launching Valheim Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
-
+        await backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
     @commands.command(aliases=['vstop', 'stopvalheim'])
     async def valheimstop(self, ctx):
         """Stops Valheim server."""
 
-        await backend_functions.valheim_command('stop')
         await ctx.send("**Halted Valheim Server** :stop_sign:")
-
+        await backend_functions.valheim_command('stop')
         lprint(ctx, "Halting Valheim Server")
+
+    @commands.command(aliases=['vstatus'])
+    async def valheimstatus(self, ctx):
+        """Checks valheim server active status using 'vhserver details' command."""
+
+        await ctx.send("***Checking Valheim Server Status...***")
+
+        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
+        if vhserver_output.find('STARTED') != -1:
+            await ctx.send("Valheim Server **Online**.\nAddress: `arcpy.asuscomm.com`")
+        elif vhserver_output.find('STOPPED') != -1:
+            await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
+        else: await ctx.send("Unable to check status.")
+        lprint(ctx, 'Checked Valheim Status.')
 
     @commands.command(aliases=['vlog'])
     async def valheimlog(self, ctx, lines=10):
         """Show Valheim log lines."""
 
         # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
-        await get_log_lines(ctx, 'Valheim', lines, '/home/0n1udra/Games/valheim/log/console/vhserver-console.log', match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
+        await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
     # ===== Project Zomboid
     @commands.command(aliases=['zlog'])

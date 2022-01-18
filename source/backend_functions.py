@@ -264,7 +264,7 @@ async def server_status(discord_msg=False):
     global server_active
 
     if discord_msg: await channel_send('***Checking Server Status...***')
-    lprint("Checking server active status...")
+    lprint("Checking Minecraft server status...")
 
     # Creates random number to send in command, server is online if match is found in log.
     response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
