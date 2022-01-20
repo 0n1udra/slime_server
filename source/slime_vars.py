@@ -1,6 +1,7 @@
 import os
 
 # Other Games
+valheim_password = 'tacobell'
 valheim_path = '/home/0n1udra/Games/valheim'
 valheim_log_path = '/home/0n1udra/Games/valheim/log/console/vhserver-console.log'
 

@@ -1,4 +1,4 @@
-import discord, subprocess, asyncio, datetime, os, sys
+import discord, subprocess, random, asyncio, datetime, os, sys, time
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
@@ -21,15 +21,15 @@ else:
     sys.exit()
 
 # Make sure this doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?')
+bot = ComponentsBot(command_prefix='?', help_command=None)
 channel = None
-
 
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 player_selection = None
 restore_world_selection = restore_server_selection = None
 current_components = []
+
 @bot.event
 async def on_ready():
     global channel
@@ -106,23 +106,52 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
 class Other_Games(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    @commands.command()
+    async def help(self, ctx):
+        await ctx.send("""```?games - Show start/stop buttons for game servers
+Valheim:
+  ?vstart     - Start Valheim Server.
+  ?vstop      - Stop server.
+  ?vstatus    - Check online status.
+  ?vlog       - Show X log lines. e.g. ?vlog 25.
+  ?v/ COMMAND - Send command to vhserver.
+    Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
+        
+Project Zomboid:
+  ?zstart     - Start Project Zomboid Server
+  ?zstop      - Stop server.
+  ?zstatus    - Check online status.
+  ?zsave      - Saves game.
+  ?zlog       - Show X log lines. e.g. ?zlog 25.
+  ?z/ COMMAND - Send command to server.
+    
+Minecraft:
+  ?mstart     - Start Minecraft server. 
+  ?mstop      - Stop Minecraft server.
+  ?mstatus    - Minecraft server info.
+  ?help2      - All Minecraft and slime_bot commands.
+        ```""")
+
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
         """Quickly start/stop games."""
 
         await ctx.send("**Valheim** :axe:", components=[[
-            Button(label="Start Valheim", custom_id="valheimstart"),
-            Button(label="Stop Valheim", custom_id="valheimstop")
+            Button(label="Start", custom_id="valheimstart"),
+            Button(label="Stop", custom_id="valheimstop"),
+            Button(label="Status", custom_id="valheimstatus")
             ]])
 
         await ctx.send("**Zomboid** :zombie:", components=[[
-            Button(label="Start Zomboid", custom_id="zomboidstart"),
-            Button(label="Stop Zomboid", custom_id="zomboidstop")
+            Button(label="Start", custom_id="zomboidstart"),
+            Button(label="Stop", custom_id="zomboidstop"),
+            Button(label="Status", custom_id="zomboidstatus")
             ]])
 
         await ctx.send("**Minecraft** :pick:", components=[[
-            Button(label="Start Minecraft", custom_id="serverstart"),
-            Button(label="Stop Minecraft", custom_id="serverstop")
+            Button(label="Start", custom_id="serverstart"),
+            Button(label="Stop", custom_id="serverstop"),
+            Button(label="Status", custom_id="serverstatus")
         ]])
 
     @commands.command(aliases=['v/', 'vcommand'])
@@ -130,7 +159,7 @@ class Other_Games(commands.Cog):
         """Sends command to vhserver"""
 
         command = format_args(command)
-        await backend_functions.valheim_command(command)
+        backend_functions.valheim_command(command)
         await ctx.send("Sent Command to vhserver")
 
         lprint(ctx, "Sent Valheim command: " + command)
@@ -139,8 +168,9 @@ class Other_Games(commands.Cog):
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-        await ctx.send("***Launching Valheim Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
-        await backend_functions.valheim_command('start')
+        await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
+        await ctx.send(f"Address: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
+        backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
     @commands.command(aliases=['vstop', 'stopvalheim'])
@@ -148,7 +178,7 @@ class Other_Games(commands.Cog):
         """Stops Valheim server."""
 
         await ctx.send("**Halted Valheim Server** :stop_sign:")
-        await backend_functions.valheim_command('stop')
+        backend_functions.valheim_command('stop')
         lprint(ctx, "Halting Valheim Server")
 
     @commands.command(aliases=['vstatus'])
@@ -173,12 +203,6 @@ class Other_Games(commands.Cog):
         await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
     # ===== Project Zomboid
-    @commands.command(aliases=['zlog'])
-    async def zomboidlog(self, ctx, lines=10):
-        """Show Project Zomboid log lines."""
-
-        await get_log_lines(ctx, 'Zomboid', lines,'/home/0n1udra/Zomboid/server-console.txt')
-
     @commands.command(aliases=['zcommand', 'z/'])
     async def zomboidcommand(self, ctx, *command):
         """
@@ -191,7 +215,7 @@ class Other_Games(commands.Cog):
         """
 
         command = format_args(command)
-        await backend_functions.zomboid_command(f"{command}")
+        backend_functions.zomboid_command(f"{command}")
         await asyncio.sleep(1)
         ctx.invoke(self.bot.get_command('zlog'))
 
@@ -201,7 +225,7 @@ class Other_Games(commands.Cog):
     async def zomboidstart(self, ctx):
         """Starts Project Zomboid server."""
 
-        await backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+        backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
         await backend_functions.zomboid_command(f'./start-server.sh')
         await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
 
@@ -211,16 +235,37 @@ class Other_Games(commands.Cog):
     async def zomboidstop(self, ctx):
         """Stops Project Zomboid server."""
 
-        await backend_functions.zomboid_command('quit')
+        backend_functions.zomboid_command('quit')
         await ctx.send("**Halted Project Zomboid Server** :stop_sign:")
 
         lprint(ctx, "Project Zomboid Stopped")
+
+    @commands.command(aliases=['zstatus', 'statuszomboid'])
+    async def zomboidstatus(self, ctx):
+        """Checks valheim server active status using 'vhserver details' command."""
+
+        await ctx.send("***Checking Project Zomboid Server Status...***")
+
+        random_number = str(random.random())
+        backend_functions.zomboid_command(random_number)
+        await asyncio.sleep(1)
+        log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
+        if log_data:
+            await ctx.send("Project Zomboid Server **Online**.\nAddress: `arcpy.asuscomm.com`")
+        else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
+        lprint(ctx, 'Checked Zomboid Status.')
+
+    @commands.command(aliases=['zlog'])
+    async def zomboidlog(self, ctx, lines=10):
+        """Show Project Zomboid log lines."""
+
+        await get_log_lines(ctx, 'Zomboid', lines,'/home/0n1udra/Zomboid/server-console.txt')
 
     @commands.command(aliases=['zsave', 'savezomboid'])
     async def zomboidsave(self, ctx):
         """Save Project Zomboid."""
 
-        await backend_functions.zomboid_command('save')
+        backend_functions.zomboid_command('save')
         await ctx.send("World Saved")
 
         lprint(ctx, "Saved Project Zomboid")
@@ -322,7 +367,6 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
-
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -609,7 +653,6 @@ class Player(commands.Cog):
     @commands.command()
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
-
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
@@ -960,7 +1003,6 @@ class Permissions(commands.Cog):
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
-
 # ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -1169,7 +1211,7 @@ class Server(commands.Cog):
         await server_status(discord_msg=show_msg)
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
-    @commands.command(aliases=['stat', 'stats', 'status'])
+    @commands.command(aliases=['stat', 'stats', 'status', 'mstatus'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -2095,7 +2137,6 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send("Cleared `channel_id`")
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
-
 
 # Adds functions to bot.
 for cog in [Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
