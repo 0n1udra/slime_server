@@ -1,8 +1,8 @@
-import subprocess, requests, datetime, asyncio, random, time, csv, os, re
+import subprocess, requests, datetime, asyncio, shutil, random, time, csv, os, re
 import mctools
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
-from slime_vars import *
+import slime_vars
 
 server_active = False
 discord_channel = None
@@ -612,4 +612,4 @@ def restore_server(server=None, reset=False):
 
 def restore_world(world=None, reset=False):
     os.chdir(slime_vars.world_backups_path)
-    return restore_backup(world, slime_vars.slime_vars.server_path + '/world', reset)
+    return restore_backup(world, slime_vars.server_path + '/world', reset)
