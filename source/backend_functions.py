@@ -1,5 +1,5 @@
-import subprocess, requests, datetime, asyncio, random, time, csv, os, re
-import mctools
+import subprocess, requests, shutil, datetime, asyncio, random, json, time, csv, os, re
+import mctools, fileinput
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
@@ -10,18 +10,16 @@ discord_channel = None
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
-
 # ========== Other Games
-async def valheim_command(command):
+def valheim_command(command):
     """Use vhserver script"""
 
     os.system(f'~/Games/valheim/vhserver {command}')
 
-async def zomboid_command(command):
+def zomboid_command(command):
     """Sends command to tmux 0.1 Project Zomboid server."""
 
     os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
-
 
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(arg1=None, arg2=None):
@@ -96,7 +94,6 @@ def channel_set(channel):
 
 async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
-
 
 # ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
@@ -266,7 +263,7 @@ async def server_status(discord_msg=False):
     if discord_msg: await channel_send('***Checking Server Status...***')
     lprint("Checking Minecraft server status...")
 
-    # Creates random number to send in command, server is online if match is found in log.
+    # server_command() will send random number, server is online if match is found in log.
     response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
@@ -593,7 +590,6 @@ def delete_backup(backup):
         return True
     except: lprint("Error deleting: " + str(backup))
 
-
 # ========== Discord Commands.
 def get_server_from_index(index):
     """Returns server backup full path from passed in index number."""
@@ -630,4 +626,4 @@ def restore_server(server=None, reset=False):
 
 def restore_world(world=None, reset=False):
     os.chdir(slime_vars.world_backups_path)
-    return restore_backup(world, slime_vars.slime_vars.server_path + '/world', reset)
+    return restore_backup(world, slime_vars.server_path + '/world', reset)
