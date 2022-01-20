@@ -108,7 +108,9 @@ class Other_Games(commands.Cog):
 
     @commands.command()
     async def help(self, ctx):
-        await ctx.send("""```?games - Show start/stop buttons for game servers
+        await ctx.send("""```
+?games        - Show start/stop buttons for game servers
+
 Valheim:
   ?vstart     - Start Valheim Server.
   ?vstop      - Stop server.
@@ -130,7 +132,7 @@ Minecraft:
   ?mstop      - Stop Minecraft server.
   ?mstatus    - Minecraft server info.
   ?help2      - All Minecraft and slime_bot commands.
-        ```""")
+```""")
 
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
