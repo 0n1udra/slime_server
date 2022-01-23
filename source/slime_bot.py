@@ -109,7 +109,7 @@ class Other_Games(commands.Cog):
     @commands.command()
     async def help(self, ctx):
         await ctx.send("""```
-?games        - Show start/stop buttons for game servers
+?games        - Show start/stop buttons for game.
 
 Valheim:
   ?vstart     - Start Valheim Server.
@@ -120,7 +120,7 @@ Valheim:
     Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
         
 Project Zomboid:
-  ?zstart     - Start Project Zomboid Server
+  ?zstart     - Start Project Zomboid Server.
   ?zstop      - Stop server.
   ?zstatus    - Check online status.
   ?zsave      - Saves game.
@@ -170,9 +170,13 @@ Minecraft:
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-        await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
-        await ctx.send(f"Address: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
-        backend_functions.valheim_command('start')
+        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
+        if vhserver_output.find('STARTED') != -1:
+            await ctx.send(f"Valheim Server **Online**.\nAddress: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
+        else:
+            await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
+            await ctx.send(f"Address: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
+            backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
     @commands.command(aliases=['vstop', 'stopvalheim'])
@@ -227,10 +231,17 @@ Minecraft:
     async def zomboidstart(self, ctx):
         """Starts Project Zomboid server."""
 
-        backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
-        await backend_functions.zomboid_command(f'./start-server.sh')
-        await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
-
+        # Checks if server is online first.
+        random_number = str(random.random())
+        backend_functions.zomboid_command(random_number)
+        await asyncio.sleep(1)
+        log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
+        if log_data:
+            await ctx.send("Project Zomboid Server **Online**\nAddress: `arcpy.asuscomm.com`")
+        else:  # Launches if not online already.
+            backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+            backend_functions.zomboid_command(f'./start-server.sh')
+            await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
 
     @commands.command(aliases=['zstop', 'stopzomboid'])
@@ -1198,7 +1209,7 @@ class Server(commands.Cog):
         if await server_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
-        await backend_functions.zomboid_command('save')
+        backend_functions.zomboid_command('save')
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
