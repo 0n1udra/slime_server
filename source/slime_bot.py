@@ -110,6 +110,7 @@ class Other_Games(commands.Cog):
     async def help(self, ctx):
         await ctx.send("""```
 ?games        - Show start/stop buttons for game.
+?info         - Get server address(s) and password(s).
 
 Valheim:
   ?vstart     - Start Valheim Server.
@@ -133,6 +134,15 @@ Minecraft:
   ?mstatus    - Minecraft server info.
   ?help2      - All Minecraft and slime_bot commands.
 ```""")
+        lprint(ctx, "Show help page.")
+
+    @commands.command(aliases=['address', 'infopage'])
+    async def info(self, ctx):
+        await ctx.send(f"""
+Address: `{slime_vars.server_url}`
+Password for Valheim: `{slime_vars.valheim_password}`
+""")
+        lprint(ctx, "Show info page.")
 
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
@@ -172,10 +182,10 @@ Minecraft:
 
         vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
         if vhserver_output.find('STARTED') != -1:
-            await ctx.send(f"Valheim Server **Online**.\nAddress: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
+            await ctx.send(f"Valheim Server **Online**.\nAddress: `{slime_vars.server_url}`\nPassword: `{slime_vars.valheim_password}`")
         else:
             await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
-            await ctx.send(f"Address: `arcpy.asuscomm.com`\nPassword: `{slime_vars.valheim_password}`")
+            await ctx.send(f"Address: `{slime_vars.server_url}`\nPassword: `{slime_vars.valheim_password}`")
             backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
@@ -195,7 +205,7 @@ Minecraft:
 
         vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
         if vhserver_output.find('STARTED') != -1:
-            await ctx.send("Valheim Server **Online**.\nAddress: `arcpy.asuscomm.com`")
+            await ctx.send(f"Valheim Server **Online**.\nAddress: `{slime_vars.server_url}`")
         elif vhserver_output.find('STOPPED') != -1:
             await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
         else: await ctx.send("Unable to check status.")
@@ -237,11 +247,11 @@ Minecraft:
         await asyncio.sleep(1)
         log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
         if log_data:
-            await ctx.send("Project Zomboid Server **Online**\nAddress: `arcpy.asuscomm.com`")
+            await ctx.send(f"Project Zomboid Server **Online**\nAddress: `{slime_vars.server_url}`")
         else:  # Launches if not online already.
             backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
             backend_functions.zomboid_command(f'./start-server.sh')
-            await ctx.send("***Launching Project Zomboid Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 30s before attempting to connect.")
+            await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
 
     @commands.command(aliases=['zstop', 'stopzomboid'])
@@ -264,7 +274,7 @@ Minecraft:
         await asyncio.sleep(1)
         log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
         if log_data:
-            await ctx.send("Project Zomboid Server **Online**.\nAddress: `arcpy.asuscomm.com`")
+            await ctx.send(f"Project Zomboid Server **Online**.\nAddress: `{slime_vars.server_url}`")
         else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
         lprint(ctx, 'Checked Zomboid Status.')
 
@@ -1275,7 +1285,7 @@ class Server(commands.Cog):
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        await ctx.send("***Launching Minecraft Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
+        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
@@ -2105,8 +2115,8 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
-    @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
-    async def ip(self, ctx):
+    @commands.command(aliases=['minecraftaddress'])
+    async def minecrafturl(self, ctx):
         """
         Shows IP address for server.
 
