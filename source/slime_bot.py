@@ -116,6 +116,7 @@ Valheim:
   ?vstart     - Start Valheim Server.
   ?vstop      - Stop server.
   ?vstatus    - Check online status.
+  ?vhelp      - Shows how to join server.
   ?vlog       - Show X log lines. e.g. ?vlog 25.
   ?v/ COMMAND - Send command to vhserver.
     Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
@@ -143,6 +144,15 @@ Address: `{slime_vars.server_url}`
 Password for Valheim: `{slime_vars.valheim_password}`
 """)
         lprint(ctx, "Show info page.")
+
+    @commands.command(aliases=['vinfo', 'vhelp'])
+    async def valheimhelp(self, ctx):
+        await ctx.send(f"""
+Address: `{slime_vars.server_url}`
+Password: `{slime_vars.valheim_password}`
+Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.
+""")
+        await ctx.send(file=discord.File(r'/home/0n1udra/Pictures/valheim_info.png'))
 
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
