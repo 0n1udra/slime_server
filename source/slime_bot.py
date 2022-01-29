@@ -1244,7 +1244,7 @@ class Server(commands.Cog):
         await server_status(discord_msg=show_msg)
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
-    @commands.command(aliases=['stat', 'stats', 'status', 'mstatus'])
+    @commands.command(aliases=['mstatus'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -1262,7 +1262,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
-    @commands.command(aliases=['log'])
+    @commands.command(aliases=['log', 'mlog'])
     async def serverlog(self, ctx, lines=10):
         """
         Show server log.
@@ -1283,7 +1283,7 @@ class Server(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Minecraft Log: {lines}")
 
-    @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
+    @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -1303,7 +1303,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
+    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -1337,7 +1337,7 @@ class Server(commands.Cog):
         backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
+    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
