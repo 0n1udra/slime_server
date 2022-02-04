@@ -104,7 +104,10 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
 
 # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
-    def __init__(self, bot): self.bot = bot
+    def __init__(self, bot):
+        self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
+        self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
+        self.bot = bot
 
     @commands.command()
     async def help(self, ctx):
@@ -140,7 +143,7 @@ Minecraft:
     @commands.command(aliases=['address', 'infopage'])
     async def info(self, ctx):
         await ctx.send(f"""
-Address: `{slime_vars.server_url}`
+{self.ip_text}
 Password for Valheim: `{slime_vars.valheim_password}`
 """)
         lprint(ctx, "Show info page.")
@@ -148,8 +151,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
     @commands.command(aliases=['vinfo', 'vhelp'])
     async def valheimhelp(self, ctx):
         await ctx.send(f"""
-Address: `{slime_vars.server_url}`
-Password: `{slime_vars.valheim_password}`
+{self.valheim_text}
 Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.
 """)
         await ctx.send(file=discord.File(r'/home/0n1udra/Pictures/valheim_info.png'))
@@ -192,10 +194,10 @@ Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > ent
 
         vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
         if vhserver_output.find('STARTED') != -1:
-            await ctx.send(f"Valheim Server **Online**.\nAddress: `{slime_vars.server_url}`\nPassword: `{slime_vars.valheim_password}`")
+            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         else:
             await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
-            await ctx.send(f"Address: `{slime_vars.server_url}`\nPassword: `{slime_vars.valheim_password}`")
+            await ctx.send(f"{self.valheim_text}")
             backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
@@ -215,7 +217,7 @@ Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > ent
 
         vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
         if vhserver_output.find('STARTED') != -1:
-            await ctx.send(f"Valheim Server **Online**.\nAddress: `{slime_vars.server_url}`")
+            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         elif vhserver_output.find('STOPPED') != -1:
             await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
         else: await ctx.send("Unable to check status.")
@@ -257,11 +259,11 @@ Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > ent
         await asyncio.sleep(1)
         log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
         if log_data:
-            await ctx.send(f"Project Zomboid Server **Online**\nAddress: `{slime_vars.server_url}`")
+            await ctx.send(f"Project Zomboid Server **Online**\n{self.ip_text}")
         else:  # Launches if not online already.
             backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
             backend_functions.zomboid_command(f'./start-server.sh')
-            await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 30s before attempting to connect.")
+            await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\n{self.ip_text}\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
 
     @commands.command(aliases=['zstop', 'stopzomboid'])
@@ -284,7 +286,7 @@ Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > ent
         await asyncio.sleep(1)
         log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
         if log_data:
-            await ctx.send(f"Project Zomboid Server **Online**.\nAddress: `{slime_vars.server_url}`")
+            await ctx.send(f"Project Zomboid Server **Online**.\n{self.ip_text}")
         else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
         lprint(ctx, 'Checked Zomboid Status.')
 
