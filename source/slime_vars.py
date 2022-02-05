@@ -1,7 +1,10 @@
 import os
 
 # Other Games
-valheim_password = 'tacobell'
+pass_path, valheim_password = '/home/0n1udra/keys/valheim_password.txt', ''
+if os.path.isfile(pass_path):
+    with open(pass_path, 'r') as file:
+        valheim_password = file.readline()
 valheim_path = '/home/0n1udra/Games/valheim'
 valheim_log_path = '/home/0n1udra/Games/valheim/log/console/vhserver-console.log'
 

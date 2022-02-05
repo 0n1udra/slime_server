@@ -150,10 +150,8 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
     @commands.command(aliases=['vinfo', 'vhelp'])
     async def valheimhelp(self, ctx):
-        await ctx.send(f"""
-{self.valheim_text}
-Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.
-""")
+        await ctx.invoke(self.bot.get_command("valheimstatus"))
+        await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
         await ctx.send(file=discord.File(r'/home/0n1udra/Pictures/valheim_info.png'))
 
     @commands.command(aliases=['servers', 'game'])
