@@ -54,7 +54,7 @@ source ~/pyenvs/slime_server/bin/activate
 ```
 Install required Python modules:
 ```bash
-pip install discord.py discord-components asyncio file-read-backwards mctools
+pip install discord.py discord-components asyncio file-read-backwards mctools requests bs4
 ```
 or
 ```bash
