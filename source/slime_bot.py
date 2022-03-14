@@ -1853,7 +1853,7 @@ class Bot_Functions(commands.Cog):
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
-        await ctx.send(f"Bot Version: {__version__}")
+        await ctx.send(f"Bot Version: `{__version__}`")
 
     @commands.command()
     async def _control_panel_msg(self, ctx):
