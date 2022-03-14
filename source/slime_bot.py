@@ -2070,6 +2070,8 @@ class Bot_Functions(commands.Cog):
     async def gitupdate(self, ctx):
         """Gets update from GitHub."""
 
+        await ctx.send("***Updating from GitHub...*** :arrows_counterclockwise:")
+
         os.chdir(slime_vars.bot_files_path)
         os.system('git pull')
 
