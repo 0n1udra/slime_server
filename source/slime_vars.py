@@ -1,16 +1,18 @@
 import os
 
+user = 'pop_mbp'
+
 # Other Games
-pass_path, valheim_password = '/home/0n1udra/keys/valheim_password.txt', ''
+pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
 if os.path.isfile(pass_path):
     with open(pass_path, 'r') as file:
         valheim_password = file.readline()
-valheim_path = '/home/0n1udra/Games/valheim'
-valheim_log_path = '/home/0n1udra/Games/valheim/log/console/vhserver-console.log'
+valheim_path = f'/home/{user}/Games/valheim'
+valheim_log_path = f'/home/{user}/Games/valheim/log/console/vhserver-console.log'
 
 
-bot_token_file = '/home/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
-pyenv_activate_command = 'source /home/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
+bot_token_file = f'/home/{user}/keys/slime_server.token'  # Set location of Discord bot token.
+pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
@@ -39,7 +41,7 @@ rcon_port = 25575
 
 # ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
-mc_path = '/home/0n1udra/Games/Minecraft'
+mc_path = f'/home/{user}/Games/Minecraft'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}

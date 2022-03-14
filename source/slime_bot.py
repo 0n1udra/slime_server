@@ -119,7 +119,7 @@ Valheim:
   ?vstart     - Start Valheim Server.
   ?vstop      - Stop server.
   ?vstatus    - Check online status.
-  ?vhelp      - Shows how to join server.
+  ?vhelp      - Shows instructions for how to join server.
   ?vlog       - Show X log lines. e.g. ?vlog 25.
   ?v/ COMMAND - Send command to vhserver.
     Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
@@ -148,7 +148,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
 """)
         lprint(ctx, "Show info page.")
 
-    @commands.command(aliases=['vinfo', 'vhelp'])
+    @commands.command(aliases=['vhelp'])
     async def valheimhelp(self, ctx):
         await ctx.invoke(self.bot.get_command("valheimstatus"))
         await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
@@ -186,7 +186,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         lprint(ctx, "Sent Valheim command: " + command)
 
-    @commands.command(aliases=['vstart', 'startvalheim'])
+    @commands.command(aliases=['vstart', 'startvalheim', 'vlaunch'])
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
@@ -207,7 +207,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         backend_functions.valheim_command('stop')
         lprint(ctx, "Halting Valheim Server")
 
-    @commands.command(aliases=['vstatus'])
+    @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
     async def valheimstatus(self, ctx):
         """Checks valheim server active status using 'vhserver details' command."""
 
@@ -273,7 +273,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         lprint(ctx, "Project Zomboid Stopped")
 
-    @commands.command(aliases=['zstatus', 'statuszomboid'])
+    @commands.command(aliases=['zstatus', 'statuszomboid', 'zstat'])
     async def zomboidstatus(self, ctx):
         """Checks valheim server active status using 'vhserver details' command."""
 
