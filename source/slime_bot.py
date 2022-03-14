@@ -152,7 +152,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def valheimhelp(self, ctx):
         await ctx.invoke(self.bot.get_command("valheimstatus"))
         await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
-        await ctx.send(file=discord.File(r'/home/0n1udra/Pictures/valheim_info.png'))
+        await ctx.send(file=discord.File(rf'{slime_vars.bot_files_path}/valheim_info.png'))
 
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
@@ -255,11 +255,11 @@ Password for Valheim: `{slime_vars.valheim_password}`
         random_number = str(random.random())
         backend_functions.zomboid_command(random_number)
         await asyncio.sleep(1)
-        log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
+        log_data = backend_functions.server_log(random_number, file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
         if log_data:
             await ctx.send(f"Project Zomboid Server **Online**\n{self.ip_text}")
         else:  # Launches if not online already.
-            backend_functions.zomboid_command('cd /home/0n1udra/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+            backend_functions.zomboid_command(f'cd /home/{slime_vars.user}/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
             backend_functions.zomboid_command(f'./start-server.sh')
             await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\n{self.ip_text}\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
@@ -282,7 +282,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         random_number = str(random.random())
         backend_functions.zomboid_command(random_number)
         await asyncio.sleep(1)
-        log_data = backend_functions.server_log(random_number, file_path='/home/0n1udra/Zomboid/server-console.txt')
+        log_data = backend_functions.server_log(random_number, file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
         if log_data:
             await ctx.send(f"Project Zomboid Server **Online**.\n{self.ip_text}")
         else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
@@ -292,7 +292,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def zomboidlog(self, ctx, lines=10):
         """Show Project Zomboid log lines."""
 
-        await get_log_lines(ctx, 'Zomboid', lines,'/home/0n1udra/Zomboid/server-console.txt')
+        await get_log_lines(ctx, 'Zomboid', lines,f'/home/{slime_vars.user}/Zomboid/server-console.txt')
 
     @commands.command(aliases=['zsave', 'savezomboid'])
     async def zomboidsave(self, ctx):
