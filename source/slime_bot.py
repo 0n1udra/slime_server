@@ -2066,11 +2066,14 @@ class Bot_Functions(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Bot Log: {lines}")
 
-    @commands.command(aliases=['updatebot', 'bupdate', 'bu'])
-    async def botupdate(self, ctx):
+    @commands.command(aliases=['updatebot', 'botupdate'])
+    async def gitupdate(self, ctx):
         """Gets update from GitHub."""
 
-        await ctx.send("***Comming Soon...***")
+        os.chdir(slime_vars.bot_files_path)
+        os.system('git pull')
+
+        await ctx.invoke(self.bot.get_command("restartbot"))
 
     @commands.command()
     async def help2(self, ctx):
