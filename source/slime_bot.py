@@ -40,7 +40,7 @@ async def on_ready():
 
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send('**Bot PRIMED** :white_check_mark:')
+        await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status()
@@ -1358,7 +1358,7 @@ class Server(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
-    @commands.command(aliases=['version', 'v', 'serverv'])
+    @commands.command(aliases=['minecraftversion', 'mversion'])
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
@@ -1849,9 +1849,11 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
-        pass
+        """Shows bot version and other info."""
+
+        await ctx.send(f"Bot Version: {__version__}")
 
     @commands.command()
     async def _control_panel_msg(self, ctx):
