@@ -1258,7 +1258,10 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-        await ctx.invoke(self.bot.get_command('players'))
+        # Only fetches players list if server online.
+        if await server_status():
+            await ctx.invoke(self.bot.get_command('players'))
+
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
@@ -1291,6 +1294,7 @@ class Server(commands.Cog):
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
 
+        # Exits function if server already online.
         if await server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
