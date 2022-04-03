@@ -34,8 +34,8 @@
 ### Setup:
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).
 2. Update `slime_vars.py` variables.
-3. Run `python3 run_bot.py help` to setup tmux and/or run bot.
-4. Use `?setchannel` command so you get important bot/server event updates.
+3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
+4. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
 5. Read through the help pages with `?help` or `?help2` in Discord.
 
 ## Using Virtualenv or venv:
