@@ -27,7 +27,7 @@
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
-- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
+- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [fileinput](https://docs.python.org/3.9/library/fileinput.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
@@ -35,8 +35,9 @@
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).
 2. Update `slime_vars.py` variables.
 3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
-4. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
-5. Read through the help pages with `?help` or `?help2` in Discord.
+  e.g. `python3 run_bot.py starttmux startboth attachtmux
+5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
+6. Read through the help pages with `?help` or `?help2` in Discord.
 
 ## Using Virtualenv or venv:
 Create Python Virtualenvt:
