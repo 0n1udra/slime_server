@@ -41,7 +41,7 @@
 ## Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-python venv ~/pyenvs/slime_server
+python -m venv ~/pyenvs/slime_server
 ```
 or
 ```bash
