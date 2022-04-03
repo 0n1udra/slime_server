@@ -1,7 +1,7 @@
 import os
 
-bot_token_file = '/home/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
-pyenv_activate_command = 'source /home/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
+bot_token_file = '/Users/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
+pyenv_activate_command = 'source /Users/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
@@ -30,7 +30,7 @@ rcon_port = 25575
 
 # ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
-mc_path = '/home/0n1udra/Games/Minecraft'
+mc_path = '/Users/0n1udra/Games/Minecraft'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
