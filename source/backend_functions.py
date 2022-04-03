@@ -1,5 +1,4 @@
-import subprocess, requests, datetime, asyncio, shutil, random, time, csv, os, re
-import mctools
+import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, time, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
@@ -175,7 +174,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     stopgap_str = stopgap_str.lower()
 
     # Defaults file to server log.
-    if file_path is None: file_path = f"{server_path}/logs/latest.log"
+    if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
     if filter_mode is True: lines = slime_vars.log_lines_limit
