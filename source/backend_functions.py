@@ -39,6 +39,7 @@ def lprint(arg1=None, arg2=None):
 
 lprint("Server selected: " + slime_vars.server_selected[0])
 
+# Parse/get data.
 def format_args(args, return_empty_str=False):
     """
     Formats passed in *args from Discord command functions.
@@ -85,8 +86,10 @@ def get_public_ip():
 
     global server_ip
     server_ip = requests.get('http://ip.42.pl/raw').text
+    slime_vars.server_ip = server_ip
     return server_ip
 
+# Discord
 def channel_set(channel):
     global discord_channel
     discord_channel = channel
