@@ -1,4 +1,4 @@
-import discord, subprocess, random, asyncio, datetime, os, sys, time
+import discord, asyncio, datetime, os, sys
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
@@ -24,12 +24,12 @@ else:
 bot = ComponentsBot(command_prefix='?')
 channel = None
 
+
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 player_selection = None
 restore_world_selection = restore_server_selection = None
 current_components = []
-
 @bot.event
 async def on_ready():
     global channel
@@ -40,7 +40,7 @@ async def on_ready():
 
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
+        await channel.send('**Bot PRIMED** :white_check_mark:')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status(discord_msg=True)
@@ -184,6 +184,7 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
+
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -471,6 +472,7 @@ class Player(commands.Cog):
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
 
+
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -648,6 +650,7 @@ class Permissions(commands.Cog):
         if not await server_status():
             await ctx.send("Server Offline.")
             return
+
         # Enable/disable whitelisting.
         if arg.lower() in backend_functions.enable_inputs:
             await server_command('whitelist on')
@@ -819,6 +822,7 @@ class Permissions(commands.Cog):
     @commands.command()
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
+
 
 # ========== World: weather, time.
 class World(commands.Cog):
@@ -1013,6 +1017,7 @@ class Server(commands.Cog):
         if await server_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
+        await backend_functions.zomboid_command('save')
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -1041,10 +1046,7 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-        # Only fetches players list if server online.
-        if await server_status():
-            await ctx.invoke(self.bot.get_command('players'))
-
+        await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
@@ -1077,12 +1079,11 @@ class Server(commands.Cog):
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
 
-        # Exits function if server already online.
         if await server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
+        await ctx.send("***Launching Minecraft Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
@@ -1145,7 +1146,7 @@ class Server(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
-    @commands.command(aliases=['minecraftversion', 'mversion'])
+    @commands.command(aliases=['version', 'v', 'serverv'])
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
@@ -1636,11 +1637,9 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
+    @commands.command()
     async def botinfo(self, ctx):
-        """Shows bot version and other info."""
-
-        await ctx.send(f"Bot Version: `{__version__}`")
+        pass
 
     @commands.command()
     async def _control_panel_msg(self, ctx):
@@ -1855,16 +1854,11 @@ class Bot_Functions(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Bot Log: {lines}")
 
-    @commands.command(aliases=['updatebot', 'botupdate'])
-    async def gitupdate(self, ctx):
+    @commands.command(aliases=['updatebot', 'bupdate', 'bu'])
+    async def botupdate(self, ctx):
         """Gets update from GitHub."""
 
-        await ctx.send("***Updating from GitHub...*** :arrows_counterclockwise:")
-
-        os.chdir(slime_vars.bot_files_path)
-        os.system('git pull')
-
-        await ctx.invoke(self.bot.get_command("restartbot"))
+        await ctx.send("***Comming Soon...***")
 
     @commands.command()
     async def help2(self, ctx):
@@ -1919,8 +1913,8 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
-    @commands.command(aliases=['minecraftaddress'])
-    async def minecrafturl(self, ctx):
+    @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
+    async def ip(self, ctx):
         """
         Shows IP address for server.
 
@@ -1964,6 +1958,7 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send("Cleared `channel_id`")
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
+
 
 # Adds functions to bot.
 for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:

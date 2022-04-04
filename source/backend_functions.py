@@ -83,6 +83,7 @@ def channel_set(channel):
 async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
+
 # ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
@@ -185,13 +186,8 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 if match in line: return line
     else:
         with FileReadBackwards(file_path) as file:
-            i = 0
-            while i < lines:
+            for i in range(lines):
                 line = file.readline()
-                if not line.strip(): continue  # Skip blank/newlines.
-                i += 1
-
-                # Minecraft log data parsing.
                 if 'banlist' in match:  # How ugly :(
                     if 'was banned by' in line:  # finds log lines that shows banned players.
                         log_data += line
@@ -577,6 +573,7 @@ def delete_backup(backup):
         shutil.rmtree(backup)
         return True
     except: lprint("Error deleting: " + str(backup))
+
 
 # ========== Discord Commands.
 def get_server_from_index(index):
