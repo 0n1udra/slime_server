@@ -1,4 +1,3 @@
-==== BASE ====
 import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, time, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
@@ -629,4 +628,3 @@ def restore_server(server=None, reset=False):
 def restore_world(world=None, reset=False):
     os.chdir(slime_vars.world_backups_path)
     return restore_backup(world, slime_vars.server_path + '/world', reset)
-==== BASE ====

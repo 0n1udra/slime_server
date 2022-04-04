@@ -1970,6 +1970,7 @@ class Bot_Functions(commands.Cog):
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
 
 # Adds functions to bot.
+for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
