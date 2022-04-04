@@ -1,6 +1,10 @@
 ## Control Minecraft server with Discord bot.  
 Scroll down for requirements, setup instructions and screenshots.
 
+
+My own personal branch for modification specifically for my setup.  
+e.g. I have implemented basic start/stop commands for my Project Zomboid and Valheim servers.
+
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
 ### Features:

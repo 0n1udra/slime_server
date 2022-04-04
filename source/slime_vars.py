@@ -1,7 +1,18 @@
 import os
 
-bot_token_file = '/Users/0n1udra/keys/slime_server.token'  # Set location of Discord bot token.
-pyenv_activate_command = 'source /Users/0n1udra/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
+user = 'pop_mbp'
+
+# Other Games
+pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
+if os.path.isfile(pass_path):
+    with open(pass_path, 'r') as file:
+        valheim_password = file.readline()
+valheim_path = f'/home/{user}/Games/valheim'
+valheim_log_path = f'/home/{user}/Games/valheim/log/console/vhserver-console.log'
+
+
+bot_token_file = f'/home/{user}/keys/slime_server.token'  # Set location of Discord bot token.
+pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
 
 bot_files_path = os.getcwd()
 slime_vars_file = bot_files_path + '/slime_vars.py'
@@ -30,11 +41,11 @@ rcon_port = 25575
 
 # ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
-mc_path = '/Users/0n1udra/Games/Minecraft'
+mc_path = f'/home/{user}/Games/Minecraft'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'Server_Name': ['Server_name', 'Server_Description', 'Start_Command']}
-java_params = '-server -Xmx3G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
+java_params = '-server -Xmx2G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar {mc_path}/papermc/server.jar nogui'],
                'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar {mc_path}/vanilla/server.jar nogui"],
                'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"java -jar -Xms3G -Xmx6G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AlwaysPreTouch forge-1.16.4-35.1.13.jar nogui"],

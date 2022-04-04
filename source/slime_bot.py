@@ -1,11 +1,11 @@
-import discord, asyncio, datetime, os, sys
+import discord, subprocess, random, asyncio, datetime, os, sys, time
 from discord.ext import commands, tasks
 #from discord_components import DiscordComponents, Button
 from discord_components import DiscordComponents, Button, ButtonStyle,  Select, SelectOption, ComponentsBot
 from backend_functions import lprint, format_args, server_command, server_status
 import backend_functions, slime_vars
 
-__version__ = "5.0"
+__version__ = "5.2P"
 __date__ = '2022/01/02'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
@@ -21,7 +21,7 @@ else:
     sys.exit()
 
 # Make sure this doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?')
+bot = ComponentsBot(command_prefix='?', help_command=None)
 channel = None
 
 
@@ -40,14 +40,15 @@ async def on_ready():
 
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send('**Bot PRIMED** :white_check_mark:')
+        await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
-        await backend_functions.server_status(discord_msg=True)
+        await backend_functions.server_status()
 
         await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
-        components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                     Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+                           components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
+                                        Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                                        Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
 
 @bot.event
 async def on_button_click(interaction):
@@ -87,6 +88,221 @@ async def _delete_current_components():
         except: pass
     current_components = []
 
+async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
+    """Get Log lines from game server logs."""
+
+    log_mode = True
+    if 'filter_mode' in kwargs: log_mode = False
+
+    await ctx.send(f"***Getting {lines} {game_name} Log Lines...*** :tools:")
+    log_data = backend_functions.server_log(file_path=file_path, lines=lines, return_reversed=True, log_mode=log_mode, **kwargs)
+    for line in log_data.split('\n'):
+        if line: await ctx.send(f"`{line}`")
+    await ctx.send("-----END-----")
+    lprint(ctx, f"Fetched {game_name} Log: {lines}")
+
+
+# ========== Other Games: Valheim, Project Zomboid
+class Other_Games(commands.Cog):
+    def __init__(self, bot):
+        self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
+        self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
+        self.bot = bot
+
+    @commands.command()
+    async def help(self, ctx):
+        await ctx.send("""```
+?games        - Show start/stop buttons for game.
+?info         - Get server address(s) and password(s).
+
+Valheim:
+  ?vstart     - Start Valheim Server.
+  ?vstop      - Stop server.
+  ?vstatus    - Check online status.
+  ?vhelp      - Shows instructions for how to join server.
+  ?vlog       - Show X log lines. e.g. ?vlog 25.
+  ?v/ COMMAND - Send command to vhserver.
+    Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
+        
+Project Zomboid:
+  ?zstart     - Start Project Zomboid Server.
+  ?zstop      - Stop server.
+  ?zstatus    - Check online status.
+  ?zsave      - Saves game.
+  ?zlog       - Show X log lines. e.g. ?zlog 25.
+  ?z/ COMMAND - Send command to server.
+    
+Minecraft:
+  ?mstart     - Start Minecraft server. 
+  ?mstop      - Stop Minecraft server.
+  ?mstatus    - Minecraft server info.
+  ?help2      - All Minecraft and slime_bot commands.
+```""")
+        lprint(ctx, "Show help page.")
+
+    @commands.command(aliases=['address', 'infopage'])
+    async def info(self, ctx):
+        await ctx.send(f"""
+{self.ip_text}
+Password for Valheim: `{slime_vars.valheim_password}`
+""")
+        lprint(ctx, "Show info page.")
+
+    @commands.command(aliases=['vhelp'])
+    async def valheimhelp(self, ctx):
+        await ctx.invoke(self.bot.get_command("valheimstatus"))
+        await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
+        await ctx.send(file=discord.File(rf'{os.path.dirname(os.path.abspath(__file__)) }/valheim_info.png'))
+
+    @commands.command(aliases=['servers', 'game'])
+    async def games(self, ctx):
+        """Quickly start/stop games."""
+
+        await ctx.send("**Valheim** :axe:", components=[[
+            Button(label="Start", custom_id="valheimstart"),
+            Button(label="Stop", custom_id="valheimstop"),
+            Button(label="Status", custom_id="valheimstatus")
+            ]])
+
+        await ctx.send("**Zomboid** :zombie:", components=[[
+            Button(label="Start", custom_id="zomboidstart"),
+            Button(label="Stop", custom_id="zomboidstop"),
+            Button(label="Status", custom_id="zomboidstatus")
+            ]])
+
+        await ctx.send("**Minecraft** :pick:", components=[[
+            Button(label="Start", custom_id="serverstart"),
+            Button(label="Stop", custom_id="serverstop"),
+            Button(label="Status", custom_id="serverstatus")
+        ]])
+
+    @commands.command(aliases=['v/', 'vcommand'])
+    async def valheimcommand(self, ctx, *command):
+        """Sends command to vhserver"""
+
+        command = format_args(command)
+        backend_functions.valheim_command(command)
+        await ctx.send("Sent Command to vhserver")
+
+        lprint(ctx, "Sent Valheim command: " + command)
+
+    @commands.command(aliases=['vstart', 'startvalheim', 'vlaunch'])
+    async def valheimstart(self, ctx):
+        """Starts Valheim server."""
+
+        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
+        if vhserver_output.find('STARTED') != -1:
+            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
+        else:
+            await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
+            await ctx.send(f"{self.valheim_text}")
+            backend_functions.valheim_command('start')
+        lprint(ctx, "Launching Valheim Server")
+
+    @commands.command(aliases=['vstop', 'stopvalheim'])
+    async def valheimstop(self, ctx):
+        """Stops Valheim server."""
+
+        await ctx.send("**Halted Valheim Server** :stop_sign:")
+        backend_functions.valheim_command('stop')
+        lprint(ctx, "Halting Valheim Server")
+
+    @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
+    async def valheimstatus(self, ctx):
+        """Checks valheim server active status using 'vhserver details' command."""
+
+        await ctx.send("***Checking Valheim Server Status...***")
+
+        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
+        if vhserver_output.find('STARTED') != -1:
+            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
+        elif vhserver_output.find('STOPPED') != -1:
+            await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
+        else: await ctx.send("Unable to check status.")
+        lprint(ctx, 'Checked Valheim Status.')
+
+    @commands.command(aliases=['vlog'])
+    async def valheimlog(self, ctx, lines=10):
+        """Show Valheim log lines."""
+
+        # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
+        await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
+
+    # ===== Project Zomboid
+    @commands.command(aliases=['zcommand', 'z/'])
+    async def zomboidcommand(self, ctx, *command):
+        """
+        Pass command directly to Project Zomboid server.
+
+        Args:
+            *command str: Server command, do not include the slash /.
+
+        Note: Currently no feedback.
+        """
+
+        command = format_args(command)
+        backend_functions.zomboid_command(f"{command}")
+        await asyncio.sleep(1)
+        ctx.invoke(self.bot.get_command('zlog'))
+
+        lprint(ctx, "Sent Zomboid command: " + command)
+
+    @commands.command(aliases=['zstart', 'startzomboid'])
+    async def zomboidstart(self, ctx):
+        """Starts Project Zomboid server."""
+
+        # Checks if server is online first.
+        random_number = str(random.random())
+        backend_functions.zomboid_command(random_number)
+        await asyncio.sleep(1)
+        log_data = backend_functions.server_log(random_number, file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
+        if log_data:
+            await ctx.send(f"Project Zomboid Server **Online**\n{self.ip_text}")
+        else:  # Launches if not online already.
+            backend_functions.zomboid_command(f'cd /home/{slime_vars.user}/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+            backend_functions.zomboid_command(f'./start-server.sh')
+            await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\n{self.ip_text}\nPlease wait about 30s before attempting to connect.")
+        lprint(ctx, "Launching Project Zomboid Server")
+
+    @commands.command(aliases=['zstop', 'stopzomboid'])
+    async def zomboidstop(self, ctx):
+        """Stops Project Zomboid server."""
+
+        backend_functions.zomboid_command('quit')
+        await ctx.send("**Halted Project Zomboid Server** :stop_sign:")
+
+        lprint(ctx, "Project Zomboid Stopped")
+
+    @commands.command(aliases=['zstatus', 'statuszomboid', 'zstat'])
+    async def zomboidstatus(self, ctx):
+        """Checks valheim server active status using 'vhserver details' command."""
+
+        await ctx.send("***Checking Project Zomboid Server Status...***")
+
+        random_number = str(random.random())
+        backend_functions.zomboid_command(random_number)
+        await asyncio.sleep(1)
+        log_data = backend_functions.server_log(random_number, file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
+        if log_data:
+            await ctx.send(f"Project Zomboid Server **Online**.\n{self.ip_text}")
+        else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
+        lprint(ctx, 'Checked Zomboid Status.')
+
+    @commands.command(aliases=['zlog'])
+    async def zomboidlog(self, ctx, lines=10):
+        """Show Project Zomboid log lines."""
+
+        await get_log_lines(ctx, 'Zomboid', lines,f'/home/{slime_vars.user}/Zomboid/server-console.txt')
+
+    @commands.command(aliases=['zsave', 'savezomboid'])
+    async def zomboidsave(self, ctx):
+        """Save Project Zomboid."""
+
+        backend_functions.zomboid_command('save')
+        await ctx.send("World Saved")
+
+        lprint(ctx, "Saved Project Zomboid")
+
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
 
@@ -108,7 +324,7 @@ class Basics(commands.Cog):
         """
 
         command = format_args(command)
-        if not await server_command(f"{command}"): return False
+        if not await server_command(command): return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -1032,7 +1248,7 @@ class Server(commands.Cog):
         await server_status(discord_msg=show_msg)
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
-    @commands.command(aliases=['stat', 'stats', 'status'])
+    @commands.command(aliases=['mstatus'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -1050,7 +1266,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
-    @commands.command(aliases=['log'])
+    @commands.command(aliases=['log', 'mlog'])
     async def serverlog(self, ctx, lines=10):
         """
         Show server log.
@@ -1071,7 +1287,7 @@ class Server(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Minecraft Log: {lines}")
 
-    @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
+    @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -1091,7 +1307,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
+    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -1125,7 +1341,7 @@ class Server(commands.Cog):
         backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
+    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
@@ -1637,9 +1853,11 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
-        pass
+        """Shows bot version and other info."""
+
+        await ctx.send(f"Bot Version: `{__version__}`")
 
     @commands.command()
     async def _control_panel_msg(self, ctx):
@@ -1854,11 +2072,16 @@ class Bot_Functions(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Bot Log: {lines}")
 
-    @commands.command(aliases=['updatebot', 'bupdate', 'bu'])
-    async def botupdate(self, ctx):
+    @commands.command(aliases=['updatebot', 'botupdate'])
+    async def gitupdate(self, ctx):
         """Gets update from GitHub."""
 
-        await ctx.send("***Comming Soon...***")
+        await ctx.send("***Updating from GitHub...*** :arrows_counterclockwise:")
+
+        os.chdir(slime_vars.bot_files_path)
+        os.system('git pull')
+
+        await ctx.invoke(self.bot.get_command("restartbot"))
 
     @commands.command()
     async def help2(self, ctx):
@@ -1961,7 +2184,7 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+for cog in [Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
