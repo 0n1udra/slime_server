@@ -41,6 +41,7 @@ async def on_ready():
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
         await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
+        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status()
@@ -100,7 +101,6 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
         if line: await ctx.send(f"`{line}`")
     await ctx.send("-----END-----")
     lprint(ctx, f"Fetched {game_name} Log: {lines}")
-
 
 # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
@@ -226,7 +226,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         """Show Valheim log lines."""
 
         # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
-        await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, match_lines=lines, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
+        await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
     # ===== Project Zomboid
     @commands.command(aliases=['zcommand', 'z/'])
@@ -385,7 +385,7 @@ class Basics(commands.Cog):
 
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
-        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(']: <', filter_mode=True, return_reversed=True)
         try:
             log_data = log_data.strip().split('\n')
         except:
@@ -400,7 +400,6 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
-
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -687,7 +686,6 @@ class Player(commands.Cog):
     @commands.command()
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
-
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
@@ -1039,7 +1037,6 @@ class Permissions(commands.Cog):
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
-
 # ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -1267,7 +1264,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log', 'mlog'])
-    async def serverlog(self, ctx, lines=10):
+    async def serverlog(self, ctx, lines=10, match=None):
         """
         Show server log.
 
@@ -1279,9 +1276,13 @@ class Server(commands.Cog):
             ?log 10
         """
 
+        # If received match argument, switches server_log mode.
+        filter_mode, log_mode = False, True
+        if match: filter_mode, log_mode = True, False
+
         file_path = f"{slime_vars.server_path}/logs/latest.log"
         await ctx.send(f"***Getting {lines} Minecraft Log Lines...*** :tools:")
-        log_data = backend_functions.server_log(file_path=file_path, lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
         await ctx.send("-----END-----")
@@ -1506,26 +1507,24 @@ class Server(commands.Cog):
             now str(''): Stops server immediately without giving online players 15s warning.
         """
 
-        if 'vanilla' not in slime_vars.server_selected:
-            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{slime_vars.server_selected[0]}` selected.")
+        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
+            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
+            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
+        else:
+            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
             return False
 
-        lprint(ctx, "Updating server.jar...")
-        await ctx.send("***Updating...*** :arrows_counterclockwise:")
-
+        # Halts server if running.
         if await server_status() is True:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await ctx.send("***Downloading latest server.jar***")
-        server = backend_functions.get_latest_version()
-
-        if server is True:
-            await ctx.send(f"Downloaded latest version: `{server}`")
+        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
+        server = backend_functions.get_latest_version()  # Updats server.jar file.
+        if server:
+            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
             await asyncio.sleep(3)
-            await ctx.invoke(self.bot.get_command('serverstart'))
         else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
-
         lprint(ctx, "Server Updated")
 
 class World_Backups(commands.Cog):
@@ -2181,7 +2180,6 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send("Cleared `channel_id`")
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
-
 
 # Adds functions to bot.
 for cog in [Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
