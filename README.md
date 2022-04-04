@@ -1,12 +1,7 @@
-## Control Minecraft server with Discord bot.
+## Control Minecraft server with Discord bot.  
+Scroll down for requirements, setup instructions and screenshots.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
-
-<img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">
-
-<img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">
-
-
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -31,15 +26,15 @@
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
-### Setup:
+# Setup
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).
 2. Update `slime_vars.py` variables.
-3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
-  e.g. `python3 run_bot.py starttmux startboth attachtmux
+3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
+  e.g. `python3 run_bot.py starttmux startboth attachtmux`
 5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
 6. Read through the help pages with `?help` or `?help2` in Discord.
 
-## Using Virtualenv or venv:
+### Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
 python -m venv ~/pyenvs/slime_server
@@ -62,3 +57,8 @@ or
 pip install -r requirements.txt
 ```
 
+# Screenshots
+
+<img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">
+
+<img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">
