@@ -1,9 +1,5 @@
 ## Control Minecraft server with Discord bot.
 
-
-My own personal branch for modification specifically for my setup.  
-e.g. I have implemented basic start/stop commands for my Project Zomboid and Valheim servers.
-
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
 <img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">
@@ -31,21 +27,22 @@ e.g. I have implemented basic start/stop commands for my Project Zomboid and Val
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
-- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
+- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [fileinput](https://docs.python.org/3.9/library/fileinput.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
 ### Setup:
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).
 2. Update `slime_vars.py` variables.
-3. Run `python3 run_bot.py help` to setup tmux and/or run bot.
-4. Use `?setchannel` command so you get important bot/server event updates.
-5. Read through the help pages with `?help` or `?help2` in Discord.
+3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
+  e.g. `python3 run_bot.py starttmux startboth attachtmux
+5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
+6. Read through the help pages with `?help` or `?help2` in Discord.
 
 ## Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-python venv ~/pyenvs/slime_server
+python -m venv ~/pyenvs/slime_server
 ```
 or
 ```bash
@@ -58,7 +55,7 @@ source ~/pyenvs/slime_server/bin/activate
 ```
 Install required Python modules:
 ```bash
-pip install discord.py discord-components asyncio file-read-backwards mctools
+pip install discord.py discord-components asyncio file-read-backwards mctools requests bs4
 ```
 or
 ```bash

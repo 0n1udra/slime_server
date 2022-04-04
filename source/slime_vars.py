@@ -2,15 +2,6 @@ import os
 
 user = 'pop_mbp'
 
-# Other Games
-pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
-if os.path.isfile(pass_path):
-    with open(pass_path, 'r') as file:
-        valheim_password = file.readline()
-valheim_path = f'/home/{user}/Games/valheim'
-valheim_log_path = f'/home/{user}/Games/valheim/log/console/vhserver-console.log'
-
-
 bot_token_file = f'/home/{user}/keys/slime_server.token'  # Set location of Discord bot token.
 pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'  # Set as None if not using a python virtual env.
 

@@ -1,5 +1,4 @@
-import subprocess, requests, shutil, datetime, asyncio, random, json, time, csv, os, re
-import mctools, fileinput
+import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, time, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
@@ -9,17 +8,6 @@ discord_channel = None
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
-
-# ========== Other Games
-def valheim_command(command):
-    """Use vhserver script"""
-
-    os.system(f'~/Games/valheim/vhserver {command}')
-
-def zomboid_command(command):
-    """Sends command to tmux 0.1 Project Zomboid server."""
-
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(arg1=None, arg2=None):
@@ -184,7 +172,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
     stopgap_str = stopgap_str.lower()
 
-    # Checks if file exists.
+    # Defaults file to server log.
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
@@ -261,9 +249,9 @@ async def server_status(discord_msg=False):
     global server_active
 
     if discord_msg: await channel_send('***Checking Server Status...***')
-    lprint("Checking Minecraft server status...")
+    lprint("Checking server active status...")
 
-    # server_command() will send random number, server is online if match is found in log.
+    # Creates random number to send in command, server is online if match is found in log.
     response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
