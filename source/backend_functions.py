@@ -626,4 +626,3 @@ def restore_server(server=None, reset=False):
 def restore_world(world=None, reset=False):
     os.chdir(slime_vars.world_backups_path)
     return restore_backup(world, slime_vars.server_path + '/world', reset)
-==== BASE ====
