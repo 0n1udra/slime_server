@@ -140,7 +140,7 @@ Minecraft:
 ```""")
         lprint(ctx, "Show help page.")
 
-    @commands.command(aliases=['address', 'infopage'])
+    @commands.command(aliases=['infopage'])
     async def info(self, ctx):
         await ctx.send(f"""
 {self.ip_text}
