@@ -142,7 +142,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     elif slime_vars.use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{status_checker}" ENTER')
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         if not server_log(random_number):
             await inactive_msg()
             return False
@@ -152,7 +152,8 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         await inactive_msg()
         return False
 
-    time.sleep(1)
+    await asyncio.sleep(1)
+    # Checks server log if command went through.
     return_data = [server_log(command), None]
     if stop_at_checker is True:
         return_data[1] = random_number
