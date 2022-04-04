@@ -1321,8 +1321,11 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if not await server_status(): return
+        if not await server_status():
+            await ctx.send("Already Offline")
+            return
 
+        await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
             await server_command('save-all')
             await asyncio.sleep(3)

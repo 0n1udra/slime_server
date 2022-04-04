@@ -50,7 +50,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_param
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
                }
 
-server_selected = server_list['vanilla']
+server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
