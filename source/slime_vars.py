@@ -1,14 +1,23 @@
 import os
 
+
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = '0n1udra'
-bot_files_path = os.getcwd()
+
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
+
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
+
+# Save slime_vars.py to json, for updating bot. (set_slime_vars() in run_bot.py)
+slime_vars_json = f'/home/{user}/slime_bot_vars.json'
+
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = 860361620492255292
+
+# Server URL or IP address. In case you're using a DDNS or something.
+server_url = 'arcpy.asuscomm.com'
 
 # ========== Other Games
 pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
@@ -31,8 +40,6 @@ tmux_session_name = 'sess'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
-server_ip = ''  # Will be updated by ip_ip function in backend_functions.py on bot startup.
-server_url = 'arcpy.asuscomm.com'
 rcon_pass = 'rconpass420'
 rcon_port = 25575
 
@@ -50,6 +57,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_param
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
                }
 
+#set_server = 'papermc'  # This variable is needed for server_select because need something to save to json.
 server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
@@ -57,8 +65,6 @@ world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
-slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_log_file = f"{bot_files_path}/bot_log.txt"
 log_lines_limit = 100  # Max number of log lines to read.
 
 # Autosave functionality. interval is in minutes.
@@ -78,7 +84,43 @@ useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://file
                    }
 
 # ========== Other variables. DON'T TOUCH.
+bot_files_path = os.getcwd()
+slime_vars_file = bot_files_path + '/slime_vars.py'
+bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
+server_ip = ''  # Will be updated by get_ip function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
+
+# All variables which will be saved in slime_vars_json.
+all_variables = {'user': user,
+                 'bot_token_file': bot_token_file,
+                 'pyenv_activate_command': pyenv_activate_command,
+                 'slime_vars_json': slime_vars_json,
+                 'channel_id': channel_id,
+                 'server_url': server_url,
+                 'server_files_access': server_files_access,
+                 'use_subprocess': use_subprocess,
+                 'use_tmux': use_tmux,
+                 'use_rcon': use_rcon,
+                 'rcon_pass': rcon_pass,
+                 'rcon_port': rcon_port,
+                 'mc_path': mc_path,
+                 'java_params': java_params,
+                 'server_list': server_list,
+                 'server_selected': server_selected,
+                 'world_backups_path': world_backups_path,
+                 'server_backup_path': server_backups_path,
+                 'log_lines_limit': log_lines_limit,
+                 'autosave_status': autosave_status,
+                 'autosave_interval': autosave_interval,
+                 'mc_active_status': mc_active_status,
+                 'mc_subprocess': mc_subprocess,
+                 'useful_websites': useful_websites,
+                 }
+
+
+def set_slime_vars():
+    with open(slime_vars_json, 'w') as f: json.dump(all_variables, f)
+set_slime_vars()
