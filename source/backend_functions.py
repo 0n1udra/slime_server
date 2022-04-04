@@ -1,3 +1,4 @@
+==== BASE ====
 import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, time, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
@@ -83,6 +84,7 @@ def channel_set(channel):
 async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
+
 # ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
     """
@@ -131,7 +133,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     elif slime_vars.use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{status_checker}" ENTER')
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         if not server_log(random_number):
             await inactive_msg()
             return False
@@ -141,13 +143,14 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         await inactive_msg()
         return False
 
-    time.sleep(1)
+    await asyncio.sleep(1)
+    # Checks server log if command went through.
     return_data = [server_log(command), None]
     if stop_at_checker is True:
         return_data[1] = random_number
     return return_data
 
-def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, match_lines=10, stopgap_str=None, return_reversed=False):
+def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
     """
     Read latest.log file under server/logs folder. Can also find match.
     What a fat ugly function you are :(
@@ -159,7 +162,6 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
         log_mode bool(False): Return x lines from log file, skips matching.
         normal_read bool(False): Reads file top down, defaults to bottom up using file-read-backwards module.
         filter_mode bool(False): Don't stop at first match.
-        match_lines int(10): How many matches to find.
         return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
 
     Returns:
@@ -203,8 +205,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
 
                 elif match in line.lower():
                     log_data += line
-                    if filter_mode is True and match_lines > 1: match_lines -= 1
-                    else: break
+                    if not filter_mode: break
                 if stopgap_str.lower() in line.lower(): break
 
     if log_data:
@@ -249,9 +250,9 @@ async def server_status(discord_msg=False):
     global server_active
 
     if discord_msg: await channel_send('***Checking Server Status...***')
-    lprint("Checking server active status...")
+    lprint("Checking Minecraft server status...")
 
-    # Creates random number to send in command, server is online if match is found in log.
+    # server_command() will send random number, server is online if match is found in log.
     response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
@@ -305,9 +306,7 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
-        returned_data = edit_file('version')[1]
-        if 'not' not in returned_data:
-            return returned_data
+        version = server_log('server version')
     return 'N/A'
 
 def server_motd():
@@ -378,32 +377,46 @@ def get_latest_version():
     """
 
     os.chdir(slime_vars.mc_path)
-    jar_download_url = ''
+    jar_download_url = version_info = ''
 
-    minecraft_website = requests.get(slime_vars.new_server_url)
-    soup = BeautifulSoup(minecraft_website.text, 'html.parser')
-    # Finds Minecraft server.jar urls in div class.
-    div_agenda = soup.find_all('div', class_='minecraft-version')
-    for i in div_agenda[0].find_all('a'):
-        jar_download_url = f"{i.get('href')}"
+    if 'vanilla' in slime_vars.server_selected[0]:
+        def request_json(url): return json.loads(requests.get(url).text)
 
-    if not jar_download_url: return False
+        # Finds latest release from manifest and gets required data.
+        manifest = request_json('https://launchermeta.mojang.com/mc/game/version_manifest.json')
+        for i in manifest['versions']:
+            if i['type'] == 'release':
+                version_info = f"{i['id']} ({i['time']})"
+                jar_download_url = request_json(i['url'])['downloads']['server']['url']
+                break  # Breaks loop on firest release found (should be latest).
+
+    if 'papermc' in slime_vars.server_selected[0]:
+        base_url = 'https://papermc.io/api/v2/projects/paper'
+
+        # Extracts required data for download URL. PaperMC API: https://papermc.io/api/docs/swagger-ui/index.html?configUrl=/api/openapi/swagger-config
+        def get_data(find, url=''): return json.loads(requests.get(f'{base_url}{url}').text)[find]
+        latest_version = get_data('versions')[-1]  # Gets latest Minecraft version (e.g. 1.18.2).
+        latest_build = get_data('builds', f'/versions/{latest_version}')[-1]  # Get PaperMC Paper latest build (277).
+        # Get file name to download (paper-1.18.2-277.jar).
+        latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['name']
+        # Full download URL: https://papermc.io/api/v2/projects/paper/versions/1.18.2/builds/277/downloads/paper-1.18.2-277.jar
+        jar_download_url = f'{base_url}/versions/{latest_version}/builds/{latest_build}/downloads/{latest_jar}'
+
+    if not jar_download_url:
+        lprint("Error: Issue downloading new jar.")
+        return False
 
     # Saves new server.jar in current server.
     new_jar_data = requests.get(jar_download_url).content
 
-    try:
-        with open(slime_vars.server_path + '/eula.txt', 'w+') as f:
-            f.write(new_jar_data)
-    except IOError:
-        lprint(f"Error updatine eula.txt file: {slime_vars.server_path}")
+    try:  # Sets eula.txt file.
+        with open(slime_vars.server_path + '/eula.txt', 'w+') as f: f.write('eula=true')
+    except IOError: lprint(f"Error updatine eula.txt file: {slime_vars.server_path}")
 
-    try:
-        with open(slime_vars.server_path + '/server.jar', 'wb+') as f:
-            f.write(new_jar_data)
-        return True
-    except IOError:
-        lprint(f"Error saving new jar file: {slime_vars.server_path}")
+    try:  # Saves file as server.jar.
+        with open(slime_vars.server_path + '/server.jar', 'wb+') as f: f.write(new_jar_data)
+    except IOError: lprint(f"Error saving new jar file: {slime_vars.server_path}")
+    else: return version_info
 
     return False
 
@@ -459,7 +472,8 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
         tuple: First item is line from file that matched target_property. Second item is just the current value.
     """
 
-    os.chdir(slime_vars.server_path)
+    try: os.chdir(slime_vars.server_path)
+    except: pass
     return_line = discord_return = ''  # Discord has it's own return variable, because the data might be formatted for Discord.
 
     with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
@@ -615,3 +629,4 @@ def restore_server(server=None, reset=False):
 def restore_world(world=None, reset=False):
     os.chdir(slime_vars.world_backups_path)
     return restore_backup(world, slime_vars.server_path + '/world', reset)
+==== BASE ====

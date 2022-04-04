@@ -56,7 +56,7 @@ def server_start():
 def script_help():
     help = """
     python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
-    python3 run_bot.py starttmux startboth attachtmux      --  Start Tmux session, start server and bot, then attaches to Tmux session.
+    python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
     
     help        - Shows this help page.
     setup       - Create necessary folders. Starts Tmux session in detached mode with 2 panes.

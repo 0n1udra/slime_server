@@ -5,7 +5,7 @@ from discord_components import DiscordComponents, Button, ButtonStyle,  Select, 
 from backend_functions import lprint, format_args, server_command, server_status
 import backend_functions, slime_vars
 
-__version__ = "5.0"
+__version__ = "5.3"
 __date__ = '2022/01/02'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
@@ -42,7 +42,7 @@ async def on_ready():
         await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
-        await backend_functions.server_status(discord_msg=True)
+        await backend_functions.server_status()
 
         await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
         components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
@@ -107,7 +107,7 @@ class Basics(commands.Cog):
         """
 
         command = format_args(command)
-        if not await server_command(f"{command}"): return False
+        if not await server_command(command): return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -168,7 +168,7 @@ class Basics(commands.Cog):
 
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
-        log_data = backend_functions.server_log(']: <', match_lines=lines, filter_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(']: <', filter_mode=True, return_reversed=True)
         try:
             log_data = log_data.strip().split('\n')
         except:
@@ -1047,8 +1047,8 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
-    @commands.command(aliases=['log'])
-    async def serverlog(self, ctx, lines=10):
+    @commands.command(aliases=['log', 'mlog'])
+    async def serverlog(self, ctx, lines=10, match=None):
         """
         Show server log.
 
@@ -1060,15 +1060,19 @@ class Server(commands.Cog):
             ?log 10
         """
 
+        # If received match argument, switches server_log mode.
+        filter_mode, log_mode = False, True
+        if match: filter_mode, log_mode = True, False
+
         file_path = f"{slime_vars.server_path}/logs/latest.log"
         await ctx.send(f"***Getting {lines} Minecraft Log Lines...*** :tools:")
-        log_data = backend_functions.server_log(file_path=file_path, lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         for line in log_data.split('\n'):
             await ctx.send(f"`{line}`")
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Minecraft Log: {lines}")
 
-    @commands.command(aliases=['start', 'boot', 'startserver', 'serverboot'])
+    @commands.command(aliases=['startminecraft', 'mstart', 'startserver'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -1089,7 +1093,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['stop', 'halt', 'serverhalt', 'shutdown'])
+    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -1102,8 +1106,11 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if not await server_status(): return
+        if not await server_status():
+            await ctx.send("Already Offline")
+            return
 
+        await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
             await server_command('save-all')
             await asyncio.sleep(3)
@@ -1123,7 +1130,7 @@ class Server(commands.Cog):
         backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @commands.command(aliases=['reboot', 'restart', 'rebootserver', 'restartserver', 'serverreboot'])
+    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
@@ -1288,26 +1295,24 @@ class Server(commands.Cog):
             now str(''): Stops server immediately without giving online players 15s warning.
         """
 
-        if 'vanilla' not in slime_vars.server_selected:
-            await ctx.send(f"**ERROR:** This command only works with vanilla servers. You have `{slime_vars.server_selected[0]}` selected.")
+        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
+            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
+            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
+        else:
+            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
             return False
 
-        lprint(ctx, "Updating server.jar...")
-        await ctx.send("***Updating...*** :arrows_counterclockwise:")
-
+        # Halts server if running.
         if await server_status() is True:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await ctx.send("***Downloading latest server.jar***")
-        server = backend_functions.get_latest_version()
-
-        if server is True:
-            await ctx.send(f"Downloaded latest version: `{server}`")
+        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
+        server = backend_functions.get_latest_version()  # Updats server.jar file.
+        if server:
+            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
             await asyncio.sleep(3)
-            await ctx.invoke(self.bot.get_command('serverstart'))
         else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
-
         lprint(ctx, "Server Updated")
 
 class World_Backups(commands.Cog):
@@ -1965,7 +1970,6 @@ class Bot_Functions(commands.Cog):
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
 
 # Adds functions to bot.
-for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
