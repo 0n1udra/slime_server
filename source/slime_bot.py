@@ -1833,7 +1833,6 @@ class Bot_Functions(commands.Cog):
         if slime_vars.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
-        os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])

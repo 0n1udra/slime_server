@@ -1,6 +1,5 @@
 import os
 
-
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = '0n1udra'
 
@@ -73,7 +72,7 @@ useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://file
                    }
 
 # ========== Other variables. DON'T TOUCH.
-bot_files_path = os.getcwd()
+bot_files_path = os.path.dirname(os.path.abspath(__file__))
 slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
