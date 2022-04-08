@@ -97,12 +97,13 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
 
     await ctx.send(f"***Getting {lines} {game_name} Log Lines...*** :tools:")
     log_data = backend_functions.server_log(file_path=file_path, lines=lines, return_reversed=True, log_mode=log_mode, **kwargs)
-    for line in log_data.split('\n'):
-        if line: await ctx.send(f"`{line}`")
-    await ctx.send("-----END-----")
-    lprint(ctx, f"Fetched {game_name} Log: {lines}")
+    if log_data:
+        for line in log_data.split('\n'):
+            if line: await ctx.send(f"`{line}`")
+        await ctx.send("-----END-----")
+        lprint(ctx, f"Fetched {game_name} Log: {lines}")
 
-# ========== Other Games: Valheim, Project Zomboid
+    # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
     def __init__(self, bot):
         self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
@@ -1286,10 +1287,14 @@ class Server(commands.Cog):
         file_path = f"{slime_vars.server_path}/logs/latest.log"
         await ctx.send(f"***Getting {lines} Minecraft Log Lines...*** :tools:")
         log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
-        for line in log_data.split('\n'):
-            await ctx.send(f"`{line}`")
-        await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched Minecraft Log: {lines}")
+        if log_data:
+            for line in log_data.split('\n'):
+                await ctx.send(f"`{line}`")
+            await ctx.send("-----END-----")
+            lprint(ctx, f"Fetched Minecraft Log: {lines}")
+        else:
+            await ctx.send("**Error:** Problem fetching data.")
+            lprint(ctx, "Error: Issue getting minecraft log data.")
 
     @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
@@ -2069,14 +2074,16 @@ class Bot_Functions(commands.Cog):
         """
 
         log_data = backend_functions.server_log(file_path=slime_vars.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
-
         await ctx.send(f"***Getting {lines} Bot Log Lines...*** :tools:")
-        # Shows server log line by line.
-        for line in log_data.split('\n'):
-            await ctx.send(f"`{line}`")
-
-        await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched Bot Log: {lines}")
+        if log_data:
+            # Shows server log line by line.
+            for line in log_data.split('\n'):
+                await ctx.send(f"`{line}`")
+            await ctx.send("-----END-----")
+            lprint(ctx, f"Fetched Bot Log: {lines}")
+        else:
+            await ctx.send("**Error:** Problem fetching data.")
+            lprint(ctx, "Error: Issue getting bog log data.")
 
     @commands.command(aliases=['updatebot', 'botupdate'])
     async def gitupdate(self, ctx):

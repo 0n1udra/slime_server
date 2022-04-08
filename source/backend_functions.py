@@ -190,6 +190,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
 
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
+    #os.path.getsize(file_path) > 0:
 
     if filter_mode is True: lines = slime_vars.log_lines_limit
 
@@ -200,12 +201,9 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 if match in line: return line
     else:
         with FileReadBackwards(file_path) as file:
-            print("OKK", file_path)
-            i = 0
-            while i < lines:
+            for i in range(lines):
                 line = file.readline()
                 if not line.strip(): continue  # Skip blank/newlines.
-                i += 1
 
                 # Minecraft log data parsing.
                 if 'banlist' in match:  # How ugly :(
@@ -218,7 +216,6 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 elif log_mode: log_data += line
 
                 elif match in line.lower():
-                    print("OKK")
                     log_data += line
                     if not filter_mode: break
                 if stopgap_str.lower() in line.lower(): break
