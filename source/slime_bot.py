@@ -24,7 +24,6 @@ else:
 bot = ComponentsBot(command_prefix='?', help_command=None)
 channel = None
 
-
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 player_selection = None
@@ -35,7 +34,6 @@ async def on_ready():
     global channel
 
     await bot.wait_until_ready()
-
     lprint(f"Bot PRIMED (v{__version__})")
 
     if slime_vars.channel_id:
@@ -1260,8 +1258,6 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-
-
         if await server_status():  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
@@ -1308,7 +1304,7 @@ class Server(commands.Cog):
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        await ctx.send("***Launching Minecraft Server...*** :rocket:\nAddress: `arcpy.asuscomm.com`\nPlease wait about 15s before attempting to connect.")
+        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
         await ctx.send("***Fetching Status in 20s...***")
         await asyncio.sleep(20)
