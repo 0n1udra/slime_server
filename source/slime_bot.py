@@ -1040,8 +1040,6 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-
-
         if await server_status():  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
@@ -1838,6 +1836,7 @@ class Bot_Functions(commands.Cog):
         if slime_vars.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
+        os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
