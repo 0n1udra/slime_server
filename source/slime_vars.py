@@ -57,8 +57,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_param
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
-#set_server = 'papermc'  # This variable is needed for server_select because need something to save to json.
-server_selected = server_list['vvolatile']
+server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"

@@ -29,6 +29,7 @@ teleport_selection = [None, None, None]  # Target, Destination, Target's origina
 player_selection = None
 restore_world_selection = restore_server_selection = None
 current_components = []
+
 @bot.event
 async def on_ready():
     global channel
@@ -1300,6 +1301,7 @@ class Server(commands.Cog):
         Note: Depending on your system, server may take 15 to 40+ seconds to fully boot.
         """
 
+        # Exits function if server already online.
         if await server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
