@@ -288,7 +288,6 @@ def server_start():
 
     global mc_subprocess
 
-    os.chdir(slime_vars.server_path)
     if slime_vars.use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
@@ -299,9 +298,9 @@ def server_start():
 
     elif slime_vars.use_tmux is True:
         #os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
+        os.system(rf'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
 
-        # Tries starting new detached tmux session.
+        # Starts server in tmux pane.
         if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{slime_vars.server_selected[2]}" ENTER'):
             return True
     else: return "Error starting server."

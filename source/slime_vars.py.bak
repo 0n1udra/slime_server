@@ -1,6 +1,5 @@
 import os
 
-
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = '0n1udra'
 
@@ -10,21 +9,11 @@ bot_token_file = f'/home/{user}/keys/slime_server.token'
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
 
-# Save slime_vars.py to json, for updating bot. (set_slime_vars() in run_bot.py)
-slime_vars_json = f'/home/{user}/slime_bot_vars.json'
-
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = 860361620492255292
 
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
-
-# ========== Other Games
-pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
-if os.path.isfile(pass_path):
-    with open(pass_path, 'r') as file: valheim_password = file.readline()
-valheim_path = f'/home/{user}/Games/valheim'
-valheim_log_path = f'/home/{user}/Games/valheim/log/console/vhserver-console.log'
 
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -48,17 +37,16 @@ rcon_port = 25575
 mc_path = f'/home/{user}/Games/Minecraft'
 
 # Server profiles, allows you to have different servers and each with their own backups/restores.
-# {'Server_Name': ['Server_name', 'description', 'start_Command', 'jar_download_url']} No spaces allowed in Server_name.
+# {'Server_Name': ['name', 'description', 'start_Command', 'jar_download_url']}
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx2G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads'],
                'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server'],
-               'vvolatile': ["vvolatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh"],
+               'valhesia volatile': ["valhesia volatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh"],
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
-#set_server = 'papermc'  # This variable is needed for server_select because need something to save to json.
-server_selected = server_list['vvolatile']
+server_selected = server_list['vanilla']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -85,7 +73,6 @@ useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://file
 
 # ========== Other variables. DON'T TOUCH.
 bot_files_path = os.path.dirname(os.path.abspath(__file__))
-
 slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
@@ -93,31 +80,3 @@ server_ip = ''  # Will be updated by get_ip function in backend_functions.py on 
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
-
-# All variables which will be saved in slime_vars_json.
-all_variables = {'user': user,
-                 'bot_token_file': bot_token_file,
-                 'pyenv_activate_command': pyenv_activate_command,
-                 'slime_vars_json': slime_vars_json,
-                 'channel_id': channel_id,
-                 'server_url': server_url,
-                 'server_files_access': server_files_access,
-                 'use_subprocess': use_subprocess,
-                 'use_tmux': use_tmux,
-                 'use_rcon': use_rcon,
-                 'rcon_pass': rcon_pass,
-                 'rcon_port': rcon_port,
-                 'mc_path': mc_path,
-                 'java_params': java_params,
-                 'server_list': server_list,
-                 'server_selected': server_selected,
-                 'world_backups_path': world_backups_path,
-                 'server_backup_path': server_backups_path,
-                 'log_lines_limit': log_lines_limit,
-                 'autosave_status': autosave_status,
-                 'autosave_interval': autosave_interval,
-                 'mc_active_status': mc_active_status,
-                 'mc_subprocess': mc_subprocess,
-                 'useful_websites': useful_websites,
-                 }
-
