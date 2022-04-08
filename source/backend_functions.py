@@ -40,14 +40,14 @@ def lprint(arg1=None, arg2=None):
 lprint("Server selected: " + slime_vars.server_selected[0])
 
 # Parse/get data.
-def format_args(args, return_empty_str=False):
+def format_args(args, return_no_reason=False):
     """
     Formats passed in *args from Discord command functions.
     This is so quotes aren't necessary for Discord command arguments.
 
     Args:
         args str: Passed in args to combine and return.
-        return_empty bool(False): returns empty str if passed in arguments aren't usable for Discord command.
+        return_no_reason bool(False): returns string 'No reason given.' for commands that require a reason (kick, ban, etc).
 
     Returns:
         str: Arguments combines with spaces.
@@ -55,9 +55,9 @@ def format_args(args, return_empty_str=False):
 
     if args: return ' '.join(args)
     else:
-        if return_empty_str is True:
-            return ''
-        return "No reason given."
+        if return_no_reason is True:
+            return "No reason given."
+        return ''
 
 def get_datetime():
     """Returns date and time. (2021-12-04 01-49)"""
@@ -187,6 +187,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     stopgap_str = stopgap_str.lower()
 
     # Defaults file to server log.
+
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
 
@@ -199,6 +200,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 if match in line: return line
     else:
         with FileReadBackwards(file_path) as file:
+            print("OKK", file_path)
             i = 0
             while i < lines:
                 line = file.readline()
@@ -216,6 +218,7 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 elif log_mode: log_data += line
 
                 elif match in line.lower():
+                    print("OKK")
                     log_data += line
                     if not filter_mode: break
                 if stopgap_str.lower() in line.lower(): break
@@ -298,7 +301,7 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif slime_vars.use_tmux is True:
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        #os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
 
         # Tries starting new detached tmux session.

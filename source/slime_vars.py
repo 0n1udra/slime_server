@@ -2,7 +2,7 @@ import os
 
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
-user = 'pop_mbp'
+user = '0n1udra'
 
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
@@ -51,10 +51,10 @@ mc_path = f'/home/{user}/Games/Minecraft'
 # {'Server_Name': ['name', 'description', 'start_Command', 'jar_download_url']}
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx2G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar {mc_path}/papermc/server.jar nogui', 'https://papermc.io/downloads'],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar {mc_path}/vanilla/server.jar nogui", 'https://www.minecraft.net/en-us/download/server'],
-               'valhesia3': ["valhesia3", "140 mods!, Note: Takes a long time to start.", f"java -jar -Xms3G -Xmx6G -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=50 -XX:+AlwaysPreTouch forge-1.16.4-35.1.13.jar nogui"],
-               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar {mc_path}/ulibrary/server.jar nogui'],
+server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads'],
+               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server'],
+               'valhesia volatile': ["valhesia volatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh"],
+               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
 #set_server = 'papermc'  # This variable is needed for server_select because need something to save to json.
@@ -121,7 +121,3 @@ all_variables = {'user': user,
                  'useful_websites': useful_websites,
                  }
 
-
-def set_slime_vars():
-    with open(slime_vars_json, 'w') as f: json.dump(all_variables, f)
-set_slime_vars()

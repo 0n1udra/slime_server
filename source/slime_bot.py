@@ -341,7 +341,7 @@ class Basics(commands.Cog):
             ?s Hello World!
         """
 
-        msg = format_args(msg, return_empty_str=True)
+        msg = format_args(msg)
 
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
@@ -441,7 +441,7 @@ class Player(commands.Cog):
             await ctx.send("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}"): return
 
         await server_command(f'kill {target}')
@@ -464,7 +464,7 @@ class Player(commands.Cog):
             ?pk Steve 15
         """
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not target:
             await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
@@ -610,7 +610,7 @@ class Player(commands.Cog):
             await ctx.send(f"Usage: `?gamemode <name> <mode> [reason]`\nExample: `?gamemode MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f"say {player} now in {mode} : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
@@ -638,7 +638,7 @@ class Player(commands.Cog):
             await ctx.send("Usage: `?gamemodetimed <player> <mode> <seconds> [reason]`\nExample: `?gamemodetimed MysticFrogo spectator 120 Needs a time out`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}"): return
 
         await server_command(f"gamemode {mode} {player}")
@@ -709,7 +709,7 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?kick <player> [reason]`\nExample: `?kick R3diculous Trolling too much`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}'): return
 
         await asyncio.sleep(5)
@@ -736,7 +736,7 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}"):
             return
 
@@ -773,7 +773,7 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?pardon <player> [reason]`\nExample: `?ban R3diculous He has been forgiven`")
             return False
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if not await server_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:"):return
 
         await server_command(f"pardon {player}")
@@ -956,7 +956,7 @@ class Permissions(commands.Cog):
 
         if not await server_status(): return
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
 
         if slime_vars.use_rcon:
             command_success = await server_command(f"op {player}")[0]
@@ -991,7 +991,7 @@ class Permissions(commands.Cog):
 
         if not await server_status(): return
 
-        reason = format_args(reason)
+        reason = format_args(reason, return_no_reason=True)
         if slime_vars.use_rcon:
             command_success = await server_command(f"deop {player}")[0]
         else:
@@ -1259,7 +1259,10 @@ class Server(commands.Cog):
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
 
-        await ctx.invoke(self.bot.get_command('players'))
+
+
+        if await server_status():  # Only fetches players list if server online.
+            await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
@@ -1463,7 +1466,7 @@ class Server(commands.Cog):
             ?motd YAGA YEWY!
         """
 
-        message = format_args(message, return_empty_str=True)
+        message = format_args(message)
 
         if slime_vars.use_rcon:
             motd_property = backend_functions.server_motd()
@@ -1693,7 +1696,7 @@ class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
-    async def serverlist(self, ctx, name=''):
+    async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
 
@@ -1705,6 +1708,7 @@ class Server_Backups(commands.Cog):
             ?selectserver papermc
         """
 
+        name = format_args(name)
         if not name or 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
             for server in slime_vars.server_list.values():
@@ -2048,6 +2052,7 @@ class Bot_Functions(commands.Cog):
         if slime_vars.use_subprocess is True:
             await ctx.invoke(self.bot.get_command("serverstop"), now=now)
 
+        #os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['blog'])
