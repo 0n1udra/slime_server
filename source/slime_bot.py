@@ -40,6 +40,7 @@ async def on_ready():
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
         await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
+        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable.
         await backend_functions.server_status()
@@ -1928,8 +1929,8 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
-    @commands.command(aliases=['minecraftaddress'])
-    async def minecrafturl(self, ctx):
+    @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
+    async def ip(self, ctx):
         """
         Shows IP address for server.
 

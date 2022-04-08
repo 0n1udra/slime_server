@@ -77,13 +77,13 @@ def get_public_ip():
     server_ip = requests.get('http://ip.42.pl/raw').text
     return server_ip
 
+# Discord
 def channel_set(channel):
     global discord_channel
     discord_channel = channel
 
 async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
-
 
 # ========== Server Commands: start, send command, read log, etc
 async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
