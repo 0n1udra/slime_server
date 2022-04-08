@@ -28,14 +28,15 @@ def lprint(arg1=None, arg2=None):
 
 lprint("Server selected: " + slime_vars.server_selected[0])
 
-def format_args(args, return_empty_str=False):
+# Parse/get data.
+def format_args(args, return_no_reason=False):
     """
     Formats passed in *args from Discord command functions.
     This is so quotes aren't necessary for Discord command arguments.
 
     Args:
         args str: Passed in args to combine and return.
-        return_empty bool(False): returns empty str if passed in arguments aren't usable for Discord command.
+        return_no_reason bool(False): returns string 'No reason given.' for commands that require a reason (kick, ban, etc).
 
     Returns:
         str: Arguments combines with spaces.
@@ -43,9 +44,9 @@ def format_args(args, return_empty_str=False):
 
     if args: return ' '.join(args)
     else:
-        if return_empty_str is True:
-            return ''
-        return "No reason given."
+        if return_no_reason is True:
+            return "No reason given."
+        return ''
 
 def get_datetime():
     """Returns date and time. (2021-12-04 01-49)"""
@@ -174,8 +175,10 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     stopgap_str = stopgap_str.lower()
 
     # Defaults file to server log.
+
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
+    #os.path.getsize(file_path) > 0:
 
     if filter_mode is True: lines = slime_vars.log_lines_limit
 
@@ -186,11 +189,9 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
                 if match in line: return line
     else:
         with FileReadBackwards(file_path) as file:
-            i = 0
-            while i < lines:
+            for i in range(lines):
                 line = file.readline()
                 if not line.strip(): continue  # Skip blank/newlines.
-                i += 1
 
                 # Minecraft log data parsing.
                 if 'banlist' in match:  # How ugly :(
@@ -275,7 +276,6 @@ def server_start():
 
     global mc_subprocess
 
-    os.chdir(slime_vars.server_path)
     if slime_vars.use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
@@ -285,10 +285,10 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif slime_vars.use_tmux is True:
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
+        #os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
+        os.system(rf'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
 
-        # Tries starting new detached tmux session.
+        # Starts server in tmux pane.
         if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{slime_vars.server_selected[2]}" ENTER'):
             return True
     else: return "Error starting server."
