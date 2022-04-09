@@ -1,6 +1,5 @@
 import os
 
-
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = '0n1udra'
 
@@ -57,14 +56,18 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_param
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
-server_selected = server_list['papermc']
+server_selected = server_list['vvolatile']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
-log_lines_limit = 100  # Max number of log lines to read.
+log_lines_limit = 100  # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
+
+# Wait time (in seconds) between sending command to MC server and reading server logs for output.
+# Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
+command_buffer_time = 3
 
 # Autosave functionality. interval is in minutes.
 autosave_status = False
@@ -74,9 +77,10 @@ mc_active_status = False  # If Minecraft server is running.
 mc_subprocess = None  # If using subprocess, this is will be the Minecraft server.
 
 # For '?links' command. Shows helpful websites.
-useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://files.minecraftforge.net/',
+useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-volatile',
+                   'Valhesia Volatile Guide': 'https://drive.google.com/drive/folders/1WpuMlZ30bloWE4GckDYWyBaNeO_8gLOK?usp=sharing',
+                   'Forge Installer': 'https://files.minecraftforge.net/',
                    'CurseForge Download': 'https://curseforge.overwolf.com/',
-                   'Valhesia 3.1': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-3',
                    'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
                    'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
@@ -92,31 +96,3 @@ server_ip = ''  # Will be updated by get_ip function in backend_functions.py on 
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
-
-# All variables which will be saved in slime_vars_json.
-all_variables = {'user': user,
-                 'bot_token_file': bot_token_file,
-                 'pyenv_activate_command': pyenv_activate_command,
-                 'slime_vars_json': slime_vars_json,
-                 'channel_id': channel_id,
-                 'server_url': server_url,
-                 'server_files_access': server_files_access,
-                 'use_subprocess': use_subprocess,
-                 'use_tmux': use_tmux,
-                 'use_rcon': use_rcon,
-                 'rcon_pass': rcon_pass,
-                 'rcon_port': rcon_port,
-                 'mc_path': mc_path,
-                 'java_params': java_params,
-                 'server_list': server_list,
-                 'server_selected': server_selected,
-                 'world_backups_path': world_backups_path,
-                 'server_backup_path': server_backups_path,
-                 'log_lines_limit': log_lines_limit,
-                 'autosave_status': autosave_status,
-                 'autosave_interval': autosave_interval,
-                 'mc_active_status': mc_active_status,
-                 'mc_subprocess': mc_subprocess,
-                 'useful_websites': useful_websites,
-                 }
-
