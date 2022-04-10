@@ -392,11 +392,11 @@ class Basics(commands.Cog):
             return False
 
         for line in log_data:
+            if lines <= 0: break
+            lines -= 1
+
             line = line.split(']: <', 1)[-1].split('>', 1)
             await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
-            lines -= 1
-            if lines == 0: break
-
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
