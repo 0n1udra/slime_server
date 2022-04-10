@@ -53,7 +53,11 @@ world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
-log_lines_limit = 100  # Max number of log lines to read.
+log_lines_limit = 100  # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
+
+# Wait time (in seconds) between sending command to MC server and reading server logs for output.
+# Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
+command_buffer_time = 3
 
 # Autosave functionality. interval is in minutes.
 autosave_status = False
@@ -63,9 +67,9 @@ mc_active_status = False  # If Minecraft server is running.
 mc_subprocess = None  # If using subprocess, this is will be the Minecraft server.
 
 # For '?links' command. Shows helpful websites.
-useful_websites = {'Forge Downnload (Download 35.1.13 Installer)': 'https://files.minecraftforge.net/',
+useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
+                   'Forge Installer': 'https://files.minecraftforge.net/',
                    'CurseForge Download': 'https://curseforge.overwolf.com/',
-                   'Valhesia 3.1': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-3',
                    'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
                    'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',

@@ -5,8 +5,8 @@ from discord_components import DiscordComponents, Button, ButtonStyle,  Select, 
 from backend_functions import lprint, format_args, server_command, server_status
 import backend_functions, slime_vars
 
-__version__ = "5.3"
-__date__ = '2022/01/02'
+__version__ = "5.3.1"
+__date__ = '2022/04/09'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -364,7 +364,7 @@ class Player(commands.Cog):
     async def playerlocate(self, ctx, player=''):
         """Gets player's location coordinates."""
 
-        if location := backend_functions.get_location(player):
+        if location := await backend_functions.get_location(player):
             await ctx.send(f"Located `{player}`: `{location}`")
             lprint(ctx, f"Located {player}: {location}")
             return location
@@ -648,6 +648,7 @@ class Permissions(commands.Cog):
         if not await server_status():
             await ctx.send("Server Offline.")
             return
+
         # Enable/disable whitelisting.
         if arg.lower() in backend_functions.enable_inputs:
             await server_command('whitelist on')
@@ -1012,7 +1013,6 @@ class Server(commands.Cog):
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await server_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {slime_vars.autosave_interval}m)")
-
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
