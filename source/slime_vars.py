@@ -60,7 +60,7 @@ log_lines_limit = 100  # Max number of log lines to read. Increase if server is 
 command_buffer_time = 3
 
 # Autosave functionality. interval is in minutes.
-autosave_status = False
+autosave_status = True
 autosave_interval = 60
 
 mc_active_status = False  # If Minecraft server is running.

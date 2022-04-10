@@ -1737,7 +1737,7 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened secret panel')
 
-    @commands.command(aliases=['player', 'ppanel'])
+    @commands.command(aliases=['player', 'ppanel', 'pc'])
     async def playerpanel(self, ctx, player=''):
         """Select player from list (or all, random) and use quick action buttons."""
 
