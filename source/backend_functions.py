@@ -294,8 +294,7 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif slime_vars.use_tmux is True:
-        #os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd /" ENTER')  # Fix: 'java.lang.Error: Properties init: Could not determine current working' error
-        os.system(rf'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
+        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
 
         # Starts server in tmux pane.
         if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{slime_vars.server_selected[2]}" ENTER'):
