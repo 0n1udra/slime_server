@@ -375,7 +375,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=15):
+    async def chatlog(self, ctx, lines=10):
         """
         Shows chat log. Does not include whispers.
 
@@ -386,17 +386,17 @@ class Basics(commands.Cog):
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         log_data = backend_functions.server_log(']: <', filter_mode=True, return_reversed=True)
-        try:
-            log_data = log_data.strip().split('\n')
+        try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
 
         for line in log_data:
-            try:
-                line = line.split(']')
-                await ctx.send(f"`{str(line[0][1:] + ':' + line[2][1:])}`")
-            except: pass
+            line = line.split(']: <', 1)[-1].split('>', 1)
+            await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
+            lines -= 1
+            if lines == 0: break
+
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
