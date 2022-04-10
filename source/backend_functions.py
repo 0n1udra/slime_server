@@ -118,7 +118,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
     global mc_subprocess, server_active
 
     async def inactive_msg():
-        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?stats` or `?check` to check if server is back online.")
+        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?check` to update server status.")
 
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to a unreachable RCON server which will hold up the bot.
@@ -258,7 +258,6 @@ async def server_status(discord_msg=False):
 
     global server_active
 
-    if discord_msg: await channel_send('***Checking Server Status...***')
     lprint("Checking Minecraft server status...")
 
     # server_command() will send random number, server is online if match is found in log.
