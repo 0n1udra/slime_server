@@ -28,7 +28,7 @@ def lprint(arg1=None, arg2=None):
 
 lprint("Server selected: " + slime_vars.server_selected[0])
 
-# Parse/get data.
+# ===== Parse/format/read data.
 def format_args(args, return_no_reason=False):
     """
     Formats passed in *args from Discord command functions.
@@ -78,16 +78,19 @@ def get_public_ip():
     slime_vars.server_ip = server_ip
     return server_ip
 
-# Discord
+# ===== Discord related functions.
 def channel_set(channel):
+    """Sets discord_channel global variable."""
     global discord_channel
     discord_channel = channel
 
 async def channel_send(msg):
+    """Send message to discord_channel."""
+
     if discord_channel: await discord_channel.send(msg)
 
 # ========== Server Commands: start, send command, read log, etc
-async def server_command(command, stop_at_checker=True, skip_check=False, discord_msg=True):
+async def server_command(command, skip_check=False, discord_msg=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -95,7 +98,6 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
 
     Args:
         command str: Command to send.
-        stop_at_checker bool(True): Only returns log output under sent status_checker
         skip_check bool(False): Skips server_active boolean check.
         discord_msg bool(True): Send message indicating if server is inactive.
 
@@ -145,10 +147,8 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         return False
 
     await asyncio.sleep(slime_vars.command_buffer_time)
-    # Checks server log if command went through.
-    return_data = [server_log(command), None]
-    if stop_at_checker is True:
-        return_data[1] = random_number
+    # Returns log line that matches command.
+    return_data = [server_log(command), random_number]
     return return_data
 
 def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
@@ -169,41 +169,33 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
         log_data (str): Returns found match log line or multiple lines from log.
     """
 
+    # Parameter setups.
     if match is None: match = 'placeholder_match'
     match = match.lower()
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
-
+    if filter_mode is True: lines = slime_vars.log_lines_limit
     # Defaults file to server log.
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
-    #os.path.getsize(file_path) > 0:
-
-    if filter_mode is True: lines = slime_vars.log_lines_limit
 
     log_data = ''
+
+    # Read log file top down.
     if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line: return line
-    else:
+    else:  # Read log file bottom up, latest log outputs first.
         with FileReadBackwards(file_path) as file:
             for i in range(lines):
                 line = file.readline()
                 if not line.strip(): continue  # Skip blank/newlines.
-
-                # Minecraft log data parsing.
-                if 'banlist' in match:  # How ugly :(
-                    if 'was banned by' in line:  # finds log lines that shows banned players.
-                        log_data += line
-                    elif ']: There are' in line:  # finds the end so it doesn't return everything from log other then banned users.
-                        log_data += line
-                        break
-
-                elif log_mode: log_data += line
-
+                elif log_mode:
+                    log_data += line
                 elif match in line.lower():
                     log_data += line
                     if not filter_mode: break
+
                 if stopgap_str.lower() in line.lower(): break
 
     if log_data:
@@ -250,7 +242,7 @@ async def server_status(discord_msg=False):
     lprint("Checking Minecraft server status...")
 
     # server_command() will send random number, server is online if match is found in log.
-    response = await server_command(' ', skip_check=True, stop_at_checker=True, discord_msg=discord_msg)
+    response = await server_command(' ', skip_check=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
         lprint("Server Status: Active")
@@ -324,7 +316,6 @@ def ping_server():
 
     Returns:
         dict: Dictionary containing 'version', and 'description' (motd).
-
     """
 
     global server_active
@@ -416,6 +407,8 @@ def get_latest_version():
     return False
 
 async def get_player_list():
+    """Extracts wanted data from output of 'list' command."""
+
     response = await server_command("list")
     if not response: return False
 
@@ -435,7 +428,7 @@ async def get_player_list():
     else:
         player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        #player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
 
         return player_names, text
 
