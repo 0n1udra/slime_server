@@ -5,8 +5,8 @@ from discord_components import DiscordComponents, Button, ButtonStyle,  Select, 
 from backend_functions import lprint, format_args, server_command, server_status
 import backend_functions, slime_vars
 
-__version__ = "5.3P"
-__date__ = '2022/01/02'
+__version__ = "5.3.1P"
+__date__ = '2022/04/09'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"

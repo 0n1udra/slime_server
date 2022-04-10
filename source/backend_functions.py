@@ -150,12 +150,12 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
             await inactive_msg()
             return False
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{command}" ENTER')
-        await asyncio.sleep(slime_vars.command_buffer_time)
 
     else:
         await inactive_msg()
         return False
 
+    await asyncio.sleep(slime_vars.command_buffer_time)
     # Checks server log if command went through.
     return_data = [server_log(command), None]
     if stop_at_checker is True:
@@ -461,7 +461,6 @@ async def get_location(player=''):
         # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
         if log_data:
             location = log_data.split('[')[-1][:-3].replace('d', '')
-            #location = log_data.split('[')[3][:-3].replace('d,', '')
             return location
 
 

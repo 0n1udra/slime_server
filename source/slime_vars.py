@@ -89,7 +89,6 @@ useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/mo
 
 # ========== Other variables. DON'T TOUCH.
 bot_files_path = os.path.dirname(os.path.abspath(__file__))
-
 slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
