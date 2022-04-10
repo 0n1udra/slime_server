@@ -449,8 +449,8 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` :gun: assassinated!")
         lprint(ctx, f"Killed: {target}")
 
-    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'waitkill', 'dw'])
-    async def killwait(self, ctx, target='', delay=5, *reason):
+    @commands.command(aliases=['delaykill', 'dkill', 'killwait','waitkill'])
+    async def killdelay(self, ctx, target='', delay=5, *reason):
         """
         Kill player after time elapsed.
 
@@ -478,7 +478,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
 
-    @commands.command(aliases=['killallplayers', 'kilkillkill'])
+    @commands.command(aliases=['killallplayers', 'kilkillkill', 'killall'])
     async def _killplayers(self, ctx):
         await ctx.send("All players killed!")
         await backend_functions.server_command('kill @a')
@@ -789,7 +789,8 @@ class Permissions(commands.Cog):
         if not await server_status(): return
 
         banned_players = ''
-        response = await server_command("banlist")[0]
+        response = await server_command("banlist")
+        response = response[0]
 
         if slime_vars.use_rcon is True:
             if 'There are no bans' in response:

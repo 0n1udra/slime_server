@@ -126,7 +126,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
         await inactive_msg()
         return False
 
-    status_checker_command, random_number = 'locatebiome ', str(random.random())
+    status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
     status_checker = status_checker_command + random_number
 
     if slime_vars.use_rcon is True:
