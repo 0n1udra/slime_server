@@ -150,6 +150,7 @@ async def server_command(command, stop_at_checker=True, skip_check=False, discor
             await inactive_msg()
             return False
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{command}" ENTER')
+        await asyncio.sleep(slime_vars.command_buffer_time)
 
     else:
         await inactive_msg()
@@ -181,12 +182,9 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
 
     if match is None: match = 'placeholder_match'
     match = match.lower()
-
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
-    stopgap_str = stopgap_str.lower()
 
     # Defaults file to server log.
-
     if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
     if not os.path.isfile(file_path): return False
     #os.path.getsize(file_path) > 0:
@@ -462,7 +460,8 @@ async def get_location(player=''):
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
         # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
         if log_data:
-            location = log_data.split('[')[3][:-3].replace('d,', '')
+            location = log_data.split('[')[-1][:-3].replace('d', '')
+            #location = log_data.split('[')[3][:-3].replace('d,', '')
             return location
 
 

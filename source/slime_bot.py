@@ -580,7 +580,7 @@ class Player(commands.Cog):
     async def playerlocate(self, ctx, player=''):
         """Gets player's location coordinates."""
 
-        if location := backend_functions.get_location(player):
+        if location := await backend_functions.get_location(player):
             await ctx.send(f"Located `{player}`: `{location}`")
             lprint(ctx, f"Located {player}: {location}")
             return location
@@ -1230,7 +1230,7 @@ class Server(commands.Cog):
         if await server_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
-        await backend_functions.zomboid_command('save')
+        #await backend_functions.zomboid_command('save')
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
