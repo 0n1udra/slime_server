@@ -46,11 +46,9 @@ async def on_ready():
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
         await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
-==== BASE ====
         await channel.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
                            components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),
-                                        Button(label="Help Page", emoji='\U00002753', custom_id="help")]])
+                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus")]])
 
 @bot.event
 async def on_button_click(interaction):
