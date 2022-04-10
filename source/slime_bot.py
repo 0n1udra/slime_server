@@ -159,7 +159,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=15):
+    async def chatlog(self, ctx, lines=10):
         """
         Shows chat log. Does not include whispers.
 
@@ -170,17 +170,17 @@ class Basics(commands.Cog):
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         log_data = backend_functions.server_log(']: <', filter_mode=True, return_reversed=True)
-        try:
-            log_data = log_data.strip().split('\n')
+        try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
 
         for line in log_data:
-            try:
-                line = line.split(']')
-                await ctx.send(f"`{str(line[0][1:] + ':' + line[2][1:])}`")
-            except: pass
+            if lines <= 0: break
+            lines -= 1
+
+            line = line.split(']: <', 1)[-1].split('>', 1)
+            await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched chat log")
@@ -233,8 +233,8 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` :gun: assassinated!")
         lprint(ctx, f"Killed: {target}")
 
-    @commands.command(aliases=['delayedkill', 'delayedplayerkill', 'waitkill', 'dw'])
-    async def killwait(self, ctx, target='', delay=5, *reason):
+    @commands.command(aliases=['delaykill', 'dkill', 'killwait','waitkill'])
+    async def killdelay(self, ctx, target='', delay=5, *reason):
         """
         Kill player after time elapsed.
 
@@ -262,7 +262,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
 
-    @commands.command(aliases=['killallplayers', 'kilkillkill'])
+    @commands.command(aliases=['killallplayers', 'kilkillkill', 'killall'])
     async def _killplayers(self, ctx):
         await ctx.send("All players killed!")
         await backend_functions.server_command('kill @a')
@@ -569,11 +569,10 @@ class Permissions(commands.Cog):
     async def banlist(self, ctx):
         """Show list of current bans."""
 
-        # Gets online players, formats output for Discord depending on using RCON or reading from server log.
-        if not await server_status(): return
-
         banned_players = ''
-        response = await server_command("banlist")[0]
+        response = await server_command("banlist")
+        if not response: return
+        response = response[0]
 
         if slime_vars.use_rcon is True:
             if 'There are no bans' in response:
@@ -588,9 +587,9 @@ class Permissions(commands.Cog):
                     banner = line[0].split(' ')[-1].strip()
                     if len(player) < 2:
                         continue
-                    banned_players += f"`{player}` banned by `{banner}` : `{reason}`\n"
+                    banned_players += f"**{player}** banned by `{banner}` : `{reason}`\n"
 
-                banned_players += data[0] + '.'  # Gets line that says 'There are x bans'.
+                banned_players += data[0].strip() + '.'  # Gets line that says 'There are x bans'.
 
         else:
             if log_data := backend_functions.server_log('banlist'):
@@ -644,10 +643,8 @@ class Permissions(commands.Cog):
         # Checks if inputted any arguments.
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
-        # Checks if can send command to server.
-        if not await server_status():
-            await ctx.send("Server Offline.")
-            return
+        # Checks if server online.
+        if not await server_status(discord_msg=True): return
 
         # Enable/disable whitelisting.
         if arg.lower() in backend_functions.enable_inputs:
@@ -738,9 +735,8 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
             return False
 
-        if not await server_status(): return
-
         reason = format_args(reason, return_no_reason=True)
+        if not reason: return
 
         if slime_vars.use_rcon:
             command_success = await server_command(f"op {player}")[0]
@@ -773,20 +769,22 @@ class Permissions(commands.Cog):
             await ctx.send("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
             return False
 
-        if not await server_status(): return
-
         reason = format_args(reason, return_no_reason=True)
+        command_success = False
+
         if slime_vars.use_rcon:
             command_success = await server_command(f"deop {player}")[0]
         else:
-            response = await server_command(f"deop {player}")
-            command_success = backend_functions.server_log(player, stopgap_str=response[1])
+            if response := await server_command(f"deop {player}"):
+                command_success = backend_functions.server_log(player, stopgap_str=response[1])
 
         if command_success:
             await server_command(f"say ---INFO--- {player} no longer OP : {reason}")
             await ctx.send(f"**Player OP Removed:** `{player}`")
-        else: await ctx.send("**ERROR:** Problem removing OP status.")
-        lprint(ctx, f"Removed server OP: {player}")
+            lprint(ctx, f"Removed server OP: {player}")
+        else:
+            await ctx.send("**ERROR:** Problem removing OP status.")
+            lprint(ctx, f"Error: removing server OP: {player}")
 
     @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
     async def optimed(self, ctx, player='', time_limit=1, *reason):
@@ -801,6 +799,8 @@ class Permissions(commands.Cog):
             ?optimed Steve 30 Need to check something real quick.
             ?top jesse 60
         """
+
+        if not await server_status(discord_msg=True): return
 
         if not player:
             await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
@@ -898,7 +898,7 @@ class World(commands.Cog):
             ?time 12
         """
 
-        if not await server_status(): return
+        if not await server_status(discord_msg=True): return
 
         if set_time:
             await server_command(f"time set {set_time}")
@@ -1025,6 +1025,7 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await server_status(discord_msg=show_msg)
+        await ctx.send('***Checking Server Status...***')
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
 
     @commands.command(aliases=['stat', 'stats', 'status'])

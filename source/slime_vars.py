@@ -53,11 +53,15 @@ world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 
 # ========== Bot Config
-log_lines_limit = 100  # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
+# The command to use in server to use to check status. server_command() will send something like 'xp 0.64356...'.
+status_checker_command = 'xp '
+
+# Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
+log_lines_limit = 100
 
 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
-command_buffer_time = 3
+command_buffer_time = 1
 
 # Autosave functionality. interval is in minutes.
 autosave_status = True
