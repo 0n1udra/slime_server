@@ -79,6 +79,7 @@ mc_subprocess = None  # If using subprocess, this is will be the Minecraft serve
 # For '?links' command. Shows helpful websites.
 useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/modpacks/valhelsia-volatile',
                    'Valhesia Volatile Guide': 'https://drive.google.com/drive/folders/1WpuMlZ30bloWE4GckDYWyBaNeO_8gLOK?usp=sharing',
+                   'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
                    'Forge Installer': 'https://files.minecraftforge.net/',
                    'CurseForge Download': 'https://curseforge.overwolf.com/',
                    'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
