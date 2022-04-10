@@ -51,8 +51,7 @@ async def on_ready():
         await channel.send(content='Use `?cp` for Control Panel. `?mstat` Minecraft Status page. `?help` for all commands.',
                            components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
                                         Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),
-                                        Button(label="Help Page", emoji='\U00002753', custom_id="help")]])
+                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
 
 @bot.event
 async def on_button_click(interaction):
