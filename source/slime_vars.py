@@ -94,6 +94,7 @@ useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/mo
 # ========== Other variables. DON'T TOUCH.
 bot_files_path = os.path.dirname(os.path.abspath(__file__))
 slime_vars_file = bot_files_path + '/slime_vars.py'
+server_log_file = f"{server_path}/logs/latest.log"
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
 server_ip = ''  # Will be updated by get_ip function in backend_functions.py on bot startup.
