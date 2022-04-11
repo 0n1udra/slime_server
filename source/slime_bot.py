@@ -119,7 +119,7 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {game_name} Log: {lines}")
 
-    # ========== Other Games: Valheim, Project Zomboid
+# ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
     def __init__(self, bot):
         self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
