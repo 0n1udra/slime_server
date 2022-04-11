@@ -162,7 +162,7 @@ async def server_command(command, skip_check=False, discord_msg=True):
     return_data = [server_log(command), random_number]
     return return_data
 
-def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
+def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
     """
     Read latest.log file under server/logs folder. Can also find match.
     What a fat ugly function you are :(
@@ -186,27 +186,41 @@ def server_log(match=None, file_path=None, lines=15, normal_read=False, log_mode
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
     if filter_mode is True: lines = slime_vars.log_lines_limit
     # Defaults file to server log.
-    if file_path is None: file_path = f"{slime_vars.server_path}/logs/latest.log"
+    if file_path is None: file_path = slime_vars.server_log_file
     if not os.path.isfile(file_path): return False
 
     log_data = ''
+    line_count = 0
+    with open(file_path) as f:
+        for line in f: line_count += 1
 
-    # Read log file top down.
+    log_data = ''
     if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line: return line
     else:  # Read log file bottom up, latest log outputs first.
         with FileReadBackwards(file_path) as file:
-            for i in range(lines):
+            i = total = 0
+            # Stops loop at set limit or if file has no more lines.
+            while i <= lines and total <= line_count and total <= slime_vars.log_lines_limit:
+                total += 1
                 line = file.readline()
                 if not line.strip(): continue  # Skip blank/newlines.
                 elif log_mode:
                     log_data += line
+                    i += 1
+                elif match in line.lower() or any(i in line for i in match_list):
+                    log_data += line
+                    i += 1
+                    if not filter_mode: break  # If filter_mode is not True, loop will stop at first match.
+                if stopgap_str.lower() in line.lower(): break  # Stops loop if using stopgap_str variable. e.g. Using with filter_mode.
+
+                elif log_mode: log_data += line
+
                 elif match in line.lower():
                     log_data += line
                     if not filter_mode: break
-
                 if stopgap_str.lower() in line.lower(): break
 
     if log_data:
