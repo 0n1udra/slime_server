@@ -431,10 +431,11 @@ class Basics(commands.Cog):
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
 
+        i = lines
         for line in log_data:
             # Only show specified number of lines from 'lines' parameter.
-            if lines <= 0: break
-            lines -= 1
+            if i <= 0: break
+            i -= 1
 
             # Extracts wanted data from log line and formats it in Discord markdown.
             # E.g. [16:35:15] [Server thread/INFO] [minecraft/DedicatedServer]: <R3diculous> hello
@@ -1369,10 +1370,11 @@ class Server(commands.Cog):
             await ctx.send("**ERROR:** Problem fetching connection logs, there may be nothing to fetch.")
             return False
 
+        i = lines
         # Prints out log lines with Discord markdown.
         for line in log_data:
-            if lines <= 0: break
-            lines -= 1
+            if i <= 0: break
+            i -= 1
             await ctx.send(f'`{line}`')
 
         await ctx.send("-----END-----")
