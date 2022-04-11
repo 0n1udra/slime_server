@@ -205,14 +205,6 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
                     if not filter_mode: break  # If filter_mode is not True, loop will stop at first match.
                 if stopgap_str.lower() in line.lower(): break  # Stops loop if using stopgap_str variable. e.g. Using with filter_mode.
 
-                elif log_mode: log_data += line
-
-                elif match in line.lower():
-                    log_data += line
-                    if not filter_mode: break
-
-                if stopgap_str.lower() in line.lower(): break
-
     if log_data:
         if return_reversed is True:
             log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.

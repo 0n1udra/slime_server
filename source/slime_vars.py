@@ -57,7 +57,7 @@ server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 status_checker_command = 'xp '
 
 # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
-log_lines_limit = 100
+log_lines_limit = 500
 
 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
