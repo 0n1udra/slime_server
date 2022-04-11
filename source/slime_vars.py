@@ -46,7 +46,7 @@ server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_param
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
-server_selected = server_list['papermc']
+server_selected = server_list['vvolatile']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -82,6 +82,7 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
 # ========== Other variables. DON'T TOUCH.
 bot_files_path = os.path.dirname(os.path.abspath(__file__))
 slime_vars_file = bot_files_path + '/slime_vars.py'
+server_log_file = f"{server_path}/logs/latest.log"
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
 server_ip = ''  # Will be updated by get_ip function in backend_functions.py on bot startup.
