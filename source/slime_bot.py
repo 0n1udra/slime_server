@@ -1,10 +1,10 @@
-import subprocess, datetime, asyncio, discord, random, sys, os
+import asyncio, discord, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "5.4"
+__version__ = "5.4.1"
 __date__ = '2022/04/09'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
@@ -203,7 +203,7 @@ class Basics(commands.Cog):
             await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
 
         await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched chat log")
+        lprint(ctx, f"Fetched Chat Log: {lines}")
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -214,7 +214,6 @@ class Player(commands.Cog):
         """Show list of online players."""
 
         player_list = await backend_functions.get_player_list()
-        if not player_list: return
 
         await ctx.send("***Fetching Player List...***")
         if not player_list:
@@ -861,6 +860,7 @@ class Permissions(commands.Cog):
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    # ===== Weather
     @commands.command(aliases=['weather', 'setweather'])
     async def weatherset(self, ctx, state='', duration=0):
         """
@@ -921,6 +921,7 @@ class World(commands.Cog):
         await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
         lprint(ctx, 'Weather: Disabled')
 
+    # ===== Time
     @commands.command(aliases=['time', 'settime'])
     async def timeset(self, ctx, set_time=''):
         """
@@ -979,6 +980,7 @@ class Server(commands.Cog):
             self.autosave_loop.start()
             lprint(f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
+    # ===== Save/Autosave
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
@@ -1056,6 +1058,7 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
 
+    # ===== Status/Info
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active'])
     async def servercheck(self, ctx, show_msg=True):
         """Checks if server is online."""
@@ -1100,7 +1103,7 @@ class Server(commands.Cog):
         if match: filter_mode, log_mode = True, False
 
         file_path = f"{slime_vars.server_path}/logs/latest.log"
-        await ctx.send(f"***Getting {lines} Minecraft Log Lines...*** :tools:")
+        await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
         log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
             for line in log_data.split('\n'):
@@ -1111,7 +1114,157 @@ class Server(commands.Cog):
             await ctx.send("**Error:** Problem fetching data.")
             lprint(ctx, "Error: Issue getting minecraft log data.")
 
-    @commands.command(aliases=['startminecraft', 'mstart', 'startserver'])
+    @commands.command(aliases=['clog', 'connectionlog'])
+    async def serverconnectionlog(self, ctx, lines=10):
+        """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
+
+        await ctx.send(f"***Fetching {lines} Connection Log...*** :speech_left:")
+
+        match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
+        # Get only log lines that are connection related.
+        log_data = backend_functions.server_log(match_list=match_list, filter_mode=True, return_reversed=True)
+        try: log_data = log_data.strip().split('\n')
+        except:
+            await ctx.send("**ERROR:** Problem fetching connection logs, there may be nothing to fetch.")
+            return False
+
+        # Prints out log lines with Discord markdown.
+        for line in log_data:
+            if lines <= 0: break
+            lines -= 1
+            await ctx.send(f'`{line}`')
+
+        await ctx.send("-----END-----")
+        lprint(ctx, f"Fetched Connection Log: {lines}")
+
+    @commands.command(aliases=['minecraftversion', 'mversion'])
+    async def serverversion(self, ctx):
+        """Gets Minecraft server version."""
+
+        response = backend_functions.server_version()
+        await ctx.send(f"Current version: `{response}`")
+        lprint("Fetched Minecraft server version: " + response)
+
+    # === Properties
+    @commands.command(aliases=['property', 'p'])
+    async def properties(self, ctx, target_property='', *value):
+        """
+        Check or change a server.properties property. May require restart.
+
+        Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
+
+        Args:
+            target_property str(''): Target property to change, must be exact in casing and spelling and some may include a dash -.
+            *value str: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
+
+        Usage:
+            ?property motd
+            ?property spawn-protection 2
+            ?property all
+        """
+
+        if not target_property:
+            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`")
+            return False
+
+        if value:
+            await ctx.send("Property Updated  :memo:")
+            value = ' '.join(value)
+        else: value = ''
+
+        backend_functions.edit_file(target_property, value)
+        fetched_property = backend_functions.edit_file(target_property)
+        await asyncio.sleep(2)
+
+        if fetched_property:
+            await ctx.send(f"`{fetched_property[0].strip()}`")
+            lprint(ctx, f"Server property: {fetched_property[0].strip()}")
+        else:
+            await ctx.send(f"**ERROR:** 404 Property not found.")
+            lprint(f"Server property not found: {target_property}")
+
+    @commands.command()
+    async def propertiesall(self, ctx):
+        """Shows full server properties file."""
+
+        await ctx.invoke(self.bot.get_command('properties'), target_property='all')
+
+    @commands.command(aliases=['serveronlinemode', 'omode', 'om'])
+    async def onlinemode(self, ctx, mode=''):
+        """
+        Check or enable/disable onlinemode property. Restart required.
+
+        Args:
+            mode str(''): Update onlinemode property in server.properties file. Must be in lowercase.
+
+        Usage:
+            ?onlinemode true
+            ?omode false
+        """
+
+        if not mode:
+            online_mode = backend_functions.edit_file('online-mode')[1]
+            await ctx.send(f"online mode: `{online_mode}`")
+            lprint(ctx, f"Fetched online-mode state: {online_mode}")
+        elif mode in ['true', 'false']:
+            backend_functions.edit_file('online-mode', mode)[0]
+            server_property = backend_functions.edit_file('online-mode')
+            await ctx.send(f"Updated online mode: `{server_property[1]}`")
+            await ctx.send("**Note:** Server restart required for change to take effect.")
+            lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
+        else: await ctx.send("Need a true or false argument (in lowercase).")
+
+    @commands.command(aliases=['updatemotd', 'servermotd'])
+    async def motd(self, ctx, *message):
+        """
+        Check or Update motd property. Restart required.
+
+        Args:
+            *message str: New message for message of the day for server. No quotes needed.
+
+        Usage:
+            ?motd
+            ?motd YAGA YEWY!
+        """
+
+        message = format_args(message)
+
+        if slime_vars.use_rcon:
+            motd_property = backend_functions.server_motd()
+        elif slime_vars.server_files_access:
+            backend_functions.edit_file('motd', message)
+            motd_property = backend_functions.edit_file('motd')
+        else: motd_property = '**ERROR:** Fetching server motd failed.'
+
+        if message:
+            await ctx.send(f"Updated MOTD: `{motd_property[0].strip()}`")
+            lprint("Updated MOTD: " + motd_property[1].strip())
+        else:
+            await ctx.send(f"Current MOTD: `{motd_property[1]}`")
+            lprint("Fetched MOTD: " + motd_property[1].strip())
+
+    @commands.command(aliases=['serverrcon'])
+    async def rcon(self, ctx, state=''):
+        """
+        Check RCON status, enable/disable enable-rcon property. Restart required.
+
+        Args:
+            state str(''): Set enable-rcon property in server.properties file, true or false must be in lowercase.
+
+        Usage:
+            ?rcon
+            ?rcon true
+            ?rcon false
+
+        """
+
+        if state in ['true', 'false', '']:
+            response = backend_functions.edit_file('enable-rcon', state)
+            await ctx.send(f"`{response[0]}`")
+        else: await ctx.send("Need a true or false argument (in lowercase).")
+
+    # ===== Start/Stop
+    @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -1190,14 +1343,7 @@ class Server(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
-    @commands.command(aliases=['minecraftversion', 'mversion'])
-    async def serverversion(self, ctx):
-        """Gets Minecraft server version."""
-
-        response = backend_functions.server_version()
-        await ctx.send(f"Current version: `{response}`")
-        lprint("Fetched Minecraft server version: " + response)
-
+    # ===== Misc
     @commands.command(aliases=['lversion', 'lver', 'lv'])
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
@@ -1205,123 +1351,6 @@ class Server(commands.Cog):
         response = backend_functions.check_latest_version()
         await ctx.send(f"Latest version: `{response}`")
         lprint("Fetched latest Minecraft server version: " + response)
-
-    @commands.command()
-    async def propertiesall(self, ctx):
-        """Shows full server properties file."""
-
-        await ctx.invoke(self.bot.get_command('properties'), target_property='all')
-
-    @commands.command(aliases=['property', 'p'])
-    async def properties(self, ctx, target_property='', *value):
-        """
-        Check or change a server.properties property. May require restart.
-
-        Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
-
-        Args:
-            target_property str(''): Target property to change, must be exact in casing and spelling and some may include a dash -.
-            *value str: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
-
-        Usage:
-            ?property motd
-            ?property spawn-protection 2
-            ?property all
-        """
-
-        if not target_property:
-            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`")
-            return False
-
-        if value:
-            await ctx.send("Property Updated  :memo:")
-            value = ' '.join(value)
-        else: value = ''
-
-        backend_functions.edit_file(target_property, value)
-        fetched_property = backend_functions.edit_file(target_property)
-        await asyncio.sleep(2)
-
-        if fetched_property:
-            await ctx.send(f"`{fetched_property[0].strip()}`")
-            lprint(ctx, f"Server property: {fetched_property[0].strip()}")
-        else:
-            await ctx.send(f"**ERROR:** 404 Property not found.")
-            lprint(f"Server property not found: {target_property}")
-
-    @commands.command(aliases=['serveronlinemode', 'omode', 'om'])
-    async def onlinemode(self, ctx, mode=''):
-        """
-        Check or enable/disable onlinemode property. Restart required.
-
-        Args:
-            mode str(''): Update onlinemode property in server.properties file. Must be in lowercase.
-
-        Usage:
-            ?onlinemode true
-            ?omode false
-        """
-
-        if not mode:
-            online_mode = backend_functions.edit_file('online-mode')[1]
-            await ctx.send(f"online mode: `{online_mode}`")
-            lprint(ctx, f"Fetched online-mode state: {online_mode}")
-        elif mode in ['true', 'false']:
-            backend_functions.edit_file('online-mode', mode)[0]
-            server_property = backend_functions.edit_file('online-mode')
-            await ctx.send(f"Updated online mode: `{server_property[1]}`")
-            await ctx.send("**Note:** Server restart required for change to take effect.")
-            lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
-        else: await ctx.send("Need a true or false argument (in lowercase).")
-
-    @commands.command(aliases=['updatemotd', 'servermotd'])
-    async def motd(self, ctx, *message):
-        """
-        Check or Update motd property. Restart required.
-
-        Args:
-            *message str: New message for message of the day for server. No quotes needed.
-
-        Usage:
-            ?motd
-            ?motd YAGA YEWY!
-        """
-
-        message = format_args(message)
-
-        if slime_vars.use_rcon:
-            motd_property = backend_functions.server_motd()
-        elif slime_vars.server_files_access:
-            backend_functions.edit_file('motd', message)
-            motd_property = backend_functions.edit_file('motd')
-        else: motd_property = '**ERROR:** Fetching server motd failed.'
-
-        if message:
-            await ctx.send(f"Updated MOTD: `{motd_property[0].strip()}`")
-            lprint("Updated MOTD: " + motd_property[1].strip())
-        else:
-            await ctx.send(f"Current MOTD: `{motd_property[1]}`")
-            lprint("Fetched MOTD: " + motd_property[1].strip())
-
-    @commands.command(aliases=['serverrcon'])
-    async def rcon(self, ctx, state=''):
-        """
-        Check RCON status, enable/disable enable-rcon property. Restart required.
-
-        Args:
-            state str(''): Set enable-rcon property in server.properties file, true or false must be in lowercase.
-
-        Usage:
-            ?rcon
-            ?rcon true
-            ?rcon false
-
-        """
-
-        if state in ['true', 'false', '']:
-            response = backend_functions.edit_file('enable-rcon', state)
-            await ctx.send(f"`{response[0]}`")
-        else: await ctx.send("Need a true or false argument (in lowercase).")
 
     @commands.command(aliases=['updateserver', 'su'])
     async def serverupdate(self, ctx, now=''):
@@ -1357,6 +1386,7 @@ class Server(commands.Cog):
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    # ===== Backup
     @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
     async def worldbackups(self, ctx, amount=10):
         """
@@ -1421,6 +1451,7 @@ class World_Backups(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('worldbackup'), '')
 
+    # ===== Restore
     @commands.command(aliases=['restoreworld', 'worldbackuprestore', 'wbr'])
     async def worldrestore(self, ctx, index='', now=''):
         """
@@ -1461,6 +1492,7 @@ class World_Backups(commands.Cog):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
 
+    # ===== Delete/Reset
     @commands.command(aliases=['deleteworld', 'wbd'])
     async def worlddelete(self, ctx, index=''):
         """
@@ -1544,6 +1576,7 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
+    # ===== Backup
     @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
         """
@@ -1607,6 +1640,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
+    # ===== Restore
     @commands.command(aliases=['restoreserver', 'serverbackuprestore', 'restoreserverbackup', 'sbr'])
     async def serverrestore(self, ctx, index='', now=''):
         """
@@ -1646,6 +1680,7 @@ class Server_Backups(commands.Cog):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
 
+    # ===== Delete
     @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
     async def serverdelete(self, ctx, index=''):
         """
@@ -1890,7 +1925,7 @@ class Bot_Functions(commands.Cog):
         """
 
         log_data = backend_functions.server_log(file_path=slime_vars.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
-        await ctx.send(f"***Getting {lines} Bot Log Lines...*** :tools:")
+        await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
             # Shows server log line by line.
             for line in log_data.split('\n'):
