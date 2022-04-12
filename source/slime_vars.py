@@ -1,16 +1,13 @@
 import os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
-user = 'arcpy'
+user = os.getlogin()
 
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
 
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
-
-# Save slime_vars.py to json, for updating bot. (set_slime_vars() in run_bot.py)
-slime_vars_json = f'/home/{user}/slime_bot_vars.json'
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = 860361620492255292
