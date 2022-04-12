@@ -12,6 +12,7 @@ Server Start, `?start`, Starts Minecraft server up.
 Server Stop, `?stop [now]`, `?stop now` will immediately stop server. `?stop`, Messages all players the server will be halted in 15s. Then will halt server.
 Server Restart, `?restart` `?reboot [now]`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
 Server Version, `?version`, Get Minecraft Server version.
+Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log lines.
 Check Server Status, `?check`, Checks if server is active or not. The `?check` and `?stats` commands are the only ones that will actually check server status.
 Online Players, `?players` `?pl`, Gets list of online users.
 Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.

@@ -5,9 +5,9 @@ Scroll down for requirements, setup instructions and screenshots.
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
-- Show online players, banned, OP list, and whitelist.
+- Show connection history, chat log, online players, banned, OP list, and whitelist.
 - World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files.
-- Server autosave, start, stop, status, version, log, update server.jar, and edit server.properties
+- Server autosave, start, stop, status, version, log, update server.jar (only with Vanilla or PaperMC), and edit server.properties
 - Interface via RCON, Tmux or subprocess. Some features and command may be disabled if using RCON or Subprocess.
 
 ### Requirements:
