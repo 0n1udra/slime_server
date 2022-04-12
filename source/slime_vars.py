@@ -1,7 +1,7 @@
 import os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
-user = '0n1udra'
+user = 'arcpy'
 
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
