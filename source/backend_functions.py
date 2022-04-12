@@ -203,7 +203,7 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
         with FileReadBackwards(file_path) as file:
             i = total = 0
             # Stops loop at set limit or if file has no more lines.
-            while i <= lines and total <= line_count and total <= slime_vars.log_lines_limit:
+            while i < lines and total < line_count and total <= slime_vars.log_lines_limit:
                 total += 1
                 line = file.readline()
                 if not line.strip(): continue  # Skip blank/newlines.
