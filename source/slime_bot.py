@@ -114,8 +114,11 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
     log_data = backend_functions.server_log(file_path=file_path, lines=lines, return_reversed=True, log_mode=log_mode, **kwargs)
     # Splits by \n and prints line by line in discord markdown, ending with END footer.
     if log_data:
+        i = 0
         for line in log_data.split('\n'):
-            if line: await ctx.send(f"`{line}`")
+            if line:
+                i += 1
+                await ctx.send(f"**{i}**: `{line}`")
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {game_name} Log: {lines}")
 
@@ -439,8 +442,9 @@ class Basics(commands.Cog):
 
             # Extracts wanted data from log line and formats it in Discord markdown.
             # E.g. [16:35:15] [Server thread/INFO] [minecraft/DedicatedServer]: <R3diculous> hello
+            timestamp = line.split(']', 1)[0][1:]
             line = line.split(']: <', 1)[-1].split('>', 1)
-            await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
+            await ctx.send(f"({timestamp}) **{line[0]}**: {line[-1][1:]}")
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Chat Log: {lines}")
@@ -1349,8 +1353,10 @@ class Server(commands.Cog):
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
         log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
+            i = 0
             for line in log_data.split('\n'):
-                await ctx.send(f"`{line}`")
+                i += 1
+                await ctx.send(f"**{i}**: `{line}`")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
@@ -1372,11 +1378,13 @@ class Server(commands.Cog):
             return False
 
         i = lines
+        j = 0  # To show line numbers in Discord for each log line.
         # Prints out log lines with Discord markdown.
         for line in log_data:
             if i <= 0: break
             i -= 1
-            await ctx.send(f'`{line}`')
+            j += 1
+            await ctx.send(f'**{j}**: `{line}`')
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Connection Log: {lines}")
@@ -2172,8 +2180,10 @@ class Bot_Functions(commands.Cog):
         await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
             # Shows server log line by line.
+            i = 1
             for line in log_data.split('\n'):
-                await ctx.send(f"`{line}`")
+                i += 1
+                await ctx.send(f"**{i}**: `{line}`")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
