@@ -441,7 +441,7 @@ class Basics(commands.Cog):
             i -= 1
 
             # Extracts wanted data from log line and formats it in Discord markdown.
-            # E.g. [16:35:15] [Server thread/INFO] [minecraft/DedicatedServer]: <R3diculous> hello
+            # '[15:26:49 INFO]: <R3diculous> test' > '(15:26:49) R3diculous: test' (With Discord markdown)
             timestamp = line.split(']', 1)[0][1:]
             line = line.split(']: <', 1)[-1].split('>', 1)
             await ctx.send(f"({timestamp}) **{line[0]}**: {line[-1][1:]}")
@@ -1356,7 +1356,9 @@ class Server(commands.Cog):
             i = 0
             for line in log_data.split('\n'):
                 i += 1
-                await ctx.send(f"**{i}**: `{line}`")
+                # E.g. '[16:28:28 INFO]: There are 1 of a max of 20 players online: R3diculous' >
+                # '3: (16:28:28) [Server thread/INFO]: There are 1 of a max of 20 players online: R3diculous' (With Discord markdown)
+                await ctx.send(f"**{i}**: ({line.split(']', 1)[0][1:]}) `{line.split(']', 1)[-1][1:]}`")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
@@ -1378,13 +1380,18 @@ class Server(commands.Cog):
             return False
 
         i = lines
-        j = 0  # To show line numbers in Discord for each log line.
         # Prints out log lines with Discord markdown.
         for line in log_data:
             if i <= 0: break
             i -= 1
-            j += 1
-            await ctx.send(f'**{j}**: `{line}`')
+
+            # Gets timestamp from start of line.
+            timestamp = line.split(']', 1)[0][1:]
+            # '[15:51:31 INFO]: R3diculous left the game' > ['R3diculous', 'left the game'] > '(16:30:36) R3diculous: joined the gameA'
+            line = line.split(']:', 1)[-1][1:].split(' ', 1)
+            # Extracts wanted data and formats it into a Discord message with markdown.
+            line = f"({timestamp}) **{line[0]}**: {line[1]}"
+            await ctx.send(f'{line}')
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Connection Log: {lines}")
@@ -2183,11 +2190,11 @@ class Bot_Functions(commands.Cog):
             i = 1
             for line in log_data.split('\n'):
                 i += 1
-                await ctx.send(f"**{i}**: `{line}`")
+                await ctx.send(f"({line.split(']', 1)[0][1:]}) **{line.split(']', 1)[1].split('):', 1)[0][2:]}**: {line.split(']', 1)[1].split('):', 1)[1][1:]}")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
-            await ctx.send("**Error:** Problem fetching data.")
+            await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
             lprint(ctx, "Error: Issue getting bog log data.")
 
     @commands.command(aliases=['updatebot', 'botupdate'])
