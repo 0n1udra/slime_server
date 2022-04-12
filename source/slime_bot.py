@@ -215,6 +215,7 @@ class Player(commands.Cog):
         """Show list of online players."""
 
         player_list = await backend_functions.get_player_list()
+        if player_list is False: return
 
         await ctx.send("***Fetching Player List...***")
         if not player_list:
@@ -1123,7 +1124,7 @@ class Server(commands.Cog):
 
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
-        log_data = backend_functions.server_log(match_list=match_list, filter_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(match_list=match_list, filter_mode=True)
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching connection logs, there may be nothing to fetch.")
@@ -1281,8 +1282,8 @@ class Server(commands.Cog):
 
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
-        await ctx.send("***Fetching Status in 20s...***")
-        await asyncio.sleep(20)
+        await ctx.send(f"***Fetching Status in {slime_vars.wait_for_launch}s...***")
+        await asyncio.sleep(slime_vars.wait_for_launch)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
