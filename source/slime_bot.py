@@ -4,8 +4,8 @@ from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "5.4.1"
-__date__ = '2022/04/09'
+__version__ = "5.5"
+__date__ = '2022/04/12'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -25,7 +25,7 @@ channel = None
 
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
-# For buttons and selection boxes components.
+# For buttons and selection box components.
 player_selection = None
 restore_world_selection = restore_server_selection = None
 current_components = []
@@ -199,9 +199,10 @@ class Basics(commands.Cog):
             i -= 1
 
             # Extracts wanted data from log line and formats it in Discord markdown.
-            # E.g. [16:35:15] [Server thread/INFO] [minecraft/DedicatedServer]: <R3diculous> hello
+            # '[15:26:49 INFO]: <R3diculous> test' > '(15:26:49) R3diculous: test' (With Discord markdown)
+            timestamp = line.split(']', 1)[0][1:]
             line = line.split(']: <', 1)[-1].split('>', 1)
-            await ctx.send(f"**{line[0]}:** {line[-1][1:]}")
+            await ctx.send(f"({timestamp}) **{line[0]}**: {line[-1][1:]}")
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Chat Log: {lines}")
@@ -1108,8 +1109,12 @@ class Server(commands.Cog):
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
         log_data = backend_functions.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
+            i = 0
             for line in log_data.split('\n'):
-                await ctx.send(f"`{line}`")
+                i += 1
+                # E.g. '[16:28:28 INFO]: There are 1 of a max of 20 players online: R3diculous' >
+                # '3: (16:28:28) [Server thread/INFO]: There are 1 of a max of 20 players online: R3diculous' (With Discord markdown)
+                await ctx.send(f"**{i}**: ({line.split(']', 1)[0][1:]}) `{line.split(']', 1)[-1][1:]}`")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
@@ -1135,7 +1140,14 @@ class Server(commands.Cog):
         for line in log_data:
             if i <= 0: break
             i -= 1
-            await ctx.send(f'`{line}`')
+
+            # Gets timestamp from start of line.
+            timestamp = line.split(']', 1)[0][1:]
+            # '[15:51:31 INFO]: R3diculous left the game' > ['R3diculous', 'left the game'] > '(16:30:36) R3diculous: joined the gameA'
+            line = line.split(']:', 1)[-1][1:].split(' ', 1)
+            # Extracts wanted data and formats it into a Discord message with markdown.
+            line = f"({timestamp}) **{line[0]}**: {line[1]}"
+            await ctx.send(f'{line}')
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Connection Log: {lines}")
@@ -1931,12 +1943,14 @@ class Bot_Functions(commands.Cog):
         await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
             # Shows server log line by line.
+            i = 1
             for line in log_data.split('\n'):
-                await ctx.send(f"`{line}`")
+                i += 1
+                await ctx.send(f"({line.split(']', 1)[0][1:]}) **{line.split(']', 1)[1].split('):', 1)[0][2:]}**: {line.split(']', 1)[1].split('):', 1)[1][1:]}")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
-            await ctx.send("**Error:** Problem fetching data.")
+            await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
             lprint(ctx, "Error: Issue getting bog log data.")
 
     @commands.command(aliases=['updatebot', 'botupdate'])
