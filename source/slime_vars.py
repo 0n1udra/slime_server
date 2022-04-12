@@ -69,6 +69,9 @@ status_checker_command = 'xp '
 # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
 log_lines_limit = 500
 
+# Time (in second) to wait before checking server status when use ?serverstart. e.g. PaperMC takes about 10s (w/ decent hardware), my Valhesia Volatile takes about 40-50s.
+wait_for_launch = 60
+
 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
 command_buffer_time = 1

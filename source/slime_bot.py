@@ -1523,8 +1523,8 @@ class Server(commands.Cog):
 
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
-        await ctx.send("***Fetching Status in 20s...***")
-        await asyncio.sleep(20)
+        await ctx.send(f"***Fetching Status in {slime_vars.wait_for_launch}s...***")
+        await asyncio.sleep(slime_vars.wait_for_launch)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
