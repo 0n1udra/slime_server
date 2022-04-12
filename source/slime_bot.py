@@ -1125,7 +1125,7 @@ class Server(commands.Cog):
     async def serverconnectionlog(self, ctx, lines=10):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
-        await ctx.send(f"***Fetching {lines} Connection Log...*** :speech_left:")
+        await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
 
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
