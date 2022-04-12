@@ -184,21 +184,19 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
     if match is None: match = 'placeholder_match'
     match = match.lower()
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
-    if filter_mode is True: lines = slime_vars.log_lines_limit
     # Defaults file to server log.
     if file_path is None: file_path = slime_vars.server_log_file
     if not os.path.isfile(file_path): return False
-
     log_data = ''
     line_count = 0
     with open(file_path) as f:
         for line in f: line_count += 1
 
-    log_data = ''
     if normal_read:
         with open(file_path, 'r') as file:
             for line in file:
                 if match in line: return line
+
     else:  # Read log file bottom up, latest log outputs first.
         with FileReadBackwards(file_path) as file:
             i = total = 0

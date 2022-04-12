@@ -428,7 +428,7 @@ class Basics(commands.Cog):
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
-        log_data = backend_functions.server_log(']: <', filter_mode=True, return_reversed=True)
+        log_data = backend_functions.server_log(']: <', lines=lines, filter_mode=True, return_reversed=True)
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
@@ -1373,7 +1373,7 @@ class Server(commands.Cog):
 
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
-        log_data = backend_functions.server_log(match_list=match_list, filter_mode=True)
+        log_data = backend_functions.server_log(match_list=match_list, lines=lines, filter_mode=True, return_reversed=True)
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching connection logs, there may be nothing to fetch.")
