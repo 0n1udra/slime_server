@@ -1121,8 +1121,8 @@ class Server(commands.Cog):
             await ctx.send("**Error:** Problem fetching data.")
             lprint(ctx, "Error: Issue getting minecraft log data.")
 
-    @commands.command(aliases=['clog', 'connectionlog', 'joinedlog', 'loginlog'])
-    async def serverconnectionlog(self, ctx, lines=10):
+    @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
+    async def serverconnectionslog(self, ctx, lines=10):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
         await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
@@ -1759,6 +1759,7 @@ class Bot_Functions(commands.Cog):
             Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
             Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
             Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
+            Button(label="Connections Logs", emoji='\U0001F4E1', custom_id="serverconnectionslog"),
         ]])
 
         await ctx.send("Saving & Backups:", components=[[
