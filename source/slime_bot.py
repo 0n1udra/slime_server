@@ -5,7 +5,7 @@ from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
 __version__ = "5.5P"
-__date__ = '2022/04/09'
+__date__ = '2022/04/12'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -1369,7 +1369,7 @@ class Server(commands.Cog):
     async def serverconnectionlog(self, ctx, lines=10):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
-        await ctx.send(f"***Fetching {lines} Connection Log...*** :speech_left:")
+        await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
 
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
