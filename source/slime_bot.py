@@ -4,7 +4,7 @@ from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "5.4.1P"
+__version__ = "5.5P"
 __date__ = '2022/04/09'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
