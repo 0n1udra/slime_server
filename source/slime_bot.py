@@ -1365,7 +1365,7 @@ class Server(commands.Cog):
             await ctx.send("**Error:** Problem fetching data.")
             lprint(ctx, "Error: Issue getting minecraft log data.")
 
-    @commands.command(aliases=['clog', 'connectionlog'])
+    @commands.command(aliases=['clog', 'connectionlog', 'joinedlog', 'loginlog'])
     async def serverconnectionlog(self, ctx, lines=10):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
