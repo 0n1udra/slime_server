@@ -3,8 +3,10 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
 
+ctx = 'backend_functions.py'
 server_active = False
 discord_channel = None
+slime_proc = slime_pid = None  # If using nohup to run bot in background.
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
@@ -21,14 +23,11 @@ def zomboid_command(command):
     os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 # ========== Extra Functions: start, send command, read log, etc
-def lprint(arg1=None, arg2=None):
+def lprint(ctx, msg):
     """Prints and Logs events in file."""
-    if type(arg1) is str:
-        msg, user = arg1, 'Script'  # If did not receive ctx object.
-    else:
-        try: user = arg1.message.author
-        except: user = 'N/A'
-        msg = arg2
+
+    try: user = ctx.message.author
+    except: user = ctx
 
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
     print(output)
@@ -37,7 +36,11 @@ def lprint(arg1=None, arg2=None):
     with open(slime_vars.bot_log_file, 'a') as file:
         file.write(output + '\n')
 
-lprint("Server selected: " + slime_vars.server_selected[0])
+lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
+
+def set_slime_proc(proc, pid):
+    global slime_proc, slime_pid
+    slime_proc, slime_pid = proc, pid
 
 # ===== Parse/format/read data.
 def format_args(args, return_no_reason=False):
@@ -236,7 +239,7 @@ async def server_rcon(command=''):
     server_rcon_client = mctools.RCONClient(server_ip, port=slime_vars.rcon_port)
     try: server_rcon_client.login(slime_vars.rcon_pass)
     except ConnectionError:
-        lprint(f"Error Connecting to RCON: {server_ip} : {slime_vars.rcon_port}")
+        lprint(ctx, f"Error Connecting to RCON: {server_ip} : {slime_vars.rcon_port}")
         server_active = False
         return False
     else:
@@ -255,18 +258,18 @@ async def server_status(discord_msg=False):
 
     global server_active
 
-    lprint("Checking Minecraft server status...")
+    lprint(ctx, "Checking Minecraft server status...")
 
     # server_command() will send random number, server is online if match is found in log.
     response = await server_command(' ', skip_check=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
-        lprint("Server Status: Active")
+        lprint(ctx, "Server Status: Active")
         server_active = True
         return True
     else:
         # server_command will send a discord message if server is inactive, so it's unneeded here.
-        lprint("Server Status: Inactive")
+        lprint(ctx, "Server Status: Inactive")
         server_active = False
 
 def server_start():
@@ -285,7 +288,7 @@ def server_start():
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             mc_subprocess = subprocess.Popen(slime_vars.server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        except: lprint("Error server starting subprocess")
+        except: lprint(ctx, "Error server starting subprocess")
 
         if type(mc_subprocess) == subprocess.Popen: return True
 
@@ -341,7 +344,7 @@ def ping_server():
         stats = ping.get_stats()
         ping.stop()
     except ConnectionRefusedError:
-        lprint("Ping Error")
+        lprint(ctx, "Ping Error")
         server_active = False
         return False
     else:
@@ -405,7 +408,7 @@ def get_latest_version():
         jar_download_url = f'{base_url}/versions/{latest_version}/builds/{latest_build}/downloads/{latest_jar}'
 
     if not jar_download_url:
-        lprint("Error: Issue downloading new jar.")
+        lprint(ctx, "ERROR: Issue downloading new jar")
         return False
 
     # Saves new server.jar in current server.
@@ -413,11 +416,11 @@ def get_latest_version():
 
     try:  # Sets eula.txt file.
         with open(slime_vars.server_path + '/eula.txt', 'w+') as f: f.write('eula=true')
-    except IOError: lprint(f"Error updatine eula.txt file: {slime_vars.server_path}")
+    except IOError: lprint(ctx, f"Errorr: Updating eula.txt file: {slime_vars.server_path}")
 
     try:  # Saves file as server.jar.
         with open(slime_vars.server_path + '/server.jar', 'wb+') as f: f.write(new_jar_data)
-    except IOError: lprint(f"Error saving new jar file: {slime_vars.server_path}")
+    except IOError: lprint(ctx, f"ERROR: Saving new jar file: {slime_vars.server_path}")
     else: return version_info
 
     return False
@@ -556,10 +559,10 @@ def create_backup(name, src, dst):
     shutil.copytree(src, new_backup_path)
 
     if os.path.isdir(new_backup_path):
-        lprint("Backed up to: " + new_backup_path)
+        lprint(ctx, "Backed up to: " + new_backup_path)
         return new_name
     else:
-        lprint("Error creating backup at: " + new_backup_path)
+        lprint(ctx, "Error creating backup at: " + new_backup_path)
         return False
 
 def restore_backup(src, dst, reset=False):
@@ -581,7 +584,7 @@ def restore_backup(src, dst, reset=False):
     try:
         shutil.copytree(src, dst)
         return True
-    except: lprint("Error restoring: " + str(src + ' > ' + dst))
+    except: lprint(ctx, "Error restoring: " + str(src + ' > ' + dst))
 
 def delete_backup(backup):
     """
@@ -594,7 +597,7 @@ def delete_backup(backup):
     try:
         shutil.rmtree(backup)
         return True
-    except: lprint("Error deleting: " + str(backup))
+    except: lprint(ctx, "Error deleting: " + str(backup))
 
 # ========== Discord Commands.
 def get_server_from_index(index):

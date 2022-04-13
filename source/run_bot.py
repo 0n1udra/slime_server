@@ -1,56 +1,102 @@
-import time, sys, os
+import psutil, time, sys, os
 from slime_bot import bot, TOKEN
 from slime_vars import tmux_session_name, pyenv_activate_command
+from backend_functions import lprint
 import backend_functions, slime_vars
+
+ctx = 'run_bot.py'  # So you know which log lines come from which file.
+slime_proc = slime_pid = None  # If using nohup to run bot in background.
+slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
 def setup_directories():
     """Create necessary directories."""
-
     try:
         # TODO Needed?
         # Creates Server folder, folder for world backups, and folder for server backups.
         os.makedirs(slime_vars.server_path)
-        print("Created:", slime_vars.server_path)
+        lprint(ctx, "INFO: Created: " + slime_vars.server_path)
         os.makedirs(slime_vars.world_backups_path)
-        print("Created:", slime_vars.world_backups_path)
+        lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
         os.makedirs(slime_vars.server_backups_path)
-        print("Created:", slime_vars.server_backups_path)
+        lprint(ctx, "INFO: Created: " + slime_vars.server_backups_path)
     except:
-        print("Error: Something went wrong setup up necessary directory structure at:", slime_vars.server_path)
+        lprint(ctx, "ERROR: Creating folder structure at: " + slime_vars.server_path)
 
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
+    if os.system(f'tmux new -d -s {tmux_session_name}'):
+        lprint(ctx, f"ERROR: Starting tmux session")
+    else: lprint(ctx, f"INFO: Started Tmux detached session")
 
-    try:
-        os.system(f'tmux new -d -s {tmux_session_name}')
-        print(f"Started Tmux detached session.")
-    except: print(f"Error: Starting {tmux_session_name} detached session.")
-
-    try:
-        os.system(f'tmux split-window -v -t {tmux_session_name}:0.0')
-        print("Created second tmux pane for Discord bot.")
-    except: print("Error: Creating second tmux pane for Discord bot.")
+    if os.system(f'tmux split-window -v -t {tmux_session_name}:0.0'):
+        lprint(ctx, "ERROR: Creating second tmux panes")
+    else: lprint(ctx, "INFO: Created second tmux panes")
 
     time.sleep(1)
 
 def start_bot():
     if slime_vars.use_tmux is True:
-        if pyenv_activate_command: os.system(f"tmux send-keys -t {tmux_session_name}:0.1 '{pyenv_activate_command}' ENTER")  # Sources pyenv if set in slime_vars.
+        # Sources pyenv if set in slime_vars.
+        if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
+            lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
 
-        os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER')
-        if not os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 slime_bot.py' ENTER"):
-            print(f"Started bot in {tmux_session_name} tmux session, top pane.")
-            return True  # If os.system() return 0, means successful.
-    else:
-        print("Start server with ?start command in Discord.")
-        input("Enter to exit > ")
+        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 slime_bot.py' ENTER"):
+            lprint(ctx, "ERROR: Starting slime_bot.py")
+        else: lprint(ctx, "INFO: Started slime_bot.py")
 
 def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
-
     if slime_vars.use_tmux is True:
         backend_functions.server_start()
     else: bot.run(TOKEN)
+
+# ===== Background process (nohup)
+def get_proc():
+    """Returns bot process."""
+    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
+    for proc in psutil.process_iter():
+        if proc.name() == slime_proc_name and any(i in slime_proc_cmdline for i in proc.cmdline()):
+            return proc
+
+def start_slime_proc():
+    """Starts bot in background with nohup command."""
+    global slime_proc, slime_pid
+
+    if pyenv_activate_command:
+        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 '{pyenv_activate_command}' ENTER"):  # Sources pyenv if set in slime_vars.:
+            lprint(ctx, "ERROR: Activating pyenv")
+        else: lprint(ctx, "INFO: Activated pyenv")
+
+    if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
+        lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
+    if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'nohup python3 slime_bot.py &' ENTER"):
+        lprint(ctx, "ERROR: Starting slime_bot.py with nohup")
+    else: lprint(ctx, "INFO: Started slime_bot.py with nohup")
+
+    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
+    if proc := get_proc():
+        slime_proc = proc
+        slime_pid = proc.pid
+        backend_functions.set_slime_proc(slime_proc, slime_pid)
+        lprint(ctx, f"INFO: Process PID Found: {proc.pid}")
+    else: lprint(ctx, "ERROR: Finding  process PID")
+
+def kill_slime_proc():
+    """Kills bot process."""
+    if proc := get_proc():
+        proc.kill()
+        lprint(ctx, "INFO: Bot process killed")
+    else: lprint(ctx, "ERROR: Bot process not found")
+
+def status_slime_proc():
+    """Get bot process name and pid."""
+    if proc := get_proc():
+        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
+
+def attach_slime_proc():
+    """Get bot process name and pid."""
+    if proc := get_proc():
+        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
 
 # TODO add update      - Downloads latest server.jar file from official Minecraft website to server folder.
 def script_help():
@@ -65,6 +111,7 @@ def script_help():
     startserver - Start MC server.
     startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
+    --nohup     - Run bot in background using nohup command.
 
     Note:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
@@ -86,7 +133,10 @@ if __name__ == '__main__':
         start_tmux_session()
         time.sleep(1)
 
-    if 'startbot' in sys.argv: start_bot()
+    if 'startbot' in sys.argv:
+        if '--nohup' in sys.argv:
+            start_slime_proc()
+        else: start_bot()
 
     if 'startserver' in sys.argv: server_start()
 
@@ -102,5 +152,10 @@ if __name__ == '__main__':
         time.sleep(1)
         start_bot()
         os.system(f"tmux attach -t {tmux_session_name}")
+
+    # Background process method (using nohup)
+    if 'stopbot' in sys.argv:
+        kill_slime_proc()
+    if 'statusbot' in sys.argv: status_slime_proc()
 
     if 'help' in sys.argv: script_help()
