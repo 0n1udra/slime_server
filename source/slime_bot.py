@@ -2161,7 +2161,7 @@ class Bot_Functions(commands.Cog):
     async def stopbot(self, ctx):
         """Restart this bot."""
         await ctx.send("**Bot Halted**")
-        quit()
+        sys.exit(1)
 
     @commands.command(aliases=['blog'])
     async def botlog(self, ctx, lines=10):

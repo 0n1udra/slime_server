@@ -7,6 +7,7 @@ import backend_functions, slime_vars
 ctx = 'run_bot.py'  # So you know which log lines come from which file.
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
+watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
 def setup_directories():
     """Create necessary directories."""
@@ -93,10 +94,9 @@ def status_slime_proc():
     if proc := get_proc():
         lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
 
-def attach_slime_proc():
-    """Get bot process name and pid."""
-    if proc := get_proc():
-        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
+def show_log():
+    """Use watch + tail command on bot log."""
+    os.system(f"watch -n {watch_interval} tail {slime_vars.bot_log_file}")
 
 # TODO add update      - Downloads latest server.jar file from official Minecraft website to server folder.
 def script_help():
@@ -108,10 +108,13 @@ def script_help():
     setup       - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
     starttmux   - Start Tmux session named with 2 panes. Top pane for Minecraft server, bottom for bot.
     startbot    - Start Discord bot.
+    stopbot     - Stops Discord bot.
     startserver - Start MC server.
     startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
+    showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
-    --nohup     - Run bot in background using nohup command.
+    --nohup     - Run bot in background using nohup command. (stopbot will work without)
+        E.g. python3 run_bot.py --nohup startbot
 
     Note:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
@@ -121,6 +124,8 @@ def script_help():
 
 
 if __name__ == '__main__':
+    # The order of the if statements is important.
+
     if 'setup' in sys.argv:
         if slime_vars.server_files_access is True:
             setup_directories()
@@ -138,13 +143,18 @@ if __name__ == '__main__':
             start_slime_proc()
         else: start_bot()
 
+    # Background process method (using nohup)
+    if 'stopbot' in sys.argv:
+        kill_slime_proc()
+    if 'statusbot' in sys.argv: status_slime_proc()
+
     if 'startserver' in sys.argv: server_start()
 
     if 'startboth' in sys.argv:
         server_start()
         start_bot()
 
-    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {tmux_session_name}")
+    if 'showlog' in sys.argv: show_log()
 
     # My personal shortcut.
     if 'slime' in sys.argv:
@@ -153,9 +163,6 @@ if __name__ == '__main__':
         start_bot()
         os.system(f"tmux attach -t {tmux_session_name}")
 
-    # Background process method (using nohup)
-    if 'stopbot' in sys.argv:
-        kill_slime_proc()
-    if 'statusbot' in sys.argv: status_slime_proc()
+    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {tmux_session_name}")
 
     if 'help' in sys.argv: script_help()
