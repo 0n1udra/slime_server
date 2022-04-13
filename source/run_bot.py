@@ -112,6 +112,7 @@ def script_help():
     startserver - Start MC server.
     startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
     showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
+                  Use standalone, showlog will not work properly if used with other arguments.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
     --nohup     - Run bot in background using nohup command. (stopbot will work without)
         E.g. python3 run_bot.py --nohup startbot
