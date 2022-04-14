@@ -228,8 +228,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
-        if vhserver_output.find('STARTED') != -1:
+        if backend_functions.valheim_proc():
             await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         else:
             await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")

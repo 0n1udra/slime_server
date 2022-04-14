@@ -1,4 +1,4 @@
-import psutil, time, sys, os
+import subprocess, psutil, time, sys, os
 from slime_bot import bot, TOKEN
 from slime_vars import tmux_session_name, pyenv_activate_command
 from backend_functions import lprint
@@ -56,11 +56,11 @@ def get_proc():
     """Returns bot process."""
     # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
     for proc in psutil.process_iter():
-        if proc.name() == slime_proc_name and any(i in slime_proc_cmdline for i in proc.cmdline()):
+        if proc.name() == slime_proc_name and any(slime_proc_cmdline in i for i in proc.cmdline()):
             return proc
 
 def start_slime_proc():
-    """Starts bot in background with nohup command."""
+    """Starts bot in background with subprocess.Popen()."""
     global slime_proc, slime_pid
 
     if pyenv_activate_command:
@@ -70,9 +70,7 @@ def start_slime_proc():
 
     if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
         lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
-    if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'nohup python3 slime_bot.py &' ENTER"):
-        lprint(ctx, "ERROR: Starting slime_bot.py with nohup")
-    else: lprint(ctx, "INFO: Started slime_bot.py with nohup")
+    subprocess.Popen(['python3', f'{slime_vars.bot_files_path}/slime_bot.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
     if proc := get_proc():
@@ -98,7 +96,6 @@ def show_log():
     """Use watch + tail command on bot log."""
     os.system(f"watch -n {watch_interval} tail {slime_vars.bot_log_file}")
 
-# TODO add update      - Downloads latest server.jar file from official Minecraft website to server folder.
 def script_help():
     help = """
     python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
@@ -114,12 +111,16 @@ def script_help():
     showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
                   Use standalone, showlog will not work properly if used with other arguments.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
-    --nohup     - Run bot in background using nohup command. (stopbot will work without)
-        E.g. python3 run_bot.py --nohup startbot
+    --popen     - Run with subprocess.Popen(). Currently needed to use valheim comannds.
+        E.g. python3 run_bot.py --popen startbot
 
-    Note:   The corresponding functions will run in the order you pass arguments in.
+    NOTE:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
             Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then start server and bot, then attach to Tmux session.
+    
+    WARN:   If using nohup method, having a similar process (including it's command arguments) name to slime_bot.py will cause issues.
+            Say if you have a vim open editing slime_var.py, this script will may mistake that for the bot. 
+            From my testing this is unpredictable, sometimes it'll work and sometimes not. Until I can find a fix, just be careful.
     """
     print(help)
 
@@ -140,7 +141,7 @@ if __name__ == '__main__':
         time.sleep(1)
 
     if 'startbot' in sys.argv:
-        if '--nohup' in sys.argv:
+        if '--popen' in sys.argv:
             start_slime_proc()
         else: start_bot()
 

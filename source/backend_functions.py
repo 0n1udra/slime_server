@@ -1,4 +1,4 @@
-import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, time, json, csv, os, re
+import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
@@ -12,10 +12,17 @@ enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
 # ========== Other Games
+def valheim_proc():
+    """Returns valheim process if found."""
+    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
+    for proc in psutil.process_iter():
+        if proc.name() == 'valheim_server.x86_64': return proc
+    else: return None
+
 def valheim_command(command):
     """Use vhserver script"""
 
-    os.system(f'~/Games/valheim/vhserver {command}')
+    subprocess.run(['/bin/bash', f'/home/{slime_vars.user}/Games/valheim/vhserver', command])
 
 def zomboid_command(command):
     """Sends command to tmux 0.1 Project Zomboid server."""
