@@ -231,7 +231,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         else:
             await ctx.send(f"***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.\n{self.valheim_text}")
-            backend_functions.valheim_command(f"cd '/home/{slime_vars.user}/steamapps/common/Valheim dedicated server/'")
+            backend_functions.valheim_command(f"cd '/home/{slime_vars.user}/Steam/steamapps/common/Valheim dedicated server/'")
             backend_functions.valheim_command(f"./server_start.sh")
             lprint(ctx, "Launched Valheim Server")
 
