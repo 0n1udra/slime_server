@@ -155,6 +155,7 @@ Project Zomboid:
   ?zstop      - Stop server.
   ?zstatus    - Check online status.
   ?zsave      - Saves game.
+  ?zupdate    - Stops server and updates it.
   ?zlog       - Show X log lines. e.g. ?zlog 25.
   ?z/ COMMAND - Send command to server.
     
@@ -256,13 +257,13 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
     @commands.command(aliases=['vupdate', 'updatevalheim'])
     async def valheimupdate(self, ctx):
-        """Stops Valheim server."""
+        """Updates Valheim server."""
 
         if backend_functions.get_proc('valheim_server.x86_64'):
             await ctx.invoke(self.bot.get_command("valheimstop"))
+            await ctx.send("_Waiting 15s to make sure server has halted fully_")
             await asyncio.sleep(15)
 
-        await ctx.send("_Waiting 15s to make sure server has halted fully_")
         await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
         if os.system('steamcmd +login anonymous 896660 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Valheim server.")
@@ -336,15 +337,14 @@ Password for Valheim: `{slime_vars.valheim_password}`
         else: await ctx.send("Project Zomboid Server **Offline**.\nUse `?zstart` to launch server.")
         lprint(ctx, 'Checked Zomboid Status')
 
-    @commands.command(aliases=['vupdate', 'updatevalheim'])
-    async def valheimupdate(self, ctx):
-        """Stops Valheim server."""
-
+    @commands.command(aliases=['zupdate', 'updatezomboid'])
+    async def zomboidupdate(self, ctx):
+        """Updates Zomboid server."""
         if backend_functions.get_proc('zomboid'):
             await ctx.invoke(self.bot.get_command("zomboidstop"))
+            await ctx.send("_Waiting 15s to make sure server has halted fully_")
             await asyncio.sleep(15)
 
-        await ctx.send("_Waiting 15s to make sure server has halted fully_")
         await ctx.send("***Updating Zomboid Server*** :arrows_counterclockwise:")
         if os.system('steamcmd +login anonymous 380870 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Zomboid server")
