@@ -311,7 +311,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         if log_data:
             await ctx.send(f"Project Zomboid Server **Online**\n{self.ip_text}")
         else:  # Launches if not online already.
-            backend_functions.zomboid_command(f"cd {slime_vars.steam_path}/Project\ Zomboid\ Dedicated\ Server/'")
+            backend_functions.zomboid_command(f"cd '{slime_vars.steam_path}/Project\ Zomboid\ Dedicated\ Server/'")
             backend_functions.zomboid_command(f'./start-server.sh')
             await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\n{self.ip_text}\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
