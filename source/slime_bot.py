@@ -145,6 +145,7 @@ Valheim:
   ?vstart     - Start Valheim Server.
   ?vstop      - Stop server.
   ?vstatus    - Check online status.
+  ?vupdate    - Stops server and updates it.
   ?vhelp      - Shows instructions for how to join server.
   ?v/ COMMAND - Send command to vhserver.
     Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
@@ -242,6 +243,19 @@ Password for Valheim: `{slime_vars.valheim_password}`
         await ctx.send("**Halted Valheim Server** :stop_sign:")
         backend_functions.valheim_command('C-c')
         lprint(ctx, "Halting Valheim Server")
+        
+    @commands.command(aliases=['vupdate', 'updatevalheim'])
+    async def valheimupdate(self, ctx):
+        """Stops Valheim server."""
+
+        await ctx.invoke(self.bot.get_command("valheimstop"))
+        await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
+        if os.system('steamcmd +login anonymous 896660 validate +exit'):
+            await ctx.send("**Valheim Server Updated**")
+            lprint(ctx, "Updated Valheim Server")
+        else:
+            await ctx.send("**Halted Valheim Server** :stop_sign:")
+            lprint(ctx, "ERROR: Updating Valheim Server")
 
     @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
     async def valheimstatus(self, ctx):
