@@ -265,7 +265,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await asyncio.sleep(15)
 
         await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
-        if os.system('steamcmd +login anonymous 896660 validate +exit'):
+        if os.system('steamcmd +login anonymous +app_update 896660 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Valheim server.")
             lprint(ctx, "ERROR: Updating Valheim Server")
         else:
@@ -346,7 +346,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await asyncio.sleep(15)
 
         await ctx.send("***Updating Zomboid Server*** :arrows_counterclockwise:")
-        if os.system('steamcmd +login anonymous 380870 validate +exit'):
+        if os.system('steamcmd +login anonymous +app_update 380870 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Zomboid server")
             lprint(ctx, "ERROR: Updating Zomboid Server")
         else:
