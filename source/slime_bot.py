@@ -146,7 +146,6 @@ Valheim:
   ?vstop      - Stop server.
   ?vstatus    - Check online status.
   ?vhelp      - Shows instructions for how to join server.
-  ?vlog       - Show X log lines. e.g. ?vlog 25.
   ?v/ COMMAND - Send command to vhserver.
     Usage: ?v/ setaccesslevel yeeter admin, ?v/ kickuser yeeter, etc...
         
@@ -228,15 +227,13 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-
-        await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
-        os.system(f"sh '/home/{slime_vars.user}/steamapps/common/Valheim dedicated server/start_server.sh'")
-
-    #  else:
-      #      await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
-      #      await ctx.send(f"{self.valheim_text}")
-      #      backend_functions.valheim_command('start')
-        lprint(ctx, "Launching Valheim Server")
+        if backend_functions.get_proc('valheim_server.x86_64'):
+            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
+        else:
+            await ctx.send(f"***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.\n{self.valheim_text}")
+            backend_functions.valheim_command(f"cd '/home/{slime_vars.user}/steamapps/common/Valheim dedicated server/'")
+            backend_functions.valheim_command(f"./server_start.sh")
+            lprint(ctx, "Launched Valheim Server")
 
     @commands.command(aliases=['vstop', 'stopvalheim'])
     async def valheimstop(self, ctx):
@@ -249,23 +246,12 @@ Password for Valheim: `{slime_vars.valheim_password}`
     @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
     async def valheimstatus(self, ctx):
         """Checks valheim server active status using 'vhserver details' command."""
-
         await ctx.send("***Checking Valheim Server Status...***")
 
-        vhserver_output = str(subprocess.check_output([f'{slime_vars.valheim_path}/vhserver', 'details']))
-        if vhserver_output.find('STARTED') != -1:
+        if backend_functions.get_proc('valheim_server.x86_64'):
             await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
-        elif vhserver_output.find('STOPPED') != -1:
-            await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
-        else: await ctx.send("Unable to check status.")
+        else: await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
         lprint(ctx, 'Checked Valheim Status')
-
-    @commands.command(aliases=['vlog'])
-    async def valheimlog(self, ctx, lines=10):
-        """Show Valheim log lines."""
-
-        # Skips '(Filename: ./Runtime/Export/Debug/Debug.bindings.h Line: 39)' lines by using the year as filter e.g. '01/10/2022 23:57:51: clone 292'
-        await get_log_lines(ctx, 'Valheim', lines, slime_vars.valheim_log_path, filter_mode=True, match=str(datetime.datetime.today().year)[-2:])
 
     # ===== Project Zomboid
     @commands.command(aliases=['zcommand', 'z/'])

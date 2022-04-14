@@ -52,13 +52,6 @@ def server_start():
     else: bot.run(TOKEN)
 
 # ===== Background process (nohup)
-def get_proc():
-    """Returns bot process."""
-    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
-    for proc in psutil.process_iter():
-        if proc.name() == slime_proc_name and any(slime_proc_cmdline in i for i in proc.cmdline()):
-            return proc
-
 def start_slime_proc():
     """Starts bot in background with subprocess.Popen()."""
     global slime_proc, slime_pid
@@ -73,7 +66,7 @@ def start_slime_proc():
     subprocess.Popen(['python3', f'{slime_vars.bot_files_path}/slime_bot.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
-    if proc := get_proc():
+    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
         slime_proc = proc
         slime_pid = proc.pid
         backend_functions.set_slime_proc(slime_proc, slime_pid)
@@ -82,14 +75,14 @@ def start_slime_proc():
 
 def kill_slime_proc():
     """Kills bot process."""
-    if proc := get_proc():
+    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
         proc.kill()
         lprint(ctx, "INFO: Bot process killed")
     else: lprint(ctx, "ERROR: Bot process not found")
 
 def status_slime_proc():
     """Get bot process name and pid."""
-    if proc := get_proc():
+    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
         lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
 
 def show_log():

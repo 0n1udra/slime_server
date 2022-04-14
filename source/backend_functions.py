@@ -12,6 +12,7 @@ enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
 # ========== Other Games
+
 def valheim_proc():
     """Returns valheim process if found."""
     # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
@@ -41,6 +42,16 @@ def lprint(ctx, msg):
         file.write(output + '\n')
 
 lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
+
+def get_proc(proc_name, proc_cmdline=None):
+    """Returns a process by matching name and argument."""
+    for proc in psutil.process_iter():
+        if proc.name() == proc_name:
+            # Narrow down process by it's arguments. E.g. python3 could have multiple processes.
+            if proc_cmdline:
+                if any(proc_cmdline in i for i in proc.cmdline()):
+                    return proc
+            else: return proc
 
 def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
