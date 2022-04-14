@@ -271,7 +271,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             lprint(ctx, "ERROR: Updating Valheim Server")
         else:
             # Copies start_server.sh settings.
-            os.system(f" cp '/home/{slime_vars.user}/Games/valheim/serverfiles/start_server.sh  '{slime_vars.steam_path}/Valheim dedicated server/'")
+            os.system(f" cp '/home/{slime_vars.user}/Games/valheim/serverfiles/start_server.sh'  '{slime_vars.steam_path}/Valheim dedicated server/'")
             await ctx.send("**Valheim Server Updated**")
             lprint(ctx, "Updated Valheim Server")
 
