@@ -233,7 +233,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         else:
             await ctx.send(f"***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.\n{self.valheim_text}")
-            backend_functions.valheim_command(f"cd '/home/{slime_vars.user}/Steam/steamapps/common/Valheim dedicated server/'")
+            backend_functions.valheim_command(f"cd '{slime_vars.steam_path}/Valheim dedicated server/'")
             backend_functions.valheim_command(f"./start_server.sh")
             lprint(ctx, "Launched Valheim Server")
 
@@ -265,10 +265,13 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await asyncio.sleep(15)
 
         await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
+        os.system(f"cd '{slime_vars.steam_path}/Valheim dedicated server/'")
         if os.system('steamcmd +login anonymous +app_update 896660 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Valheim server.")
             lprint(ctx, "ERROR: Updating Valheim Server")
         else:
+            # Copies start_server.sh settings.
+            os.system(f" cp '/home/{slime_vars.user}/Games/valheim/serverfiles/start_server.sh  '{slime_vars.steam_path}/Valheim dedicated server/'")
             await ctx.send("**Valheim Server Updated**")
             lprint(ctx, "Updated Valheim Server")
 
@@ -308,7 +311,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         if log_data:
             await ctx.send(f"Project Zomboid Server **Online**\n{self.ip_text}")
         else:  # Launches if not online already.
-            backend_functions.zomboid_command(f'cd /home/{slime_vars.user}/.steam/steam/steamapps/common/Project\ Zomboid\ Dedicated\ Server/')
+            backend_functions.zomboid_command(f"cd {slime_vars.steam_path}/Project\ Zomboid\ Dedicated\ Server/'")
             backend_functions.zomboid_command(f'./start-server.sh')
             await ctx.send(f"***Launching Project Zomboid Server...*** :rocket:\n{self.ip_text}\nPlease wait about 30s before attempting to connect.")
         lprint(ctx, "Launching Project Zomboid Server")
@@ -346,7 +349,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await asyncio.sleep(15)
 
         await ctx.send("***Updating Zomboid Server*** :arrows_counterclockwise:")
-        if os.system('steamcmd +login anonymous +app_update 380870 validate +exit'):
+        if os.system('steamcmd +login anonymous 380870 validate +exit'):
             await ctx.send("**ERROR:** Problem updating Zomboid server")
             lprint(ctx, "ERROR: Updating Zomboid Server")
         else:
