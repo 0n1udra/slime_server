@@ -19,8 +19,6 @@ server_url = 'arcpy.asuscomm.com'
 pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
 if os.path.isfile(pass_path):
     with open(pass_path, 'r') as file: valheim_password = file.readline()
-valheim_path = f'/home/{user}/Games/valheim'
-valheim_log_path = f'/home/{user}/Games/valheim/log/console/vhserver-console.log'
 
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.

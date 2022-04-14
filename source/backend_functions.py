@@ -21,18 +21,15 @@ def valheim_proc():
 
 def valheim_command(command):
     """Use vhserver script"""
-
-    subprocess.run(['/bin/bash', f'/home/{slime_vars.user}/Games/valheim/vhserver', command])
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
 
 def zomboid_command(command):
     """Sends command to tmux 0.1 Project Zomboid server."""
-
     os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(ctx, msg):
     """Prints and Logs events in file."""
-
     try: user = ctx.message.author
     except: user = ctx
 

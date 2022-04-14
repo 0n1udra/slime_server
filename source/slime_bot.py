@@ -228,12 +228,14 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def valheimstart(self, ctx):
         """Starts Valheim server."""
 
-        if backend_functions.valheim_proc():
-            await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
-        else:
-            await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
-            await ctx.send(f"{self.valheim_text}")
-            backend_functions.valheim_command('start')
+
+        await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
+        os.system(f"sh '/home/{slime_vars.user}/steamapps/common/Valheim dedicated server/start_server.sh'")
+
+    #  else:
+      #      await ctx.send("***Launching Valheim Server...*** :rocket:\nPlease wait about 15s before attempting to connect.")
+      #      await ctx.send(f"{self.valheim_text}")
+      #      backend_functions.valheim_command('start')
         lprint(ctx, "Launching Valheim Server")
 
     @commands.command(aliases=['vstop', 'stopvalheim'])
@@ -241,7 +243,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         """Stops Valheim server."""
 
         await ctx.send("**Halted Valheim Server** :stop_sign:")
-        backend_functions.valheim_command('stop')
+        backend_functions.valheim_command('C-c')
         lprint(ctx, "Halting Valheim Server")
 
     @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
