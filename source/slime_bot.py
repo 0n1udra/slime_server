@@ -248,8 +248,10 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def valheimupdate(self, ctx):
         """Stops Valheim server."""
 
-        await ctx.invoke(self.bot.get_command("valheimstop"))
-        await asyncio.sleep(15)
+        if backend_functions.get_proc('valheim_server.x86_64'):
+            await ctx.invoke(self.bot.get_command("valheimstop"))
+            await asyncio.sleep(15)
+
         await ctx.send("_Waiting 15s to make sure server has halted fully_")
         await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
         if os.system('steamcmd +login anonymous 896660 validate +exit'):
