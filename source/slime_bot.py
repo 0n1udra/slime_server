@@ -249,13 +249,15 @@ Password for Valheim: `{slime_vars.valheim_password}`
         """Stops Valheim server."""
 
         await ctx.invoke(self.bot.get_command("valheimstop"))
+        await asyncio.sleep(15)
+        await ctx.send("_Waiting 15s to make sure server has halted fully_")
         await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
         if os.system('steamcmd +login anonymous 896660 validate +exit'):
-            await ctx.send("**Valheim Server Updated**")
-            lprint(ctx, "Updated Valheim Server")
-        else:
             await ctx.send("**Halted Valheim Server** :stop_sign:")
             lprint(ctx, "ERROR: Updating Valheim Server")
+        else:
+            await ctx.send("**Valheim Server Updated**")
+            lprint(ctx, "Updated Valheim Server")
 
     @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
     async def valheimstatus(self, ctx):
