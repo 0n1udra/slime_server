@@ -35,7 +35,7 @@ async def on_ready():
     global channel
 
     await bot.wait_until_ready()
-    lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
+    lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
@@ -550,7 +550,6 @@ class Permissions(commands.Cog):
             ?ban Steve Player killing
             ?ban Jesse
         """
-
         if not player:
             await ctx.send("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
             return False
@@ -587,7 +586,6 @@ class Permissions(commands.Cog):
             ?pardon Steve He has turn over a new leaf.
             ?unban Jesse
         """
-
         if not player:
             await ctx.send("Usage: `?pardon <player> [reason]`\nExample: `?ban R3diculous He has been forgiven`")
             return False
@@ -603,7 +601,6 @@ class Permissions(commands.Cog):
     @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
         """Show list of current bans."""
-
         banned_players = ''
         response = await server_command("banlist")
         if not response: return
@@ -643,7 +640,7 @@ class Permissions(commands.Cog):
 
         if not banned_players:
             ctx.send('**ERROR:** Trouble fetching ban list.')
-            lprint(ctx, f"Error: fetching ban list")
+            lprint(ctx, f"ERROR: Fetching ban list")
             return
 
         await ctx.send(banned_players)
@@ -674,7 +671,6 @@ class Permissions(commands.Cog):
             ?whitelist on
             ?whitelist reload
         """
-
         # Checks if inputted any arguments.
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
@@ -766,7 +762,6 @@ class Permissions(commands.Cog):
             ?opadd Steve Testing purposes
             ?opadd Jesse
         """
-
         if not player:
             await ctx.send("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
             return False
@@ -801,7 +796,6 @@ class Permissions(commands.Cog):
             ?opremove Steve abusing goodhood.
             ?opremove Jesse
         """
-
         if not player:
             await ctx.send("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
             return False
@@ -822,7 +816,7 @@ class Permissions(commands.Cog):
             lprint(ctx, f"Removed server OP: {player}")
         else:
             await ctx.send("**ERROR:** Problem removing OP status.")
-            lprint(ctx, f"Error: removing server OP: {player}")
+            lprint(ctx, f"ERROR: Removing server OP: {player}")
 
     @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
     async def optimed(self, ctx, player='', time_limit=1, *reason):
@@ -837,7 +831,6 @@ class Permissions(commands.Cog):
             ?optimed Steve 30 Need to check something real quick.
             ?top jesse 60
         """
-
         if not await server_status(discord_msg=True): return
 
         if not player:
@@ -846,7 +839,7 @@ class Permissions(commands.Cog):
 
         await server_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
         await ctx.send(f"***Temporary OP:*** `{player}` for {time_limit}m :hourglass:")
-        lprint(f"Temporary OP: {player} for {time_limit}m")
+        lprint(ctx, f"Temporary OP: {player} for {time_limit}m")
         await ctx.invoke(self.bot.get_command('opadd'), player, *reason)
         await asyncio.sleep(time_limit * 60)
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
@@ -877,7 +870,6 @@ class World(commands.Cog):
             ?weatherset rain
             ?weather thunder 60
         """
-
         if not state:
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
@@ -890,7 +882,6 @@ class World(commands.Cog):
     @commands.command(aliases=['enableweather', 'weatherenable'])
     async def weatheron(self, ctx):
         """Enable weather cycle."""
-
         await server_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
@@ -898,7 +889,6 @@ class World(commands.Cog):
     @commands.command(aliases=['disableweather', 'weatherdisable'])
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
-
         await server_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
@@ -906,21 +896,18 @@ class World(commands.Cog):
     @commands.command(aliases=['clearweather', 'weathersetclear'])
     async def weatherclear(self, ctx):
         """Set weather to clear."""
-
         await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
         lprint(ctx, 'Weather: Disabled')
 
     @commands.command(aliases=['rainweather', 'weathersetrain'])
     async def weatherrain(self, ctx):
         """Set weather to clear."""
-
         await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
         lprint(ctx, 'Weather: Disabled')
 
     @commands.command(aliases=['thunderweather', 'weathersetthunder'])
     async def weatherthunder(self, ctx):
         """Set weather to clear."""
-
         await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
         lprint(ctx, 'Weather: Disabled')
 
@@ -937,7 +924,6 @@ class World(commands.Cog):
             ?timeset day
             ?time 12
         """
-
         if not await server_status(discord_msg=True): return
 
         if set_time:
@@ -949,19 +935,16 @@ class World(commands.Cog):
     @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
     async def timeday(self, ctx):
         """Set time to day."""
-
         await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
 
     @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
     async def timenight(self, ctx):
         """Set time to night."""
-
         await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
 
     @commands.command(aliases=['enabletime', 'timecycleon'])
     async def timeon(self, ctx):
         """Enable day light cycle."""
-
         await server_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle ENABLED")
         lprint(ctx, 'Daylight Cycle: Enabled')
@@ -969,7 +952,6 @@ class World(commands.Cog):
     @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
-
         await server_command(f'gamerule doDaylghtCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
@@ -981,7 +963,7 @@ class Server(commands.Cog):
 
         if slime_vars.autosave_status is True:
             self.autosave_loop.start()
-            lprint(f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
+            lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Save/Autosave
     @commands.command(aliases=['sa', 'save-all'])
@@ -1053,7 +1035,7 @@ class Server(commands.Cog):
 
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await server_command('save-all', discord_msg=False):
-            lprint(f"Autosaved (interval: {slime_vars.autosave_interval}m)")
+            lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -1119,7 +1101,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data.")
-            lprint(ctx, "Error: Issue getting minecraft log data.")
+            lprint(ctx, "ERROR: Issue getting minecraft log data")
 
     @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
     async def serverconnectionslog(self, ctx, lines=10):
@@ -1158,7 +1140,7 @@ class Server(commands.Cog):
 
         response = backend_functions.server_version()
         await ctx.send(f"Current version: `{response}`")
-        lprint("Fetched Minecraft server version: " + response)
+        lprint(ctx, "Fetched Minecraft server version: " + response)
 
     # === Properties
     @commands.command(aliases=['property', 'p'])
@@ -1196,7 +1178,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Server property: {fetched_property[0].strip()}")
         else:
             await ctx.send(f"**ERROR:** 404 Property not found.")
-            lprint(f"Server property not found: {target_property}")
+            lprint(ctx, f"Server property not found: {target_property}")
 
     @commands.command()
     async def propertiesall(self, ctx):
@@ -1253,10 +1235,10 @@ class Server(commands.Cog):
 
         if message:
             await ctx.send(f"Updated MOTD: `{motd_property[0].strip()}`")
-            lprint("Updated MOTD: " + motd_property[1].strip())
+            lprint(ctx, "Updated MOTD: " + motd_property[1].strip())
         else:
             await ctx.send(f"Current MOTD: `{motd_property[1]}`")
-            lprint("Fetched MOTD: " + motd_property[1].strip())
+            lprint(ctx, "Fetched MOTD: " + motd_property[1].strip())
 
     @commands.command(aliases=['serverrcon'])
     async def rcon(self, ctx, state=''):
@@ -1365,7 +1347,7 @@ class Server(commands.Cog):
 
         response = backend_functions.check_latest_version()
         await ctx.send(f"Latest version: `{response}`")
-        lprint("Fetched latest Minecraft server version: " + response)
+        lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
     @commands.command(aliases=['updateserver', 'su'])
     async def serverupdate(self, ctx, now=''):
@@ -1927,6 +1909,12 @@ class Bot_Functions(commands.Cog):
         os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
+    @commands.command(aliases=['kbot', 'killbot', 'quit', 'quitbot', 'sbot'])
+    async def stopbot(self, ctx):
+        """Restart this bot."""
+        await ctx.send("**Bot Halted**")
+        sys.exit(1)
+
     @commands.command(aliases=['blog'])
     async def botlog(self, ctx, lines=10):
         """
@@ -1952,7 +1940,7 @@ class Bot_Functions(commands.Cog):
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
-            lprint(ctx, "Error: Issue getting bog log data.")
+            lprint(ctx, "ERROR: Issue getting bog log data.")
 
     @commands.command(aliases=['updatebot', 'botupdate'])
     async def gitupdate(self, ctx):
