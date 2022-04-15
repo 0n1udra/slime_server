@@ -51,28 +51,6 @@ def server_start():
         backend_functions.server_start()
     else: bot.run(TOKEN)
 
-# ===== Background process (nohup)
-def start_slime_proc():
-    """Starts bot in background with subprocess.Popen()."""
-    global slime_proc, slime_pid
-
-    if pyenv_activate_command:
-        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 '{pyenv_activate_command}' ENTER"):  # Sources pyenv if set in slime_vars.:
-            lprint(ctx, "ERROR: Activating pyenv")
-        else: lprint(ctx, "INFO: Activated pyenv")
-
-    if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
-        lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
-    subprocess.Popen(['python3', f'{slime_vars.bot_files_path}/slime_bot.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
-    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
-        slime_proc = proc
-        slime_pid = proc.pid
-        backend_functions.set_slime_proc(slime_proc, slime_pid)
-        lprint(ctx, f"INFO: Process PID Found: {proc.pid}")
-    else: lprint(ctx, "ERROR: Finding  process PID")
-
 def kill_slime_proc():
     """Kills bot process."""
     if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
@@ -104,16 +82,10 @@ def script_help():
     showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
                   Use standalone, showlog will not work properly if used with other arguments.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
-    --popen     - Run with subprocess.Popen(). Currently needed to use valheim comannds.
-        E.g. python3 run_bot.py --popen startbot
 
     NOTE:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
             Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then start server and bot, then attach to Tmux session.
-    
-    WARN:   If using nohup method, having a similar process (including it's command arguments) name to slime_bot.py will cause issues.
-            Say if you have a vim open editing slime_var.py, this script will may mistake that for the bot. 
-            From my testing this is unpredictable, sometimes it'll work and sometimes not. Until I can find a fix, just be careful.
     """
     print(help)
 
@@ -134,9 +106,7 @@ if __name__ == '__main__':
         time.sleep(1)
 
     if 'startbot' in sys.argv:
-        if '--popen' in sys.argv:
-            start_slime_proc()
-        else: start_bot()
+        start_bot()
 
     # Background process method (using nohup)
     if 'stopbot' in sys.argv:
