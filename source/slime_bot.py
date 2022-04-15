@@ -19,6 +19,7 @@ else:
     print("Missing Token File:", slime_vars.bot_token_file)
     sys.exit()
 
+ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure this doesn't conflict with other bots.
 bot = ComponentsBot(command_prefix='?')
 channel = None
