@@ -60,13 +60,15 @@ async def on_ready():
 @bot.event
 async def on_button_click(interaction):
     """Handler for when any button is used."""
+    global teleport_selection
 
     # Need to respond with type=6, or proceeding code will execute twice.
     await interaction.respond(type=6)
 
     # Before teleporting player, this saves the location of player beforehand.
     if interaction.custom_id == '_teleport_selected':
-        teleport_selection[2] = await backend_functions.get_location(teleport_selection[0])
+        return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+        teleport_selection[2] = return_coord.replace(',', '')
 
     # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
     ctx = await bot.get_context(interaction.message)  # Not exactly sure why this is needed, but i think it is :P.
@@ -602,11 +604,17 @@ class Player(commands.Cog):
         """
 
         global teleport_selection
-        teleport_selection = [None, None, None]
 
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)
         except: destination = destination[0]
+
+        select_playeropt = []
+        if target:
+            teleport_selection[0] = target.strip()
+            return_coord = await backend_functions.get_location(target.strip())
+            teleport_selection[2] = return_coord.replace(',', '')
+            select_playeropt = [SelectOption(label=target, value=target, default=True)]
 
         # Will not show select components if received usable parameters.
         # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
@@ -617,9 +625,6 @@ class Player(commands.Cog):
             if not players:
                 await ctx.send("No players online")
                 return
-
-            select_playeropt = []
-            if target: select_playeropt = [SelectOption(label=target, value=target, default=True)]
 
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
             await ctx.send("**Teleport**", components=[
@@ -641,15 +646,19 @@ class Player(commands.Cog):
                 Button(label='Return', custom_id='_return_selected')
                 ]
             ])
-
         else:
+            target = target.strip()
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
             await ctx.send(f"***Teleporting in 5s...***")
 
             # Gets coordinates for target and destination.
             target_info = f'{target} ~ {await backend_functions.get_location(target)}'
-            dest_coord = await backend_functions.get_location(destination)
-            destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
+            # Don't try to get coords if using @r.
+            if '@r' in destination:
+                destination_info = 'Random player'
+            else:
+                dest_coord = await backend_functions.get_location(destination)
+                destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
 
             await asyncio.sleep(5)
             await server_command(f"tp {target} {destination}")
@@ -667,7 +676,7 @@ class Player(commands.Cog):
     async def _teleport_selected_playerpanel(self, ctx):
         """Sets target selection box from selection in ?playerpanel command."""
 
-        await ctx.invoke(self.bot.get_command('teleport'), player_selection)
+        await ctx.invoke(self.bot.get_command('teleport'), str(player_selection) + ' ')
 
     @commands.command()
     async def _return_selected(self, ctx):
@@ -2094,7 +2103,8 @@ class Bot_Functions(commands.Cog):
     async def playerpanel(self, ctx, player=''):
         """Select player from list (or all, random) and use quick action buttons."""
 
-        global player_selection
+        global player_selection, current_components
+        await _delete_current_components()
         player_selection = None
 
         players = await backend_functions.get_player_list()  # Gets list of online players
@@ -2103,7 +2113,7 @@ class Bot_Functions(commands.Cog):
         select_playeropt = []
         if player: select_playeropt = [SelectOption(label=player, value=player, default=True)]
 
-        await ctx.send("**Player Panel**", components=[
+        player_selection_panel = await ctx.send("**Player Panel**", components=[
             Select(custom_id='player_select',
                    placeholder="Select Player",
                    options=select_playeropt +
@@ -2112,7 +2122,7 @@ class Bot_Functions(commands.Cog):
                            [SelectOption(label=i, value=i) for i in players[0]],
                    )])
 
-        await ctx.send('Actions:', components=[[
+        player_selection_actions = await ctx.send('Actions:', components=[[
             Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
             Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
             Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
@@ -2129,6 +2139,7 @@ class Bot_Functions(commands.Cog):
             Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
         ]])
 
+        current_components += player_selection_panel, player_selection_actions
         lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])

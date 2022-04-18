@@ -79,9 +79,9 @@ def script_help():
     stopbot     - Stops Discord bot.
     startserver - Start MC server.
     startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
+    attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
     showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
                   Use standalone, showlog will not work properly if used with other arguments.
-    attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
 
     NOTE:   The corresponding functions will run in the order you pass arguments in.
             For example, 'python3 run_bot.py startbot tmuxattach tmuxstart' won't work because the script will try to start the server and bot in a Tmux session that doesn't exist.
