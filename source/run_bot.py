@@ -1,4 +1,4 @@
-import subprocess, psutil, time, sys, os
+import time, sys, os
 from slime_bot import bot, TOKEN
 from slime_vars import tmux_session_name, pyenv_activate_command
 from backend_functions import lprint

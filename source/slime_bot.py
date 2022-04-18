@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, datetime, asyncio, discord, random, sys, os
+import asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
@@ -1702,9 +1702,9 @@ class World_Backups(commands.Cog):
             return False
         name = format_args(name)
 
-        if await server_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}"):
-            await server_command(f"save-all")
-            await asyncio.sleep(3)
+        #if await server_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}"):
+            #await server_command(f"save-all")
+        await asyncio.sleep(3)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
         new_backup = backend_functions.backup_world(name)
