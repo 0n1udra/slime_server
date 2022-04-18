@@ -602,13 +602,17 @@ class Player(commands.Cog):
         """
 
         global teleport_selection
-        teleport_selection = [None, None, None]
+        #teleport_selection = [None, None, None]
 
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)
         except: destination = destination[0]
 
+        # Can set target from playerpanel selection box.
+        if teleport_selection[0]: target = teleport_selection[0]
+
         # Will not show select components if received usable parameters.
+        # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
         if not target or not destination:
             await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
 
@@ -617,12 +621,16 @@ class Player(commands.Cog):
                 await ctx.send("No players online")
                 return
 
+            select_playeropt = []
+            if target: select_playeropt = [SelectOption(label=target, value=target, default=True)]
+
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
             await ctx.send("**Teleport**", components=[
                 Select(
                     custom_id="teleport_target",
                     placeholder="Target",
-                    options=[SelectOption(label='All Players', value='@a')] +
+                    options=select_playeropt +
+                            [SelectOption(label='All Players', value='@a')] +
                             [SelectOption(label='Random Player', value='@r')] +
                             [SelectOption(label=i, value=i) for i in players[0]],
                 ),
@@ -655,6 +663,12 @@ class Player(commands.Cog):
     @commands.command()
     async def _teleport_selected(self, ctx):
         """Teleports selected targets from ?teleport command when use Teleport! button."""
+
+        await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
+
+    @commands.command()
+    async def _teleport_selected_playerpanel(self, ctx):
+        """Sets target selection box from selection in ?playerpanel command."""
 
         await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
 
@@ -2105,6 +2119,7 @@ class Bot_Functions(commands.Cog):
             Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
             Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
             Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
+            Button(label='Teleport', emoji='\U000026A1', custom_id="teleport_panel"),
         ], [
             Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
             Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
