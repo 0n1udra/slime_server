@@ -135,6 +135,18 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
         self.bot = bot
 
+    @commands.command(aliases=['syslog'])
+    async def systemlog(self, ctx, lines=10):
+        """Shows ~/system.log."""
+
+        await get_log_lines(ctx, 'system', lines,f'/home/{slime_vars.user}/system.log')
+
+    @commands.command(aliases=['upslog'])
+    async def powerlog(self, ctx, lines=10):
+        """Shows /var/log/pwrstatd.log."""
+
+        await get_log_lines(ctx, 'system', lines,f'/var/log/pwrstatd.log')
+
     @commands.command()
     async def help(self, ctx):
         """Custom help command for my setup."""
