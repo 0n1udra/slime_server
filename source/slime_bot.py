@@ -149,7 +149,7 @@ class Other_Games(commands.Cog):
 
         await ctx.send("Executed power down script.")
         lprint(ctx, "Executed power down script.")
-        if os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py slime_server"):
+        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py slime_server")
 
     @commands.command(aliases=['syslog'])
     async def systemlog(self, ctx, lines=5):
