@@ -177,7 +177,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=10):
+    async def chatlog(self, ctx, lines=5):
         """
         Shows chat log. Does not include whispers.
 
@@ -1094,7 +1094,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log', 'mlog'])
-    async def serverlog(self, ctx, lines=10, match=None):
+    async def serverlog(self, ctx, lines=5, match=None):
         """
         Show server log.
 
@@ -1127,7 +1127,7 @@ class Server(commands.Cog):
             lprint(ctx, "ERROR: Issue getting minecraft log data")
 
     @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
-    async def serverconnectionslog(self, ctx, lines=10):
+    async def serverconnectionslog(self, ctx, lines=5):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
         await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
@@ -1942,7 +1942,7 @@ class Bot_Functions(commands.Cog):
         sys.exit(1)
 
     @commands.command(aliases=['blog'])
-    async def botlog(self, ctx, lines=10):
+    async def botlog(self, ctx, lines=5):
         """
         Show bot log.
 
