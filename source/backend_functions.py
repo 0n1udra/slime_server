@@ -103,8 +103,10 @@ def get_public_ip():
     """Gets your public IP address, to updates server ip address varable using request.get()"""
 
     global server_ip
-    server_ip = requests.get('http://ip.42.pl/raw').text
-    slime_vars.server_ip = server_ip
+    try:
+        server_ip = requests.get('http://ip.42.pl/raw').text
+        slime_vars.server_ip = server_ip
+    except: return None
     return server_ip
 
 # ===== Discord related functions.
