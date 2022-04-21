@@ -136,13 +136,13 @@ class Other_Games(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['syslog'])
-    async def systemlog(self, ctx, lines=10):
+    async def systemlog(self, ctx, lines=5):
         """Shows ~/system.log."""
 
         await get_log_lines(ctx, 'system', lines,f'/home/{slime_vars.user}/system.log')
 
     @commands.command(aliases=['upslog'])
-    async def powerlog(self, ctx, lines=10):
+    async def powerlog(self, ctx, lines=5):
         """Shows /var/log/pwrstatd.log."""
 
         await get_log_lines(ctx, 'system', lines,f'/var/log/pwrstatd.log')
@@ -371,7 +371,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             lprint(ctx, "Updated Zomboid Server")
 
     @commands.command(aliases=['zlog'])
-    async def zomboidlog(self, ctx, lines=10):
+    async def zomboidlog(self, ctx, lines=5):
         """Show Project Zomboid log lines."""
 
         await get_log_lines(ctx, 'Zomboid', lines,f'/home/{slime_vars.user}/Zomboid/server-console.txt')
@@ -457,7 +457,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=10):
+    async def chatlog(self, ctx, lines=5):
         """
         Shows chat log. Does not include whispers.
 
@@ -1376,7 +1376,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log', 'mlog'])
-    async def serverlog(self, ctx, lines=10, match=None):
+    async def serverlog(self, ctx, lines=5, match=None):
         """
         Show server log.
 
@@ -1409,7 +1409,7 @@ class Server(commands.Cog):
             lprint(ctx, "ERROR: Issue getting minecraft log data")
 
     @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
-    async def serverconnectionslog(self, ctx, lines=10):
+    async def serverconnectionslog(self, ctx, lines=5):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
         await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
@@ -2224,7 +2224,7 @@ class Bot_Functions(commands.Cog):
         sys.exit(1)
 
     @commands.command(aliases=['blog'])
-    async def botlog(self, ctx, lines=10):
+    async def botlog(self, ctx, lines=5):
         """
         Show bot log.
 
