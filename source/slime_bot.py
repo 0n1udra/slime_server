@@ -135,7 +135,18 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
         self.bot = bot
 
-    @commands.command(aliases=['syspowerdown', 'sysoff'])
+    @commands.command(aliases=['sysreboot', 'sysrestart'])
+    async def systemreboot(self, ctx):
+        """System shutdown."""
+
+        if os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py --restart slime_server"):
+            await ctx.send("**ERROR:** Issue executing power down script.")
+            lprint(ctx, "Error: power down script (reboot).")
+        else:
+            await ctx.send("Executed power down script (reboot).")
+            lprint(ctx, "Error: Executed power down script (reboot).")
+
+    @commands.command(aliases=['syspowerdown', 'sysoff', 'syspoweroff'])
     async def systempowerdown(self, ctx):
         """System shutdown."""
 
@@ -144,7 +155,7 @@ class Other_Games(commands.Cog):
             lprint(ctx, "Error: power down script.")
         else:
             await ctx.send("Executed power down script.")
-            lprint(ctx, "Error: Executed powerdown script.")
+            lprint(ctx, "Error: Executed power down script.")
 
     @commands.command(aliases=['syslog'])
     async def systemlog(self, ctx, lines=5):
