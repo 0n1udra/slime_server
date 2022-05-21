@@ -14,6 +14,7 @@ channel_id = 860361620492255292
 
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
+server_port = 25566
 
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -28,7 +29,7 @@ use_tmux = True
 tmux_session_name = 'sess'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = False
+use_rcon = True
 rcon_pass = 'rconpass420'
 rcon_port = 25575
 
@@ -88,7 +89,7 @@ slime_vars_file = bot_files_path + '/slime_vars.py'
 server_log_file = f"{server_path}/logs/latest.log"
 bot_log_file = f"{bot_files_path}/bot_log.txt"
 updatable_mc = ['vanilla', 'papermc']
-server_ip = ''  # Will be updated by get_ip function in backend_functions.py on bot startup.
+server_ip = server_url  # Will be updated by get_ip function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json

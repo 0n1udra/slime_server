@@ -229,7 +229,8 @@ class Player(commands.Cog):
         else:
             new_player_list = []
             for i in player_list[0]:
-                new_player_list.append(f'**{i}** ({await backend_functions.get_location(i)}')
+                player_location = await backend_functions.get_location(i)
+                new_player_list.append(f'**{i.strip()}** ({player_location if player_location else "Location N/A"})')
             await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
             await ctx.send("-----END-----")
 
