@@ -253,10 +253,10 @@ async def server_rcon(command=''):
 
     global server_active
 
-    server_rcon_client = mctools.RCONClient(server_ip, port=slime_vars.rcon_port)
+    server_rcon_client = mctools.RCONClient(slime_vars.server_ip, port=slime_vars.rcon_port)
     try: server_rcon_client.login(slime_vars.rcon_pass)
     except ConnectionError:
-        lprint(ctx, f"Error Connecting to RCON: {server_ip} : {slime_vars.rcon_port}")
+        lprint(ctx, f"Error Connecting to RCON: {slime_vars.server_ip} : {slime_vars.rcon_port}")
         server_active = False
         return False
     else:
@@ -287,6 +287,7 @@ async def server_status(discord_msg=False):
     else:
         # server_command will send a discord message if server is inactive, so it's unneeded here.
         lprint(ctx, "Server Status: Inactive")
+        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:")
         server_active = False
 
 def server_start():
@@ -357,7 +358,7 @@ def ping_server():
     global server_active
 
     try:
-        ping = mctools.PINGClient(server_ip)
+        ping = mctools.PINGClient(slime_vars.server_url, slime_vars.server_port)
         stats = ping.get_stats()
         ping.stop()
     except ConnectionRefusedError:
@@ -373,7 +374,7 @@ def ping_url():
 
     ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ping_out, ping_error = ping.communicate()
-    if server_ip in str(ping_out):
+    if slime_vars.server_ip in str(ping_out):
         return 'working'
     return 'inactive'
 
@@ -449,7 +450,7 @@ async def get_player_list():
     if not response: return False
 
     # Gets data from RCON response or reads server log for line containing player names.
-    if slime_vars.use_rcon is True: log_data = response
+    if slime_vars.use_rcon is True: log_data = response[0]
     else:
         await asyncio.sleep(1)
         log_data = server_log('players online')
