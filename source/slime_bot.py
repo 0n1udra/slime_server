@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import asyncio, discord, random, sys, os
+import datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
@@ -45,7 +45,7 @@ async def on_ready():
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
+        await channel.send(f':white_check_mark: **Bot PRIMED**v {__version__} {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
