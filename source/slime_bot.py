@@ -2034,6 +2034,15 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    @commands.command(hidden=True, aliases=['systemreboot'])
+    async def restartsystem(self, ctx):
+        """Restart this bot."""
+
+        await ctx.send("***Rebooting ArcPy...*** :arrows_counterclockwise: ")
+        lprint(ctx, "Restarting ArcPy...")
+
+        os.system("python3 ~/git/playground/scripts/powerdown.py slime_bot")
+
     @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
