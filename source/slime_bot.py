@@ -24,7 +24,7 @@ else:
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?', help_command=None)
+bot = ComponentsBot(command_prefix='?', case_insensitive=True, help_command=None)
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
