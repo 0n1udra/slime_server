@@ -135,14 +135,6 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
         self.bot = bot
 
-    @commands.command(aliases=['sysreboot', 'sysrestart'])
-    async def systemreboot(self, ctx):
-        """System reboot."""
-
-        await ctx.send("Executed power down script (reboot).")
-        lprint(ctx, "Executed power down script (reboot).")
-        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py --restart slime_server")
-
     @commands.command(aliases=['syspowerdown', 'sysoff', 'syspoweroff'])
     async def systempowerdown(self, ctx):
         """System shutdown."""
@@ -2041,7 +2033,7 @@ class Bot_Functions(commands.Cog):
         await ctx.send("***Rebooting ArcPy...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting ArcPy...")
 
-        os.system("python3 ~/git/playground/scripts/powerdown.py slime_bot")
+        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py --restart slime")
 
     @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
