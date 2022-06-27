@@ -128,32 +128,48 @@ async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched {game_name} Log: {lines}")
 
+
+# ========== System commands
+class System(commands.Cog):
+
+    def __init__(self, bot): self.bot = bot
+
+    @commands.command(hidden=True, aliases=['sysreboot', 'sysrestart'])
+    async def systemrestart(self, ctx):
+        """Restart this bot."""
+
+        await ctx.send("***Rebooting ArcPy...*** :arrows_counterclockwise: ")
+        lprint(ctx, "Restarting ArcPy...")
+
+        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py --restart slime")
+
+    @commands.command(hidden=True, aliases=['sysoff'])
+    async def systempowerdown(self, ctx):
+        """System shutdown."""
+
+        await ctx.send("Executed power down script.")
+        lprint(ctx, "Executed power down script.")
+        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py slime")
+
+    @commands.command(hidden=True, aliases=['syslog'])
+    async def systemlog(self, ctx, lines=5):
+        """Shows ~/system.log."""
+
+        await get_log_lines(ctx, 'system', lines, f'/home/{slime_vars.user}/system.log')
+
+    @commands.command(hidden=True, aliases=['upslog', 'pwrlog'])
+    async def powerlog(self, ctx, lines=5):
+        """Shows /var/log/pwrstatd.log."""
+
+        await get_log_lines(ctx, 'system', lines, f'/var/log/pwrstatd.log')
+
+
 # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
     def __init__(self, bot):
         self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
         self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
         self.bot = bot
-
-    @commands.command(aliases=['syspowerdown', 'sysoff', 'syspoweroff'])
-    async def systempowerdown(self, ctx):
-        """System shutdown."""
-
-        await ctx.send("Executed power down script.")
-        lprint(ctx, "Executed power down script.")
-        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py slime_server")
-
-    @commands.command(aliases=['syslog'])
-    async def systemlog(self, ctx, lines=5):
-        """Shows ~/system.log."""
-
-        await get_log_lines(ctx, 'system', lines,f'/home/{slime_vars.user}/system.log')
-
-    @commands.command(aliases=['upslog'])
-    async def powerlog(self, ctx, lines=5):
-        """Shows /var/log/pwrstatd.log."""
-
-        await get_log_lines(ctx, 'system', lines,f'/var/log/pwrstatd.log')
 
     @commands.command()
     async def help(self, ctx):
@@ -393,6 +409,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         lprint(ctx, "Saved Project Zomboid")
 
+
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
 
@@ -499,6 +516,7 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Chat Log: {lines}")
+
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -817,6 +835,7 @@ class Player(commands.Cog):
     @commands.command()
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
+
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
@@ -1164,6 +1183,7 @@ class Permissions(commands.Cog):
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
+
 # ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -1267,6 +1287,7 @@ class World(commands.Cog):
         await server_command(f'gamerule doDaylghtCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
+
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
@@ -2022,18 +2043,10 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
         await ctx.invoke(self.bot.get_command('serverrestorepanel'))
 
+
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
-
-    @commands.command(hidden=True, aliases=['systemreboot'])
-    async def restartsystem(self, ctx):
-        """Restart this bot."""
-
-        await ctx.send("***Rebooting ArcPy...*** :arrows_counterclockwise: ")
-        lprint(ctx, "Restarting ArcPy...")
-
-        os.system(f"python3 /home/{slime_vars.user}/git/playground/scripts/powerdown.py --restart slime")
 
     @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
@@ -2378,8 +2391,9 @@ class Bot_Functions(commands.Cog):
         await ctx.send("Cleared `channel_id`")
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
 
+
 # Adds functions to bot.
-for cog in [Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+for cog in [System, Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
     bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
