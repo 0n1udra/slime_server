@@ -104,7 +104,7 @@ def get_public_ip():
 
     global server_ip
     try:
-        server_ip = requests.get('http://ip.42.pl/raw').text
+        server_ip = json.loads(requests.get('http://jsonip.com').text)['ip']
         slime_vars.server_ip = server_ip
     except: return None
     return server_ip
