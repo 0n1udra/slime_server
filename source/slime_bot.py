@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import asyncio, discord, random, sys, os
+import datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
@@ -22,8 +22,10 @@ else:
     sys.exit()
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
-# Make sure this doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?')
+
+# Make sure command_prifex doesn't conflict with other bots.
+bot = ComponentsBot(command_prefix='?', case_insensitive=True, help_command=None)
+# So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
 # ========== Extra: Functions, Variables, Templates, etc
@@ -43,7 +45,7 @@ async def on_ready():
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send(f'**Bot PRIMED** v{__version__} :white_check_mark:')
+        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
@@ -119,8 +121,8 @@ class Basics(commands.Cog):
             *command str: Server command, do not include the slash /.
 
         Usage:
-            ?command broadcast Hello Everyone!
-            ?/ list
+            ?mcommand broadcast Hello Everyone!
+            ?m/ toggledownfall
 
         Note: You will get the latest 2 lines from server output, if you need more use ?log.
         """
@@ -211,6 +213,7 @@ class Basics(commands.Cog):
 
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Chat Log: {lines}")
+
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -529,6 +532,7 @@ class Player(commands.Cog):
     @commands.command()
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
+
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
@@ -876,6 +880,7 @@ class Permissions(commands.Cog):
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
+
 # ========== World: weather, time.
 class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -979,6 +984,7 @@ class World(commands.Cog):
         await server_command(f'gamerule doDaylghtCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
+
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
@@ -1732,6 +1738,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
         await ctx.invoke(self.bot.get_command('serverrestorepanel'))
 
+
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -2078,6 +2085,7 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send("Cleared `channel_id`")
         backend_functions.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
+
 
 # Adds functions to bot.
 for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:

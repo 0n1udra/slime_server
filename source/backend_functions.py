@@ -104,7 +104,7 @@ def get_public_ip():
 
     global server_ip
     try:
-        server_ip = requests.get('http://ip.42.pl/raw').text
+        server_ip = json.loads(requests.get('http://jsonip.com').text)['ip']
         slime_vars.server_ip = server_ip
     except: return None
     return server_ip
@@ -207,10 +207,11 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
     # Defaults file to server log.
     if file_path is None: file_path = slime_vars.server_log_file
     if not os.path.isfile(file_path): return False
+
     log_data = ''
-    line_count = 0
-    with open(file_path) as f:
-        for line in f: line_count += 1
+
+    # Gets file line number
+    line_count = sum(1 for line in open(file_path))
 
     if normal_read:
         with open(file_path, 'r') as file:
@@ -220,7 +221,7 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
     else:  # Read log file bottom up, latest log outputs first.
         with FileReadBackwards(file_path) as file:
             i = total = 0
-            # Stops loop at set limit or if file has no more lines.
+            # Stops loop at user set limit, if file has no more lines, or at hard limit (don't let user ask for 999 lines of log).
             while i < lines and total < line_count and total <= slime_vars.log_lines_limit:
                 total += 1
                 line = file.readline()
@@ -330,7 +331,7 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
-        version = server_log('server version')
+        return server_log('server version')
     return 'N/A'
 
 def server_motd():
