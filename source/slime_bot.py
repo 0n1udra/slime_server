@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime, asyncio, discord, random, sys, os
+import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
@@ -46,16 +46,17 @@ async def on_ready():
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
-        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
         await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
-        await channel.send(content='Use `?cp` for Control Panel. `?mstat` Minecraft Status page. `?help` for all commands.',
+        await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
+        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.',
                            components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
                                         Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
                                         Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
+
 
 @bot.event
 async def on_button_click(interaction):
@@ -171,11 +172,22 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
         self.bot = bot
 
+    @commands.command(aliases=['welcome', 'start'])
+    async def splash(self, ctx):
+        """Bot splash/startup message."""
+
+        await ctx.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
+        await ctx.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.',
+                           components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
+                                        Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
+                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
+
     @commands.command()
     async def help(self, ctx):
         """Custom help command for my setup."""
 
         await ctx.send("""```
+?splash       - Show bot's splash/welcome messages.
 ?games        - Show start/stop buttons for game.
 ?info         - Get server address(s) and password(s).
 
@@ -215,13 +227,30 @@ Password for Valheim: `{slime_vars.valheim_password}`
 """)
         lprint(ctx, "Show info page")
 
-    @commands.command(aliases=['vhelp'])
-    async def valheimhelp(self, ctx):
-        """Shows connect to valheim server instructions with included screenshot."""
+    async def steam_update(self, ctx, game_name, steam_id):
+        """Update steam games with steacmd."""
 
-        await ctx.invoke(self.bot.get_command("valheimstatus"))
-        await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
-        await ctx.send(file=discord.File(rf'{os.path.dirname(os.path.abspath(__file__)) }/valheim_info.png'))
+        await ctx.send(f"***Updating {game_name} Server...*** :arrows_counterclockwise: _(may take awhile)_")
+        lprint(ctx, f"Updating {game_name}...")
+
+        # Runs command and gets output
+        try: command_output = subprocess.check_output(f'steamcmd +login anonymous +app_update {steam_id} +exit'.split(' ')).decode()
+        except:
+            await ctx.send(f"Error: Update command error")
+            lprint(ctx, "Error: Updating: {game_name}, command error")
+            return
+
+        if 'up to date' in command_output:
+            await ctx.send(f"**{game_name} already up to date.**")
+        elif 'fully installed' in command_output:
+            await ctx.send(f"**{game_name} updated.**")
+            lprint(ctx, f"{game_name} updated")
+        elif 'ERROR' in command_output:
+            await ctx.send(f"Error: Trouble updating {game_name}.")
+            lprint(ctx, f"Error: Updating {game_name}")
+        else:
+            await ctx.send(f"Error: Unknown error")
+            lprint(ctx, f"Error: Updating {game_name}, Unknown error")
 
     @commands.command(aliases=['servers', 'game'])
     async def games(self, ctx):
@@ -230,20 +259,31 @@ Password for Valheim: `{slime_vars.valheim_password}`
         await ctx.send("**Valheim** :axe:", components=[[
             Button(label="Start", custom_id="valheimstart"),
             Button(label="Stop", custom_id="valheimstop"),
+            Button(label="Update", custom_id="valheimupdate"),
             Button(label="Status", custom_id="valheimstatus")
-            ]])
+        ]])
 
         await ctx.send("**Zomboid** :zombie:", components=[[
             Button(label="Start", custom_id="zomboidstart"),
             Button(label="Stop", custom_id="zomboidstop"),
+            Button(label="Update", custom_id="zomboidupdate"),
             Button(label="Status", custom_id="zomboidstatus")
-            ]])
+        ]])
 
         await ctx.send("**Minecraft** :pick:", components=[[
             Button(label="Start", custom_id="serverstart"),
             Button(label="Stop", custom_id="serverstop"),
             Button(label="Status", custom_id="servercheck")
         ]])
+
+    # ===== Valheim
+    @commands.command(aliases=['vhelp'])
+    async def valheimhelp(self, ctx):
+        """Shows connect to valheim server instructions with included screenshot."""
+
+        await ctx.invoke(self.bot.get_command("valheimstatus"))
+        await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
+        await ctx.send(file=discord.File(rf'{os.path.dirname(os.path.abspath(__file__)) }/valheim_info.png'))
 
     @commands.command(aliases=['v/', 'vcommand'])
     async def valheimcommand(self, ctx, *command):
@@ -281,7 +321,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         await ctx.send("**Halted Valheim Server** :stop_sign:")
         backend_functions.valheim_command('C-c')
-        lprint(ctx, "Halting Valheim Server")
+        lprint(ctx, "Stopped Valheim Server")
 
     @commands.command(aliases=['vstatus', 'vinfo', 'vstat'])
     async def valheimstatus(self, ctx):
@@ -299,19 +339,10 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         if backend_functions.get_proc('valheim_server.x86_64'):
             await ctx.invoke(self.bot.get_command("valheimstop"))
-            await ctx.send("_Waiting 15s to make sure server has halted fully_")
+            await ctx.send("***Waiting 15s to make sure server has halted***")
             await asyncio.sleep(15)
 
-        await ctx.send("***Updating Valheim Server*** :arrows_counterclockwise:")
-        os.system(f"cd '{slime_vars.steam_path}/Valheim dedicated server/'")
-        if os.system('steamcmd +login anonymous +app_update 896660 validate +exit'):
-            await ctx.send("**ERROR:** Problem updating Valheim server.")
-            lprint(ctx, "ERROR: Updating Valheim Server")
-        else:
-            # Copies start_server.sh settings.
-            os.system(f" cp '/home/{slime_vars.user}/Games/valheim/serverfiles/start_server.sh'  '{slime_vars.steam_path}/Valheim dedicated server/'")
-            await ctx.send("**Valheim Server Updated**")
-            lprint(ctx, "Updated Valheim Server")
+        await self.steam_update(ctx, 'Valheim', '896660')
 
     # ===== Project Zomboid
     @commands.command(aliases=['zcommand', 'z/'])
@@ -363,6 +394,15 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         lprint(ctx, "Project Zomboid Stopped")
 
+    @commands.command(aliases=['zsave', 'savezomboid'])
+    async def zomboidsave(self, ctx):
+        """Save Project Zomboid."""
+
+        backend_functions.zomboid_command('save')
+        await ctx.send("World Saved")
+
+        lprint(ctx, "Saved Project Zomboid")
+
     @commands.command(aliases=['zstatus', 'statuszomboid', 'zstat'])
     async def zomboidstatus(self, ctx):
         """Checks valheim server active status using 'vhserver details' command."""
@@ -381,33 +421,19 @@ Password for Valheim: `{slime_vars.valheim_password}`
     @commands.command(aliases=['zupdate', 'updatezomboid'])
     async def zomboidupdate(self, ctx):
         """Updates Zomboid server."""
+
         if backend_functions.get_proc('zomboid'):
             await ctx.invoke(self.bot.get_command("zomboidstop"))
-            await ctx.send("_Waiting 15s to make sure server has halted fully_")
+            await ctx.send("_Waiting 15s to make sure server has halted_")
             await asyncio.sleep(15)
 
-        await ctx.send("***Updating Zomboid Server*** :arrows_counterclockwise:")
-        if os.system('steamcmd +login anonymous 380870 validate +exit'):
-            await ctx.send("**ERROR:** Problem updating Zomboid server")
-            lprint(ctx, "ERROR: Updating Zomboid Server")
-        else:
-            await ctx.send("**Zomboid Server Updated**")
-            lprint(ctx, "Updated Zomboid Server")
+        await self.steam_update(ctx, 'Zomboid', '380870')
 
     @commands.command(aliases=['zlog'])
     async def zomboidlog(self, ctx, lines=5):
         """Show Project Zomboid log lines."""
 
         await get_log_lines(ctx, 'Zomboid', lines,f'/home/{slime_vars.user}/Zomboid/server-console.txt')
-
-    @commands.command(aliases=['zsave', 'savezomboid'])
-    async def zomboidsave(self, ctx):
-        """Save Project Zomboid."""
-
-        backend_functions.zomboid_command('save')
-        await ctx.send("World Saved")
-
-        lprint(ctx, "Saved Project Zomboid")
 
 
 # ========== Basics: Say, whisper, online players, server command pass through.
