@@ -57,7 +57,6 @@ async def on_ready():
                                         Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
                                         Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
 
-
 @bot.event
 async def on_button_click(interaction):
     """Handler for when any button is used."""
@@ -169,7 +168,7 @@ class System(commands.Cog):
 class Other_Games(commands.Cog):
     def __init__(self, bot):
         self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend_functions.get_public_ip()}` (Use if URL not working)'
-        self.valheim_text = f"{self.ip_text}\nPassword: `{slime_vars.valheim_password}`"
+        self.valheim_text = f"{self.ip_text}\nPass: `{slime_vars.valheim_password}`"
         self.bot = bot
 
     @commands.command(aliases=['welcome', 'start'])
@@ -282,7 +281,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         """Shows connect to valheim server instructions with included screenshot."""
 
         await ctx.invoke(self.bot.get_command("valheimstatus"))
-        await ctx.send("Join Server: Start Game > (pick character) Start > Join Game tab > Join IP > enter password if needed.")
+        await ctx.send("Join: Start Game > (pick character) Start > Join Game tab > Join IP (Enter URL or IP)")
         await ctx.send(file=discord.File(rf'{os.path.dirname(os.path.abspath(__file__)) }/valheim_info.png'))
 
     @commands.command(aliases=['v/', 'vcommand'])
