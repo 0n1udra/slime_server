@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime, asyncio, discord, random, sys, os
+import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
