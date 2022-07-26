@@ -500,28 +500,26 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
 
     try: os.chdir(slime_vars.server_path)
     except: pass
-    return_line = discord_return = ''  # Discord has it's own return variable, because the data might be formatted for Discord.
+    return_line = ''
 
+    # print() writes to file while using it in FileInput() with inplace=True
+    # fileinput doc: https://docs.python.org/3/library/fileinput.html
     with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
         for line in file:
             split_line = line.split('=', 1)
 
             if target_property == 'all':  # Return all lines of file.
-                discord_return += F"`{line.rstrip()}`\n"
                 return_line += line.strip() + '\n'
                 print(line, end='')
 
             # If found match, and user passed in new value to update it.
             elif target_property in split_line[0] and len(split_line) > 1:
                 if value:
-                    split_line[1] = value
-                    new_line = '='.join(split_line)
-                    discord_return = f"Updated Property:`{line}` > `{new_line}`.\nRestart to apply changes."
-                    return_line = line
-                    print(new_line, end='\n')
+                    split_line[1] = value  # edits value section of line
+                    new_line = return_line = '='.join(split_line)
+                    print(new_line, end='\n')  # Writes new line to file
                 # If user did not pass a new value to update property, just return the line from file.
                 else:
-                    discord_return = f"`{'='.join(split_line)}`"
                     return_line = '='.join(split_line)
                     print(line, end='')
             else: print(line, end='')
