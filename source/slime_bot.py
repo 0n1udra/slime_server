@@ -81,14 +81,14 @@ async def on_select_option(interaction):
     await interaction.respond(type=6)
 
     # Updates teleport_selection corresponding value based on which selection box is updated.
-    if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0]
-    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0]
+    if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0].rstrip()
+    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0].rstrip()
 
     # World/server backup panel
-    if interaction.custom_id == 'restore_server_selection': restore_server_selection = interaction.values[0]
-    if interaction.custom_id == 'restore_world_selection': restore_world_selection = interaction.values[0]
+    if interaction.custom_id == 'restore_server_selection': restore_server_selection = interaction.values[0].rstrip()
+    if interaction.custom_id == 'restore_world_selection': restore_world_selection = interaction.values[0].rstrip()
 
-    if interaction.custom_id == 'player_select': player_selection = interaction.values[0]
+    if interaction.custom_id == 'player_select': player_selection = interaction.values[0].rstrip()
 
 async def _delete_current_components():
     """
