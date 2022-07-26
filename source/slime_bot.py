@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime, asyncio, discord, random, sys, os
+import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
 from discord_components import ComponentsBot, SelectOption, Button,  Select
 from backend_functions import server_command, format_args, server_status, lprint
@@ -80,15 +80,18 @@ async def on_select_option(interaction):
 
     await interaction.respond(type=6)
 
+    # Removes any escape chars.
+    value = interaction.values[0].strip()
+
     # Updates teleport_selection corresponding value based on which selection box is updated.
-    if interaction.custom_id == 'teleport_target': teleport_selection[0] = interaction.values[0].rstrip()
-    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = interaction.values[0].rstrip()
+    if interaction.custom_id == 'teleport_target': teleport_selection[0] = value
+    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = value
 
     # World/server backup panel
-    if interaction.custom_id == 'restore_server_selection': restore_server_selection = interaction.values[0].rstrip()
-    if interaction.custom_id == 'restore_world_selection': restore_world_selection = interaction.values[0].rstrip()
+    if interaction.custom_id == 'restore_server_selection': restore_server_selection = value
+    if interaction.custom_id == 'restore_world_selection': restore_world_selection = value
 
-    if interaction.custom_id == 'player_select': player_selection = interaction.values[0].rstrip()
+    if interaction.custom_id == 'player_select': player_selection = value
 
 async def _delete_current_components():
     """
