@@ -27,12 +27,15 @@ Scroll down for requirements, setup instructions and screenshots.
 
 
 # Setup
-1. Create Discord bot using this [portal](https://discord.com/developers/applications).
-2. Update `slime_vars.py` variables.
-3. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
-  e.g. `python3 run_bot.py starttmux startboth attachtmux`
-5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.
-6. Read through the help pages with `?help` or `?help2` in Discord.
+1. Create Discord bot using this [portal](https://discord.com/developers/applications).  
+2. Install discord.py first, then discord-components package:  
+  a. Download or git clone: https://github.com/kiki7000/discord.py-components.git  
+  b. Go into discord.py-components folder and run `python3 setup.py install`.  
+3. Update `slime_vars.py` variables.  
+4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
+  e.g. `python3 run_bot.py starttmux startboth attachtmux`  
+5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.  
+6. Read through the help pages with `?help` or `?help2` in Discord.  
 
 ### Using Virtualenv or venv:
 Create Python Virtualenvt:
