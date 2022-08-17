@@ -1,4 +1,5 @@
 ## Control Minecraft server with Discord bot.  
+### The Pycord transition update.
 Scroll down for requirements, setup instructions and screenshots.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
@@ -9,6 +10,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files.
 - Server autosave, start, stop, status, version, log, update server.jar (only with Vanilla or PaperMC), and edit server.properties
 - Interface via RCON, Tmux or subprocess. Some features and command may be disabled if using RCON or Subprocess.
+- Coming soon: slash commands.
 
 ### Requirements:
 - [Python3](https://www.python.org/)
@@ -17,8 +19,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)
 
 ### Python Modules:
-- [discord.py](https://github.com/Rapptz/discord.py)
-- [discord-components](https://pypi.org/project/discord-components/)
+- [pycord](https://github.com/Pycord-Development/pycord)
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
@@ -28,9 +29,7 @@ Scroll down for requirements, setup instructions and screenshots.
 
 # Setup
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).  
-2. Install discord.py first, then discord-components package:  
-  a. Download or git clone: https://github.com/kiki7000/discord.py-components.git  
-  b. Go into discord.py-components folder and run `python3 setup.py install`.  
+2. Setup Python venv and install libraries.
 3. Update `slime_vars.py` variables.  
 4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
   e.g. `python3 run_bot.py starttmux startboth attachtmux`  
