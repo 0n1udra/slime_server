@@ -2,12 +2,12 @@
 
 import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
-from discord_components import ComponentsBot, SelectOption, Button,  Select
+from discord.ui import Button
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "5.5P"
-__date__ = '2022/04/12'
+__version__ = "6Py"
+__date__ = '2022/08/17'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -24,7 +24,7 @@ else:
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?', case_insensitive=True, help_command=None)
+bot = commands.Bot(command_prefix='?', case_insensitive=True, help_command=None)
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
@@ -34,6 +34,18 @@ teleport_selection = [None, None, None]  # Target, Destination, Target's origina
 player_selection = None
 restore_world_selection = restore_server_selection = None
 current_components = []
+
+on_ready_buttons = [['Start/Stop Servers', 'games', '\U0001F3AE'],
+                    ['Control Panel', 'controlpanel', '\U0001F39B'],
+                    ['Minecraft Status', 'serverstatus', '\U00002139']]
+class On_Ready_Buttons(discord.ui.Button):
+    def __init__(self, button):
+        super().__init__(label=button[0], custom_id=button[1], emoji=button[2], style=discord.ButtonStyle.primary)
+
+    async def callback(self, interaction):
+        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        await ctx.invoke(bot.get_command(str(interaction.custom_id)))
+
 
 @bot.event
 async def on_ready():
@@ -51,11 +63,11 @@ async def on_ready():
         await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
+        view = discord.ui.View(timeout=None)
+        for button in on_ready_buttons:
+            view.add_item(On_Ready_Buttons(button))
         await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
-        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.',
-                           components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
-                                        Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
+        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=view)
 
 @bot.event
 async def on_button_click(interaction):
