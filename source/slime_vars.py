@@ -16,12 +16,6 @@ channel_id = 916450451061350420
 server_url = 'arcpy.asuscomm.com'
 server_port = 25566
 
-# ========== Other Games
-steam_path = f'/home/{user}/.steam/steam/steamapps/common'
-pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
-if os.path.isfile(pass_path):
-    with open(pass_path, 'r') as file: valheim_password = file.readline()
-
 # ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
