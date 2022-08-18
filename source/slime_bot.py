@@ -75,7 +75,7 @@ class Discord_Button(discord.ui.Button):
 
         # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
-        await ctx.invoke(bot.get_command(custom_id), ctx)
+        await ctx.invoke(bot.get_command(custom_id))
 
 def new_buttons(buttons_list):
     """Create new discord.ui.View and add buttons, then return said view."""
@@ -108,6 +108,7 @@ async def on_ready():
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
 
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
         #await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
