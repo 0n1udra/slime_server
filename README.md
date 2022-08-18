@@ -18,7 +18,7 @@ Scroll down for requirements, setup instructions and screenshots.
 
 ### Python Modules:
 - [discord.py](https://github.com/Rapptz/discord.py)
-- [discord-components](https://pypi.org/project/discord-components/)
+- [discord-components](https://pypi.org/project/discord-components-mirror/)
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
