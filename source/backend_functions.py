@@ -10,23 +10,6 @@ slime_proc = slime_pid = None  # If using nohup to run bot in background.
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
-# ========== Other Games
-
-def valheim_proc():
-    """Returns valheim process if found."""
-    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
-    for proc in psutil.process_iter():
-        if proc.name() == 'valheim_server.x86_64': return proc
-    else: return None
-
-def valheim_command(command):
-    """Use vhserver script"""
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
-
-def zomboid_command(command):
-    """Sends command to tmux 0.1 Project Zomboid server."""
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
-
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(ctx, msg):
     """Prints and Logs events in file."""
