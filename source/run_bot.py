@@ -26,7 +26,7 @@ def start_bot_tmux():
         if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
             lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
 
-        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 run_bot.py startbot' ENTER"):
+        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 run_bot.py _startbot' ENTER"):
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
             start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
@@ -127,6 +127,8 @@ if __name__ == '__main__':
     if 'startbot' in sys.argv:
         start_bot_tmux()
 
+    if '_startbot' in sys.argv:
+        start_bot()
     # Background process method (using nohup)
     if 'stopbot' in sys.argv:
         kill_slime_proc()
