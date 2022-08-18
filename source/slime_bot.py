@@ -65,15 +65,16 @@ class Discord_Button(discord.ui.Button):
 
     async def callback(self, interaction):
         await interaction.response.defer()
+        custom_id = interaction.data['custom_id']
 
         # Before teleporting player, this saves the location of player beforehand.
-        if interaction.custom_id == '_teleport_selected':
+        if custom_id == '_teleport_selected':
             return_coord = await backend_functions.get_location(teleport_selection[0].strip())
             teleport_selection[2] = return_coord.replace(',', '')
 
         # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
-        await ctx.invoke(bot.get_command(str(interaction.custom_id)))
+        await ctx.invoke(bot.get_command(custom_id))
 
 def new_buttons(buttons_list):
     """Create new discord.ui.View and add buttons, then return said view."""
