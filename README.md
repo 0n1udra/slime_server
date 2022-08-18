@@ -1,5 +1,5 @@
 ## Control Minecraft server with Discord bot.  
-### The Pycord transition update.
+### The discord.py 2.0 transition update.
 Scroll down for requirements, setup instructions and screenshots.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
@@ -13,13 +13,13 @@ Scroll down for requirements, setup instructions and screenshots.
 - Coming soon: slash commands.
 
 ### Requirements:
-- [Python3](https://www.python.org/)
+- [Python3.8+](https://www.python.org/)
 - [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If hosting Minecraft server)
 - [Tmux](https://github.com/tmux/tmux/wiki) (If hosting Minecraft server)
 - [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)
 
 ### Python Modules:
-- [pycord](https://github.com/Pycord-Development/pycord)
+- [discord.py 2.0](https://github.com/Rapptz/discord.py)
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
