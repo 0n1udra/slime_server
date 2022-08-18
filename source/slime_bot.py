@@ -24,8 +24,7 @@ channel = None
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 # For buttons and selection box components.
-player_selection = None
-restore_world_selection = restore_server_selection = None
+player_selection = restore_world_selection = restore_server_selection = None
 current_components = []
 
 start_button = ['Start Server', 'serverstart', '\U0001F680']
@@ -33,25 +32,26 @@ on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'],
                     ['Minecraft Status', 'serverstatus', '\U00002139']]
 
 class Discord_Select(discord.ui.Select):
-    def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=25):
+    def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
         super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
 
     async def callback(self, interaction):
-        global player_selection, restore_world_selection, restore_server_selection
+        global teleport_selection, player_selection, restore_world_selection, restore_server_selection
 
         await interaction.response.defer()  # Defer response so not to show failed interaction message.
         # Removes any escape chars.
-        value = interaction.values[0].strip()
+        value = interaction.data['values'][0].strip()
+        custom_id = interaction.data['custom_id']
 
         # Updates teleport_selection corresponding value based on which selection box is updated.
-        if interaction.custom_id == 'teleport_target': teleport_selection[0] = value
-        if interaction.custom_id == 'teleport_destination': teleport_selection[1] = value
+        if custom_id == 'teleport_target': teleport_selection[0] = value
+        if custom_id == 'teleport_destination': teleport_selection[1] = value
 
         # World/server backup panel
-        if interaction.custom_id == 'restore_server_selection': restore_server_selection = value
-        if interaction.custom_id == 'restore_world_selection': restore_world_selection = value
+        if custom_id == 'restore_server_selection': restore_server_selection = value
+        if custom_id == 'restore_world_selection': restore_world_selection = value
 
-        if interaction.custom_id == 'player_select': player_selection = value
+        if custom_id == 'player_select': player_selection = value
 
 
 class Discord_Button(discord.ui.Button):
@@ -71,7 +71,8 @@ class Discord_Button(discord.ui.Button):
         # Before teleporting player, this saves the location of player beforehand.
         if custom_id == '_teleport_selected':
             return_coord = await backend_functions.get_location(teleport_selection[0].strip())
-            teleport_selection[2] = return_coord.replace(',', '')
+            try: teleport_selection[2] = return_coord.replace(',', '')
+            except: pass
 
         # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
@@ -90,8 +91,12 @@ def new_selection(select_options_args, custom_id, placeholder):
     """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
 
     view = discord.ui.View(timeout=None)
+    select_options = []
+
     # Create options for select menu.
-    select_options = [discord.SelectOption(label=option[0], value=option[1]) for option in select_options_args]
+    for option in select_options_args:
+        if len(option) == 2: option.append(False)  # Sets default for 'Default' arg for SelectOption.
+        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
 
@@ -100,19 +105,18 @@ async def on_ready():
     global channel
 
     await bot.wait_until_ready()
-    bot.load_extension("slime_bot")
     await setup(bot)
+
     lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
+    await backend_functions.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
+        backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
+
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
-
-        backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
-        #await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
-
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
         await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
         await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
@@ -158,7 +162,7 @@ class Basics(commands.Cog):
 
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['mcommand', 'm/'])
+    @commands.command(aliases=['mcommand', '/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
@@ -236,7 +240,6 @@ class Basics(commands.Cog):
             ?chat 50
         """
 
-        print(ctx, dir(ctx))
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
@@ -393,11 +396,7 @@ class Player(commands.Cog):
         except: destination = destination[0]
 
         select_playeropt = []
-        if target:
-            teleport_selection[0] = target.strip()
-            return_coord = await backend_functions.get_location(target.strip())
-            teleport_selection[2] = return_coord.replace(',', '')
-            select_playeropt = [SelectOption(label=target, value=target, default=True)]
+        if target: select_playeropt = [[target, target, True]]
 
         # Will not show select components if received usable parameters.
         # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
@@ -411,10 +410,10 @@ class Player(commands.Cog):
 
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
             teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]]
-            await ctx.send("**Teleport**", view=new_selection(teleport_select_options + ['All Players', '@'], custom_id='teleport_target', placeholder='Target'))
-            await ctx.send('', view=new_selection(teleport_select_options, custom_id='teleport_target', placeholder='Destination'))
+            await ctx.send("**Teleport**", view=new_selection(select_playeropt + [['All Players', '@']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
+            await ctx.send('', view=new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
 
-            teleport_buttons = [['Teleprot', '_teleport_selected'], ['Return', '_return_selected']]
+            teleport_buttons = [['Teleport', '_teleport_selected'], ['Return', '_return_selected']]
             await ctx.send('', view=new_buttons(teleport_buttons))
         else:
             target = target.strip()
