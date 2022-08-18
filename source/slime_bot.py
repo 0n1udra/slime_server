@@ -33,6 +33,28 @@ on_ready_buttons = [['Start/Stop Servers', 'games', '\U0001F3AE'],
                     ['Control Panel', 'controlpanel', '\U0001F39B'],
                     ['Minecraft Status', 'serverstatus', '\U00002139']]
 
+class Discord_Select(discord.ui.Select):
+    def __init__(self, options, placeholder='Choose', min_values=1, max_values=25):
+        super().__init__(options=options, placeholder=placeholder, min_values=min_values, max_values=max_values)
+
+    async def callback(self, interaction):
+        global player_selection, restore_world_selection, restore_server_selection
+
+        await interaction.response.defer()  # Defer response so not to show failed interaction message.
+        # Removes any escape chars.
+        value = interaction.values[0].strip()
+
+        # Updates teleport_selection corresponding value based on which selection box is updated.
+        if interaction.custom_id == 'teleport_target': teleport_selection[0] = value
+        if interaction.custom_id == 'teleport_destination': teleport_selection[1] = value
+
+        # World/server backup panel
+        if interaction.custom_id == 'restore_server_selection': restore_server_selection = value
+        if interaction.custom_id == 'restore_world_selection': restore_world_selection = value
+
+        if interaction.custom_id == 'player_select': player_selection = value
+
+
 class Discord_Buttons(discord.ui.Button):
     """
     Create button from received list containing label, custom_id, and emoji.
@@ -44,6 +66,13 @@ class Discord_Buttons(discord.ui.Button):
 
     async def callback(self, interaction):
         await interaction.response.defer()
+
+        # Before teleporting player, this saves the location of player beforehand.
+        if interaction.custom_id == '_teleport_selected':
+            return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+            teleport_selection[2] = return_coord.replace(',', '')
+
+        # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         await ctx.invoke(bot.get_command(str(interaction.custom_id)))
 
@@ -74,44 +103,6 @@ async def on_ready():
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
         await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
         await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
-
-@bot.event
-async def on_button_click(interaction):
-    """Handler for when any button is used."""
-    global teleport_selection
-
-    # Need to respond with type=6, or proceeding code will execute twice.
-    await interaction.respond(type=6)
-
-    # Before teleporting player, this saves the location of player beforehand.
-    if interaction.custom_id == '_teleport_selected':
-        return_coord = await backend_functions.get_location(teleport_selection[0].strip())
-        teleport_selection[2] = return_coord.replace(',', '')
-
-    # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
-    ctx = await bot.get_context(interaction.message)  # Not exactly sure why this is needed, but i think it is :P.
-    await ctx.invoke(bot.get_command(str(interaction.custom_id)))
-
-@bot.event
-async def on_select_option(interaction):
-    """This updated needed global bot variables from selection box so corresponding functions can work properly."""
-
-    global player_selection, restore_world_selection, restore_server_selection
-
-    await interaction.respond(type=6)
-
-    # Removes any escape chars.
-    value = interaction.values[0].strip()
-
-    # Updates teleport_selection corresponding value based on which selection box is updated.
-    if interaction.custom_id == 'teleport_target': teleport_selection[0] = value
-    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = value
-
-    # World/server backup panel
-    if interaction.custom_id == 'restore_server_selection': restore_server_selection = value
-    if interaction.custom_id == 'restore_world_selection': restore_world_selection = value
-
-    if interaction.custom_id == 'player_select': player_selection = value
 
 async def _delete_current_components():
     """
@@ -2137,13 +2128,10 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['sp', 'hiddenpanel'])
     async def secretpanel(self, ctx):
-        await ctx.send("**Secret Panel**", components=[[
-            Button(label='Kill Players', emoji='\U0001F4A3', custom_id="_killplayers"),
-            Button(label="Kill Entities", emoji='\U0001F4A5', custom_id="_killentities"),
-            Button(label='Kill Rando', emoji='\U00002753', custom_id="_killrando"),
-        ], [
-            Button(label='HADES Protocol', emoji='\U0001F480', custom_id="hades"),
-        ]])
+
+        secret_buttons = [['Kill Players', '_killplayers', '\U00002753'], ['Kill Entities', '_killentities', '\U0001F4A3'],
+                          ['Kill Rando', '_killrando', '\U0001F4A5'], ['HADES Protocol', 'hades', '\U0001F480']]
+        await ctx.send("**Secret Panel**", view=new_buttons(secret_buttons))
 
         lprint(ctx, 'Opened secret panel')
 
@@ -2232,10 +2220,8 @@ class Bot_Functions(commands.Cog):
                    options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
                    )])
 
-        button_msg = await ctx.send("Actions:", components=[[
-            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_server_selected"),
-            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_server_selected"),
-        ]])
+        restore_buttons = [['Restore', '_restore_server_selected', '\U000021A9'], ['Delete', '_delete_server_selected', '\U0001F5D1']]
+        button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
 
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore server panel')
