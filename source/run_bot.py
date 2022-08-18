@@ -17,7 +17,6 @@ def start_bot():
         print("Missing Token File:", slime_vars.bot_token_file)
         sys.exit()
 
-    bot.load_extension("slime_bot")
     bot.run(TOKEN)
 
 

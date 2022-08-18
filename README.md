@@ -13,7 +13,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - Coming soon: slash commands.
 
 ### Requirements:
-- [Python3.8+](https://www.python.org/)
+- [Python 3.8+](https://www.python.org/)
 - [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If hosting Minecraft server)
 - [Tmux](https://github.com/tmux/tmux/wiki) (If hosting Minecraft server)
 - [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)

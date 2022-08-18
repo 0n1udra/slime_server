@@ -2,7 +2,7 @@
 
 import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
-from discord.ui import Button
+from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
@@ -17,7 +17,7 @@ __status__ = "Development"
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?', case_insensitive=True, help_command=None, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='?', case_insensitive=True, intents=discord.Intents.all())
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
@@ -33,8 +33,8 @@ on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'],
                     ['Minecraft Status', 'serverstatus', '\U00002139']]
 
 class Discord_Select(discord.ui.Select):
-    def __init__(self, options, placeholder='Choose', min_values=1, max_values=25):
-        super().__init__(options=options, placeholder=placeholder, min_values=min_values, max_values=max_values)
+    def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=25):
+        super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
 
     async def callback(self, interaction):
         global player_selection, restore_world_selection, restore_server_selection
@@ -60,10 +60,11 @@ class Discord_Button(discord.ui.Button):
     Uses custom_id with ctx.invoke to call corresponding function.
     """
 
-    def __init__(self, button):
-        super().__init__(label=button[0], custom_id=button[1], emoji=button[2], style=discord.ButtonStyle.grey)
+    def __init__(self, label, custom_id, emoji=None, style=discord.ButtonStyle.grey):
+        super().__init__(label=label, custom_id=custom_id, emoji=emoji, style=style)
 
     async def callback(self, interaction):
+        global teleport_selection
         await interaction.response.defer()
         custom_id = interaction.data['custom_id']
 
@@ -82,7 +83,16 @@ def new_buttons(buttons_list):
     view = discord.ui.View(timeout=None)
     for button in buttons_list:
         if len(button) == 2: button.append(None)  # For button with no emoji.
-        view.add_item(Discord_Button(button))
+        view.add_item(Discord_Button(label=button[0], custom_id=button[1], emoji=button[2]))
+    return view
+
+def new_selection(select_options_args, custom_id, placeholder):
+    """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    # Create options for select menu.
+    select_options = [discord.SelectOption(label=option[0], value=option[1]) for option in select_options_args]
+    view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
 
 @bot.event
@@ -90,6 +100,8 @@ async def on_ready():
     global channel
 
     await bot.wait_until_ready()
+    bot.load_extension("slime_bot")
+    await setup(bot)
     lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
 
     # Will send startup messages to specified channel if given channel_id.
@@ -145,7 +157,7 @@ class Basics(commands.Cog):
 
     def __init__(self, bot): self.bot = bot
 
-    @bot.command(aliases=['mcommand', 'm/'])
+    @commands.command(aliases=['mcommand', 'm/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
@@ -166,7 +178,7 @@ class Basics(commands.Cog):
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
 
-    @bot.command(aliases=['broadcast', 's'])
+    @commands.command(aliases=['broadcast', 's'])
     async def say(self, ctx, *msg):
         """
         sends message to all online players.
@@ -187,7 +199,7 @@ class Basics(commands.Cog):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
-    @bot.command(aliases=['whisper', 't', 'w'])
+    @commands.command(aliases=['whisper', 't', 'w'])
     async def tell(self, ctx, player='', *msg):
         """
         Message online player directly.
@@ -211,7 +223,7 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @bot.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
+    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
     async def chatlog(self, ctx, lines=5):
         """
         Shows chat log. Does not include whispers.
@@ -223,6 +235,7 @@ class Basics(commands.Cog):
             ?chat 50
         """
 
+        print(ctx, dir(ctx))
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
@@ -252,7 +265,7 @@ class Basics(commands.Cog):
 class Player(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @bot.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
+    @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx):
         """Show list of online players."""
 
@@ -272,7 +285,7 @@ class Player(commands.Cog):
 
         lprint(ctx, "Fetched player list")
 
-    @bot.command(aliases=['playerkill', 'pk'])
+    @commands.command(aliases=['playerkill', 'pk'])
     async def kill(self, ctx, target='', *reason):
         """
         Kill a player.
@@ -298,7 +311,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` :gun: assassinated!")
         lprint(ctx, f"Killed: {target}")
 
-    @bot.command(aliases=['delaykill', 'dkill', 'killwait','waitkill'])
+    @commands.command(aliases=['delaykill', 'dkill', 'killwait','waitkill'])
     async def killdelay(self, ctx, target='', delay=5, *reason):
         """
         Kill player after time elapsed.
@@ -327,7 +340,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
 
-    @bot.command(aliases=['killallplayers', 'kilkillkill', 'killall'])
+    @commands.command(aliases=['killallplayers', 'kilkillkill', 'killall'])
     async def _killplayers(self, ctx):
         """Kills all online players using '@a' argument."""
 
@@ -335,7 +348,7 @@ class Player(commands.Cog):
         await server_command('kill @a')
         lprint(ctx, 'Killed: All Players')
 
-    @bot.command(aliases=['killeverything', 'killallentities'])
+    @commands.command(aliases=['killeverything', 'killallentities'])
     async def _killentities(self, ctx):
         """Kills all server entities using '@e' argument."""
 
@@ -343,7 +356,7 @@ class Player(commands.Cog):
         await server_command('kill @e')
         lprint(ctx, 'Killed: All Entities')
 
-    @bot.command(aliases=['killrandom', 'killrandomplayer'])
+    @commands.command(aliases=['killrandom', 'killrandomplayer'])
     async def _killrando(self, ctx):
         """Kills random player using '@r' argument."""
 
@@ -351,13 +364,13 @@ class Player(commands.Cog):
         await server_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
-    @bot.command()
+    @commands.command()
     async def _kill_selected(self, ctx):
         """Kills selected player from player panel."""
 
         await ctx.invoke(self.bot.get_command('kill'), target=player_selection)
 
-    @bot.command(aliases=['tp'])
+    @commands.command(aliases=['tp'])
     async def teleport(self, ctx, target='', *destination):
         """
         Teleport player to another player.
@@ -396,25 +409,12 @@ class Player(commands.Cog):
                 return
 
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
-            await ctx.send("**Teleport**", components=[
-                Select(
-                    custom_id="teleport_target",
-                    placeholder="Target",
-                    options=select_playeropt +
-                            [SelectOption(label='All Players', value='@a')] +
-                            [SelectOption(label='Random Player', value='@r')] +
-                            [SelectOption(label=i, value=i) for i in players[0]],
-                ),
-                Select(custom_id="teleport_destination",
-                       placeholder="Destination",
-                       options=[SelectOption(label=i, value=i) for i in players[0]] +
-                               [SelectOption(label='Random Player', value='@r')],
-                ),
-                [
-                Button(label='Teleport', custom_id='_teleport_selected'),
-                Button(label='Return', custom_id='_return_selected')
-                ]
-            ])
+            teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]]
+            await ctx.send("**Teleport**", view=new_selection(teleport_select_options + ['All Players', '@'], custom_id='teleport_target', placeholder='Target'))
+            await ctx.send('', view=new_selection(teleport_select_options, custom_id='teleport_target', placeholder='Destination'))
+
+            teleport_buttons = [['Teleprot', '_teleport_selected'], ['Return', '_return_selected']]
+            await ctx.send('', view=new_buttons(teleport_buttons))
         else:
             target = target.strip()
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
@@ -435,25 +435,25 @@ class Player(commands.Cog):
             await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
             lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
 
-    @bot.command()
+    @commands.command()
     async def _teleport_selected(self, ctx):
         """Teleports selected targets from ?teleport command when use Teleport! button."""
 
         await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
 
-    @bot.command()
+    @commands.command()
     async def _teleport_selected_playerpanel(self, ctx):
-        """Sets target selection box from selection in ?playerpanel command."""
+        """invokes ?playerpanel and sets target menu selection."""
 
         await ctx.invoke(self.bot.get_command('teleport'), str(player_selection) + ' ')
 
-    @bot.command()
+    @commands.command()
     async def _return_selected(self, ctx):
         """Returns player to original location before teleportation."""
 
         await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[2])
 
-    @bot.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
+    @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
     async def playerlocate(self, ctx, player=''):
         """Gets player's location coordinates."""
 
@@ -464,13 +464,13 @@ class Player(commands.Cog):
 
         await ctx.send(f"**ERROR:** Could not get location.")
 
-    @bot.command()
+    @commands.command()
     async def _locate_selected(self, ctx):
         """Get player's xyz coordinates."""
 
         await ctx.invoke(self.bot.get_command('playerlocate'), player=player_selection)
 
-    @bot.command(aliases=['gm'])
+    @commands.command(aliases=['gm'])
     async def gamemode(self, ctx, player='', mode='', *reason):
         """
         Change player's gamemode.
@@ -497,7 +497,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{player}` is now in `{mode.upper()}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
 
-    @bot.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
+    @commands.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
     async def gamemodetimed(self, ctx, player='', mode='', duration=60, *reason):
         """
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
@@ -529,25 +529,25 @@ class Player(commands.Cog):
         await server_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
 
-    @bot.command()
+    @commands.command()
     async def _survival_selected(self, ctx):
         """Changes selected player to survival."""
 
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='survival')
 
-    @bot.command()
+    @commands.command()
     async def _adventure_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='adventure')
 
-    @bot.command()
+    @commands.command()
     async def _creative_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='creative')
 
-    @bot.command()
+    @commands.command()
     async def _spectator_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='spectator')
 
-    @bot.command(aliases=['clear'])
+    @commands.command(aliases=['clear'])
     async def clearinventory(self, ctx, target):
         """Clears player inventory."""
 
@@ -562,7 +562,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` inventory cleared")
         lprint(ctx, f"Cleared: {target}")
 
-    @bot.command()
+    @commands.command()
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
 
@@ -571,7 +571,7 @@ class Player(commands.Cog):
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @bot.command()
+    @commands.command()
     async def kick(self, ctx, player='', *reason):
         """
         Kick player from server.
@@ -598,7 +598,7 @@ class Permissions(commands.Cog):
         await ctx.send(f"`{player}` is outta here :wave:")
         lprint(ctx, f"Kicked: {player}")
 
-    @bot.command(aliases=['exile', 'banish'])
+    @commands.command(aliases=['exile', 'banish'])
     async def ban(self, ctx, player='', *reason):
         """
         Ban player from server.
@@ -626,15 +626,15 @@ class Permissions(commands.Cog):
         await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
 
-    @bot.command()
+    @commands.command()
     async def _kick_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('kick'), player=player_selection)
 
-    @bot.command()
+    @commands.command()
     async def _ban_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('ban'), player=player_selection)
 
-    @bot.command(aliases=['unban'])
+    @commands.command(aliases=['unban'])
     async def pardon(self, ctx, player='', *reason):
         """
         Pardon (unban) player.
@@ -659,7 +659,7 @@ class Permissions(commands.Cog):
         await ctx.send(f"Cleansed `{player}` :flag_white:")
         lprint(ctx, f"Pardoned {player} : {reason}")
 
-    @bot.command(aliases=['bl', 'bans'])
+    @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
         """Show list of current bans."""
         banned_players = ''
@@ -707,7 +707,7 @@ class Permissions(commands.Cog):
         await ctx.send(banned_players)
         lprint(ctx, f"Fetched ban list")
 
-    @bot.command(aliases=['wl', 'whitel', 'white', 'wlist'])
+    @commands.command(aliases=['wl', 'whitel', 'white', 'wlist'])
     async def whitelist(self, ctx, arg='', arg2=''):
         """
         Whitelist commands. Turn on/off, add/remove, etc.
@@ -798,7 +798,7 @@ class Permissions(commands.Cog):
             return False
         else: await ctx.send("**ERROR:** Something went wrong.")
 
-    @bot.command(aliases=['ol', 'ops', 'listops'])
+    @commands.command(aliases=['ol', 'ops', 'listops'])
     async def oplist(self, ctx):
         """Show list of server operators."""
 
@@ -810,7 +810,7 @@ class Permissions(commands.Cog):
 
         lprint(ctx, f"Fetched server operators list")
 
-    @bot.command(aliases=['op', 'addop'])
+    @commands.command(aliases=['op', 'addop'])
     async def opadd(self, ctx, player='', *reason):
         """
         Add server operator (OP).
@@ -844,7 +844,7 @@ class Permissions(commands.Cog):
         else: await ctx.send("**ERROR:** Problem setting OP status.")
         lprint(ctx, f"New server op: {player}")
 
-    @bot.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
+    @commands.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
     async def opremove(self, ctx, player='', *reason):
         """
         Remove player OP status (deop).
@@ -879,7 +879,7 @@ class Permissions(commands.Cog):
             await ctx.send("**ERROR:** Problem removing OP status.")
             lprint(ctx, f"ERROR: Removing server OP: {player}")
 
-    @bot.command(aliases=['optime', 'opt', 'optimedlimit'])
+    @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
     async def optimed(self, ctx, player='', time_limit=1, *reason):
         """
         Set player as OP for x seconds.
@@ -905,11 +905,11 @@ class Permissions(commands.Cog):
         await asyncio.sleep(time_limit * 60)
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
-    @bot.command()
+    @commands.command()
     async def _opadd_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opadd'), player=player_selection)
 
-    @bot.command()
+    @commands.command()
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
@@ -919,7 +919,7 @@ class World(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     # ===== Weather
-    @bot.command(aliases=['weather', 'setweather'])
+    @commands.command(aliases=['weather', 'setweather'])
     async def weatherset(self, ctx, state='', duration=0):
         """
         Set weather.
@@ -941,40 +941,40 @@ class World(commands.Cog):
         await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
 
-    @bot.command(aliases=['enableweather', 'weatherenable'])
+    @commands.command(aliases=['enableweather', 'weatherenable'])
     async def weatheron(self, ctx):
         """Enable weather cycle."""
         await server_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
 
-    @bot.command(aliases=['disableweather', 'weatherdisable'])
+    @commands.command(aliases=['disableweather', 'weatherdisable'])
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
         await server_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
 
-    @bot.command(aliases=['clearweather', 'weathersetclear'])
+    @commands.command(aliases=['clearweather', 'weathersetclear'])
     async def weatherclear(self, ctx):
         """Set weather to clear."""
         await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
         lprint(ctx, 'Weather: Disabled')
 
-    @bot.command(aliases=['rainweather', 'weathersetrain'])
+    @commands.command(aliases=['rainweather', 'weathersetrain'])
     async def weatherrain(self, ctx):
         """Set weather to clear."""
         await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
         lprint(ctx, 'Weather: Disabled')
 
-    @bot.command(aliases=['thunderweather', 'weathersetthunder'])
+    @commands.command(aliases=['thunderweather', 'weathersetthunder'])
     async def weatherthunder(self, ctx):
         """Set weather to clear."""
         await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
         lprint(ctx, 'Weather: Disabled')
 
     # ===== Time
-    @bot.command(aliases=['time', 'settime'])
+    @commands.command(aliases=['time', 'settime'])
     async def timeset(self, ctx, set_time=''):
         """
         Set time.
@@ -994,24 +994,24 @@ class World(commands.Cog):
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
 
-    @bot.command(aliaases=['daytime', 'setday', 'timesetday'])
+    @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
     async def timeday(self, ctx):
         """Set time to day."""
         await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
 
-    @bot.command(aliases=['nighttime', 'setnight', 'timesetnight'])
+    @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
     async def timenight(self, ctx):
         """Set time to night."""
         await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
 
-    @bot.command(aliases=['enabletime', 'timecycleon'])
+    @commands.command(aliases=['enabletime', 'timecycleon'])
     async def timeon(self, ctx):
         """Enable day light cycle."""
         await server_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle ENABLED")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
-    @bot.command(aliases=['diabletime', 'timecycleoff'])
+    @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
         await server_command(f'gamerule doDaylghtCycle false')
@@ -1029,7 +1029,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Save/Autosave
-    @bot.command(aliases=['sa', 'save-all'])
+    @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
@@ -1039,19 +1039,19 @@ class Server(commands.Cog):
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved World")
 
-    @bot.command()
+    @commands.command()
     async def autosaveon(self, ctx):
         """Enables autosave."""
 
         await ctx.invoke(self.bot.get_command('autosave'), arg='on')
 
-    @bot.command()
+    @commands.command()
     async def autosaveoff(self, ctx):
         """Disables autosave."""
 
         await ctx.invoke(self.bot.get_command('autosave'), arg='off')
 
-    @bot.command(aliases=['asave'])
+    @commands.command(aliases=['asave'])
     async def autosave(self, ctx, arg=''):
         """
         Sends save-all command at interval of x minutes.
@@ -1108,14 +1108,14 @@ class Server(commands.Cog):
         await self.bot.wait_until_ready()
 
     # ===== Status/Info
-    @bot.command(aliases=['check', 'checkstatus', 'statuscheck', 'active'])
+    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active'])
     async def servercheck(self, ctx, show_msg=True):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
         await server_status(discord_msg=show_msg)
 
-    @bot.command(aliases=['mstatus', 'mstat', 'mstats', 'minecraftstatus'])
+    @commands.command(aliases=['mstatus', 'mstat', 'mstats', 'minecraftstatus'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -1134,7 +1134,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
 
-    @bot.command(aliases=['log', 'mlog'])
+    @commands.command(aliases=['log', 'mlog'])
     async def serverlog(self, ctx, lines=5, match=None):
         """
         Show server log.
@@ -1167,7 +1167,7 @@ class Server(commands.Cog):
             await ctx.send("**Error:** Problem fetching data.")
             lprint(ctx, "ERROR: Issue getting minecraft log data")
 
-    @bot.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
+    @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
     async def serverconnectionslog(self, ctx, lines=5):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
@@ -1198,7 +1198,7 @@ class Server(commands.Cog):
         await ctx.send("-----END-----")
         lprint(ctx, f"Fetched Connection Log: {lines}")
 
-    @bot.command(aliases=['minecraftversion', 'mversion'])
+    @commands.command(aliases=['minecraftversion', 'mversion'])
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
@@ -1207,7 +1207,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched Minecraft server version: " + response)
 
     # === Properties
-    @bot.command(aliases=['property', 'p'])
+    @commands.command(aliases=['property', 'p'])
     async def properties(self, ctx, target_property='', *value):
         """
         Check or change a server.properties property. May require restart.
@@ -1244,13 +1244,13 @@ class Server(commands.Cog):
             await ctx.send(f"**ERROR:** 404 Property not found.")
             lprint(ctx, f"Server property not found: {target_property}")
 
-    @bot.command()
+    @commands.command()
     async def propertiesall(self, ctx):
         """Shows full server properties file."""
 
         await ctx.invoke(self.bot.get_command('properties'), target_property='all')
 
-    @bot.command(aliases=['serveronlinemode', 'omode', 'om'])
+    @commands.command(aliases=['serveronlinemode', 'omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
         """
         Check or enable/disable onlinemode property. Restart required.
@@ -1275,7 +1275,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
-    @bot.command(aliases=['updatemotd', 'servermotd'])
+    @commands.command(aliases=['updatemotd', 'servermotd'])
     async def motd(self, ctx, *message):
         """
         Check or Update motd property. Restart required.
@@ -1304,7 +1304,7 @@ class Server(commands.Cog):
             await ctx.send(f"Current MOTD: `{motd_property[1]}`")
             lprint(ctx, "Fetched MOTD: " + motd_property[1].strip())
 
-    @bot.command(aliases=['serverrcon'])
+    @commands.command(aliases=['serverrcon'])
     async def rcon(self, ctx, state=''):
         """
         Check RCON status, enable/disable enable-rcon property. Restart required.
@@ -1325,7 +1325,7 @@ class Server(commands.Cog):
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @bot.command(aliases=['startminecraft', 'mstart'])
+    @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -1346,7 +1346,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @bot.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
+    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -1383,7 +1383,7 @@ class Server(commands.Cog):
         backend_functions.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @bot.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
+    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
@@ -1405,7 +1405,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstart'))
 
     # ===== Misc
-    @bot.command(aliases=['lversion', 'lver', 'lv'])
+    @commands.command(aliases=['lversion', 'lver', 'lv'])
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
@@ -1413,7 +1413,7 @@ class Server(commands.Cog):
         await ctx.send(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
-    @bot.command(aliases=['updateserver', 'su'])
+    @commands.command(aliases=['updateserver', 'su'])
     async def serverupdate(self, ctx, now=''):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
@@ -1448,7 +1448,7 @@ class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
     # ===== Backup
-    @bot.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
+    @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
     async def worldbackups(self, ctx, amount=10):
         """
         Show world backups.
@@ -1475,7 +1475,7 @@ class World_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
         lprint(ctx, f"Fetched {amount} world saves")
 
-    @bot.command(aliases=['backupworld', 'newworldbackup', 'worldbackupnew', 'wbn'])
+    @commands.command(aliases=['backupworld', 'newworldbackup', 'worldbackupnew', 'wbn'])
     async def worldbackup(self, ctx, *name):
         """
         new backup of current world.
@@ -1506,14 +1506,14 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @bot.command(aliases=['deleteworldbackup'])
+    @commands.command(aliases=['deleteworldbackup'])
     async def worldbackupdate(self, ctx):
         """Creates world backup with current date and time as name."""
 
         await ctx.invoke(self.bot.get_command('worldbackup'), '')
 
     # ===== Restore
-    @bot.command(aliases=['restoreworld', 'worldbackuprestore', 'wbr'])
+    @commands.command(aliases=['restoreworld', 'worldbackuprestore', 'wbr'])
     async def worldrestore(self, ctx, index='', now=''):
         """
         Restore a world backup.
@@ -1547,13 +1547,13 @@ class World_Backups(commands.Cog):
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
-    @bot.command()
+    @commands.command()
     async def _restore_world_selected(self, ctx):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
 
     # ===== Delete/Reset
-    @bot.command(aliases=['deleteworld', 'wbd'])
+    @commands.command(aliases=['deleteworld', 'wbd'])
     async def worlddelete(self, ctx, index=''):
         """
         Delete a world backup.
@@ -1577,12 +1577,12 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
-    @bot.command()
+    @commands.command()
     async def _delete_world_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('worlddelete'), index=restore_world_selection)
         await ctx.invoke(self.bot.get_command('worldrestorepanel'))
 
-    @bot.command(aliases=['rebirth', 'hades', 'resetworld'])
+    @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx, now=''):
         """
         Deletes world save (does not touch other server files).
@@ -1608,7 +1608,7 @@ class World_Backups(commands.Cog):
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @bot.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
+    @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -1637,7 +1637,7 @@ class Server_Backups(commands.Cog):
         else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
 
     # ===== Backup
-    @bot.command(aliases=['serverbackupslist', 'sbl'])
+    @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
         """
         List server backups.
@@ -1665,13 +1665,13 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups")
 
-    @bot.command(aliases=['deleteserverbackup'])
+    @commands.command(aliases=['deleteserverbackup'])
     async def serverbackupdate(self, ctx):
         """Creates server backup with current date and time as name."""
 
         await ctx.invoke(self.bot.get_command('serverbackup'), '')
 
-    @bot.command(aliases=['backupserver', 'newserverbackup', 'serverbackupnew', 'sbn'])
+    @commands.command(aliases=['backupserver', 'newserverbackup', 'serverbackupnew', 'sbn'])
     async def serverbackup(self, ctx, *name):
         """
         New backup of server files (not just world save).
@@ -1701,7 +1701,7 @@ class Server_Backups(commands.Cog):
         lprint(ctx, "New server backup: " + new_backup)
 
     # ===== Restore
-    @bot.command(aliases=['restoreserver', 'serverbackuprestore', 'restoreserverbackup', 'sbr'])
+    @commands.command(aliases=['restoreserver', 'serverbackuprestore', 'restoreserverbackup', 'sbr'])
     async def serverrestore(self, ctx, index='', now=''):
         """
         Restore server backup.
@@ -1734,13 +1734,13 @@ class Server_Backups(commands.Cog):
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
-    @bot.command()
+    @commands.command()
     async def _restore_server_selected(self, ctx):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
 
     # ===== Delete
-    @bot.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
+    @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
     async def serverdelete(self, ctx, index=''):
         """
         Delete a server backup.
@@ -1765,7 +1765,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
-    @bot.command()
+    @commands.command()
     async def _delete_server_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
         await ctx.invoke(self.bot.get_command('serverrestorepanel'))
@@ -1775,20 +1775,20 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @bot.command(aliases=['binfo', 'bversion', 'botversion'])
+    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
         await ctx.send(f"Bot Version: `{__version__}`")
 
-    @bot.command()
+    @commands.command()
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
         cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
         await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=new_buttons(cp_buttons))
 
-    @bot.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
+    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
     async def controlpanel(self, ctx):
         """Quick action buttons."""
 
@@ -1830,7 +1830,7 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened control panel')
 
-    @bot.command(aliases=['sp', 'hiddenpanel'])
+    @commands.command(aliases=['sp', 'hiddenpanel'])
     async def secretpanel(self, ctx):
 
         secret_buttons = [['Kill Players', '_killplayers', '\U00002753'], ['Kill Entities', '_killentities', '\U0001F4A3'],
@@ -1839,7 +1839,7 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened secret panel')
 
-    @bot.command(aliases=['player', 'ppanel', 'pc'])
+    @commands.command(aliases=['player', 'ppanel', 'pc'])
     async def playerpanel(self, ctx, player=''):
         """Select player from list (or all, random) and use quick action buttons."""
 
@@ -1862,27 +1862,22 @@ class Bot_Functions(commands.Cog):
                            [SelectOption(label=i, value=i) for i in players[0]],
                    )])
 
-        player_selection_actions = await ctx.send('Actions:', components=[[
-            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
-            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
-            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
-            Button(label='Teleport', emoji='\U000026A1', custom_id="_teleport_selected_playerpanel"),
-        ], [
-            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
-            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
-            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
-            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
-        ], [
-            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
-            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
-            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
-            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
-        ]])
+        player_buttons = [['Kill', '_kill_selected', '\U0001F52A'], ['Clear Inventory', '_clear_selected', '\U0001F4A5'],
+                          ['Location', '_locate_selected', '\U0001F4CD'], ['Teleport', '_teleport_selected_playerpanel', '\U000026A1']]
+        b1 = await ctx.send('Actions:', view=new_buttons(player_buttons))
 
-        current_components += player_selection_panel, player_selection_actions
+        player_buttons2 = [['Survival', '_survival_selected', '\U0001F5E1'], ['Adventure', '_adventure_selected', '\U0001F5FA'],
+                           ['Creative', '_creative_selected', '\U0001F528'], ['Spectator', '_spectator_selected', '\U0001F441']]
+        b2 = await ctx.send('', view=new_buttons(player_buttons2))
+
+        player_buttons3 =[['OP', 'opadd_selected', '\U000023EB'], ['DEOP', '_deop_selected', '\U000023EC'],
+                          ['Kick', '_kick_selected', '\U0000274C'], ['Ban', '_ban_selected', '\U0001F6AB']]
+        b3 = await ctx.send('', view=new_buttons(player_buttons3))
+
+        current_components += player_selection_panel, b1, b2, b3
         lprint(ctx, 'Opened player panel')
 
-    @bot.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
+    @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
     async def worldrestorepanel(self, ctx):
         """Restore/delete selected world backup."""
 
@@ -1899,15 +1894,13 @@ class Bot_Functions(commands.Cog):
                    options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
                    )])
 
-        button_msg = await ctx.send("Actions:", components=[[
-            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_world_selected"),
-            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_world_selected"),
-        ]])
+        restore_buttons = [['Restore', '_restore_world_selected', '\U000021A9'], ['Delete', '_delete_world_selected', '\U0001F5D1']]
+        button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
 
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore world panel')
 
-    @bot.command(aliases=['restoreserverpanel', 'srpanel', 'srp'])
+    @commands.command(aliases=['restoreserverpanel', 'srpanel', 'srp'])
     async def serverrestorepanel(self, ctx):
         """Restore/delete selected server backup."""
 
@@ -1930,7 +1923,7 @@ class Bot_Functions(commands.Cog):
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore server panel')
 
-    @bot.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
+    @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx, now=''):
         """Restart this bot."""
 
@@ -1943,13 +1936,13 @@ class Bot_Functions(commands.Cog):
         os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-    @bot.command(aliases=['kbot', 'killbot', 'quit', 'quitbot', 'sbot'])
+    @commands.command(aliases=['kbot', 'killbot', 'quit', 'quitbot', 'sbot'])
     async def stopbot(self, ctx):
         """Restart this bot."""
         await ctx.send("**Bot Halted**")
         sys.exit(1)
 
-    @bot.command(aliases=['blog'])
+    @commands.command(aliases=['blog'])
     async def botlog(self, ctx, lines=5):
         """
         Show bot log.
@@ -1976,7 +1969,7 @@ class Bot_Functions(commands.Cog):
             await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
             lprint(ctx, "ERROR: Issue getting bog log data.")
 
-    @bot.command(aliases=['updatebot', 'botupdate'])
+    @commands.command(aliases=['updatebot', 'botupdate'])
     async def gitupdate(self, ctx):
         """Gets update from GitHub."""
 
@@ -1987,7 +1980,7 @@ class Bot_Functions(commands.Cog):
 
         await ctx.invoke(self.bot.get_command("restartbot"))
 
-    @bot.command()
+    @commands.command()
     async def help2(self, ctx):
         """Shows help page with embed format, using reactions to navigate pages."""
 
@@ -2040,7 +2033,7 @@ class Bot_Functions(commands.Cog):
                 await message.delete()
                 break
 
-    @bot.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
+    @commands.command(aliases=['getip', 'address', 'getaddress', 'serverip', 'serveraddress'])
     async def ip(self, ctx):
         """
         Shows IP address for server.
@@ -2054,7 +2047,7 @@ class Bot_Functions(commands.Cog):
         await ctx.send(f"Alternative Address: ||`{slime_vars.server_url}`|| ({backend_functions.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
-    @bot.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
+    @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
     async def links(self, ctx):
         """
         Shows list of useful websites.
@@ -2072,14 +2065,14 @@ class Bot_Functions(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @bot.command(aliases=['setchannelid'])
+    @commands.command(aliases=['setchannelid'])
     async def setchannel(self, ctx):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
         backend_functions.edit_file('channel_id', ' ' + str(ctx.channel.id), slime_vars.slime_vars_file)
 
-    @bot.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
+    @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
         """Resets channel_id variable to None."""
 
@@ -2088,8 +2081,9 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
-    bot.add_cog(cog(bot))
+async def setup(bot):
+    for cog in [Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+        await bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
 if_no_tmux = ['serverstart', 'serverrestart']
