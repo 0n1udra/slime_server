@@ -29,7 +29,8 @@ Scroll down for requirements, setup instructions and screenshots.
 # Setup
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).  
 2. Install discord.py first, then discord-components package:  
-  a. Download or git clone: https://github.com/kiki7000/discord.py-components.git  
+  a1. Use discord-components-mirror package: https://pypi.org/project/discord-components-mirror/  
+  a2. Or, download or git clone: https://github.com/kiki7000/discord.py-components.git  
   b. Go into discord.py-components folder and run `python3 setup.py install`.  
 3. Update `slime_vars.py` variables.  
 4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
