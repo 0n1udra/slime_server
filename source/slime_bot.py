@@ -95,8 +95,11 @@ def new_selection(select_options_args, custom_id, placeholder):
 
     # Create options for select menu.
     for option in select_options_args:
-        if len(option) == 2: option.append(False)  # Sets default for 'Default' arg for SelectOption.
-        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2]))
+        print('option', option)
+        if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
+        elif len(option) == 3: option += None
+        print(option)
+        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
 
@@ -395,10 +398,6 @@ class Player(commands.Cog):
         try: destination = ' '.join(destination)
         except: destination = destination[0]
 
-        select_playeropt = []
-        if target: select_playeropt = [[target, target, True]]
-
-        # Will not show select components if received usable parameters.
         # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
         if not target or not destination:
             await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
@@ -408,14 +407,17 @@ class Player(commands.Cog):
                 await ctx.send("No players online")
                 return
 
-            # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
             teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]]
-            await ctx.send("**Teleport**", view=new_selection(select_playeropt + [['All Players', '@']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
+            if target: teleport_select_options += [[target, target, True]]
+
+            # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
+            await ctx.send("**Teleport**", view=new_selection([['All Players', '@']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
             await ctx.send('', view=new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
 
             teleport_buttons = [['Teleport', '_teleport_selected'], ['Return', '_return_selected']]
             await ctx.send('', view=new_buttons(teleport_buttons))
-        else:
+
+        else: # Will not show select components if received usable parameters.
             target = target.strip()
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
             await ctx.send(f"***Teleporting in 5s...***")
@@ -1849,18 +1851,13 @@ class Bot_Functions(commands.Cog):
 
         players = await backend_functions.get_player_list()  # Gets list of online players
         if not players: players = [[], ["No Players Online"]]  # Lets user know there are no online players
-        # Sets selection to player parameter if received one.
-        select_playeropt = []
-        if player: select_playeropt = [SelectOption(label=player, value=player, default=True)]
 
-        player_selection_panel = await ctx.send("**Player Panel**", components=[
-            Select(custom_id='player_select',
-                   placeholder="Select Player",
-                   options=select_playeropt +
-                           [SelectOption(label='All Players', value='@a')] +
-                           [SelectOption(label='Random Player', value='@r')] +
-                           [SelectOption(label=i, value=i) for i in players[0]],
-                   )])
+        select_options = [['All Players', '@a'], ['Random Player', '@r']] + [[i, i] for i in players[0]]
+
+        # Sets selection default to player if received 'player' parameter.
+        if player: select_options += [[player, player, True]]
+
+        player_selection_panel = await ctx.send("**Player Panel**", view=new_selection(select_options, 'player_select', "Select Player"))
 
         player_buttons = [['Kill', '_kill_selected', '\U0001F52A'], ['Clear Inventory', '_clear_selected', '\U0001F4A5'],
                           ['Location', '_locate_selected', '\U0001F4CD'], ['Teleport', '_teleport_selected_playerpanel', '\U000026A1']]
@@ -1888,11 +1885,8 @@ class Bot_Functions(commands.Cog):
         backups = backend_functions.fetch_worlds()
         if not backups: await ctx.send("No world backups")
 
-        selection_msg = await ctx.send("**Restore World Panel**", components=[
-            Select(custom_id='restore_world_selection',
-                   placeholder="Select World Backup",
-                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
-                   )])
+        select_options = [[i[1], i[0], False, i[0]] for i in backups]
+        selection_msg = await ctx.send("**Restore World Panel**", view=new_selection(select_options, 'restore_world_selection', 'Select World Backup'))
 
         restore_buttons = [['Restore', '_restore_world_selected', '\U000021A9'], ['Delete', '_delete_world_selected', '\U0001F5D1']]
         button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
@@ -1911,11 +1905,9 @@ class Bot_Functions(commands.Cog):
         backups = backend_functions.fetch_servers()
         if not backups: await ctx.send("No server backups")
 
-        selection_msg = await ctx.send("**Restore Server Panel**", components=[
-            Select(custom_id='restore_server_selection',
-                   placeholder="Select Server Backup",
-                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
-                   )])
+        print('okbackups',  backups)
+        select_options = [[i[1], i[0], False, i[0]] for i in backups]
+        selection_msg = await ctx.send("**Restore Server Panel**", view=new_selection(select_options, 'restore_server_selection', 'Select Server Backup'))
 
         restore_buttons = [['Restore', '_restore_server_selected', '\U000021A9'], ['Delete', '_delete_server_selected', '\U0001F5D1']]
         button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
