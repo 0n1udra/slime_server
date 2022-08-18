@@ -4,13 +4,13 @@ import os
 user = os.getlogin()
 
 # Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_server.token'
+bot_token_file = f'/home/{user}/keys/slime_server_beta.token'
 
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 860361620492255292
+channel_id = 916450451061350420
 
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
