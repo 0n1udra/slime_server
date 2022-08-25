@@ -1,5 +1,7 @@
 ## Control Minecraft server with Discord bot.  
-Scroll down for requirements, setup instructions and screenshots.
+Scroll down for requirements, setup instructions and screenshots.  
+
+**UPDATE:** There is a [branch](https://github.com/0n1udra/slime_server/tree/discord.py-2.0) for discord.py 2.0 compatibilty, it's still unstable and in testing.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
