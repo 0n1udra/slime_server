@@ -53,11 +53,6 @@ class Discord_Select(discord.ui.Select):
 
         if custom_id == 'player_select': player_selection = value
 
-        # Before teleporting player, this saves the location of player beforehand.
-        if custom_id == '_teleport_selected':
-            return_coord = await backend_functions.get_location(teleport_selection[0].strip())
-            teleport_selection[2] = return_coord.replace(',', '')
-
 class Discord_Button(discord.ui.Button):
     """
     Create button from received list containing label, custom_id, and emoji.
@@ -100,7 +95,7 @@ def new_selection(select_options_args, custom_id, placeholder):
     # Create options for select menu.
     for option in select_options_args:
         if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
-        elif len(option) == 3: option += None
+        elif len(option) == 3: option.append(None)
         select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
@@ -118,8 +113,6 @@ async def on_ready():
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
-        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
-
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
         await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
