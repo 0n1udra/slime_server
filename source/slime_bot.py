@@ -271,8 +271,8 @@ class Basics(commands.Cog):
 class Player(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['pl', 'playerlist', 'listplayers', 'list'])
-    async def players(self, ctx):
+    @commands.command(aliases=['p', 'playerlist', 'listplayers', 'list'])
+    async def players(self, ctx, *args):
         """Show list of online players."""
 
         player_list = await backend_functions.get_player_list()
@@ -284,13 +284,20 @@ class Player(commands.Cog):
         else:
             new_player_list = []
             for i in player_list[0]:
-                player_location = await backend_functions.get_location(i)
-                new_player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`')
+                if 'location' in args:
+                    player_location = await backend_functions.get_location(i)
+                    new_player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`')
+                else: new_player_list.append(f'{i.strip()}, ')
             await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
             await ctx.send("-----END-----")
 
         lprint(ctx, "Fetched player list")
 
+    @commands.command(aliases=['pl', 'playercoords', 'playerscoords'])
+    async def playerlocations(self, ctx):
+        await ctx.invoke(self.bot.get_command('players'), 'location')
+
+    # ===== Kill player
     @commands.command(aliases=['playerkill', 'pk'])
     async def kill(self, ctx, target='', *reason):
         """
@@ -376,6 +383,7 @@ class Player(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('kill'), target=player_selection)
 
+    # ===== Teleportation and location
     @commands.command(aliases=['tp'])
     async def teleport(self, ctx, target='', *destination):
         """
@@ -471,6 +479,7 @@ class Player(commands.Cog):
 
         await ctx.invoke(self.bot.get_command('playerlocate'), player=player_selection)
 
+    # ===== Game mode
     @commands.command(aliases=['gm'])
     async def gamemode(self, ctx, player='', mode='', *reason):
         """
@@ -548,6 +557,7 @@ class Player(commands.Cog):
     async def _spectator_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='spectator')
 
+    # ===== Inventory
     @commands.command(aliases=['clear'])
     async def clearinventory(self, ctx, target):
         """Clears player inventory."""
@@ -572,6 +582,7 @@ class Player(commands.Cog):
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
+    # ===== Ban, kick, whitelist
     @commands.command()
     async def kick(self, ctx, player='', *reason):
         """
@@ -811,6 +822,7 @@ class Permissions(commands.Cog):
 
         lprint(ctx, f"Fetched server operators list")
 
+    # ===== OP
     @commands.command(aliases=['op', 'addop'])
     async def opadd(self, ctx, player='', *reason):
         """
@@ -1101,7 +1113,6 @@ class Server(commands.Cog):
         if await server_command('save-all', discord_msg=False):
             lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
-
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
         """Makes sure bot is ready before autosave_loop can be used."""
@@ -1121,11 +1132,11 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         embed = discord.Embed(title='Server Status')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\nServer: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\n", inline=False)
-        embed.add_field(name='MOTD', value=f"{backend_functions.server_motd()}", inline=False)
-        embed.add_field(name='Version', value=f"{backend_functions.server_version()}", inline=False)
+        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
+            Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend_functions.server_version()}\n\
+            MOTD: {backend_functions.server_motd()}", inline=False)
+        embed.add_field(name='Autosave', value=f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_interval}min)", inline=False)
         embed.add_field(name='Address', value=f"IP: ||`{backend_functions.get_public_ip()}`||\nURL: ||`{slime_vars.server_url}`|| ({backend_functions.ping_url()})", inline=False)
-        embed.add_field(name='Autosave', value=f"Status: {'**ENABLED**' if slime_vars.autosave_status is True else '**DISABLED**'}\nInterval: **{slime_vars.autosave_interval}** minutes", inline=False)
         embed.add_field(name='Location', value=f"`{slime_vars.server_path}`", inline=False)
         embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
         await ctx.send(embed=embed)
@@ -1208,7 +1219,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched Minecraft server version: " + response)
 
     # === Properties
-    @commands.command(aliases=['property', 'p'])
+    @commands.command(aliases=['property', 'pr'])
     async def properties(self, ctx, target_property='', *value):
         """
         Check or change a server.properties property. May require restart.
@@ -1780,12 +1791,7 @@ class Server_Backups(commands.Cog):
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
-    async def botinfo(self, ctx):
-        """Shows bot version and other info."""
-
-        await ctx.send(f"Bot Version: `{__version__}`")
-
+    # ===== Control panel
     @commands.command()
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
@@ -1930,6 +1936,13 @@ class Bot_Functions(commands.Cog):
 
         os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
+
+    # ===== Bot
+    @commands.command(aliases=['binfo', 'bversion', 'botversion'])
+    async def botinfo(self, ctx):
+        """Shows bot version and other info."""
+
+        await ctx.send(f"Bot Version: `{__version__}`")
 
     @commands.command(aliases=['kbot', 'killbot', 'quit', 'quitbot', 'sbot'])
     async def stopbot(self, ctx):
