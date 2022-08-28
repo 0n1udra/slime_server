@@ -1,4 +1,4 @@
-import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, random, json, csv, os, re
+import mctools, subprocess, fileinput, psutil, requests, datetime, asyncio, shutil, random, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 import slime_vars
 
@@ -313,7 +313,7 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
-        return server_log('server version')
+        return server_log('server version').split('version')[1].strip()
     return 'N/A'
 
 def server_motd():
