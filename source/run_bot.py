@@ -1,6 +1,5 @@
 import time, sys, os
 from slime_bot import bot
-from slime_vars import tmux_session_name, pyenv_activate_command
 from backend_functions import lprint
 import backend_functions, slime_vars
 
@@ -50,11 +49,11 @@ def setup_directories():
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
 
-    if os.system(f'tmux new -d -s {tmux_session_name}'):
+    if os.system(f'tmux new -d -s {slime_vars.tmux_session_name}'):
         lprint(ctx, f"ERROR: Starting tmux session")
     else: lprint(ctx, f"INFO: Started Tmux detached session")
 
-    if os.system(f'tmux split-window -v -t {tmux_session_name}:0.0'):
+    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:0.0'):
         lprint(ctx, "ERROR: Creating second tmux panes")
     else: lprint(ctx, "INFO: Created second tmux panes")
 
@@ -65,7 +64,6 @@ def server_start():
 
     if slime_vars.use_tmux is True:
         backend_functions.server_start()
-    else: bot.run(TOKEN)
 
 def kill_slime_proc():
     """Kills bot process."""
@@ -148,9 +146,9 @@ if __name__ == '__main__':
         start_tmux_session()
         time.sleep(1)
         start_bot()
-        os.system(f"tmux attach -t {tmux_session_name}")
+        os.system(f"tmux attach -t {slime_vars.tmux_session_name}")
 
-    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {tmux_session_name}")
+    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {slime_vars.tmux_session_name}")
 
     if 'help' in sys.argv: script_help()
 
