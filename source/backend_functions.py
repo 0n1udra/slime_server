@@ -148,12 +148,12 @@ async def server_command(command, skip_check=False, discord_msg=True):
 
     elif slime_vars.use_tmux is True:
         # Checks if server is active in the first place by sending random number to be matched in server log.
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{status_checker}" ENTER')
+        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
         await asyncio.sleep(slime_vars.command_buffer_time)
         if not server_log(random_number):
             await inactive_msg()
             return False
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{command}" ENTER')
+        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
 
     else:
         await inactive_msg()
@@ -294,10 +294,10 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     elif slime_vars.use_tmux is True:
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "cd {slime_vars.server_path}" ENTER')
+        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "cd {slime_vars.server_path}" ENTER')
 
         # Starts server in tmux pane.
-        if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.0 "{slime_vars.server_selected[2]}" ENTER'):
+        if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{slime_vars.server_selected[2]}" ENTER'):
             return True
     else: return "Error starting server."
 

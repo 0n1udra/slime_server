@@ -27,6 +27,8 @@ use_subprocess = False
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
+tmux_bot_pane = '0.6'  # tmux pane for slime_bot
+tmux_minecraft_pane = '0.0'  # tmux pane for miencraft server
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
