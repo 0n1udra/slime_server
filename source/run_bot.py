@@ -18,18 +18,22 @@ def start_bot():
 
     bot.run(TOKEN)
 
-
 def start_bot_tmux():
     if slime_vars.use_tmux is True:
         # Sources pyenv if set in slime_vars.
-        if os.system(f'tmux send-keys -t {tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
-            lprint(ctx, "ERROR: Changing directory to bot path. (Bot may continue to work anyways)")
+        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
+            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_files_path})")
 
-        if os.system(f"tmux send-keys -t {tmux_session_name}:0.1 'python3 run_bot.py _startbot' ENTER"):
+        # Activate python env.
+        if slime_vars.pyenv_activate_command:
+            if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{slime_vars.pyenv_activate_command}" ENTER'):
+                lprint(ctx, f"ERROR: {slime_vars.pyenv_activate_command}")
+            else: lprint(ctx, f"INFO: Activated pyenv")
+
+        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:0.1 'python3 run_bot.py _startbot' ENTER"):
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
             start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
-
 
 def setup_directories():
     """Create necessary directories."""
