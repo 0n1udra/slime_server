@@ -2,45 +2,115 @@
 
 import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
-from discord_components import ComponentsBot, SelectOption, Button,  Select
+from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "5.5P"
-__date__ = '2022/04/12'
+__version__ = "6P"
+__date__ = '2022/08/28'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
 __status__ = "Development"
 
-# Exits script if no token file found (usually: ~/keys/slime_server.token).
-if os.path.isfile(slime_vars.bot_token_file):
-    with open(slime_vars.bot_token_file, 'r') as file:
-        TOKEN = file.readline()
-else:
-    print("Missing Token File:", slime_vars.bot_token_file)
-    sys.exit()
-
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = ComponentsBot(command_prefix='?', case_insensitive=True, help_command=None)
+bot = commands.Bot(command_prefix='?', case_insensitive=True, help_command=None, intents=discord.Intents.all())
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 # For buttons and selection box components.
-player_selection = None
-restore_world_selection = restore_server_selection = None
+player_selection = restore_world_selection = restore_server_selection = None
 current_components = []
+
+start_button = ['Start Server', 'serverstart', '\U0001F680']
+on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'],
+                    ['Minecraft Status', 'serverstatus', '\U00002139']]
+
+class Discord_Select(discord.ui.Select):
+    def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
+        super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
+
+    async def callback(self, interaction):
+        global teleport_selection, player_selection, restore_world_selection, restore_server_selection
+
+        await interaction.response.defer()  # Defer response so not to show failed interaction message.
+        # Removes any escape chars.
+        value = interaction.data['values'][0].strip()
+        custom_id = interaction.data['custom_id']
+
+        # Updates teleport_selection corresponding value based on which selection box is updated.
+        if custom_id == 'teleport_target': teleport_selection[0] = value
+        if custom_id == 'teleport_destination': teleport_selection[1] = value
+
+        # World/server backup panel
+        if custom_id == 'restore_server_selection': restore_server_selection = value
+        if custom_id == 'restore_world_selection': restore_world_selection = value
+
+        if custom_id == 'player_select': player_selection = value
+
+
+class Discord_Button(discord.ui.Button):
+    """
+    Create button from received list containing label, custom_id, and emoji.
+    Uses custom_id with ctx.invoke to call corresponding function.
+    """
+
+    def __init__(self, label, custom_id, emoji=None, style=discord.ButtonStyle.grey):
+        super().__init__(label=label, custom_id=custom_id, emoji=emoji, style=style)
+
+    async def callback(self, interaction):
+        global teleport_selection
+        await interaction.response.defer()
+        custom_id = interaction.data['custom_id']
+
+        # Before teleporting player, this saves the location of player beforehand.
+        if custom_id == '_teleport_selected':
+            return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+            try: teleport_selection[2] = return_coord.replace(',', '')
+            except: pass
+
+        # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
+        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        await ctx.invoke(bot.get_command(custom_id))
+
+def new_buttons(buttons_list):
+    """Create new discord.ui.View and add buttons, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    for button in buttons_list:
+        if len(button) == 2: button.append(None)  # For button with no emoji.
+        view.add_item(Discord_Button(label=button[0], custom_id=button[1], emoji=button[2]))
+    return view
+
+def new_selection(select_options_args, custom_id, placeholder):
+    """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    select_options = []
+
+    # Create options for select menu.
+    for option in select_options_args:
+        print('option', option)
+        if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
+        elif len(option) == 3: option += None
+        print(option)
+        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
+    view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
+    return view
 
 @bot.event
 async def on_ready():
     global channel
 
     await bot.wait_until_ready()
+    await setup(bot)
+
     lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
+    await backend_functions.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
@@ -50,50 +120,12 @@ async def on_ready():
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
         await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
+        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
         await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
-        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.',
-                           components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
-                                        Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
+        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
 
-@bot.event
-async def on_button_click(interaction):
-    """Handler for when any button is used."""
-    global teleport_selection
-
-    # Need to respond with type=6, or proceeding code will execute twice.
-    await interaction.respond(type=6)
-
-    # Before teleporting player, this saves the location of player beforehand.
-    if interaction.custom_id == '_teleport_selected':
-        return_coord = await backend_functions.get_location(teleport_selection[0].strip())
-        teleport_selection[2] = return_coord.replace(',', '')
-
-    # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
-    ctx = await bot.get_context(interaction.message)  # Not exactly sure why this is needed, but i think it is :P.
-    await ctx.invoke(bot.get_command(str(interaction.custom_id)))
-
-@bot.event
-async def on_select_option(interaction):
-    """This updated needed global bot variables from selection box so corresponding functions can work properly."""
-
-    global player_selection, restore_world_selection, restore_server_selection
-
-    await interaction.respond(type=6)
-
-    # Removes any escape chars.
-    value = interaction.values[0].strip()
-
-    # Updates teleport_selection corresponding value based on which selection box is updated.
-    if interaction.custom_id == 'teleport_target': teleport_selection[0] = value
-    if interaction.custom_id == 'teleport_destination': teleport_selection[1] = value
-
-    # World/server backup panel
-    if interaction.custom_id == 'restore_server_selection': restore_server_selection = value
-    if interaction.custom_id == 'restore_world_selection': restore_world_selection = value
-
-    if interaction.custom_id == 'player_select': player_selection = value
 
 async def _delete_current_components():
     """
@@ -693,27 +725,17 @@ class Player(commands.Cog):
                 await ctx.send("No players online")
                 return
 
+            teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]]
+            if target: teleport_select_options += [[target, target, True]]
+
             # Selections updates teleport_selections list, which will be used in _teleport_selected() when button clicked.
-            await ctx.send("**Teleport**", components=[
-                Select(
-                    custom_id="teleport_target",
-                    placeholder="Target",
-                    options=select_playeropt +
-                            [SelectOption(label='All Players', value='@a')] +
-                            [SelectOption(label='Random Player', value='@r')] +
-                            [SelectOption(label=i, value=i) for i in players[0]],
-                ),
-                Select(custom_id="teleport_destination",
-                       placeholder="Destination",
-                       options=[SelectOption(label=i, value=i) for i in players[0]] +
-                               [SelectOption(label='Random Player', value='@r')],
-                ),
-                [
-                Button(label='Teleport', custom_id='_teleport_selected'),
-                Button(label='Return', custom_id='_return_selected')
-                ]
-            ])
-        else:
+            await ctx.send("**Teleport**", view=new_selection([['All Players', '@']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
+            await ctx.send('', view=new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
+
+            teleport_buttons = [['Teleport', '_teleport_selected'], ['Return', '_return_selected']]
+            await ctx.send('', view=new_buttons(teleport_buttons))
+
+        else: # Will not show select components if received usable parameters.
             target = target.strip()
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
             await ctx.send(f"***Teleporting in 5s...***")
@@ -741,7 +763,7 @@ class Player(commands.Cog):
 
     @commands.command()
     async def _teleport_selected_playerpanel(self, ctx):
-        """Sets target selection box from selection in ?playerpanel command."""
+        """invokes ?playerpanel and sets target menu selection."""
 
         await ctx.invoke(self.bot.get_command('teleport'), str(player_selection) + ' ')
 
@@ -1323,7 +1345,7 @@ class Server(commands.Cog):
         self.bot = bot
 
         if slime_vars.autosave_status is True:
-            self.autosave_loop.start()
+            #await self.autosave_loop.start()
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Save/Autosave
@@ -1639,8 +1661,12 @@ class Server(commands.Cog):
 
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
-        await ctx.send(f"***Fetching Status in {slime_vars.wait_for_launch}s...***")
-        await asyncio.sleep(slime_vars.wait_for_launch)
+
+        # checks if set custom wait time in server_selected list.
+        try: wait_time = int(slime_vars.server_selected[-1])
+        except: wait_time = slime_vars.default_wait_time
+        await ctx.send(f"***Fetching Status in {wait_time}s...***")
+        await asyncio.sleep(wait_time)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
@@ -1844,8 +1870,7 @@ class World_Backups(commands.Cog):
         backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
         await asyncio.sleep(5)
 
-        await ctx.send("Start server with `?start` or click button", components=[
-            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+        await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
     @commands.command()
     async def _restore_world_selected(self, ctx):
@@ -2032,8 +2057,7 @@ class Server_Backups(commands.Cog):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
-        await ctx.send("Start server with `?start` or click button", components=[
-            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart")])
+        await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
     @commands.command()
     async def _restore_server_selected(self, ctx):
@@ -2086,87 +2110,57 @@ class Bot_Functions(commands.Cog):
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
-        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.',
-                       components=[[Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                    Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus")]])
+        cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
+        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=new_buttons(cp_buttons))
 
     @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
     async def controlpanel(self, ctx):
         """Quick action buttons."""
 
-        await ctx.send("**Control Panel**\nServer:", components=[[
-            Button(label="Status Page", emoji='\U00002139', custom_id="serverstatus"),
-            Button(label="Stop Server", emoji='\U0001F6D1', custom_id="serverstop")
-            if await server_status() else
-            Button(label="Start Server", emoji='\U0001F680', custom_id="serverstart"),
-            Button(label="Reboot Server", emoji='\U0001F501', custom_id="serverrestart"),
-        ], [
-            Button(label="Server Version", emoji='\U00002139', custom_id="serverversion"),
-            Button(label="Show MotD", emoji='\U0001F4E2', custom_id="motd"),
-            Button(label="Show Properties File", emoji='\U0001F527', custom_id="propertiesall"),
-            Button(label="Server Logs", emoji='\U0001F4C3', custom_id="serverlog"),
-            Button(label="Connections Logs", emoji='\U0001F4E1', custom_id="serverconnectionslog"),
-        ]])
+        server_buttons = [['Status Page', 'serverstatus', '\U00002139'],
+                          ['Stop Server', 'serverstop', '\U0001F6D1'] if await server_status() else ['Start Server', 'serverstart', '\U0001F680'],
+                          ['Reboot Server', 'serverrestart', '\U0001F501']]
+        await ctx.send("**Control Panel**\nServer:", view=new_buttons(server_buttons))
 
-        await ctx.send("Saving & Backups:", components=[[
-            Button(label="Backup World", emoji='\U0001F195', custom_id="worldbackupdate"),
-            Button(label="Backup Server", emoji='\U0001F195', custom_id="serverbackupdate"),
-            Button(label='Show World Backups', emoji='\U0001F4BE', custom_id="restoreworldpanel"),
-            Button(label="Show Server Backups", emoji='\U0001F4BE', custom_id="restoreserverpanel"),
-        ], [
-            Button(label="Disable Autosave", emoji='\U0001F504', custom_id="autosaveoff") \
-            if slime_vars.autosave_status else
-            Button(label="Enable Autosave", emoji='\U0001F504', custom_id="autosaveon"),
-            Button(label="Save World", emoji='\U0001F30E', custom_id="saveall"),
-        ]])
+        server_buttons2 = [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
+                           ['Properties File', 'propertiesall', '\U0001F527'], ['Server Log', 'serverlog', '\U0001F4C3'], ['Connections Log', 'serverconnections', '\U0001F4E1']]
+        await ctx.send("", view=new_buttons(server_buttons2))
 
-        await ctx.send("Players:", components=[[
-            Button(label="Player List", emoji='\U0001F5B1', custom_id="playerlist"),
-            Button(label="Chat Log", emoji='\U0001F5E8', custom_id="chatlog"),
-            Button(label="Show Banned", emoji='\U0001F6AB', custom_id="banlist"),
-            Button(label="Show Whitelist", emoji='\U0001F4C3', custom_id="whitelist"),
-            Button(label="Show OP List", emoji='\U0001F4DC', custom_id="oplist"),
-        ], [
-            Button(label='Player Panel', emoji='\U0001F39B', custom_id='playerpanel'),
-            Button(label='Teleport', emoji='\U000026A1', custom_id='teleport')
-        ]])
+        # Two lists because I want the buttons on separate row.
+        sb_buttons = [['Backup World', 'worldbackupdate', '\U0001F195'], ['Backup Server', 'serverbackupdate', '\U0001F195'],
+                      ['World Backups', 'restoreworldpanel', '\U0001F4BE'], ['Server Backups', 'restoreserverpanel', '\U0001F4BE']]
+        sb_buttons2 = [['Disable Autosave', 'autosaveoff', '\U0001F504'] if slime_vars.autosave_status else ['Enable Autosave', 'autosaveon', '\U0001F504'],
+                       ['Save World', 'saveall', '\U0001F30E']]
+        await ctx.send("Saving & Backups:", view=new_buttons(sb_buttons))
+        await ctx.send("", view=new_buttons(sb_buttons2))
 
-        await ctx.send("Time & Weather:", components=[[
-            Button(label='Day', emoji='\U00002600', custom_id="timeday"),
-            Button(label="Night", emoji='\U0001F319', custom_id="timenight"),
-            Button(label='Enable Time', emoji='\U0001F7E2', custom_id="timeon"),
-            Button(label='Disable Time', emoji='\U0001F534', custom_id="timeoff"),
-        ], [
-            Button(label='Clear', emoji='\U00002600', custom_id="weatherclear"),
-            Button(label="Rain", emoji='\U0001F327', custom_id="weatherrain"),
-            Button(label='Thunder', emoji='\U000026C8', custom_id="weatherthunder"),
-            Button(label='Enable Weather', emoji='\U0001F7E2', custom_id="weatheron"),
-            Button(label='Disable Weather', emoji='\U0001F534', custom_id="weatheroff"),
-        ]])
+        player_buttons = [['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
+                          ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'], ['OP List', 'oplist', '\U0001F4DC']]
+        player_buttons2 = [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]
+        await ctx.send("Players:", view=new_buttons(player_buttons))
+        await ctx.send("", view=new_buttons(player_buttons2))
 
-        await ctx.send("Bot:", components=[[
-            Button(label='Restart Bot', emoji='\U0001F501', custom_id="restartbot"),
-            Button(label='Set Channel ID', emoji='\U0001FA9B', custom_id="setchannelid"),
-            Button(label="Bot Logs", emoji='\U0001F4C3', custom_id="botlog"),
-        ]])
+        tw_buttons = [['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
+                      ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']]
+        tw_buttons2 = [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
+                       ['Enable Weather', 'weatheron', '\U0001F7E2'], ['Disable Weather', '\U0001F534']]
+        await ctx.send("Time & Weather:", view=new_buttons(tw_buttons))
+        await ctx.send("", view=new_buttons(tw_buttons2))
 
-        await ctx.send("Extra:", components=[[
-            Button(label='Refresh Control Panel', emoji='\U0001F504', custom_id="controlpanel"),
-            Button(label="Get Address", emoji='\U0001F310', custom_id="ip"),
-            Button(label='Website Links', emoji='\U0001F517', custom_id="links"),
-        ]])
+        bot_buttons = [['Restart Bot', 'restartbot', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Bot Log', 'botlog', '\U0001F4C3']]
+        await ctx.send("Bot:", view=new_buttons(bot_buttons))
+
+        extra_buttons = [['Refresh Control Panel', 'controlpanel', '\U0001F504'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
+        await ctx.send("Extra:", view=new_buttons(extra_buttons))
 
         lprint(ctx, 'Opened control panel')
 
     @commands.command(aliases=['sp', 'hiddenpanel'])
     async def secretpanel(self, ctx):
-        await ctx.send("**Secret Panel**", components=[[
-            Button(label='Kill Players', emoji='\U0001F4A3', custom_id="_killplayers"),
-            Button(label="Kill Entities", emoji='\U0001F4A5', custom_id="_killentities"),
-            Button(label='Kill Rando', emoji='\U00002753', custom_id="_killrando"),
-        ], [
-            Button(label='HADES Protocol', emoji='\U0001F480', custom_id="hades"),
-        ]])
+
+        secret_buttons = [['Kill Players', '_killplayers', '\U00002753'], ['Kill Entities', '_killentities', '\U0001F4A3'],
+                          ['Kill Rando', '_killrando', '\U0001F4A5'], ['HADES Protocol', 'hades', '\U0001F480']]
+        await ctx.send("**Secret Panel**", view=new_buttons(secret_buttons))
 
         lprint(ctx, 'Opened secret panel')
 
@@ -2184,33 +2178,26 @@ class Bot_Functions(commands.Cog):
         select_playeropt = []
         if player: select_playeropt = [SelectOption(label=player, value=player, default=True)]
 
-        player_selection_panel = await ctx.send("**Player Panel**", components=[
-            Select(custom_id='player_select',
-                   placeholder="Select Player",
-                   options=select_playeropt +
-                           [SelectOption(label='All Players', value='@a')] +
-                           [SelectOption(label='Random Player', value='@r')] +
-                           [SelectOption(label=i, value=i) for i in players[0]],
-                   )])
+        select_options = [['All Players', '@a'], ['Random Player', '@r']] + [[i, i] for i in players[0]]
 
-        player_selection_actions = await ctx.send('Actions:', components=[[
-            Button(label='Kill', emoji='\U0001F52A', custom_id="_kill_selected"),
-            Button(label="Clear Inventory", emoji='\U0001F4A5', custom_id="_clear_selected"),
-            Button(label='Location', emoji='\U0001F4CD', custom_id="_locate_selected"),
-            Button(label='Teleport', emoji='\U000026A1', custom_id="_teleport_selected_playerpanel"),
-        ], [
-            Button(label='Survival', emoji='\U0001F5E1', custom_id="_survival_selected"),
-            Button(label='Adventure', emoji='\U0001F5FA', custom_id="_adventure_selected"),
-            Button(label='Creative', emoji='\U0001F528', custom_id="_creative_selected"),
-            Button(label='Spectator', emoji='\U0001F441', custom_id="_spectator_selected"),
-        ], [
-            Button(label='OP', emoji='\U000023EB', custom_id="_opadd_selected"),
-            Button(label='DEOP', emoji='\U000023EC', custom_id="_opremove_selected"),
-            Button(label='Kick', emoji='\U0000274C', custom_id="_kick_selected"),
-            Button(label='Ban', emoji='\U0001F6AB', custom_id="_ban_selected"),
-        ]])
+        # Sets selection default to player if received 'player' parameter.
+        if player: select_options += [[player, player, True]]
 
-        current_components += player_selection_panel, player_selection_actions
+        player_selection_panel = await ctx.send("**Player Panel**", view=new_selection(select_options, 'player_select', "Select Player"))
+
+        player_buttons = [['Kill', '_kill_selected', '\U0001F52A'], ['Clear Inventory', '_clear_selected', '\U0001F4A5'],
+                          ['Location', '_locate_selected', '\U0001F4CD'], ['Teleport', '_teleport_selected_playerpanel', '\U000026A1']]
+        b1 = await ctx.send('Actions:', view=new_buttons(player_buttons))
+
+        player_buttons2 = [['Survival', '_survival_selected', '\U0001F5E1'], ['Adventure', '_adventure_selected', '\U0001F5FA'],
+                           ['Creative', '_creative_selected', '\U0001F528'], ['Spectator', '_spectator_selected', '\U0001F441']]
+        b2 = await ctx.send('', view=new_buttons(player_buttons2))
+
+        player_buttons3 =[['OP', 'opadd_selected', '\U000023EB'], ['DEOP', '_deop_selected', '\U000023EC'],
+                          ['Kick', '_kick_selected', '\U0000274C'], ['Ban', '_ban_selected', '\U0001F6AB']]
+        b3 = await ctx.send('', view=new_buttons(player_buttons3))
+
+        current_components += player_selection_panel, b1, b2, b3
         lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
@@ -2224,16 +2211,11 @@ class Bot_Functions(commands.Cog):
         backups = backend_functions.fetch_worlds()
         if not backups: await ctx.send("No world backups")
 
-        selection_msg = await ctx.send("**Restore World Panel**", components=[
-            Select(custom_id='restore_world_selection',
-                   placeholder="Select World Backup",
-                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
-                   )])
+        select_options = [[i[1], i[0], False, i[0]] for i in backups]
+        selection_msg = await ctx.send("**Restore World Panel**", view=new_selection(select_options, 'restore_world_selection', 'Select World Backup'))
 
-        button_msg = await ctx.send("Actions:", components=[[
-            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_world_selected"),
-            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_world_selected"),
-        ]])
+        restore_buttons = [['Restore', '_restore_world_selected', '\U000021A9'], ['Delete', '_delete_world_selected', '\U0001F5D1']]
+        button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
 
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore world panel')
@@ -2249,16 +2231,12 @@ class Bot_Functions(commands.Cog):
         backups = backend_functions.fetch_servers()
         if not backups: await ctx.send("No server backups")
 
-        selection_msg = await ctx.send("**Restore Server Panel**", components=[
-            Select(custom_id='restore_server_selection',
-                   placeholder="Select Server Backup",
-                   options=[SelectOption(label=i[1], value=i[0], description=i[0]) for i in backups]
-                   )])
+        print('okbackups',  backups)
+        select_options = [[i[1], i[0], False, i[0]] for i in backups]
+        selection_msg = await ctx.send("**Restore Server Panel**", view=new_selection(select_options, 'restore_server_selection', 'Select Server Backup'))
 
-        button_msg = await ctx.send("Actions:", components=[[
-            Button(label='Restore', emoji='\U000021A9', custom_id="_restore_server_selected"),
-            Button(label="Delete", emoji='\U0001F5D1', custom_id="_delete_server_selected"),
-        ]])
+        restore_buttons = [['Restore', '_restore_server_selected', '\U000021A9'], ['Delete', '_delete_server_selected', '\U0001F5D1']]
+        button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
 
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore server panel')
@@ -2421,8 +2399,9 @@ class Bot_Functions(commands.Cog):
 
 
 # Adds functions to bot.
-for cog in [System, Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
-    bot.add_cog(cog(bot))
+async def setup(bot):
+    for cog in [System, Other_Games, Basics, Player, Permissions, World, Server, World_Backups, Server_Backups, Bot_Functions]:
+        await bot.add_cog(cog(bot))
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
 if_no_tmux = ['serverstart', 'serverrestart']
@@ -2435,5 +2414,3 @@ if slime_vars.server_files_access is False and slime_vars.use_rcon is True:
 
 if slime_vars.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
-
-if __name__ == '__main__': bot.run(TOKEN)

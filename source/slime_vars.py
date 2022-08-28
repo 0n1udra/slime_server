@@ -4,13 +4,13 @@ import os
 user = os.getlogin()
 
 # Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_server.token'
+bot_token_file = f'/home/{user}/keys/slime_server_beta.token'
 
 # Set as None if not using a python virtual env.
-pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
+pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 860361620492255292
+channel_id = 916450451061350420
 
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
@@ -35,7 +35,7 @@ use_tmux = True
 tmux_session_name = 'sess'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = True
+use_rcon = False
 rcon_pass = 'rconpass420'
 rcon_port = 25575
 
@@ -43,17 +43,21 @@ rcon_port = 25575
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
 mc_path = f'/home/{user}/Games/Minecraft'
 
+# Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
+default_wait_time = 30
+
 # Server profiles, allows you to have different servers and each with their own backups/restores.
-# {'Server_Name': ['Server_name', 'description', 'start_Command', 'jar_download_url']} No spaces allowed in Server_name.
+# {'server_name': ['server_name', 'description', 'start_Command', 'optional_jar_download_url', optional_wait_time]}
+# No spaces allowed in server name. Always put optional_wait_time at tail of list.
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx2G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads'],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server'],
-               'vvolatile': ["vvolatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh"],
+server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads', 10],
+               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server', 20],
+               'vvolatile': ["vvolatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh", 60],
                'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
                }
 
-server_selected = server_list['vvolatile']
+server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"

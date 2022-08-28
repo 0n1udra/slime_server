@@ -331,7 +331,7 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
-        return server_log('server version')
+        return server_log('server version').split('version')[1].strip()
     return 'N/A'
 
 def server_motd():
