@@ -103,7 +103,7 @@ async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
 # ========== Server Commands: start, send command, read log, etc
-async def server_command(command, skip_check=False, discord_msg=True):
+async def server_command(command, force_check=False, skip_check=False, discord_msg=True):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -111,7 +111,8 @@ async def server_command(command, skip_check=False, discord_msg=True):
 
     Args:
         command str: Command to send.
-        skip_check bool(False): Skips server_active boolean check.
+        force_check bool(False): Skips server_active boolean check, send command anyways.
+        skip_check(False): Skips sending check command. E.g. For sending a lot of consecutive commands, to help reduces time.
         discord_msg bool(True): Send message indicating if server is inactive.
 
     Returns:
@@ -125,8 +126,8 @@ async def server_command(command, skip_check=False, discord_msg=True):
         if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?check` to update server status.")
 
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
-    # Without this, the user might try sending multiple commands to a unreachable RCON server which will hold up the bot.
-    if not skip_check and not server_active:
+    # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
+    if not force_check and not server_active:
         await inactive_msg()
         return False
 
@@ -147,12 +148,14 @@ async def server_command(command, skip_check=False, discord_msg=True):
             return False
 
     elif slime_vars.use_tmux is True:
-        # Checks if server is active in the first place by sending random number to be matched in server log.
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
-        await asyncio.sleep(slime_vars.command_buffer_time)
-        if not server_log(random_number):
-            await inactive_msg()
-            return False
+        if not skip_check:  # Check if server reachable before sending command.
+            # Checks if server is active in the first place by sending random number to be matched in server log.
+            os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
+            await asyncio.sleep(slime_vars.command_buffer_time)
+            if not server_log(random_number):
+                await inactive_msg()
+                return False
+
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
 
     else:
@@ -261,7 +264,7 @@ async def server_status(discord_msg=False):
     lprint(ctx, "Checking Minecraft server status...")
 
     # server_command() will send random number, server is online if match is found in log.
-    response = await server_command(' ', skip_check=True, discord_msg=discord_msg)
+    response = await server_command(' ', force_check=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
         lprint(ctx, "Server Status: Active")
@@ -270,7 +273,6 @@ async def server_status(discord_msg=False):
     else:
         # server_command will send a discord message if server is inactive, so it's unneeded here.
         lprint(ctx, "Server Status: Inactive")
-        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:")
         server_active = False
 
 def server_start():
@@ -313,7 +315,8 @@ def server_version():
         try: return ping_server()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
-        return server_log('server version').split('version')[1].strip()
+        try: return server_log('server version').split('version')[1].strip()
+        except: return 'N/A'
     return 'N/A'
 
 def server_motd():
@@ -458,7 +461,7 @@ async def get_player_list():
 async def get_location(player=''):
     """Gets player's location coordinates."""
 
-    if response := await server_command(f"data get entity {player} Pos"):
+    if response := await server_command(f"data get entity {player} Pos", skip_check=True):
         log_data = server_log('entity data', stopgap_str=response[1])
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
         # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
