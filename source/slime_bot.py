@@ -124,6 +124,7 @@ async def on_ready():
         await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
         await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
 
+
 async def _delete_current_components():
     """
     Deletes old components to prevent conflicts.
@@ -1342,8 +1343,12 @@ class Server(commands.Cog):
 
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
         backend_functions.server_start()
-        await ctx.send(f"***Fetching Status in {slime_vars.wait_for_launch}s...***")
-        await asyncio.sleep(slime_vars.wait_for_launch)
+
+        # checks if set custom wait time in server_selected list.
+        try: wait_time = int(slime_vars.server_selected[-1])
+        except: wait_time = slime_vars.default_wait_time
+        await ctx.send(f"***Fetching Status in {wait_time}s...***")
+        await asyncio.sleep(wait_time)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
