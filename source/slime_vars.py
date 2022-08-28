@@ -4,13 +4,13 @@ import os
 user = os.getlogin()
 
 # Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_server_beta.token'
+bot_token_file = f'/home/{user}/keys/slime_server.token'
 
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 916450451061350420
+channel_id = 860361620492255292
 
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
@@ -27,6 +27,8 @@ use_subprocess = False
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
+tmux_bot_pane = '0.6'  # tmux pane for slime_bot
+tmux_minecraft_pane = '0.0'  # tmux pane for miencraft server
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False

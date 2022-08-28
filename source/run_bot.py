@@ -21,18 +21,18 @@ def _start_bot():
 def start_bot():
     if slime_vars.use_tmux is True:
         # Sources pyenv if set in slime_vars.
-        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
+        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_files_path}" ENTER'):
             lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_files_path})")
 
         # Activate python env.
         if slime_vars.pyenv_activate_command:
-            if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{slime_vars.pyenv_activate_command}" ENTER'):
+            if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "{slime_vars.pyenv_activate_command}" ENTER'):
                 lprint(ctx, f"ERROR: {slime_vars.pyenv_activate_command}")
             else: lprint(ctx, f"INFO: Activated pyenv")
 
-        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:0.1 'python3 run_bot.py _startbot' ENTER"):
+        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} 'python3 run_bot.py _startbot' ENTER"):
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
-            start_bot()
+            _start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
 
     else: _start_bot()
@@ -59,7 +59,7 @@ def start_tmux_session():
         lprint(ctx, f"ERROR: Starting tmux session")
     else: lprint(ctx, f"INFO: Started Tmux detached session")
 
-    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:0.0'):
+    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane}'):
         lprint(ctx, "ERROR: Creating second tmux panes")
     else: lprint(ctx, "INFO: Created second tmux panes")
 
@@ -123,6 +123,9 @@ if __name__ == '__main__':
             start_tmux_session()
         if slime_vars.use_rcon is True:
             print("Using RCON. Make sure relevant variables are set properly in backend_functions.py.")
+
+    if 'beta' in sys.argv:
+        slime_vars.bot_token_file, slime_vars.channel_id = f'/home/{os.getlogin()}/keys/slime_server_beta.token', 916450451061350420
 
     if 'starttmux' in sys.argv and slime_vars.use_tmux:
         start_tmux_session()
