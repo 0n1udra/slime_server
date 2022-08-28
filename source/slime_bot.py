@@ -6,18 +6,17 @@ from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "6Py"
-__date__ = '2022/08/17'
+__version__ = "6P"
+__date__ = '2022/08/28'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
 __status__ = "Development"
 
-# Exits script if no token file found (usually: ~/keys/slime_server.token).
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?', case_insensitive=True, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='?', case_insensitive=True, help_command=None, intents=discord.Intents.all())
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
@@ -53,6 +52,10 @@ class Discord_Select(discord.ui.Select):
 
         if custom_id == 'player_select': player_selection = value
 
+    # Before teleporting player, this saves the location of player beforehand.
+    if interaction.custom_id == '_teleport_selected':
+        return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+        teleport_selection[2] = return_coord.replace(',', '')
 
 class Discord_Button(discord.ui.Button):
     """
@@ -116,7 +119,10 @@ async def on_ready():
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
         channel = bot.get_channel(slime_vars.channel_id)
+        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
+        await backend_functions.server_status()  # Checks server status, some commands won't work if server status is not correctly updated.
 
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
@@ -166,7 +172,7 @@ class Basics(commands.Cog):
 
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['mcommand', '/'])
+    @commands.command(aliases=['mcommand', 'm/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
