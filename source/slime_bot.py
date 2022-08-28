@@ -6,7 +6,7 @@ from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "6P"
+__version__ = "6.9:)D2"
 __date__ = '2022/08/28'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
@@ -16,7 +16,7 @@ __status__ = "Development"
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?', case_insensitive=True, help_command=None, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='?', case_insensitive=True, intents=discord.Intents.all())
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
@@ -52,6 +52,49 @@ class Discord_Select(discord.ui.Select):
 
         if custom_id == 'player_select': player_selection = value
 
+class Discord_Button(discord.ui.Button):
+    """
+    Create button from received list containing label, custom_id, and emoji.
+    Uses custom_id with ctx.invoke to call corresponding function.
+    """
+
+    def __init__(self, label, custom_id, emoji=None, style=discord.ButtonStyle.grey):
+        super().__init__(label=label, custom_id=custom_id, emoji=emoji, style=style)
+
+    async def callback(self, interaction):
+        global teleport_selection
+        await interaction.response.defer()
+        custom_id = interaction.data['custom_id']
+
+        # Before teleporting player, this saves the location of player beforehand.
+        if custom_id == '_teleport_selected':
+            return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+            try: teleport_selection[2] = return_coord.replace(',', '')
+            except: pass
+
+        # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
+        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        await ctx.invoke(bot.get_command(custom_id))
+
+def new_buttons(buttons_list):
+    """Create new discord.ui.View and add buttons, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    for button in buttons_list:
+        if len(button) == 2: button.append(None)  # For button with no emoji.
+        view.add_item(Discord_Button(label=button[0], custom_id=button[1], emoji=button[2]))
+    return view
+
+def new_selection(select_options_args, custom_id, placeholder):
+    """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    select_options = []
+
+    # Create options for select menu.
+    for option in select_options_args:
+        if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
+        elif len(option) == 3: option.append(None)
         select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
@@ -72,6 +115,10 @@ async def on_ready():
         backend_functions.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
 
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
+        # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
+        await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
+        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
 
 
 async def _delete_current_components():
