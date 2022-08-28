@@ -53,10 +53,10 @@ class Discord_Select(discord.ui.Select):
 
         if custom_id == 'player_select': player_selection = value
 
-    # Before teleporting player, this saves the location of player beforehand.
-    if interaction.custom_id == '_teleport_selected':
-        return_coord = await backend_functions.get_location(teleport_selection[0].strip())
-        teleport_selection[2] = return_coord.replace(',', '')
+        # Before teleporting player, this saves the location of player beforehand.
+        if custom_id == '_teleport_selected':
+            return_coord = await backend_functions.get_location(teleport_selection[0].strip())
+            teleport_selection[2] = return_coord.replace(',', '')
 
 class Discord_Button(discord.ui.Button):
     """
@@ -99,10 +99,8 @@ def new_selection(select_options_args, custom_id, placeholder):
 
     # Create options for select menu.
     for option in select_options_args:
-        print('option', option)
         if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
         elif len(option) == 3: option += None
-        print(option)
         select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
@@ -294,7 +292,7 @@ class Player(commands.Cog):
             new_player_list = []
             for i in player_list[0]:
                 player_location = await backend_functions.get_location(i)
-                new_player_list.append(f'**{i.strip()}** ({player_location if player_location else "Location N/A"})')
+                new_player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`')
             await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
             await ctx.send("-----END-----")
 
