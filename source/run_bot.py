@@ -8,7 +8,7 @@ slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
-def start_bot():
+def _start_bot():
     if os.path.isfile(slime_vars.bot_token_file):
         with open(slime_vars.bot_token_file, 'r') as file:
             TOKEN = file.readline()
@@ -18,7 +18,7 @@ def start_bot():
 
     bot.run(TOKEN)
 
-def start_bot_tmux():
+def start_bot():
     if slime_vars.use_tmux is True:
         # Sources pyenv if set in slime_vars.
         if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "cd {slime_vars.bot_files_path}" ENTER'):
@@ -34,6 +34,8 @@ def start_bot_tmux():
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
             start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
+
+    else: _start_bot()
 
 def setup_directories():
     """Create necessary directories."""
@@ -127,10 +129,11 @@ if __name__ == '__main__':
         time.sleep(1)
 
     if 'startbot' in sys.argv:
-        start_bot_tmux()
+        start_bot()
 
     if '_startbot' in sys.argv:
-        start_bot()
+        _start_bot()
+
     # Background process method (using nohup)
     if 'stopbot' in sys.argv:
         kill_slime_proc()
