@@ -281,14 +281,21 @@ class Player(commands.Cog):
         if not player_list:
             await ctx.send(f"No players online. ¯\_(ツ)_/¯")
         else:
-            new_player_list = []
+            _player_list = []
             for i in player_list[0]:
                 if 'location' in args:
                     player_location = await backend_functions.get_location(i)
-                    new_player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`')
-                else: new_player_list.append(f'{i.strip()}, ')
-            await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
-            await ctx.send("-----END-----")
+                    _player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`\n')
+                else: _player_list.append(f'{i.strip()}, ')
+
+            # Combines 'There are X of a max of X players online' text with player names.
+            output = player_list[1] + '\n' + ''.join(_player_list)
+            if 'location' in args:
+                await ctx.send(output)
+                await ctx.send("-----END-----")
+            else:
+                output = output[:-2]  # Removes trailing ','.
+                await ctx.send(output)
 
         lprint(ctx, "Fetched player list")
 
