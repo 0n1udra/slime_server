@@ -1,5 +1,6 @@
-import mctools, subprocess, fileinput, psutil, requests, datetime, asyncio, shutil, random, json, csv, os, re
+import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
 from file_read_backwards import FileReadBackwards
+from bs4 import BeautifulSoup
 import slime_vars
 
 ctx = 'backend_functions.py'
@@ -9,6 +10,23 @@ slime_proc = slime_pid = None  # If using nohup to run bot in background.
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
+
+# ========== Other Games
+
+def valheim_proc():
+    """Returns valheim process if found."""
+    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
+    for proc in psutil.process_iter():
+        if proc.name() == 'valheim_server.x86_64': return proc
+    else: return None
+
+def valheim_command(command):
+    """Use vhserver script"""
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
+
+def zomboid_command(command):
+    """Sends command to tmux 0.1 Project Zomboid server."""
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 # ========== Extra Functions: start, send command, read log, etc
 def lprint(ctx, msg):
@@ -372,13 +390,10 @@ def check_latest_version():
         str: Latest version number.
     """
 
-    try: from bs4 import BeautifulSoup
-    except: return 'Error'
-    else:
-        soup = BeautifulSoup(requests.get(slime_vars.new_server_url).text, 'html.parser')
-        for i in soup.findAll('a'):
-            if i.string and 'minecraft_server' in i.string:
-                return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
+    soup = BeautifulSoup(requests.get(slime_vars.new_server_url).text, 'html.parser')
+    for i in soup.findAll('a'):
+        if i.string and 'minecraft_server' in i.string:
+            return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
 def get_latest_version():
     """
