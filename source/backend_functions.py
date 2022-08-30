@@ -1,5 +1,6 @@
-import mctools, subprocess, fileinput, psutil, requests, datetime, asyncio, shutil, random, json, csv, os, re
+import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
 from file_read_backwards import FileReadBackwards
+from bs4 import BeautifulSoup
 import slime_vars
 
 ctx = 'backend_functions.py'
@@ -372,13 +373,10 @@ def check_latest_version():
         str: Latest version number.
     """
 
-    try: from bs4 import BeautifulSoup
-    except: return 'Error'
-    else:
-        soup = BeautifulSoup(requests.get(slime_vars.new_server_url).text, 'html.parser')
-        for i in soup.findAll('a'):
-            if i.string and 'minecraft_server' in i.string:
-                return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
+    soup = BeautifulSoup(requests.get(slime_vars.new_server_url).text, 'html.parser')
+    for i in soup.findAll('a'):
+        if i.string and 'minecraft_server' in i.string:
+            return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
 def get_latest_version():
     """

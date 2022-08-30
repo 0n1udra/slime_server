@@ -2,7 +2,6 @@
 
 import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
-from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
@@ -27,8 +26,6 @@ player_selection = restore_world_selection = restore_server_selection = None
 current_components = []
 
 start_button = ['Start Server', 'serverstart', '\U0001F680']
-on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'],
-                    ['Minecraft Status', 'serverstatus', '\U00002139']]
 
 class Discord_Select(discord.ui.Select):
     def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
@@ -117,8 +114,8 @@ async def on_ready():
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
-        await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
-        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
+        on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+        await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=new_buttons(on_ready_buttons))
 
 
 async def _delete_current_components():
@@ -280,14 +277,21 @@ class Player(commands.Cog):
         if not player_list:
             await ctx.send(f"No players online. ¯\_(ツ)_/¯")
         else:
-            new_player_list = []
+            _player_list = []
             for i in player_list[0]:
                 if 'location' in args:
                     player_location = await backend_functions.get_location(i)
-                    new_player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`')
-                else: new_player_list.append(f'{i.strip()}, ')
-            await ctx.send(player_list[1] + '\n' + '\n'.join(new_player_list))
-            await ctx.send("-----END-----")
+                    _player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`\n')
+                else: _player_list.append(f'{i.strip()}, ')
+
+            # Combines 'There are X of a max of X players online' text with player names.
+            output = player_list[1] + '\n' + ''.join(_player_list)
+            if 'location' in args:
+                await ctx.send(output)
+                await ctx.send("-----END-----")
+            else:
+                output = output[:-2]  # Removes trailing ','.
+                await ctx.send(output)
 
         lprint(ctx, "Fetched player list")
 
@@ -2102,4 +2106,3 @@ if slime_vars.server_files_access is False and slime_vars.use_rcon is True:
 
 if slime_vars.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
-
