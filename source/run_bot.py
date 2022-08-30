@@ -12,8 +12,9 @@ def _start_bot():
     if os.path.isfile(slime_vars.bot_token_file):
         with open(slime_vars.bot_token_file, 'r') as file:
             TOKEN = file.readline()
+            lprint(ctx, f'INFO: Using token: {slime_vars.bot_token_file}')
     else:
-        print("Missing Token File:", slime_vars.bot_token_file)
+        lprint(ctx, f"ERROR: Missing Token File: {slime_vars.bot_token_file}")
         sys.exit()
 
     bot.run(TOKEN)
@@ -122,7 +123,7 @@ if __name__ == '__main__':
         if slime_vars.use_tmux is True:
             start_tmux_session()
         if slime_vars.use_rcon is True:
-            print("Using RCON. Make sure relevant variables are set properly in backend_functions.py.")
+            lprint(ctx, "INFO: Using RCON. Make sure relevant variables are set properly in backend_functions.py.")
 
     if 'beta' in sys.argv:
         slime_vars.bot_token_file, slime_vars.channel_id = f'/home/{os.getlogin()}/keys/slime_server_beta.token', 916450451061350420
