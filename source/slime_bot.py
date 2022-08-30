@@ -2,7 +2,6 @@
 
 import subprocess, datetime, asyncio, discord, random, sys, os
 from discord.ext import commands, tasks
-from discord.ui import Button, Select
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
@@ -27,9 +26,6 @@ player_selection = restore_world_selection = restore_server_selection = None
 current_components = []
 
 start_button = ['Start Server', 'serverstart', '\U0001F680']
-on_ready_buttons = [['Start/Stop Servers', 'games', '\U0001F3AE'],
-                    ['Control Panel', 'controlpanel', '\U0001F39B'],
-                    ['Minecraft Status', 'serverstatus', '\U00002139']]
 
 class Discord_Select(discord.ui.Select):
     def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
@@ -108,7 +104,7 @@ async def on_ready():
     await setup(bot)
 
     lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
-    await backend_functions.server_status()  # Check server status on bot startup.
+    #await backend_functions.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
@@ -118,8 +114,8 @@ async def on_ready():
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
-        await channel.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
-        await channel.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.', view=new_buttons(on_ready_buttons))
+        on_ready_buttons = [['Start/Stop Servers', 'games', '\U0001F3AE'], ['Control Panel', 'controlpanel', '\U0001F39B']]
+        await channel.send('', view=new_buttons(on_ready_buttons))
 
 
 async def _delete_current_components():
@@ -205,11 +201,8 @@ class Other_Games(commands.Cog):
     async def splash(self, ctx):
         """Bot splash/startup message."""
 
-        await ctx.send("Use `?games`/`?servers` or the _Start/Stop Servers_ to get game servers control panel (start/stop/update/status).")
-        await ctx.send(content='Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help2`\nfor all commands.',
-                           components=[[Button(label="Start/Stop Servers", emoji='\U0001F3AE', custom_id="games"),
-                                        Button(label="Control Panel", emoji='\U0001F39B', custom_id="controlpanel"),
-                                        Button(label="Minecraft Status", emoji='\U00002139', custom_id="serverstatus"),]])
+        splash_buttons = [['Start/Stop Servers', 'games', '\U0001F3AE'], ['Control Panel', 'controlpanel', '\U0001F39B']]
+        await ctx.send('', view=new_buttons(splash_buttons))
 
     @commands.command()
     async def help(self, ctx):
@@ -285,25 +278,14 @@ Password for Valheim: `{slime_vars.valheim_password}`
     async def games(self, ctx):
         """Quickly start/stop games with buttons."""
 
-        await ctx.send("**Valheim** :axe:", components=[[
-            Button(label="Start", custom_id="valheimstart"),
-            Button(label="Stop", custom_id="valheimstop"),
-            Button(label="Update", custom_id="valheimupdate"),
-            Button(label="Status", custom_id="valheimstatus")
-        ]])
+        game_buttons = [['Start', 'valheimstart'], ['Stop', 'valheimstop'], ['Status', 'valheimstatus'], ['Update', 'valheimupdate']]
+        await ctx.send("**Valheim** :axe:", view=new_buttons(game_buttons))
 
-        await ctx.send("**Zomboid** :zombie:", components=[[
-            Button(label="Start", custom_id="zomboidstart"),
-            Button(label="Stop", custom_id="zomboidstop"),
-            Button(label="Update", custom_id="zomboidupdate"),
-            Button(label="Status", custom_id="zomboidstatus")
-        ]])
+        game_buttons2 = [['Start', 'zomboidstart'], ['Update', 'zomboidupdate'], ['Status', 'zomboidstatus'], ['Stop', 'zomboidstop']]
+        await ctx.send("**Zomboid** :zombie:", view=new_buttons(game_buttons2))
 
-        await ctx.send("**Minecraft** :pick:", components=[[
-            Button(label="Start", custom_id="serverstart"),
-            Button(label="Stop", custom_id="serverstop"),
-            Button(label="Status", custom_id="servercheck")
-        ]])
+        game_buttons3 = [['Start', 'serverstart'], ['Stop', 'serverstop'], ['Status', 'serverstatus'], ['Update', 'serverupdate']]
+        await ctx.send("**Minecraft** :pick:", view=new_buttons(game_buttons3))
 
     # ===== Valheim
     @commands.command(aliases=['vhelp'])
