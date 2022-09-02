@@ -104,7 +104,7 @@ async def on_ready():
     await setup(bot)
 
     lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
-    #await backend_functions.server_status()  # Check server status on bot startup.
+    await backend_functions.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
@@ -519,7 +519,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=5):
+    async def chatlog(self, ctx, *args):
         """
         Shows chat log. Does not include whispers.
 
@@ -530,14 +530,26 @@ class Basics(commands.Cog):
             ?chat 50
         """
 
+        try:
+            lines = int(args[0])
+            args = args[1:]
+        except: lines = 5
+
+        try: keyword = ' ' .join(args)
+        except: keyword = None
+
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
         log_data = backend_functions.server_log(']: <', lines=lines, filter_mode=True, return_reversed=True)
+
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
+
+        # optinally filter out chat lines only with certain keywords.
+        log_data = [i for i in log_data if keyword in i]
 
         i = lines
         for line in log_data:
