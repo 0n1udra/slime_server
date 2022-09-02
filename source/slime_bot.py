@@ -548,8 +548,8 @@ class Basics(commands.Cog):
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
 
-        # optinally filter out chat lines only with certain keywords.
-        log_data = [i for i in log_data if keyword in i]
+        # optionally filter out chat lines only with certain keywords.
+        log_data = [i for i in log_data if keyword.lower() in i.lower()]
 
         i = lines
         for line in log_data:
