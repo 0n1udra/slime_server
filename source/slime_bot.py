@@ -1334,7 +1334,7 @@ class World(commands.Cog):
     @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
-        await server_command(f'gamerule doDaylghtCycle false')
+        await server_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
 
