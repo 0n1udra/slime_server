@@ -226,7 +226,7 @@ class Basics(commands.Cog):
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, lines=5):
+    async def chatlog(self, ctx, *args):
         """
         Shows chat log. Does not include whispers.
 
@@ -237,14 +237,26 @@ class Basics(commands.Cog):
             ?chat 50
         """
 
+        try:
+            lines = int(args[0])
+            args = args[1:]
+        except: lines = 5
+
+        try: keyword = ' ' .join(args)
+        except: keyword = None
+
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
         log_data = backend_functions.server_log(']: <', lines=lines, filter_mode=True, return_reversed=True)
+
         try: log_data = log_data.strip().split('\n')
         except:
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
+
+        # optionally filter out chat lines only with certain keywords.
+        log_data = [i for i in log_data if keyword.lower() in i.lower()]
 
         i = lines
         for line in log_data:
@@ -1029,7 +1041,7 @@ class World(commands.Cog):
     @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
-        await server_command(f'gamerule doDaylghtCycle false')
+        await server_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle DISABLED")
         lprint(ctx, 'Daylight Cycle: Disabled')
 
