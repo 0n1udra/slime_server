@@ -1,61 +1,70 @@
-Command Name, `?command` `?c <required> [optional]`, Description.
+Command Name, `?command <required_arguments> [optional_arguments]` `?command_aliases`, Description.
 Help, `?help`, Shows Discord.py's help page.
 Help2, `?help2`, Shows this help page.
 Control Panel, `?controlpanel` `?panel` `?cp`, Show control panel buttons for quick action.
-Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
-Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
-Server Command, `?command` `?c <command>`, Send command directly to server, use `?log` to get more server output lines. example: `?/ time set day`
-Server Select, `?serverselect` `?ss papermc`, Each server has their own backups and start command. Select server to change which one to start and use commands on.
+Player Panel, `?playerpanel [player]` `?pp`, Specify or Select player from dropdown list to provided action buttons.
+World and Server Backup Panels, `?worldrestorepanel` `?wrp` `?serverrestorepanel` `?srp`, Select world/server backups from dropdown list to restore or delete.
+Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.
+Autosave, `?autosave [on/off/minutes]` `?asave`, Turn on/off autosave function, or set autosave interval in minutes, e.g. `?autosave 30`
+Say, `?say <message>` `?s`, Server sends message to all active players.
+Whisper, `?tell <player> <message>` `?t`, Whispers message to player.
+Chat Log, `?chatlog [lines] [filter]` `?chat 10` `?chat wubba lubba`, User chat logs, not include whispers. Can also filter for specific keyword(s).
+Server Status, `?check`, Checks if server is active or not. The `?check` and `?stats` commands are the only ones that will actually check server status.
+Server Command, `?command <command>` `?c`, Send command directly to server, use `?log` to get more server output lines. e.g.: `?/ time set day`
+Server List, `?serverlist`, List server, Each has their own server backups, start command, etc..
+Server Select, `?serverselect <server>` `?ss papermc`, Change what server to use.
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
-Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, max 20 lines, by default shows 5 most recent.
 Server Start, `?start`, Starts Minecraft server up.
 Server Stop, `?stop [now]`, `?stop now` will immediately stop server. `?stop`, Messages all players the server will be halted in 15s. Then will halt server.
-Server Restart, `?restart` `?reboot [now]`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
+Server Restart, `?restart [now]` `?reboot`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
 Server Version, `?version`, Get Minecraft Server version.
-Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log lines.
-Check Server Status, `?check`, Checks if server is active or not. The `?check` and `?stats` commands are the only ones that will actually check server status.
-Online Players, `?players` `?pl`, Gets list of online users.
-Save World, `?saveall` `?sa`, Save current world file. Not the same as making backup or server save.
-Autosave, `?autosave` `?asave [on/off/minutes]`, Turn on/off autosave function, or set autosave interval in minutes, e.g. `?autosave 30`
-Say, `?say` `?s <message>`, Server sends message to all active players.
-Whisper, `?tell` `t <player> <message>`, Whispers message to player.
-Chat Log, `?chatlog` `?chat`, Show server log lines of only player chats, does not include whispers.
-Whitelist, `?whitelist [on/off/add/remove/enforce/reload/list]`, Whitelist commands, using `?whitelist` standalone, will show list of whitelisted players. `?whitelist on` to turn on whitelist.
-Whitelist Add/Remove, `?whitelist <add/remove> <player>`, Add or remove player from whitelist, `?whitelist add MysticFrogo`.
-Whitelist Enforce, `?whitelist enforce <true/false/status>`, Edits `enforce-whitelist` in server properties file, server reboot required. Can also use false or true, or status.
+Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, max 20 lines, by default shows 5 most recent.
+Server Log Download, `?getlogs` `?glogs`, Download server log files. Bot will unzip .gz files.
+Server Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log lines.
+Player list, `?players` `?p`, Shows online users.
+Player Locations, `?p location` `?pl`, Gets location coordinates for all online players.
+Player Locate, `?locate <player>`, Get player coordinates.
+Teleport, `?teleport <select_user> <target_user> [reason]` `?tp`, After 5s teleports player to targeted player. Use without arguments to bring up panel.
+Invenotry Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
+Kill, `?kill <target> [reason]` `?pk`, Kill player, default reason 'No reason given'.
+Kill Delayed, `?killwait <target> <seconds> [reason]` `?dw`, Kills target after waiting for x seconds.
+Game Mode, `?gamemode <player> <mode> [reason]` `?gm`, Set player's game mode.
+Game Mode Timed, `?gamemodetimed <player> <mode> <duration> [reason]` `?tgm`, Timed game mode change.
+Weather, `?weather <clear/rain/thunder> [minutes]`, Sets weather for x minutes, 0 for random.
+More Weather Commands, `?weatheron` `?weatheroff` `?weatherclear` `?weatherrain` `?weatherthunder`, Weather commands.
+Time, `?time <time>`, Set time, e.g.: 800, 1300, day/night/noon/midnight.
+More Time Commands, `?timeday` `?timenight` `?timeon` `?timeoff`, Time commands.
 Kick, `?kick <player> [reason]`, Kick player after 5s, reason is optional.
 Ban, `?ban <player> [reason]`, After 5s bans player, providing reason is optional.
 Ban List, `?banlist` `?bl`, Shows banned players with the reason why.
-Pardon, `?pardon` `?unban <player> [reason]`, Pardons (unbans) player, reason can be optional.
-Kill, `?kill` `?pk <target> [reason]`, Kill player, default reason 'No reason given'.
-Kill Delayed, `?killwait` `?dw <target> <seconds> [reason]`, Kills target after waiting for x seconds.
-Teleport, `?teleport` `?tp <select_user> <target_user> [reason]`, After 5s teleports player to targeted player.
-Game Mode, `?gamemode` `?gm <player> <mode> [reason]`, Set player's game mode.
-Game Mode Timed, `?gamemodetimed` `?tgm <player> <mode> <duration> [reason]`, Timed game mode change.
-Weather, `?weather <clear/rain/thunder> [minutes]`, Sets weather for x minutes, 0 for random.
-Time, `?time <time>`, Set time, examples: 800, 1300, day/night/noon/midnight.
+Pardon, `?pardon <player> [reason]` `?unban`, Pardons (unbans) player, reason can be optional.
+Whitelist, `?whitelist [on/off/add/remove/enforce/reload/list]`, Whitelist commands, using `?whitelist` standalone, will show list of whitelisted players. `?whitelist on` to turn on whitelist.
+Whitelist Add/Remove, `?whitelist <add/remove> <player>`, Add or remove player from whitelist, `?whitelist add MysticFrogo`.
+Whitelist Enforce, `?whitelist enforce <true/false/status>`, Edits `enforce-whitelist` in server properties file, server reboot required. Can also use false or true, or status.
 OP List, `?oplist`, Shows list of server operators.
 OP Add, `?opadd <player>`, Sets player as server operator.
 OP Remove, `?opremove <player>`, Remove players OP privileges.
-OP Timed, `?optimed` `?opt <player> <minutes>`, Set player to OP for a set time in minutes.
-World Backups, `?worldbackupslist` `?backups [amount]`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
+OP Timed, `?optimed <player> <minutes>` `?opt`, Set player to OP for a set time in minutes.
+World Backups, `?worldbackupslist [amount]` `?backups`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
 World New Backup, `?worldbackupnew <codename>`, Create a new backup, need to provide a name or keywords. Cannot overwrite existing backup, use `?delete` first.
-World Restore, `?worldbackuprestore` `?worldrestore <index>`, Restore to a saved backup, need to input a index number you get from `?saves`.
-World Backup Delete, `?worldbackupdelete` `?worlddelete <index>`, Delete a saved world backup.
-Server Backups, `?serverbackupslist` `?serverbackups [amount]`, Get list of server backups, can specify how many of latest to show.
+World Restore, `?worldbackuprestore <index>` `?worldrestore`, Restore to a saved backup, need to input a index number you get from `?saves`.
+World Backup Delete, `?worldbackupdelete <index>` `?worlddelete`, Delete a saved world backup.
+Server Backups, `?serverbackupslist [amount]` `?serverbackups`, Get list of server backups, can specify how many of latest to show.
 Server New Backup, `?serverbackup <codename>`, Create backup of all server files.
 Server Delete backup, `?serverdelete <index>`, Get index number from `?serverbackups`.
-Server Restore, `?serverbackuprestore` '?serverrestore` `?restoreserver <index>`, Restores server files from backup.
-Server Update, `?serverupdate` `?su [now]`, Updates server.jar from official Minecraft website.
-Properties File, `?property` `?p <all/property name> [new value]`, Check and change server server.properties file, use all to show full file (without value).
+Server Restore, `?serverbackuprestore <index>` '?serverrestore` `?restoreserver`, Restores server files from backup.
+Server Update, `?serverupdate [now]` `?su`, Updates server.jar from official Minecraft website.
+Server Properties, `?property <all/property name> [new value]` `?pr`, Check and change server server.properties file.
+Server Update, `?serverupdate` `?su`, Downloads and installs latest server version. Supports: Vanilla, PaperMC).
+Check Latest Version, `?latestversion` `?lv`, Checks what's the latest minecraft version. See Update Server for suported versions)
 Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.
 Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to check RCON status else make sure true or false argument is all lowercase. Currently have to set other RCON properties with `?property`.
-Version, `?version`, `?v`, Shows Minecraft server version.
-Latest Version, `?latestversion`, `?lv`, Gets latest Minecraft server version from official website.
 Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
-Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
-Reboot Bot, `?rebootbot` `?rbot`, Reboots this discord bot.
 Bot Info, `?botinfo`, Get this bot's version and other info.
+Bot Restart, `?rebootbot` `?rbot`, Reboots this discord bot.
+Bot Update, `?botupdate` `?updatebot` `?gitupdate`, Uses git pull command to update code, WARNING: Issues may arise.
+Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
+Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
+Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Secret Panel, `?secretpanel`, `?sp`, ?????????
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Deletes world save, new one generated at start. Will not make backup||
-
