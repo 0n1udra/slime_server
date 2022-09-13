@@ -2116,7 +2116,7 @@ class Bot_Functions(commands.Cog):
 
         log_file_component = await ctx.send("**Log Files**", view=new_selection(log_select_options[0], 'log_file', "Select File"))
 
-        player_buttons = [['Get', '_get_log_file'], ['Back', '_log_select_back'], ['Next', '_log_select_next']]
+        player_buttons = [['Back', '_log_select_back'], ['Next', '_log_select_next'], ['Get', '_get_log_file'],]
         await ctx.send(' ', view=new_buttons(player_buttons))
 
     @commands.command()
