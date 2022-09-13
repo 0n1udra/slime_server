@@ -1,7 +1,6 @@
 ## Control Minecraft server with Discord bot.  
 Scroll down for requirements, setup instructions and screenshots.  
 
-**UPDATE:** There is a [branch](https://github.com/0n1udra/slime_server/tree/discord.py-2.0) for discord.py 2.0 compatibilty, it's still unstable and in testing.
 
 [Releases](https://github.com/0n1udra/slime_server/releases)
 
@@ -13,14 +12,13 @@ Scroll down for requirements, setup instructions and screenshots.
 - Interface via RCON, Tmux or subprocess. Some features and command may be disabled if using RCON or Subprocess.
 
 ### Requirements:
-- [Python3](https://www.python.org/)
+- [Python 3.8+](https://www.python.org/)
 - [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If hosting Minecraft server)
 - [Tmux](https://github.com/tmux/tmux/wiki) (If hosting Minecraft server)
 - [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)
 
 ### Python Modules:
-- [discord.py](https://github.com/Rapptz/discord.py)
-- [discord-components](https://pypi.org/project/discord-components-mirror/)
+- [discord.py 2.0](https://github.com/Rapptz/discord.py)
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
@@ -30,10 +28,7 @@ Scroll down for requirements, setup instructions and screenshots.
 
 # Setup
 1. Create Discord bot using this [portal](https://discord.com/developers/applications).  
-2. Install discord.py first, then discord-components package:  
-  a1. Use discord-components-mirror package: https://pypi.org/project/discord-components-mirror/  
-  a2. Or, download or git clone: https://github.com/kiki7000/discord.py-components.git  
-  b. Go into discord.py-components folder and run `python3 setup.py install`.  
+2. Setup Python venv and install libraries.
 3. Update `slime_vars.py` variables.  
 4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
   e.g. `python3 run_bot.py starttmux startboth attachtmux`  
