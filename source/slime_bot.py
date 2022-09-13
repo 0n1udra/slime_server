@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, datetime, asyncio, discord, random, sys, os
+import subprocess, datetime, asyncio, discord, random, gzip, sys, os
 from discord.ext import commands, tasks
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
@@ -22,8 +22,9 @@ channel = None
 # ========== Extra: Functions, Variables, Templates, etc
 teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
 # For buttons and selection box components.
-player_selection = restore_world_selection = restore_server_selection = None
+log_selection = player_selection = restore_world_selection = restore_server_selection = None
 current_components = []
+log_select_options, log_select_page, log_file_component = [], 0, None
 
 start_button = ['Start Server', 'serverstart', '\U0001F680']
 
@@ -32,12 +33,15 @@ class Discord_Select(discord.ui.Select):
         super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
 
     async def callback(self, interaction):
-        global teleport_selection, player_selection, restore_world_selection, restore_server_selection
+        global teleport_selection, player_selection, restore_world_selection, restore_server_selection, log_selection
 
         await interaction.response.defer()  # Defer response so not to show failed interaction message.
         # Removes any escape chars.
         value = interaction.data['values'][0].strip()
         custom_id = interaction.data['custom_id']
+
+        # Player selection panel
+        if custom_id == 'player_select': player_selection = value
 
         # Updates teleport_selection corresponding value based on which selection box is updated.
         if custom_id == 'teleport_target': teleport_selection[0] = value
@@ -47,7 +51,8 @@ class Discord_Select(discord.ui.Select):
         if custom_id == 'restore_server_selection': restore_server_selection = value
         if custom_id == 'restore_world_selection': restore_world_selection = value
 
-        if custom_id == 'player_select': player_selection = value
+        # Log file download panel
+        if custom_id == 'log_file': log_selection = value
 
 class Discord_Button(discord.ui.Button):
     """
@@ -1035,14 +1040,14 @@ class World(commands.Cog):
     async def timeon(self, ctx):
         """Enable day light cycle."""
         await server_command(f'gamerule doDaylightCycle true')
-        await ctx.send("Daylight cycle ENABLED")
+        await ctx.send("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
     @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
         await server_command(f'gamerule doDaylightCycle false')
-        await ctx.send("Daylight cycle DISABLED")
+        await ctx.send("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
 
 
@@ -1804,6 +1809,55 @@ class Server_Backups(commands.Cog):
 # ========== Extra: restart bot, botlog, get ip, help2.
 class Bot_Functions(commands.Cog):
     def __init__(self, bot): self.bot = bot
+
+    # ===== Get/Download Log files
+    @commands.command(aliases=['getlogs', 'glogs', 'logfiles'])
+    async def get_log_file(self, ctx):
+        """Show select menu of server log files avaiable to download."""
+
+        global log_file_component, log_select_options
+
+        log_files = [[i, i] for i in reversed(sorted(os.listdir(slime_vars.server_log_path))) if os.path.isfile(os.path.join(slime_vars.server_log_path, i))]
+        log_select_options = [log_files[i:i+25] for i in range(0, len(log_files), 25)]
+
+        log_file_component = await ctx.send("**Log Files**", view=new_selection(log_select_options[0], 'log_file', "Select File"))
+
+        player_buttons = [['Back', '_log_select_back'], ['Next', '_log_select_next'], ['Get', '_get_log_file'],]
+        await ctx.send(' ', view=new_buttons(player_buttons))
+
+    @commands.command()
+    async def _get_log_file(self, ctx):
+        """Download server log file, also unzips beforehand if it's a .gz file."""
+
+        global log_selection
+
+        # Unzips file if it's a .gz file. Will delete file afterwards.
+        if log_selection.endswith('.gz'):
+            with gzip.open(f'{slime_vars.server_log_path}/{log_selection}', 'rb') as f_in:
+                # Writes it in the bot source folder, doesn't matter because it'll be deleted.
+                with open(log_selection[:-3], 'wb') as f_out: f_out.write(f_in.read())
+
+                try: await ctx.send('', file=discord.File(log_selection[:-3]))
+                except: await ctx.send("**ERROR:** Couldn't fetch file for download.")
+                else: os.remove(log_selection[:-3])
+
+        else: await ctx.send('', file=discord.File(f'{slime_vars.server_log_path}/{log_selection}'))
+
+    @commands.command()
+    async def _log_select_back(self, ctx):
+        """Updates get_log_file() select embed, since it can only show 25 at a time."""
+
+        global log_file_component, log_select_page
+        try: await log_file_component.edit(view=new_selection(log_select_options[log_select_page - 1], 'log_file', 'Select File'))
+        except: pass
+        else: log_select_page -= 1
+
+    @commands.command()
+    async def _log_select_next(self, ctx):
+        global log_file_component, log_select_page
+        try: await log_file_component.edit(view=new_selection(log_select_options[log_select_page + 1], 'log_file', 'Select File'))
+        except: pass
+        else: log_select_page += 1
 
     # ===== Control panel
     @commands.command()

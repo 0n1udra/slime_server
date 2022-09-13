@@ -3,6 +3,7 @@ import os
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = os.getlogin()
 
+# ========== Discord
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
 
@@ -10,13 +11,14 @@ bot_token_file = f'/home/{user}/keys/slime_server.token'
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 860361620492255292
+channel_id = 860361620492255292  # Default: None
 
+
+# ========== Minecraft Interfacing Options
 # Server URL or IP address. In case you're using a DDNS or something.
 server_url = 'arcpy.asuscomm.com'
 server_port = 25566
 
-# ========== Interfacing Options
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
 
@@ -58,8 +60,14 @@ server_path = f"{mc_path}/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
+server_log_file = f"{server_path}/logs/latest.log"
+server_log_path = f"{server_path}/logs"
 
 # ========== Bot Config
+bot_files_path = os.path.dirname(os.path.abspath(__file__))
+slime_vars_file = bot_files_path + '/slime_vars.py'
+bot_log_file = f"{bot_files_path}/bot_log.txt"
+
 # The command to use in server to use to check status. server_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
 
@@ -88,13 +96,9 @@ useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/mo
                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
                    }
 
-# ========== Other variables. DON'T TOUCH.
-bot_files_path = os.path.dirname(os.path.abspath(__file__))
-slime_vars_file = bot_files_path + '/slime_vars.py'
-server_log_file = f"{server_path}/logs/latest.log"
-bot_log_file = f"{bot_files_path}/bot_log.txt"
-updatable_mc = ['vanilla', 'papermc']
-server_ip = server_url  # Will be updated by get_ip function in backend_functions.py on bot startup.
+# ========== Misc
+updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend_functions.py
+server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
