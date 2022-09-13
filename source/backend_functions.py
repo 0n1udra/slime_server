@@ -1,7 +1,8 @@
-import mctools, subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
+import subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
+if slime_vars.use_rcon: import mctools
 
 ctx = 'backend_functions.py'
 server_active = False

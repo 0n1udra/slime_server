@@ -403,9 +403,11 @@ class Player(commands.Cog):
         try: destination = ' '.join(destination)
         except: destination = destination[0]
 
-        # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
-        if not target or not destination:
+        if 'help' in target:
             await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
+
+        # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
+        elif not target or not destination:
 
             players = await backend_functions.get_player_list()  # Get list of online players.
             if not players:
@@ -422,7 +424,7 @@ class Player(commands.Cog):
             teleport_buttons = [['Teleport', '_teleport_selected'], ['Return', '_return_selected']]
             await ctx.send('', view=new_buttons(teleport_buttons))
 
-        else: # Will not show select components if received usable parameters.
+        else:  # Will not show select components if received usable parameters.
             target = target.strip()
             if not await server_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
             await ctx.send(f"***Teleporting in 5s...***")
@@ -1177,7 +1179,7 @@ class Server(commands.Cog):
             await ctx.send("**Error:** Problem fetching data.")
             lprint(ctx, "ERROR: Issue getting minecraft log data")
 
-    @commands.command(aliases=['clog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
+    @commands.command(aliases=['clog', 'clogs', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
     async def serverconnectionslog(self, ctx, lines=5):
         """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
 
@@ -1643,12 +1645,13 @@ class Server_Backups(commands.Cog):
                 embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{slime_vars.mc_path}/{slime_vars.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
             await ctx.send(embed=embed)
             await ctx.send(f"**Current Server:** `{slime_vars.server_selected[0]}`")
+            await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in slime_vars.server_list.keys():
             backend_functions.server_selected = slime_vars.server_list[name]
             backend_functions.server_path = f"{slime_vars.mc_path}/{slime_vars.server_selected[0]}"
             backend_functions.edit_file('server_selected', f" server_list['{name}']", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('restartbot'))
-        else: await ctx.send("**ERROR:** Server not found.\nUse `?serverselect` or `?ss` to show list of available servers.")
+        else: await ctx.send("**ERROR:** Server not found.")
 
     # ===== Backup
     @commands.command(aliases=['serverbackupslist', 'sbl'])
@@ -1897,7 +1900,7 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, 'Opened secret panel')
 
-    @commands.command(aliases=['player', 'ppanel', 'pc'])
+    @commands.command(aliases=['player', 'ppanel', 'pp'])
     async def playerpanel(self, ctx, player=''):
         """Select player from list (or all, random) and use quick action buttons."""
 
@@ -2041,7 +2044,7 @@ class Bot_Functions(commands.Cog):
 
         lprint(ctx, "Fetched help page")
         current_command, embed_page, contents = 0, 1, []
-        pages, current_page, page_limit = 3, 1, 15
+        pages, current_page, page_limit = 8, 1, 10
 
         def new_embed(page):
             return discord.Embed(title=f'Help Page {page}/{pages} :question:')
