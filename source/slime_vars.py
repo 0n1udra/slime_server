@@ -1,9 +1,15 @@
-import os
+import discord, os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = os.getlogin()
 
 # ========== Discord
+command_prefex = '?'
+case_insensitive = True  # Case insensitivy for discord commands. e.g. ?players, ?Players, ?pLaYers
+# Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
+intents = discord.Intents.default()
+intents.message_content = True
+
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
 

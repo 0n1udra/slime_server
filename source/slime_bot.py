@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import subprocess, datetime, asyncio, discord, random, gzip, sys, os
+import datetime, asyncio, discord,  gzip, sys, os
 from discord.ext import commands, tasks
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
@@ -15,7 +15,7 @@ __status__ = "Development"
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
-bot = commands.Bot(command_prefix='?', case_insensitive=True, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents)
 # So the bot can send ready message to a specified channel without a ctx.
 channel = None
 
