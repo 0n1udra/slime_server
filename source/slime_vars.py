@@ -1,4 +1,4 @@
-import discord, os
+import discord, csv, os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = os.getlogin()
@@ -55,11 +55,20 @@ default_wait_time = 30
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads', 15],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server', 20],
-               'vvolatile': ["vvolatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh", 60],
-               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
-               }
+
+server_list = {}
+# Create file if not exist.
+with open('server_list.csv', "a") as f: pass
+try:  # Get server list data containing run command and parameters.
+    with open('server_list.csv', 'r') as f:
+        csv_data = csv.reader(f, skipinitialspace=True)
+        for i in csv_data:
+            i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+            server_list[i[0]] = i
+except:
+    print("Error reading server_list.csv file.")
+    exit()
+
 
 server_selected = server_list['papermc']
 server_path = f"{mc_path}/{server_selected[0]}"

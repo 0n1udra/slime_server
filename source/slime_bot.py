@@ -1510,7 +1510,7 @@ class World_Backups(commands.Cog):
         name = format_args(name)
 
         #if await server_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}"):
-            #await server_command(f"save-all")
+        await server_command(f"save-all")
         await asyncio.sleep(3)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
@@ -1705,8 +1705,8 @@ class Server_Backups(commands.Cog):
             return False
 
         name = format_args(name)
-        await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        if not await server_command(f"save-all"): return
+        # await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
+        await server_command(f"save-all")
 
         await asyncio.sleep(5)
         new_backup = backend_functions.backup_server(name)
@@ -1799,10 +1799,11 @@ class Bot_Functions(commands.Cog):
 
         global log_file_component, log_select_options
 
+        await ctx.send("List limited to 25, use next/back buttons.")
         log_files = [[i, i] for i in reversed(sorted(os.listdir(slime_vars.server_log_path))) if os.path.isfile(os.path.join(slime_vars.server_log_path, i))]
         log_select_options = [log_files[i:i+25] for i in range(0, len(log_files), 25)]
 
-        log_file_component = await ctx.send("**Log Files**", view=new_selection(log_select_options[0], 'log_file', "Select File"))
+        log_file_component = await ctx.send(f"**Log Files** ({log_select_page})", view=new_selection(log_select_options[0], 'log_file', "Select File"))
 
         player_buttons = [['Back', '_log_select_back'], ['Next', '_log_select_next'], ['Get', '_get_log_file'],]
         await ctx.send(' ', view=new_buttons(player_buttons))
@@ -1830,14 +1831,14 @@ class Bot_Functions(commands.Cog):
         """Updates get_log_file() select embed, since it can only show 25 at a time."""
 
         global log_file_component, log_select_page
-        try: await log_file_component.edit(view=new_selection(log_select_options[log_select_page - 1], 'log_file', 'Select File'))
+        try: await log_file_component.edit(content=f"**Log Files** ({log_select_page})", view=new_selection(log_select_options[log_select_page - 1], 'log_file', 'Select File'))
         except: pass
         else: log_select_page -= 1
 
     @commands.command()
     async def _log_select_next(self, ctx):
         global log_file_component, log_select_page
-        try: await log_file_component.edit(view=new_selection(log_select_options[log_select_page + 1], 'log_file', 'Select File'))
+        try: await log_file_component.edit(content=f"**Log Files** ({log_select_page})", view=new_selection(log_select_options[log_select_page + 1], 'log_file', 'Select File'))
         except: pass
         else: log_select_page += 1
 
