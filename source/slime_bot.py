@@ -5,8 +5,8 @@ from discord.ext import commands, tasks
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
 
-__version__ = "6.0"
-__date__ = '2022/09/12'
+__version__ = "6.1"
+__date__ = '2022/010/17'
 __author__ = "DT"
 __email__ = "dt01@pm.me"
 __license__ = "GPL 3"
@@ -1517,6 +1517,26 @@ class Server(commands.Cog):
         else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
 
+    # ===== Create/Delete servers (not its backups)
+    @commands.command(aliases=['newserver', 'createserver'])
+    async def servercreate(self, ctx):
+        class MyModal(discord.ui.Modal):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+
+                self.add_item(discord.ui.TextInput(label="Short Input"))
+                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
+
+            async def callback(self, interaction: discord.Interaction):
+                embed = discord.Embed(title="Modal Results")
+                embed.add_field(name="Short Input", value=self.children[0].value)
+                embed.add_field(name="Long Input", value=self.children[1].value)
+                await interaction.response.send_message(embeds=[embed])
+
+        modal = MyModal(title="Modal via Slash Command")
+        await ctx.send(view=modal)
+
+
 class World_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -1717,26 +1737,6 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.")
 
-    # ===== Create/Delete servers (not its backups)
-    @commands.command(aliases=['newserver', 'createserver'])
-    async def servercreate(self, ctx):
-
-        class MyModal(discord.ui.Modal):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-
-                self.add_item(discord.ui.TextInput(label="Short Input"))
-                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
-
-            async def callback(self, interaction: discord.Interaction):
-                embed = discord.Embed(title="Modal Results")
-                embed.add_field(name="Short Input", value=self.children[0].value)
-                embed.add_field(name="Long Input", value=self.children[1].value)
-                await interaction.response.send_message(embeds=[embed])
-
-        modal = MyModal(title="Modal via Slash Command")
-        await ctx.send(view=modal)
-
     # ===== Backup
     @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
@@ -1927,12 +1927,28 @@ class Bot_Functions(commands.Cog):
         else: log_select_page += 1
 
     # ===== Control panel
-    @commands.command(hidden=True)
-    async def _control_panel_msg(self, ctx):
-        """Shows message and button to open the control panel."""
+    @commands.command(aliases=['serverfilesconfig', 'serverfiles', 'sfp'])
+    async def serverfilespanel(self, ctx):
+        """
+        A control panel to control servers, server backups, and world backups.
+        """
 
-        cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
-        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=new_buttons(cp_buttons))
+        global restore_world_selection, current_components
+        restore_world_selection = None  # Resets selection to avoid conflicts.
+        await _delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
+
+        backups = backend_functions.enum_dirs(slime_vars.world_backups_path)
+        if not backups: await ctx.send("No world backups")
+
+        select_options = [[i[1], i[0], False, i[0]] for i in backups]
+        selection_msg = await ctx.send("**Restore World Panel**", view=new_selection(select_options, 'restore_world_selection', 'Select World Backup'))
+
+        restore_buttons = [['Restore', '_restore_world_selected', '\U000021A9'], ['Delete', '_delete_world_selected', '\U0001F5D1']]
+        button_msg = await ctx.send("Actions:", view=new_buttons(restore_buttons))
+
+        current_components += selection_msg, button_msg
+        lprint(ctx, 'Opened restore world panel')
+
 
     @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
     async def controlpanel(self, ctx):
@@ -1975,6 +1991,13 @@ class Bot_Functions(commands.Cog):
         await ctx.send("Extra:", view=new_buttons(extra_buttons))
 
         lprint(ctx, 'Opened control panel')
+
+    @commands.command(hidden=True)
+    async def _control_panel_msg(self, ctx):
+        """Shows message and button to open the control panel."""
+
+        cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
+        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=new_buttons(cp_buttons))
 
     @commands.command(aliases=['sp', 'hiddenpanel'])
     async def secretpanel(self, ctx):
@@ -2028,6 +2051,7 @@ class Bot_Functions(commands.Cog):
         current_components += player_selection_panel, b1, b2, b3
         lprint(ctx, 'Opened player panel')
 
+    #TODO combine these
     @commands.command(aliases=['restoreworldpanel', 'wrpanel', 'wrp'])
     async def worldrestorepanel(self, ctx):
         """Restore/delete selected world backup."""
@@ -2068,6 +2092,7 @@ class Bot_Functions(commands.Cog):
         current_components += selection_msg, button_msg
         lprint(ctx, 'Opened restore server panel')
 
+    # ===== Bot
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
     async def restartbot(self, ctx):
         """Restart this bot."""
@@ -2082,7 +2107,6 @@ class Bot_Functions(commands.Cog):
         os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-    # ===== Bot
     @commands.command(aliases=['binfo', 'bversion', 'botversion'])
     async def botinfo(self, ctx):
         """Shows bot version and other info."""

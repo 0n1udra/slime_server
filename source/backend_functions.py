@@ -41,7 +41,7 @@ def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
     slime_proc, slime_pid = proc, pid
 
-# ===== Parse/format/read data.
+# ===== Misc
 def format_args(args, return_no_reason=False):
     """
     Formats passed in *args from Discord command functions.
@@ -93,7 +93,30 @@ def get_public_ip():
     except: return None
     return server_ip
 
-# ===== Discord related functions.
+# ===== Discord related
+teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
+# For buttons and selection box components.
+log_selection = player_selection = restore_world_selection = restore_server_selection = None
+current_components = []
+log_select_options, log_select_page, log_file_component = [], 0, None
+discord_componets_dict = {}
+
+def dc_dict(var, new_value=None):
+    """
+    Discord components dictionary value reader/setter function.
+
+
+    """
+
+    global discord_componets_dict
+    if var in discord_componets_dict.keys():
+        if not new_value: return discord_componets_dict[var]
+        else:
+            discord_componets_dict[var] = new_value
+    else: return False
+
+
+
 def channel_set(channel):
     """Sets discord_channel global variable."""
     global discord_channel
