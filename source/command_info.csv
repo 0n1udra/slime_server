@@ -24,7 +24,7 @@ Server Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log 
 Player list, `?players` `?p`, Shows online users.
 Player Locations, `?p location` `?pl`, Gets location coordinates for all online players.
 Player Locate, `?locate <player>`, Get player coordinates.
-Teleport, `?teleport <select_user> <target_user> [reason]` `?tp`, After 5s teleports player to targeted player. Use without arguments to bring up panel.
+Teleport, `?teleport [target_player] [destination] [reason]` `?tp`, "After 5s teleports player to targeted player or xyz coords. Use without arguments or provide only select_user to bring up panel."
 Invenotry Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
 Kill, `?kill <target> [reason]` `?pk`, Kill player, default reason 'No reason given'.
 Kill Delayed, `?killwait <target> <seconds> [reason]` `?dw`, Kills target after waiting for x seconds.

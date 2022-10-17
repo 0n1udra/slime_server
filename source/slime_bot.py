@@ -149,7 +149,7 @@ class Basics(commands.Cog):
         Pass command directly to server.
 
         Args:
-            *command str: Server command, do not include the slash /.
+            command: Server command, do not include the slash /.
 
         Usage:
             ?mcommand broadcast Hello Everyone!
@@ -170,7 +170,7 @@ class Basics(commands.Cog):
         sends message to all online players.
 
         Args:
-            *msg str: Message to broadcast.
+            msg: Message to broadcast.
 
         Usage:
             ?s Hello World!
@@ -191,8 +191,8 @@ class Basics(commands.Cog):
         Message online player directly.
 
         Args:
-            player str(''): Player name, casing does not matter.
-            *msg str: The message, no need for quotes.
+            player: Player name, casing does not matter.
+            msg optional: The message, no need for quotes.
 
         Usage:
             ?tell Steve Hello there!
@@ -215,10 +215,11 @@ class Basics(commands.Cog):
         Shows chat log. Does not include whispers.
 
         Args:
-            lines int(15): How many log lines to look through. This is not how many chat lines to show.
+            lines optional default(5): How many log lines to look through. This is not how many chat lines to show.
 
         Usage:
-            ?chat 50
+            ?chat - Shows latest 5 player chat lines from log file.
+            ?chat 50 - May take a while to load all 50 lines.
         """
 
         try:
@@ -293,6 +294,8 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['pl', 'playercoords', 'playerscoords'])
     async def playerlocations(self, ctx):
+        """Shows all online player's xyz location."""
+
         await ctx.invoke(self.bot.get_command('players'), 'location')
 
     # ===== Kill player
@@ -302,8 +305,8 @@ class Player(commands.Cog):
         Kill a player.
 
         Args:
-            target str(''): Target player, casing does not matter.
-            *reason str: Reason for kill, do not put in quotes.
+            target: Target player, casing does not matter.
+            reason optional: Reason for kill, do not put in quotes.
 
         Usage:
             ?kill Steve Because he needs to die!
@@ -328,13 +331,14 @@ class Player(commands.Cog):
         Kill player after time elapsed.
 
         Args:
-            target str(''): Target player.
-            delay int(5): Wait time in seconds.
-            *reason str: Reason for kill.
+            target: Target player.
+            delay optional default(5): Wait time in seconds.
+            reason optional: Reason for kill.
 
         Usage:
-            ?delayedkill Steve 5 Do I need a reason?
-            ?pk Steve 15
+            ?delayedkill Steve 10 Do I need a reason? - Waits 10s, and sends message.
+            ?dkill Steve - Defaults to 5s wait time before kill.
+            ?dkill Steve 15 - Waits for 15s instead of the default 5s.
         """
 
         reason = format_args(reason, return_no_reason=True)
@@ -351,7 +355,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
 
-    @commands.command(aliases=['killallplayers', 'kilkillkill', 'killall'])
+    @commands.command(hidden=True, aliases=['killallplayers', 'kilkillkill', 'killall'])
     async def _killplayers(self, ctx):
         """Kills all online players using '@a' argument."""
 
@@ -359,7 +363,7 @@ class Player(commands.Cog):
         await server_command('kill @a')
         lprint(ctx, 'Killed: All Players')
 
-    @commands.command(aliases=['killeverything', 'killallentities'])
+    @commands.command(hidden=True, aliases=['killeverything', 'killallentities'])
     async def _killentities(self, ctx):
         """Kills all server entities using '@e' argument."""
 
@@ -367,7 +371,7 @@ class Player(commands.Cog):
         await server_command('kill @e')
         lprint(ctx, 'Killed: All Entities')
 
-    @commands.command(aliases=['killrandom', 'killrandomplayer'])
+    @commands.command(hidden=True, aliases=['killrandom', 'killrandomplayer'])
     async def _killrando(self, ctx):
         """Kills random player using '@r' argument."""
 
@@ -375,7 +379,7 @@ class Player(commands.Cog):
         await server_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _kill_selected(self, ctx):
         """Kills selected player from player panel."""
 
@@ -388,13 +392,16 @@ class Player(commands.Cog):
         Teleport player to another player.
 
         Args:
-            player str(''): Player to teleport.
-            target str(''): Destination, player to teleport to.
-            *reason str: Reason for teleport.
+            target optional: Player to teleport.
+            destination optional: Destination, player to teleport to or xyz coordinates.
+            reason optional: Reason for teleport.
 
         Usage:
-            ?teleport Steve Jesse I wanted to see him
-            ?tp Jesse Steve
+            ?tp - Brings up player teleport panel
+            ?tp Steve - Brings up teleport panel with Steve selected
+            ?tp Steve 35 -355 355 - Teleport to specific coordinates
+            ?tp Jesse Steve - Teleports Jesse to Steve
+            ?tp Steve Jesse I wanted to see him - Teleports and shows message.
         """
 
         global teleport_selection
@@ -404,7 +411,7 @@ class Player(commands.Cog):
         except: destination = destination[0]
 
         if 'help' in target:
-            await ctx.send("Can use: `?teleport <player> <target_player> [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
+            await ctx.send("Can use: `?teleport [target_player] [destination_player] [reason]`\nExample: `?teleport R3diculous MysticFrogo I need to see him now!`")
 
         # I.e. If received usable target and destination parameter function will continue to teleport without suing Selection components.
         elif not target or not destination:
@@ -444,19 +451,19 @@ class Player(commands.Cog):
             await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
             lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _teleport_selected(self, ctx):
         """Teleports selected targets from ?teleport command when use Teleport! button."""
 
         await ctx.invoke(self.bot.get_command('teleport'), teleport_selection[0], teleport_selection[1])
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _teleport_selected_playerpanel(self, ctx):
         """invokes ?playerpanel and sets target menu selection."""
 
         await ctx.invoke(self.bot.get_command('teleport'), str(player_selection) + ' ')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _return_selected(self, ctx):
         """Returns player to original location before teleportation."""
 
@@ -464,7 +471,15 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
     async def playerlocate(self, ctx, player=''):
-        """Gets player's location coordinates."""
+        """
+        Gets player's location coordinates.
+
+        Args:
+            player: Player to get xyz location.
+
+        Usage:
+            ?locate Steve
+        """
 
         if location := await backend_functions.get_location(player):
             await ctx.send(f"Located `{player}`: `{location}`")
@@ -473,7 +488,7 @@ class Player(commands.Cog):
 
         await ctx.send(f"**ERROR:** Could not get location.")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _locate_selected(self, ctx):
         """Get player's xyz coordinates."""
 
@@ -486,9 +501,9 @@ class Player(commands.Cog):
         Change player's gamemode.
 
         Args:
-            player str(''): Target player.
-            mode str(''): Game mode survival|adventure|creative|spectator.
-            *reason str: Optional reason for gamemode change.
+            player: Target player.
+            mode: Game mode survival|adventure|creative|spectator.
+            reason optional: Reason for gamemode change.
 
         Usage:
             ?gamemode Steve creative In creative for test purposes.
@@ -513,14 +528,14 @@ class Player(commands.Cog):
         Change player's gamemode for specified amount of seconds, then will change player back to survival.
 
         Args:
-            player str(''): Target player.
-            mode str('creative'): Game mode survival/adventure/creative/spectator. Default is creative for 30s.
-            duration int(30): Duration in seconds.
-            *reason str: Reason for change.
+            player: Target player.
+            mode: Game mode survival/adventure/creative/spectator. Default is creative for 30s.
+            duration optional default(30): Duration in seconds.
+            reason optional: Reason for change.
 
         Usage:
-            ?gamemodetimed Steve spectator Steve needs a time out!
-            ?tgm Jesse adventure Jesse going on a adventure.
+            ?gamemodetimed Steve spectator Steve needs a time out! - 60s of spectator mode.
+            ?tgm Jesse adventure 30 - 30s of adventure mode.
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
@@ -539,28 +554,36 @@ class Player(commands.Cog):
         await server_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _survival_selected(self, ctx):
         """Changes selected player to survival."""
 
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='survival')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _adventure_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='adventure')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _creative_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='creative')
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _spectator_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('gamemode'), player=player_selection, mode='spectator')
 
     # ===== Inventory
     @commands.command(aliases=['clear'])
     async def clearinventory(self, ctx, target):
-        """Clears player inventory."""
+        """
+        Clears player inventory.
+
+        Args:
+            target: Player to clear inventory.
+
+        Usage:
+            ?clear Steve
+        """
 
         if not target:
             await ctx.send("Usage: `?clear <player>")
@@ -573,7 +596,7 @@ class Player(commands.Cog):
         await ctx.send(f"`{target}` inventory cleared")
         lprint(ctx, f"Cleared: {target}")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _clear_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('clearinventory'), target=player_selection)
 
@@ -589,8 +612,8 @@ class Permissions(commands.Cog):
         Kick player from server.
 
         Args:
-            player str(''): Player to kick.
-            reason str: Optional reason for kick.
+            player: Player to kick.
+            reason optional: Reason for kick.
 
         Usage:
             ?kick Steve Because he was trolling
@@ -616,8 +639,8 @@ class Permissions(commands.Cog):
         Ban player from server.
 
         Args:
-            player str(''): Player to ban.
-            reason str: Reason for ban.
+            player: Player to ban.
+            reason optional: Reason for ban.
 
         Usage:
             ?ban Steve Player killing
@@ -638,11 +661,11 @@ class Permissions(commands.Cog):
         await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _kick_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('kick'), player=player_selection)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _ban_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('ban'), player=player_selection)
 
@@ -652,8 +675,8 @@ class Permissions(commands.Cog):
         Pardon (unban) player.
 
         Args:
-            player str(''): Player to pardon.
-            *reason str: Reason for pardon.
+            player: Player to pardon.
+            reason optional: Reason for pardon.
 
         Usage:
             ?pardon Steve He has turn over a new leaf.
@@ -674,6 +697,7 @@ class Permissions(commands.Cog):
     @commands.command(aliases=['bl', 'bans'])
     async def banlist(self, ctx):
         """Show list of current bans."""
+
         banned_players = ''
         response = await server_command("banlist")
         if not response: return
@@ -725,25 +749,26 @@ class Permissions(commands.Cog):
         Whitelist commands. Turn on/off, add/remove, etc.
 
         Args:
-            arg str(''): User passed in arguments for whitelist command, see below for arguments and usage.
-            player str(''): Specify player or to specify more options for other arguments, like enforce for example.
+            arg: User passed in arguments for whitelist command, see below for arguments and usage.
+            arg2 optional: Specify player or to specify more options for other arguments, like enforce for example.
 
         Discord Args:
             list: Show whitelist, same as if no arguments.
-            add/add <player>: Player add/remove to whitelist.
             on/off: Whitelist enable/disable
             reload: Reloads from whitelist.json file.
+            add/remove <player>: Player add/remove to whitelist.
             enforce <status/on/off>: Changes 'enforce-whitelist' in server properties file.
                 Kicks players that are not on the whitelist when using ?whitelist reload command.
                 Server reboot required for enforce-whitelist to take effect.
 
         Usage:
             ?whitelist list
-            ?whitelist add MysticFrogo
-            ?whitelist enforce on
             ?whitelist on
             ?whitelist reload
+            ?whitelist add MysticFrogo
+            ?whitelist enforce on
         """
+
         # Checks if inputted any arguments.
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
@@ -829,13 +854,14 @@ class Permissions(commands.Cog):
         Add server operator (OP).
 
         Args:
-            player str(''): Player to make server operator.
-            *reason str: Optional reason for new OP status.
+            player: Player to make server operator.
+            reason optional: Reason for new OP status.
 
         Usage:
             ?opadd Steve Testing purposes
             ?opadd Jesse
         """
+
         if not player:
             await ctx.send("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
             return False
@@ -863,13 +889,14 @@ class Permissions(commands.Cog):
         Remove player OP status (deop).
 
         Args:
-            player str: Target player.
-            reason str: Reason for deop.
+            player: Target player.
+            reason optional: Reason for deop.
 
         Usage:
             ?opremove Steve abusing goodhood.
             ?opremove Jesse
         """
+
         if not player:
             await ctx.send("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
             return False
@@ -893,18 +920,21 @@ class Permissions(commands.Cog):
             lprint(ctx, f"ERROR: Removing server OP: {player}")
 
     @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
-    async def optimed(self, ctx, player='', time_limit=1, *reason):
+    async def optimed(self, ctx, player='', time_limit=60, *reason):
         """
         Set player as OP for x seconds.
 
         Args:
-            player str(''): Target player.
-            time_limit int(1: Time limit in seconds.
+            player: Target player.
+            time_limit optional default(60): Time limit in seconds.
+            reason optional: Reason to OP
 
         Usage:
             ?optimed Steve 30 Need to check something real quick.
-            ?top jesse 60
+            ?top jesse 300 - 5min being OP
+            ?top Steve - 60s
         """
+
         if not await server_status(discord_msg=True): return
 
         if not player:
@@ -915,14 +945,14 @@ class Permissions(commands.Cog):
         await ctx.send(f"***Temporary OP:*** `{player}` for {time_limit}m :hourglass:")
         lprint(ctx, f"Temporary OP: {player} for {time_limit}m")
         await ctx.invoke(self.bot.get_command('opadd'), player, *reason)
-        await asyncio.sleep(time_limit * 60)
+        await asyncio.sleep(time_limit)
         await ctx.invoke(self.bot.get_command('opremove'), player, *reason)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _opadd_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opadd'), player=player_selection)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _opremove_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('opremove'), player=player_selection)
 
@@ -938,13 +968,14 @@ class World(commands.Cog):
         Set weather.
 
         Args:
-            state str(''): <clear/rain/thunder>: Weather to change to.
-            duration int(0): Duration in seconds.
+            state: <clear/rain/thunder>: Weather to change to.
+            duration optional default(0): Duration in seconds. 0 means random duration.
 
         Usage:
-            ?weatherset rain
+            ?weatherset rain - Rain for random duration.
             ?weather thunder 60
         """
+
         if not state:
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
@@ -957,6 +988,7 @@ class World(commands.Cog):
     @commands.command(aliases=['enableweather', 'weatherenable'])
     async def weatheron(self, ctx):
         """Enable weather cycle."""
+
         await server_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
@@ -964,6 +996,7 @@ class World(commands.Cog):
     @commands.command(aliases=['disableweather', 'weatherdisable'])
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
+
         await server_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
@@ -971,18 +1004,21 @@ class World(commands.Cog):
     @commands.command(aliases=['clearweather', 'weathersetclear'])
     async def weatherclear(self, ctx):
         """Set weather to clear."""
+
         await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
         lprint(ctx, 'Weather: Disabled')
 
     @commands.command(aliases=['rainweather', 'weathersetrain'])
     async def weatherrain(self, ctx):
         """Set weather to clear."""
+
         await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
         lprint(ctx, 'Weather: Disabled')
 
     @commands.command(aliases=['thunderweather', 'weathersetthunder'])
     async def weatherthunder(self, ctx):
         """Set weather to clear."""
+
         await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
         lprint(ctx, 'Weather: Disabled')
 
@@ -993,12 +1029,13 @@ class World(commands.Cog):
         Set time.
 
         Args:
-            set_time int(''): Set time either using day|night|noon|midnight or numerically.
+            set_time: Set time either using day|night|noon|midnight or numerically.
 
         Usage:
             ?timeset day
             ?time 12
         """
+
         if not await server_status(discord_msg=True): return
 
         if set_time:
@@ -1010,16 +1047,19 @@ class World(commands.Cog):
     @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
     async def timeday(self, ctx):
         """Set time to day."""
+
         await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
 
     @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
     async def timenight(self, ctx):
         """Set time to night."""
+
         await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
 
     @commands.command(aliases=['enabletime', 'timecycleon'])
     async def timeon(self, ctx):
         """Enable day light cycle."""
+
         await server_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
@@ -1027,6 +1067,7 @@ class World(commands.Cog):
     @commands.command(aliases=['diabletime', 'timecycleoff'])
     async def timeoff(self, ctx):
         """Disable day light cycle."""
+
         await server_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
@@ -1070,12 +1111,12 @@ class Server(commands.Cog):
         Sends save-all command at interval of x minutes.
 
         Args:
-            arg int(''): turn on/off autosave, or set interval in minutes.
+            arg optional: turn on/off autosave, or set interval in minutes.
 
         Usage:
-            ?autosave
+            ?autosave - Shows current state
             ?autosave on
-            ?autosave 60
+            ?autosave 60 - will send 'save-all' command to server every 60min.
         """
 
         if not arg: await ctx.send(f"Usage Examples: Update interval (minutes) `?autosave 60`, turn on `?autosave on`.")
@@ -1152,11 +1193,16 @@ class Server(commands.Cog):
         Show server log.
 
         Args:
-            lines int(5): How many most recent lines to show. Max of 20 lines!
+            lines optional default(5): How many latest lines to show or how many matches to show if using 'match' argument.
+            match optional: Filter lines, only show lines containing this. Must provide lines argument if using this one.
 
         Usage:
-            ?serverlog
+            ?serverlog - Defaults ot showing 5 lines
             ?log 10
+            ?log 10 my coordinates - Gets 10 most recent lines containing 'my coordinates'.
+
+        Note: When using the match argument, like '?log 5 hello', this doesn't mean it'll get the latest 5 lines and check
+        if those lines contains 'hello'. Instead, it'll keep going through 'latest.log' until it finds 5 matches (or until the file ends).
         """
 
         # If received match argument, switches server_log mode.
@@ -1181,7 +1227,16 @@ class Server(commands.Cog):
 
     @commands.command(aliases=['clog', 'clogs', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
     async def serverconnectionslog(self, ctx, lines=5):
-        """Shows log lines relating to connections (joining, disconnects, kicks, etc)."""
+        """
+        Shows log lines relating to connections (joining, disconnects, kicks, etc).
+
+        Args:
+            lines optional default(5): Number of lines to show.
+
+        Usage:
+            ?clogs - Shows recent 5 lines
+            ?clogs 10
+        """
 
         await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
 
@@ -1224,16 +1279,16 @@ class Server(commands.Cog):
         """
         Check or change a server.properties property. May require restart.
 
-        Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
-
         Args:
-            target_property str(''): Target property to change, must be exact in casing and spelling and some may include a dash -.
-            *value str: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
+            target_property: Target property to change, must be exact in casing and spelling and some may include a dash -.
+            value optional: New value. For some properties you will need to input a lowercase true or false, and for others you may input a string (quotes not needed).
 
         Usage:
-            ?property motd
-            ?property spawn-protection 2
-            ?property all
+            ?property motd - Shows current value for 'motd'
+            ?property spawn-protection 2 - Updates 'spawn-protection' value to 2
+            ?property all - Shows all properties.
+
+        Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
         """
 
         if not target_property:
@@ -1268,9 +1323,10 @@ class Server(commands.Cog):
         Check or enable/disable onlinemode property. Restart required.
 
         Args:
-            mode str(''): Update onlinemode property in server.properties file. Must be in lowercase.
+            mode optional: Update onlinemode property in server.properties file. Must be in lowercase.
 
         Usage:
+            ?onlinemode - Shows current state
             ?onlinemode true
             ?omode false
         """
@@ -1293,10 +1349,10 @@ class Server(commands.Cog):
         Check or Update motd property. Restart required.
 
         Args:
-            *message str: New message for message of the day for server. No quotes needed.
+            message optional: New message for message of the day for server. No quotes needed.
 
         Usage:
-            ?motd
+            ?motd - Shows current message set.
             ?motd YAGA YEWY!
         """
 
@@ -1322,13 +1378,12 @@ class Server(commands.Cog):
         Check RCON status, enable/disable enable-rcon property. Restart required.
 
         Args:
-            state str(''): Set enable-rcon property in server.properties file, true or false must be in lowercase.
+            state: Set enable-rcon property in server.properties file, true or false must be in lowercase.
 
         Usage:
             ?rcon
             ?rcon true
             ?rcon false
-
         """
 
         if state in ['true', 'false', '']:
@@ -1368,7 +1423,7 @@ class Server(commands.Cog):
         Stop Minecraft server, gives players 15s warning.
 
         Args:
-            now str(''): Stops server immediately without giving online players 15s warning.
+            now optional: Stops server immediately without giving online players 15s warning.
 
         Usage:
             ?stop
@@ -1405,7 +1460,7 @@ class Server(commands.Cog):
         Restarts server with 15s warning to players.
 
         Args:
-            now str: Restarts server immediately without giving online players 15s warning.
+            now optional: Restarts server immediately without giving online players 15s warning.
 
         Usage:
             ?restart
@@ -1434,10 +1489,14 @@ class Server(commands.Cog):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
 
-        Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
-
         Args:
-            now str(''): Stops server immediately without giving online players 15s warning.
+            now optional: Stops server immediately without giving online players 15s warning.
+
+        Usage:
+            ?serverupdate
+            ?su now
+
+        Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
 
         if slime_vars.server_selected[0] in slime_vars.updatable_mc:
@@ -1470,7 +1529,7 @@ class World_Backups(commands.Cog):
         Show world backups.
 
         Args:
-            amount int(10): Number of most recent backups to show.
+            amount optional default(10): Number of most recent backups to show.
 
         Usage:
             ?saves
@@ -1497,7 +1556,7 @@ class World_Backups(commands.Cog):
         new backup of current world.
 
         Args:
-            *name str: Keywords or codename for new save. No quotes needed.
+            name: Keywords or codename for new save. No quotes needed.
 
         Usage:
             ?backup everything not on fire
@@ -1534,14 +1593,15 @@ class World_Backups(commands.Cog):
         """
         Restore a world backup.
 
-        Note: This will not make a backup beforehand, suggest doing so with ?backup command.
-
         Args:
-            index int(''): Get index with ?saves command.
-            now str='': Skip 15s wait to stop server. E.g. ?restore 0 now
+            index: Get index with ?worldbackups command.
+            now optional: Skip 15s wait to stop server. E.g. ?restore 0 now
 
         Usage:
             ?restore 3
+            ?wbr 5 now
+
+        Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
         try: index = int(index)
@@ -1563,7 +1623,7 @@ class World_Backups(commands.Cog):
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _restore_world_selected(self, ctx):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('worldrestore'), index=restore_world_selection)
@@ -1575,7 +1635,7 @@ class World_Backups(commands.Cog):
         Delete a world backup.
 
         Args:
-            index int(''): Get index with ?saves command.
+            index: Index number of the backup to delete. Get number with ?worldbackups command.
 
         Usage:
             ?delete 0
@@ -1593,7 +1653,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _delete_world_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('worlddelete'), index=restore_world_selection)
         await ctx.invoke(self.bot.get_command('worldrestorepanel'))
@@ -1602,6 +1662,13 @@ class World_Backups(commands.Cog):
     async def worldreset(self, ctx, now=''):
         """
         Deletes world save (does not touch other server files).
+
+        Args:
+            now optional: No 5s warning before resetting.
+
+        Usage:
+            ?worldreset
+            ?hades now
 
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
@@ -1630,7 +1697,7 @@ class Server_Backups(commands.Cog):
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
 
         Args:
-            name str(''): name of server to select, use ?selectserver list or without arguments to show list.
+            name: name of server to select, use ?selectserver list or without arguments to show list.
 
         Usage:
             ?selectserver list
@@ -1653,6 +1720,27 @@ class Server_Backups(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.")
 
+    # ===== Create/Delete servers (not its backups)
+    @commands.command(aliases=['newserver', 'createserver'])
+    async def servercreate(self, ctx):
+
+        class MyModal(discord.ui.Modal):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+
+                self.add_item(discord.ui.TextInput(label="Short Input"))
+                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
+
+            async def callback(self, interaction: discord.Interaction):
+                embed = discord.Embed(title="Modal Results")
+                embed.add_field(name="Short Input", value=self.children[0].value)
+                embed.add_field(name="Long Input", value=self.children[1].value)
+                await interaction.response.send_message(embeds=[embed])
+
+
+        modal = MyModal(title="Modal via Slash Command")
+        await ctx.send(view=modal)
+
     # ===== Backup
     @commands.command(aliases=['serverbackupslist', 'sbl'])
     async def serverbackups(self, ctx, amount=10):
@@ -1660,11 +1748,11 @@ class Server_Backups(commands.Cog):
         List server backups.
 
         Args:
-            amount int(5): How many most recent backups to show.
+            amount default(5): How many most recent backups to show.
 
         Usage:
-            ?serversaves
-            ?serversaves 10
+            ?serversaves - Shows 10
+            ?serversaves 15
         """
 
         embed = discord.Embed(title='Server Backups :floppy_disk:')
@@ -1694,7 +1782,7 @@ class Server_Backups(commands.Cog):
         New backup of server files (not just world save).
 
         Args:
-            name str: Keyword or codename for save.
+            name: Keyword or codename for save.
 
         Usage:
             ?serverbackup Dec checkpoint
@@ -1724,11 +1812,12 @@ class Server_Backups(commands.Cog):
         Restore server backup.
 
         Args:
-            index int(''): Get index number from ?serversaves command.
-            now str(''): Stop server without 15s wait.
+            index: Number of the backup to restore. Get number from ?serversaves command.
+            now optional: Stop server without 15s wait.
 
         Usage:
             ?serverrestore 0
+            ?sbr 1 now
         """
 
         try: index = int(index)
@@ -1751,23 +1840,23 @@ class Server_Backups(commands.Cog):
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _restore_server_selected(self, ctx):
         await _delete_current_components()
         await ctx.invoke(self.bot.get_command('serverrestore'), index=restore_server_selection)
 
     # ===== Delete
-    @commands.command(aliases=['deleteserver', 'deleteserverrestore', 'serverrestoredelete', 'sbd'])
-    async def serverdelete(self, ctx, index=''):
+    @commands.command(aliases=['deleteserverrestore', 'serverdeletebackup', 'serverrestoredelete', 'sbd'])
+    async def serverbackupdelete(self, ctx, index=''):
         """
         Delete a server backup.
 
         Args:
-            index int: Index of server save, get with ?serversaves command.
+            index: Index of server save, get with ?serversaves command.
 
         Usage:
             ?serverdelete 0
-            ?serverrm 5
+            ?sbd 5
         """
 
         try: index = int(index)
@@ -1782,7 +1871,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _delete_server_selected(self, ctx):
         await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
         await ctx.invoke(self.bot.get_command('serverrestorepanel'))
@@ -1795,7 +1884,7 @@ class Bot_Functions(commands.Cog):
     # ===== Get/Download Log files
     @commands.command(aliases=['getlogs', 'glogs', 'logfiles'])
     async def get_log_file(self, ctx):
-        """Show select menu of server log files avaiable to download."""
+        """Show select menu of server log files available to download."""
 
         global log_file_component, log_select_options
 
@@ -1808,7 +1897,7 @@ class Bot_Functions(commands.Cog):
         player_buttons = [['Back', '_log_select_back'], ['Next', '_log_select_next'], ['Get', '_get_log_file'],]
         await ctx.send(' ', view=new_buttons(player_buttons))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _get_log_file(self, ctx):
         """Download server log file, also unzips beforehand if it's a .gz file."""
 
@@ -1826,7 +1915,7 @@ class Bot_Functions(commands.Cog):
 
         else: await ctx.send('', file=discord.File(f'{slime_vars.server_log_path}/{log_selection}'))
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _log_select_back(self, ctx):
         """Updates get_log_file() select embed, since it can only show 25 at a time."""
 
@@ -1835,7 +1924,7 @@ class Bot_Functions(commands.Cog):
         except: pass
         else: log_select_page -= 1
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def _log_select_next(self, ctx):
         global log_file_component, log_select_page
         try: await log_file_component.edit(content=f"**Log Files** ({log_select_page})", view=new_selection(log_select_options[log_select_page + 1], 'log_file', 'Select File'))
@@ -1843,7 +1932,7 @@ class Bot_Functions(commands.Cog):
         else: log_select_page += 1
 
     # ===== Control panel
-    @commands.command()
+    @commands.command(hidden=True)
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
 
@@ -1894,6 +1983,7 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['sp', 'hiddenpanel'])
     async def secretpanel(self, ctx):
+        """Shhhhhhhh..... secret panel!!!"""
 
         secret_buttons = [['Kill Players', '_killplayers', '\U00002753'], ['Kill Entities', '_killentities', '\U0001F4A3'],
                           ['Kill Rando', '_killrando', '\U0001F4A5'], ['HADES Protocol', 'hades', '\U0001F480']]
@@ -1903,7 +1993,16 @@ class Bot_Functions(commands.Cog):
 
     @commands.command(aliases=['player', 'ppanel', 'pp'])
     async def playerpanel(self, ctx, player=''):
-        """Select player from list (or all, random) and use quick action buttons."""
+        """
+        Select player from list (or all, random) and use quick action buttons.
+
+        Args:
+            player optional: Provide player to be selected when bringing up panel.
+
+        Usage:
+            ?player
+            ?player Frogo
+        """
 
         global player_selection, current_components
         await _delete_current_components()
@@ -1965,7 +2064,6 @@ class Bot_Functions(commands.Cog):
         backups = backend_functions.fetch_servers()
         if not backups: await ctx.send("No server backups")
 
-        print('okbackups',  backups)
         select_options = [[i[1], i[0], False, i[0]] for i in backups]
         selection_msg = await ctx.send("**Restore Server Panel**", view=new_selection(select_options, 'restore_server_selection', 'Select Server Backup'))
 
@@ -1976,7 +2074,7 @@ class Bot_Functions(commands.Cog):
         lprint(ctx, 'Opened restore server panel')
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botrestart', 'botreboot'])
-    async def restartbot(self, ctx, now=''):
+    async def restartbot(self, ctx):
         """Restart this bot."""
 
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
@@ -1998,6 +2096,7 @@ class Bot_Functions(commands.Cog):
     @commands.command(aliases=['kbot', 'killbot', 'quit', 'quitbot', 'sbot'])
     async def stopbot(self, ctx):
         """Restart this bot."""
+
         await ctx.send("**Bot Halted**")
         sys.exit(1)
 
@@ -2007,10 +2106,10 @@ class Bot_Functions(commands.Cog):
         Show bot log.
 
         Args:
-            lines int(5): Number of most recent lines to show.
+            lines optional default(5): Number of most recent lines to show.
 
         Usage:
-            ?botlog
+            ?botlog - Shows 5 bot log lines
             ?blog 15
         """
 
