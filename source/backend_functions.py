@@ -527,11 +527,11 @@ def get_from_index(path, index):
             str: file path of selected folder.
     """
 
-    return os.listdir(path)[index]
+    return f'{path}/{os.listdir(path)[index]}'
 
-def fetch_backups(path):
+def enum_dirs(path):
     """
-    Gets x amount of backups. Usually to show in list.
+    Returns enumerated list of directories in path.
 
     Args:
         path str: Path of world or server backups location.
@@ -545,52 +545,7 @@ def fetch_backups(path):
             backups.append([index, item])
     return backups
 
-def create_backup(name, src, dst):
-    """
-    Create a new world or server backup, by copying and renaming folder.
-
-    Args:
-        name str: Name of new backup. Final name will have date and time prefixed.
-        src str: Folder to backup, whether it's a world folder or a entire server folder.
-        dst str: Destination for backup.
-    """
-
-    if not os.path.isdir(dst): os.makedirs(dst)
-
-    version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
-    new_name = f"({get_datetime()}) {version}{name}"
-    new_backup_path = dst + '/' + new_name.strip()
-    shutil.copytree(src, new_backup_path)
-
-    if os.path.isdir(new_backup_path):
-        lprint(ctx, "Backed up to: " + new_backup_path)
-        return new_name
-    else:
-        lprint(ctx, "Error creating backup at: " + new_backup_path)
-        return False
-
-def restore_backup(src, dst, reset=False):
-    """
-    Restores world or server backup. Overwrites existing files.
-
-    Args:
-        src str: Backed up folder to copy to current server.
-        dst str: Location to copy backup to.
-        reset bool(False): Leave src folder empty and not copy backup to dst.
-    """
-
-    try: shutil.rmtree(dst)
-    except: pass
-
-    # Used in ?worldreset and ?serverreset Discord command to clear all world or server files.
-    if reset is True: return True
-
-    try:
-        shutil.copytree(src, dst)
-        return True
-    except: lprint(ctx, "Error restoring: " + str(src + ' > ' + dst))
-
-def delete_backup(backup):
+def delete_dir(backup):
     """
     Delete world or server backup.
 
@@ -603,40 +558,43 @@ def delete_backup(backup):
         return True
     except: lprint(ctx, "Error deleting: " + str(backup))
 
-# ========== Discord Commands.
-def get_server_from_index(index):
-    """Returns server backup full path from passed in index number."""
-    return get_from_index(slime_vars.server_backups_path, index)
+def new_backup(new_name, src, dst):
+    """
+    Create a new world or server backup, by copying and renaming folder.
 
-def get_world_from_index(index):
-    return get_from_index(slime_vars.world_backups_path, index)
+    Args:
+        new_name str: Name of new copy. Final name will have date and time prefixed.
+        src str: Folder to backup, whether it's a world folder or a entire server folder.
+        dst str: Destination for backup.
+    """
 
-def fetch_servers():
-    """Returns list of x number of backed up server."""
-    return fetch_backups(slime_vars.server_backups_path)
+    if not os.path.isdir(dst): os.makedirs(dst)
 
-def fetch_worlds():
-    return fetch_backups(slime_vars.world_backups_path)
+    version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
+    new_name = f"({get_datetime()}) {version}{new_name}"
+    new_backup_path = dst + '/' + new_name.strip()
+    shutil.copytree(src, new_backup_path)
 
-def backup_server(name='server_backup'):
-    """Create new server backup with specified name."""
-    return create_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
+    if os.path.isdir(new_backup_path):
+        lprint(ctx, "Backed up to: " + new_backup_path)
+        return new_name
+    else:
+        lprint(ctx, "Error creating backup at: " + new_backup_path)
+        return False
 
-def backup_world(name="world_backup"):
-    return create_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
+def restore_backup(src, dst):
+    """
+    Restores world or server backup. Overwrites existing files.
 
-def delete_server(server):
-    """Delete specified server with specified index."""
-    return delete_backup(slime_vars.server_backups_path + '/' + server)
+    Args:
+        src str: Backed up folder to copy to current server.
+        dst str: Location to copy backup to.
+    """
 
-def delete_world(world):
-    return delete_backup(slime_vars.world_backups_path + '/' + world)
+    try: shutil.rmtree(dst)
+    except: pass
 
-def restore_server(server=None, reset=False):
-    """Restore server with specified index."""
-    os.chdir(slime_vars.server_backups_path)
-    return restore_backup(server, slime_vars.server_path, reset)
-
-def restore_world(world=None, reset=False):
-    os.chdir(slime_vars.world_backups_path)
-    return restore_backup(world, slime_vars.server_path + '/world', reset)
+    try:
+        shutil.copytree(src, dst)
+        return True
+    except: lprint(ctx, "Error restoring: " + str(src + ' > ' + dst))

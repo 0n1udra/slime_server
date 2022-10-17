@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import datetime, asyncio, discord,  gzip, sys, os
+import datetime, asyncio, discord, shutil, gzip, sys, os
 from discord.ext import commands, tasks
 from backend_functions import server_command, format_args, server_status, lprint
 import backend_functions, slime_vars
@@ -1036,10 +1036,8 @@ class World(commands.Cog):
             ?time 12
         """
 
-        if not await server_status(discord_msg=True): return
-
         if set_time:
-            await server_command(f"time set {set_time}")
+            if not await server_command(f"time set {set_time}"): return
             await ctx.send("Time Updated  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
@@ -1401,7 +1399,7 @@ class Server(commands.Cog):
         """
 
         # Exits function if server already online.
-        if await server_status() is True:
+        if await server_status():
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
@@ -1507,7 +1505,7 @@ class Server(commands.Cog):
             return False
 
         # Halts server if running.
-        if await server_status() is True:
+        if await server_status():
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
@@ -1537,7 +1535,7 @@ class World_Backups(commands.Cog):
         """
 
         embed = discord.Embed(title='World Backups :floppy_disk:')
-        worlds = backend_functions.fetch_worlds()
+        worlds = backend_functions.enum_dirs(slime_vars.world_backups_path)
         if worlds is False:
             await ctx.send("No world backups found.")
             return False
@@ -1568,12 +1566,10 @@ class World_Backups(commands.Cog):
             return False
         name = format_args(name)
 
-        #if await server_command(f"say ---INFO--- Standby, world is currently being archived. Codename: {name}"):
-        await server_command(f"save-all")
-        await asyncio.sleep(3)
-
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        new_backup = backend_functions.backup_world(name)
+        await server_command(f"save-all", discord_msg=False)
+        await asyncio.sleep(3)
+        new_backup = backend_functions.new_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
         if new_backup:
             await ctx.send(f"**New World Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
@@ -1581,7 +1577,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + new_backup)
 
-    @commands.command(aliases=['deleteworldbackup'])
+    @commands.command(aliases=['wbdate'])
     async def worldbackupdate(self, ctx):
         """Creates world backup with current date and time as name."""
 
@@ -1609,16 +1605,15 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
 
-        fetched_restore = backend_functions.get_world_from_index(index)
+        fetched_restore = backend_functions.get_from_index(slime_vars.world_backups_path, index)
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
-        if await server_status():
-            await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
+        if await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
-        backend_functions.restore_world(fetched_restore)  # Gives computer time to move around world files.
+        backend_functions.restore_backup(fetched_restore, slime_vars.server_path + '/world')  # Gives computer time to move around world files.
         await asyncio.sleep(5)
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
@@ -1630,7 +1625,7 @@ class World_Backups(commands.Cog):
 
     # ===== Delete/Reset
     @commands.command(aliases=['deleteworld', 'wbd'])
-    async def worlddelete(self, ctx, index=''):
+    async def worldbackupdelete(self, ctx, index=''):
         """
         Delete a world backup.
 
@@ -1643,10 +1638,10 @@ class World_Backups(commands.Cog):
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?worlddelete <index>`\nExample: `?worlddelete 1`")
+            await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
             return False
 
-        to_delete = backend_functions.get_world_from_index(index)
+        to_delete = backend_functions.get_from_index(slime_vars.world_backups_path, index)
         await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
         backend_functions.delete_world(to_delete)
 
@@ -1655,7 +1650,7 @@ class World_Backups(commands.Cog):
 
     @commands.command(hidden=True)
     async def _delete_world_selected(self, ctx):
-        await ctx.invoke(self.bot.get_command('worlddelete'), index=restore_world_selection)
+        await ctx.invoke(self.bot.get_command('worldbackupdelete'), index=restore_world_selection)
         await ctx.invoke(self.bot.get_command('worldrestorepanel'))
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
@@ -1673,20 +1668,22 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!")
+        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
-        if await server_status() is True:
+        if await server_status():
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        await ctx.send("**Finished.**")
-        await ctx.send("You can now start the server with `?start`.")
-
-        backend_functions.restore_world(reset=True)
-        await asyncio.sleep(3)
-
-        lprint(ctx, "World Reset")
+        try:
+            shutil.rmtree(slime_vars.server_path + '/world')
+        except:
+            await ctx.send("Error trying to reset world.")
+            lprint(ctx, "ERROR: Issue deleting world folder.")
+        finally:
+            await ctx.send("**Finished.**")
+            await ctx.send("You can now start the server with `?start`.")
+            lprint(ctx, "World Reset")
 
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -1737,7 +1734,6 @@ class Server_Backups(commands.Cog):
                 embed.add_field(name="Long Input", value=self.children[1].value)
                 await interaction.response.send_message(embeds=[embed])
 
-
         modal = MyModal(title="Modal via Slash Command")
         await ctx.send(view=modal)
 
@@ -1756,7 +1752,7 @@ class Server_Backups(commands.Cog):
         """
 
         embed = discord.Embed(title='Server Backups :floppy_disk:')
-        servers = backend_functions.fetch_servers()
+        servers = backend_functions.enum_dirs(slime_vars.server_backups_path)
 
         if servers is False:
             await ctx.send("No server backups found.")
@@ -1770,7 +1766,7 @@ class Server_Backups(commands.Cog):
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
         lprint(ctx, f"Fetched {amount} world backups")
 
-    @commands.command(aliases=['deleteserverbackup'])
+    @commands.command(aliases=['sbdate'])
     async def serverbackupdate(self, ctx):
         """Creates server backup with current date and time as name."""
 
@@ -1793,11 +1789,10 @@ class Server_Backups(commands.Cog):
             return False
 
         name = format_args(name)
-        # await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        await server_command(f"save-all")
-
-        await asyncio.sleep(5)
-        new_backup = backend_functions.backup_server(name)
+        await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
+        if await server_command(f"save-all", discord_msg=False):
+            await asyncio.sleep(3)
+        new_backup = backend_functions.new_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
         if new_backup:
             await ctx.send(f"**New Server Backup:** `{new_backup}`")
         else: await ctx.send("**ERROR:** Server backup failed! :interrobang:")
@@ -1825,16 +1820,16 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
 
-        fetched_restore = backend_functions.get_server_from_index(index)
+        fetched_restore = backend_functions.get_from_index(slime_vars.server_backups_path, index)
         lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
-        if await server_status() is True:
+        if await server_status():
             await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if backend_functions.restore_server(fetched_restore):
+        if backend_functions.restore_backup(fetched_restore, slime_vars.server_path):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
@@ -1855,25 +1850,25 @@ class Server_Backups(commands.Cog):
             index: Index of server save, get with ?serversaves command.
 
         Usage:
-            ?serverdelete 0
+            ?serverbackupdelete 0
             ?sbd 5
         """
 
         try: index = int(index)
         except:
-            await ctx.send("Usage: `?serverdelete <index>`\nExample: `?serverdelete 3`")
+            await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")
             return False
 
-        to_delete = backend_functions.get_server_from_index(index)
+        to_delete = backend_functions.get_from_index(slime_vars.server_backups_path, index)
         await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
-        backend_functions.delete_server(to_delete)
+        backend_functions.delete_dir(to_delete)
 
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
     @commands.command(hidden=True)
     async def _delete_server_selected(self, ctx):
-        await ctx.invoke(self.bot.get_command('serverdelete'), index=restore_server_selection)
+        await ctx.invoke(self.bot.get_command('serverbackupdelete'), index=restore_server_selection)
         await ctx.invoke(self.bot.get_command('serverrestorepanel'))
 
 
@@ -2041,7 +2036,7 @@ class Bot_Functions(commands.Cog):
         restore_world_selection = None  # Resets selection to avoid conflicts.
         await _delete_current_components()  # Clear out used components so you don't run into conflicts and issues.
 
-        backups = backend_functions.fetch_worlds()
+        backups = backend_functions.enum_dirs(slime_vars.world_backups_path)
         if not backups: await ctx.send("No world backups")
 
         select_options = [[i[1], i[0], False, i[0]] for i in backups]
@@ -2061,7 +2056,7 @@ class Bot_Functions(commands.Cog):
         restore_server_selection = None
         await _delete_current_components()
 
-        backups = backend_functions.fetch_servers()
+        backups = backend_functions.enum_dirs(slime_vars.server_backups_path)
         if not backups: await ctx.send("No server backups")
 
         select_options = [[i[1], i[0], False, i[0]] for i in backups]
@@ -2080,8 +2075,9 @@ class Bot_Functions(commands.Cog):
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
-        if slime_vars.use_subprocess is True:
-            await ctx.invoke(self.bot.get_command("serverstop"), now=now)
+        if slime_vars.use_subprocess:
+            if await server_status():
+                await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
         os.chdir(slime_vars.bot_files_path)
         os.execl(sys.executable, sys.executable, *sys.argv)

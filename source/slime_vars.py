@@ -3,22 +3,20 @@ import discord, csv, os
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = os.getlogin()
 
+# Set as None if not using a python virtual env.
+pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
+
 # ========== Discord
+# Set location of Discord bot token.
+bot_token_file = f'/home/{user}/keys/slime_server.token'
 command_prefex = '?'
 case_insensitive = True  # Case insensitivy for discord commands. e.g. ?players, ?Players, ?pLaYers
 # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
 intents = discord.Intents.default()
 intents.message_content = True
 
-# Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_server.token'
-
-# Set as None if not using a python virtual env.
-pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
-
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = 860361620492255292  # Default: None
-
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. In case you're using a DDNS or something.
@@ -29,8 +27,7 @@ server_port = 25566
 server_files_access = True
 
 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
-# Prioritize use_subprocess over Tmux option.
-use_subprocess = False
+use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
