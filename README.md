@@ -2,7 +2,8 @@
 Scroll down for requirements, setup instructions and screenshots.  
 
 
-[Releases](https://github.com/0n1udra/slime_server/releases)
+- See releases: https://github.com/0n1udra/slime_server/releases  
+- Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
 
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -22,7 +23,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - [asyncio](https://docs.python.org/3/library/asyncio.html)
 - [file-read-backwards](https://pypi.org/project/file-read-backwards/) (Needed for reading server log file (for now))
 - [mctools](https://pypi.org/project/mctools/) (If using RCON)
-- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [fileinput](https://docs.python.org/3.9/library/fileinput.html), [random](https://docs.python.org/3/library/random.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
+- [subprocess](https://docs.python.org/3/library/subprocess.html), [requests](https://pypi.org/project/requests/), [datetime](https://docs.python.org/3/library/datetime.html), [fileinput](https://docs.python.org/3.9/library/fileinput.html), [random](https://docs.python.org/3/library/random.html), [gzip](https://docs.python.org/3/library/gzip.html), [json](https://docs.python.org/3/library/json.html), [csv](https://docs.python.org/3/library/csv.html), [sys](https://docs.python.org/3/library/sys.html), [os](https://docs.python.org/3/library/os.html), [re](https://docs.python.org/3/library/re.html)
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
@@ -38,10 +39,8 @@ Scroll down for requirements, setup instructions and screenshots.
 ### Using Virtualenv or venv:
 Create Python Virtualenvt:
 ```bash
-python -m venv ~/pyenvs/slime_server
-```
+python -m venv ~/pyenvs/slime_server 
 or
-```bash
 virtualenv ~/pyenvs/slime_server
 
 ```
@@ -52,9 +51,7 @@ source ~/pyenvs/slime_server/bin/activate
 Install required Python modules:
 ```bash
 pip install discord.py discord-components asyncio file-read-backwards mctools requests bs4
-```
 or
-```bash
 pip install -r requirements.txt
 ```
 
