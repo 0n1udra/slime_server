@@ -64,4 +64,5 @@ pip install -r requirements.txt
 
 <img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">
 
-<img width="1362" alt="Screen Shot 2022-04-12 at 6 59 20 PM" src="https://user-images.githubusercontent.com/15573136/163068170-e28223d6-3d1c-4598-9621-ca38f5139c83.png">
+<img width="1362" alt="Screen Shot 2022-04-12 at 6 59 20 PM" src="https://user-images.githubusercontent.com/15573136/196075059-da4cc813-9a75-438e-9d6a-629a45fa4764.png">
+
