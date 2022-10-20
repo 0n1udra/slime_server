@@ -1,0 +1,4 @@
+papermc, Lightweight PaperMC, java PARAMS -jar server.jar nogui, https://papermc.io/downloads, 20
+vanilla, Plain old vanilla, java PARAMS -jar server.jar nogui, https://www.minecraft.net/en-us/download/server, 30
+vvolatile, "140 mods!, Note: Takes a long time to start", sh ServerStart.sh, 60
+ulibrary, The Uncensored Library., java -Xmx3G -Xms1G -jar server.jar nogui

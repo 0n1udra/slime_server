@@ -25,6 +25,7 @@ Player list, `?players` `?p`, Shows online users.
 Player Locations, `?p location` `?pl`, Gets location coordinates for all online players.
 Player Locate, `?locate <player>`, Get player coordinates.
 Teleport, `?teleport [target_player] [destination] [reason]` `?tp`, "After 5s teleports player to targeted player or xyz coords. Use without arguments or provide only select_user to bring up panel."
+Teleport Return, `?teleportreturn` `?return` `?tpr`, Returns last teleported player with bot to original location.
 Invenotry Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
 Kill, `?kill <target> [reason]` `?pk`, Kill player, default reason 'No reason given'.
 Kill Delayed, `?killwait <target> <seconds> [reason]` `?dw`, Kills target after waiting for x seconds.

@@ -1,106 +1,105 @@
-import subprocess, fileinput, requests, datetime, asyncio, shutil, psutil, random, json, csv, os, re
+import discord, subprocess, fileinput, asyncio, shutil, random
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 import slime_vars
+from bot_files.extra import *
 if slime_vars.use_rcon: import mctools
 
 ctx = 'backend_functions.py'
+bot = None
 server_active = False
 discord_channel = None
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
-
-enable_inputs = ['enable', 'activate', 'true', 'on']
-disable_inputs = ['disable', 'deactivate', 'false', 'off']
-
-# ========== Extra Functions: start, send command, read log, etc
-def lprint(ctx, msg):
-    """Prints and Logs events in file."""
-    try: user = ctx.message.author
-    except: user = ctx
-
-    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
-    print(output)
-
-    # Logs output.
-    with open(slime_vars.bot_log_file, 'a') as file:
-        file.write(output + '\n')
-
-lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
-
-def get_proc(proc_name, proc_cmdline=None):
-    """Returns a process by matching name and argument."""
-    for proc in psutil.process_iter():
-        if proc.name() == proc_name:
-            # Narrow down process by it's arguments. E.g. python3 could have multiple processes.
-            if proc_cmdline:
-                if any(proc_cmdline in i for i in proc.cmdline()):
-                    return proc
-            else: return proc
 
 def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
     slime_proc, slime_pid = proc, pid
 
-# ===== Misc
-def format_args(args, return_no_reason=False):
-    """
-    Formats passed in *args from Discord command functions.
-    This is so quotes aren't necessary for Discord command arguments.
-
-    Args:
-        args str: Passed in args to combine and return.
-        return_no_reason bool(False): returns string 'No reason given.' for commands that require a reason (kick, ban, etc).
-
-    Returns:
-        str: Arguments combines with spaces.
-    """
-
-    if args: return ' '.join(args)
-    else:
-        if return_no_reason is True:
-            return "No reason given."
-        return ''
-
-def get_datetime():
-    """Returns date and time. (2021-12-04 01-49)"""
-
-    return datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
-
-def remove_ansi(text):
-    """Removes ANSI escape characters."""
-    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-    return ansi_escape.sub('', text)
-
-def read_json(json_file):
-    """Read .json files."""
-    os.chdir(slime_vars.bot_files_path)
-    with open(slime_vars.server_path + '/' + json_file) as file:
-        return [i for i in json.load(file)]
-
-def read_csv(csv_file):
-    """Read .csv files."""
-    os.chdir(slime_vars.bot_files_path)
-    with open(csv_file) as file:
-        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
-
-def get_public_ip():
-    """Gets your public IP address, to updates server ip address varable using request.get()"""
-
-    global server_ip
-    try:
-        server_ip = json.loads(requests.get('http://jsonip.com').text)['ip']
-        slime_vars.server_ip = server_ip
-    except: return None
-    return server_ip
-
 # ===== Discord related
-teleport_selection = [None, None, None]  # Target, Destination, Target's original location.
-# For buttons and selection box components.
-log_selection = player_selection = restore_world_selection = restore_server_selection = None
-current_components = []
-log_select_options, log_select_page, log_file_component = [], 0, None
-discord_componets_dict = {}
+class Discord_Select(discord.ui.Select):
+    def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
+        super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
 
+    async def callback(self, interaction):
+        await interaction.response.defer()  # Defer response so not to show failed interaction message.
+        custom_id = interaction.data['custom_id']
+        value = interaction.data['values'][0].strip()
+        print("WTF", value, '-----', interaction.data['values'])
+
+        dc_dict(custom_id, value)  # Updates corresponding variables
+        print(f"dc_dict: {custom_id}", dc_dict(custom_id))
+
+        if custom_id == 'server_panel1':
+            ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+            await ctx.invoke(bot.get_command('_update_server_panel'), value)
+
+class Discord_Button(discord.ui.Button):
+    """
+    Create button from received list containing label, custom_id, and emoji.
+    Uses custom_id with ctx.invoke to call corresponding function.
+    """
+
+    def __init__(self, label, custom_id, emoji=None, style=discord.ButtonStyle.grey):
+        super().__init__(label=label, custom_id=custom_id, emoji=emoji, style=style)
+
+    async def callback(self, interaction):
+        await interaction.response.defer()
+        custom_id = interaction.data['custom_id']
+
+        # Get parameter for use of command being invoke from custom_id. E.g. 'gamemode player survival'
+        params = ['']
+        try:
+            custom_id_split = custom_id.split(' ')
+            custom_id, params = custom_id_split[0], custom_id_split[1:]
+        except: pass
+
+        # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
+        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        if params:
+            if params[0] == 'player': params[0] = dc_dict('player_selected')  # Use currently selected player as a parameter
+            await ctx.invoke(bot.get_command(custom_id), *params)
+        else: await ctx.invoke(bot.get_command(custom_id))
+
+def new_buttons(buttons_list):
+    """Create new discord.ui.View and add buttons, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    for button in buttons_list:
+        if len(button) == 2: button.append(None)  # For button with no emoji.
+        view.add_item(Discord_Button(label=button[0], custom_id=button[1], emoji=button[2]))
+    return view
+
+def new_selection(select_options_args, custom_id, placeholder):
+    """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
+
+    view = discord.ui.View(timeout=None)
+    select_options = []
+
+    # Create options for select menu.
+    for option in select_options_args:
+        if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
+        elif len(option) == 3: option.append(None)
+        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
+    view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
+    return view
+
+async def delete_current_components():
+    """
+    Deletes old components to prevent conflicts.
+    When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
+    When new panel is opened the old one is deleted.
+
+    Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
+    e.g. Deleting a listing in a selection box.
+    """
+
+    for i in dc_dict('current_components'):
+        try: await i.delete()
+        except: pass
+    dc_dict('current_components', [])
+
+discord_components_dict = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
+                           'log_select_options': [], 'log_select_page': 0}
 def dc_dict(var, new_value=None):
     """
     Discord components dictionary value reader/setter function.
@@ -108,14 +107,14 @@ def dc_dict(var, new_value=None):
 
     """
 
-    global discord_componets_dict
-    if var in discord_componets_dict.keys():
-        if not new_value: return discord_componets_dict[var]
-        else:
-            discord_componets_dict[var] = new_value
+    global discord_components_dict
+
+    # To set clear out the value use 0 instead of None. e.g. dc_dict('player_selected', 0)
+    if new_value is not None: discord_components_dict[var] = new_value
+
+    if var in discord_components_dict.keys():
+        return discord_components_dict[var]
     else: return False
-
-
 
 def channel_set(channel):
     """Sets discord_channel global variable."""
@@ -191,6 +190,51 @@ async def server_command(command, force_check=False, skip_check=False, discord_m
     # Returns log line that matches command.
     return_data = [server_log(command), random_number]
     return return_data
+
+def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
+    """
+    Edits server.properties file if received target_property and value. Edits inplace with fileinput
+    If receive no value, will return current set value if property exists.
+
+    Args:
+        target_property str(None): Find Minecraft server property.
+        value str(''): If received argument, will change value.
+        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
+
+    Returns:
+        str: If target_property was not found.
+        tuple: First item is line from file that matched target_property. Second item is just the current value.
+    """
+
+    try: os.chdir(slime_vars.server_path)
+    except: pass
+    return_line = ''
+
+    # print() writes to file while using it in FileInput() with inplace=True
+    # fileinput doc: https://docs.python.org/3/library/fileinput.html
+    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
+        for line in file:
+            split_line = line.split('=', 1)
+
+            if target_property == 'all':  # Return all lines of file.
+                return_line += line.strip() + '\n'
+                print(line, end='')
+
+            # If found match, and user passed in new value to update it.
+            elif target_property in split_line[0] and len(split_line) > 1:
+                if value:
+                    split_line[1] = value  # edits value section of line
+                    new_line = return_line = '='.join(split_line)
+                    print(new_line, end='\n')  # Writes new line to file
+                # If user did not pass a new value to update property, just return the line from file.
+                else:
+                    return_line = '='.join(split_line)
+                    print(line, end='')
+            else: print(line, end='')
+
+    if return_line:
+        return return_line, return_line.split('=')[1].strip()
+    else: return "Match not found.", 'Match not found.'
 
 def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
     """
@@ -492,52 +536,7 @@ async def get_location(player=''):
             return location
 
 
-# ========== Backup/Restore.
-def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
-    """
-    Edits server.properties file if received target_property and value. Edits inplace with fileinput
-    If receive no value, will return current set value if property exists.
-
-    Args:
-        target_property str(None): Find Minecraft server property.
-        value str(''): If received argument, will change value.
-        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
-
-    Returns:
-        str: If target_property was not found.
-        tuple: First item is line from file that matched target_property. Second item is just the current value.
-    """
-
-    try: os.chdir(slime_vars.server_path)
-    except: pass
-    return_line = ''
-
-    # print() writes to file while using it in FileInput() with inplace=True
-    # fileinput doc: https://docs.python.org/3/library/fileinput.html
-    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
-        for line in file:
-            split_line = line.split('=', 1)
-
-            if target_property == 'all':  # Return all lines of file.
-                return_line += line.strip() + '\n'
-                print(line, end='')
-
-            # If found match, and user passed in new value to update it.
-            elif target_property in split_line[0] and len(split_line) > 1:
-                if value:
-                    split_line[1] = value  # edits value section of line
-                    new_line = return_line = '='.join(split_line)
-                    print(new_line, end='\n')  # Writes new line to file
-                # If user did not pass a new value to update property, just return the line from file.
-                else:
-                    return_line = '='.join(split_line)
-                    print(line, end='')
-            else: print(line, end='')
-
-    if return_line:
-        return return_line, return_line.split('=')[1].strip()
-    else: return "Match not found.", 'Match not found.'
-
+# ========== For Backup/Restore.
 def get_from_index(path, index):
     """
     Get server or world backup folder name from passed in index number
@@ -550,22 +549,32 @@ def get_from_index(path, index):
             str: file path of selected folder.
     """
 
-    return f'{path}/{os.listdir(path)[index]}'
+    return f'{path}/{os.listdir(path)[index-1]}'
 
-def enum_dirs(path):
+def enum_dir(path, mode):
     """
     Returns enumerated list of directories in path.
 
     Args:
         path str: Path of world or server backups location.
+        mode
     """
 
     backups = []
     if not os.path.isdir(path): return False
 
-    for index, item in enumerate(os.listdir(path)):
-        if os.path.isdir(path + '/' + item):
-            backups.append([index, item])
+    counter = 1
+    for item in reversed(sorted(os.listdir(path))):
+        flag = False
+        if mode == 'f':
+            if os.path.isfile(os.path.join(path, item)): flag = True
+        elif mode == 'd':
+            if os.path.isdir(os.path.join(path, item)): flag = True
+
+        if flag:
+            backups.append([item, item, False, counter])  # Last 2 list items is for new_selection.
+            counter += 1
+        else: continue
     return backups
 
 def delete_dir(backup):

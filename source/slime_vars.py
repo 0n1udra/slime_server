@@ -55,9 +55,9 @@ java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:P
 
 server_list = {}
 # Create file if not exist.
-with open('server_list.csv', "a") as f: pass
+with open('bot_files/server_list.csv', "a") as f: pass
 try:  # Get server list data containing run command and parameters.
-    with open('server_list.csv', 'r') as f:
+    with open('bot_files/server_list.csv', 'r') as f:
         csv_data = csv.reader(f, skipinitialspace=True)
         for i in csv_data:
             i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
@@ -68,7 +68,7 @@ except:
 
 
 server_selected = server_list['papermc']
-server_path = f"{mc_path}/{server_selected[0]}"
+server_path = f"{mc_path}/servers/{server_selected[0]}"
 # Where to save world and server backups.
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
@@ -78,7 +78,7 @@ server_log_path = f"{server_path}/logs"
 # ========== Bot Config
 bot_files_path = os.path.dirname(os.path.abspath(__file__))
 slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_log_file = f"{bot_files_path}/bot_log.txt"
+bot_log_file = f"{bot_files_path}/slime_bot.log"
 
 # The command to use in server to use to check status. server_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
@@ -107,7 +107,7 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    }
 
 # ========== Misc
-updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend_functions.py
+updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend.py
 server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
