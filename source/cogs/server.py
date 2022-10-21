@@ -1,6 +1,6 @@
 import discord, asyncio
 from discord.ext import commands, tasks
-from bot_files.backend_functions import server_command, format_args, server_status, lprint
+from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import slime_vars
 
@@ -26,7 +26,7 @@ class Basics(commands.Cog):
         """
 
         command = format_args(command)
-        if not await server_command(command): return False
+        if not await send_command(command): return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -48,7 +48,7 @@ class Basics(commands.Cog):
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
-            if await server_command('say ' + msg):
+            if await send_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
@@ -71,7 +71,7 @@ class Basics(commands.Cog):
             await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
-        if not await server_command(f"tell {player} {msg}"): return
+        if not await send_command(f"tell {player} {msg}"): return
 
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
@@ -148,7 +148,7 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if not await server_command(f'weather {state} {duration}'): return
+        if not await send_command(f'weather {state} {duration}'): return
 
         await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
@@ -157,7 +157,7 @@ class World(commands.Cog):
     async def weatheron(self, ctx):
         """Enable weather cycle."""
 
-        await server_command(f'gamerule doWeatherCycle true')
+        await send_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
 
@@ -165,7 +165,7 @@ class World(commands.Cog):
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
 
-        await server_command(f'gamerule doWeatherCycle false')
+        await send_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
 
@@ -205,7 +205,7 @@ class World(commands.Cog):
         """
 
         if set_time:
-            if not await server_command(f"time set {set_time}"): return
+            if not await send_command(f"time set {set_time}"): return
             await ctx.send("Time Updated  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
@@ -226,7 +226,7 @@ class World(commands.Cog):
     async def timeon(self, ctx):
         """Enable day light cycle."""
 
-        await server_command(f'gamerule doDaylightCycle true')
+        await send_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
@@ -234,7 +234,7 @@ class World(commands.Cog):
     async def timeoff(self, ctx):
         """Disable day light cycle."""
 
-        await server_command(f'gamerule doDaylightCycle false')
+        await send_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
 
@@ -247,7 +247,6 @@ class Server(commands.Cog):
             #await self.autosave_loop.start()
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
-    # ===== Manage servers (not its backups)
     @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
     async def serverlist(self, ctx, *name):
         """
@@ -277,13 +276,12 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.")
 
-
     # ===== Save/Autosave
     @commands.command(aliases=['sa', 'save-all'])
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
-        if not await server_command('save-all'): return
+        if not await send_command('save-all'): return
 
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
@@ -347,7 +345,7 @@ class Server(commands.Cog):
         """Automatically sends save-all command to server at interval of x minutes."""
 
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
-        if await server_command('save-all', discord_msg=False):
+        if await send_command('save-all', discord_msg=False):
             lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
     @autosave_loop.before_loop
@@ -632,18 +630,18 @@ class Server(commands.Cog):
 
         await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
-            await server_command('save-all')
+            await send_command('save-all')
             await asyncio.sleep(3)
-            await server_command('stop')
+            await send_command('stop')
         else:
-            await server_command('say ---WARNING--- Server will halt in 15s!')
+            await send_command('say ---WARNING--- Server will halt in 15s!')
             await ctx.send("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
-            await server_command('say ---WARNING--- 5s left!')
+            await send_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
-            await server_command('save-all')
+            await send_command('save-all')
             await asyncio.sleep(3)
-            await server_command('stop')
+            await send_command('stop')
 
         await asyncio.sleep(5)
         await ctx.send("**Halted Minecraft Server** :stop_sign:")
@@ -663,7 +661,7 @@ class Server(commands.Cog):
             ?reboot now
         """
 
-        await server_command('say ---WARNING--- Server Rebooting...')
+        await send_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
         await ctx.send("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)

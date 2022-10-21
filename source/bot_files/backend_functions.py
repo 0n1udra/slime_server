@@ -1,7 +1,5 @@
-import discord, subprocess, fileinput, asyncio, shutil, random
+import discord, fileinput, asyncio, shutil, random
 from file_read_backwards import FileReadBackwards
-from bs4 import BeautifulSoup
-import slime_vars
 from bot_files.extra import *
 if slime_vars.use_rcon: import mctools
 
@@ -15,7 +13,6 @@ def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
     slime_proc, slime_pid = proc, pid
 
-
 def channel_set(channel):
     """Sets discord_channel global variable."""
     global discord_channel
@@ -27,115 +24,6 @@ async def channel_send(msg):
     if discord_channel: await discord_channel.send(msg)
 
 # ========== Server Commands: start, send command, read log, etc
-async def server_command(command, force_check=False, skip_check=False, discord_msg=True):
-    """
-    Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
-    Sends command to server, then reads from latest.log file for output.
-    If using RCON, will only return RCON returned data, can't read from server log.
-
-    Args:
-        command str: Command to send.
-        force_check bool(False): Skips server_active boolean check, send command anyways.
-        skip_check(False): Skips sending check command. E.g. For sending a lot of consecutive commands, to help reduces time.
-        discord_msg bool(True): Send message indicating if server is inactive.
-
-    Returns:
-        bool: If error sending command to server, sends False boolean.
-        list: Returns list containing match from server_log if found, and random_number used.
-    """
-
-    global mc_subprocess, server_active
-
-    async def inactive_msg():
-        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?check` to update server status.")
-
-    # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
-    # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
-    if not force_check and not server_active:
-        await inactive_msg()
-        return False
-
-    status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
-    status_checker = status_checker_command + random_number
-
-    if slime_vars.use_rcon is True:
-        if ping_server():
-            return [await server_rcon(command), None]
-        else: return False
-
-    elif slime_vars.use_subprocess is True:
-        if mc_subprocess is not None:
-            mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
-            mc_subprocess.stdin.flush()
-        else:
-            await inactive_msg()
-            return False
-
-    elif slime_vars.use_tmux is True:
-        if not skip_check:  # Check if server reachable before sending command.
-            # Checks if server is active in the first place by sending random number to be matched in server log.
-            os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
-            await asyncio.sleep(slime_vars.command_buffer_time)
-            if not server_log(random_number):
-                await inactive_msg()
-                return False
-
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
-
-    else:
-        await inactive_msg()
-        return False
-
-    await asyncio.sleep(slime_vars.command_buffer_time)
-    # Returns log line that matches command.
-    return_data = [server_log(command), random_number]
-    return return_data
-
-def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
-    """
-    Edits server.properties file if received target_property and value. Edits inplace with fileinput
-    If receive no value, will return current set value if property exists.
-
-    Args:
-        target_property str(None): Find Minecraft server property.
-        value str(''): If received argument, will change value.
-        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
-
-    Returns:
-        str: If target_property was not found.
-        tuple: First item is line from file that matched target_property. Second item is just the current value.
-    """
-
-    try: os.chdir(slime_vars.server_path)
-    except: pass
-    return_line = ''
-
-    # print() writes to file while using it in FileInput() with inplace=True
-    # fileinput doc: https://docs.python.org/3/library/fileinput.html
-    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
-        for line in file:
-            split_line = line.split('=', 1)
-
-            if target_property == 'all':  # Return all lines of file.
-                return_line += line.strip() + '\n'
-                print(line, end='')
-
-            # If found match, and user passed in new value to update it.
-            elif target_property in split_line[0] and len(split_line) > 1:
-                if value:
-                    split_line[1] = value  # edits value section of line
-                    new_line = return_line = '='.join(split_line)
-                    print(new_line, end='\n')  # Writes new line to file
-                # If user did not pass a new value to update property, just return the line from file.
-                else:
-                    return_line = '='.join(split_line)
-                    print(line, end='')
-            else: print(line, end='')
-
-    if return_line:
-        return return_line, return_line.split('=')[1].strip()
-    else: return "Match not found.", 'Match not found.'
-
 def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
     """
     Read latest.log file under server/logs folder. Can also find match.
@@ -194,6 +82,70 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
             log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
         return log_data
 
+async def send_command(command, force_check=False, skip_check=False, discord_msg=True):
+    """
+    Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
+    Sends command to server, then reads from latest.log file for output.
+    If using RCON, will only return RCON returned data, can't read from server log.
+
+    Args:
+        command str: Command to send.
+        force_check bool(False): Skips server_active boolean check, send command anyways.
+        skip_check(False): Skips sending check command. E.g. For sending a lot of consecutive commands, to help reduces time.
+        discord_msg bool(True): Send message indicating if server is inactive.
+
+    Returns:
+        bool: If error sending command to server, sends False boolean.
+        list: Returns list containing match from server_log if found, and random_number used.
+    """
+
+    global mc_subprocess, server_active
+
+    async def inactive_msg():
+        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?check` to update server status.")
+
+    # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
+    # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
+    if not force_check and not server_active:
+        await inactive_msg()
+        return False
+
+    status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
+    status_checker = status_checker_command + random_number
+
+    if slime_vars.use_rcon is True:
+        if server_ping():
+            return [await server_rcon(command), None]
+        else: return False
+
+    elif slime_vars.use_subprocess is True:
+        if mc_subprocess is not None:
+            mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
+            mc_subprocess.stdin.flush()
+        else:
+            await inactive_msg()
+            return False
+
+    elif slime_vars.use_tmux is True:
+        if not skip_check:  # Check if server reachable before sending command.
+            # Checks if server is active in the first place by sending random number to be matched in server log.
+            os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
+            await asyncio.sleep(slime_vars.command_buffer_time)
+            if not server_log(random_number):
+                await inactive_msg()
+                return False
+
+        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
+
+    else:
+        await inactive_msg()
+        return False
+
+    await asyncio.sleep(slime_vars.command_buffer_time)
+    # Returns log line that matches command.
+    return_data = [server_log(command), random_number]
+    return return_data
+
 async def server_rcon(command=''):
     """
     Send command to server with RCON.
@@ -232,17 +184,54 @@ async def server_status(discord_msg=False):
 
     lprint(ctx, "Checking Minecraft server status...")
 
-    # server_command() will send random number, server is online if match is found in log.
-    response = await server_command(' ', force_check=True, discord_msg=discord_msg)
+    # send_command() will send random number, server is online if match is found in log.
+    response = await send_command(' ', force_check=True, discord_msg=discord_msg)
     if response:
         if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
         lprint(ctx, "Server Status: Active")
         server_active = True
         return True
     else:
-        # server_command will send a discord message if server is inactive, so it's unneeded here.
+        # send_command will send a discord message if server is inactive, so it's unneeded here.
         lprint(ctx, "Server Status: Inactive")
         server_active = False
+
+async def get_players():
+    """Extracts wanted data from output of 'list' command."""
+
+    response = await send_command("list")
+    if not response: return False
+
+    # Gets data from RCON response or reads server log for line containing player names.
+    if slime_vars.use_rcon is True: log_data = response[0]
+    else:
+        await asyncio.sleep(1)
+        log_data = server_log('players online')
+
+    if not log_data: return False
+
+    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+    text = log_data[-2]  # There are 2 of a max of 20 players online
+    player_names = log_data[-1]  # R3diculous, MysticFrogo
+    # If there's no players active, player_names will still contain some anso escape characters.
+    if len(player_names.strip()) < 5: return None
+    else:
+        player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+
+        return player_names, text
+
+async def get_coords(player=''):
+    """Gets player's location coordinates."""
+
+    if response := await send_command(f"data get entity {player} Pos", skip_check=True):
+        log_data = server_log('entity data', stopgap_str=response[1])
+        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+        if log_data:
+            location = log_data.split('[')[-1][:-3].replace('d', '')
+            return location
 
 def server_start():
     """
@@ -281,7 +270,7 @@ def server_version():
     """
 
     if slime_vars.use_rcon is True:
-        try: return ping_server()['version']['name']
+        try: return server_ping()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
         try: return server_log('server version').split('version')[1].strip()
@@ -299,10 +288,10 @@ def server_motd():
     if slime_vars.server_files_access is True:
         return edit_file('motd')[1]
     elif slime_vars.use_rcon is True:
-        return remove_ansi(ping_server()['description'])
+        return remove_ansi(server_ping()['description'])
     else: return "N/A"
 
-def ping_server():
+def server_ping():
     """
     Gets server information using mctools.PINGClient()
 
@@ -324,16 +313,7 @@ def ping_server():
         server_active = True
         return stats
 
-def ping_url():
-    """Checks if server_url address works by pinging it twice."""
-
-    ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    ping_out, ping_error = ping.communicate()
-    if slime_vars.server_ip in str(ping_out):
-        return 'working'
-    return 'inactive'
-
-def check_latest_version():
+def check_latest():
     """
     Gets latest Minecraft server version number from official website using bs4.
 
@@ -346,7 +326,7 @@ def check_latest_version():
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
 
-def get_latest_version():
+def download_latest():
     """
     Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
 
@@ -398,45 +378,52 @@ def get_latest_version():
 
     return False
 
-async def get_player_list():
-    """Extracts wanted data from output of 'list' command."""
+# ========== Anything relating to file/folder editing/manipulation
+def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
+    """
+    Edits server.properties file if received target_property and value. Edits inplace with fileinput
+    If receive no value, will return current set value if property exists.
 
-    response = await server_command("list")
-    if not response: return False
+    Args:
+        target_property str(None): Find Minecraft server property.
+        value str(''): If received argument, will change value.
+        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
-    # Gets data from RCON response or reads server log for line containing player names.
-    if slime_vars.use_rcon is True: log_data = response[0]
-    else:
-        await asyncio.sleep(1)
-        log_data = server_log('players online')
+    Returns:
+        str: If target_property was not found.
+        tuple: First item is line from file that matched target_property. Second item is just the current value.
+    """
 
-    if not log_data: return False
+    try: os.chdir(slime_vars.server_path)
+    except: pass
+    return_line = ''
 
-    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-    text = log_data[-2]  # There are 2 of a max of 20 players online
-    player_names = log_data[-1]  # R3diculous, MysticFrogo
-    # If there's no players active, player_names will still contain some anso escape characters.
-    if len(player_names.strip()) < 5: return None
-    else:
-        player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
-        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+    # print() writes to file while using it in FileInput() with inplace=True
+    # fileinput doc: https://docs.python.org/3/library/fileinput.html
+    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
+        for line in file:
+            split_line = line.split('=', 1)
 
-        return player_names, text
+            if target_property == 'all':  # Return all lines of file.
+                return_line += line.strip() + '\n'
+                print(line, end='')
 
-async def get_location(player=''):
-    """Gets player's location coordinates."""
+            # If found match, and user passed in new value to update it.
+            elif target_property in split_line[0] and len(split_line) > 1:
+                if value:
+                    split_line[1] = value  # edits value section of line
+                    new_line = return_line = '='.join(split_line)
+                    print(new_line, end='\n')  # Writes new line to file
+                # If user did not pass a new value to update property, just return the line from file.
+                else:
+                    return_line = '='.join(split_line)
+                    print(line, end='')
+            else: print(line, end='')
 
-    if response := await server_command(f"data get entity {player} Pos", skip_check=True):
-        log_data = server_log('entity data', stopgap_str=response[1])
-        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
-        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-        if log_data:
-            location = log_data.split('[')[-1][:-3].replace('d', '')
-            return location
+    if return_line:
+        return return_line, return_line.split('=')[1].strip()
+    else: return "Match not found.", 'Match not found.'
 
-
-# ========== For Backup/Restore.
 def get_from_index(path, index, mode):
     """
     Get server or world backup folder name from passed in index number

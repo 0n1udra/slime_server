@@ -1,8 +1,40 @@
 import discord
-#from bot_files.backend_functions import dc_dict, new_buttons, new_selection, delete_current_components
 
 bot = None
-# ===== Discord related
+_data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
+         'log_select_options': [], 'log_select_page': 0}
+
+def data(var, new_value=None):
+    """
+    Discord components dictionary value reader/setter function.
+
+
+    """
+
+    global _data
+
+    # To set clear out the value use 0 instead of None. e.g. data('player_selected', 0)
+    if new_value is not None: _data[var] = new_value
+
+    if var in _data.keys():
+        return _data[var]
+    else: return False
+
+async def clear():
+    """
+    Deletes old components to prevent conflicts.
+    When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
+    When new panel is opened the old one is deleted.
+
+    Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
+    e.g. Deleting a listing in a selection box.
+    """
+
+    for i in data('current_components'):
+        try: await i.delete()
+        except: pass
+    data('current_components', [])
+
 class Discord_Select(discord.ui.Select):
     def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
         super().__init__(options=options, custom_id=custom_id, placeholder=placeholder, min_values=min_values, max_values=max_values)
@@ -12,7 +44,7 @@ class Discord_Select(discord.ui.Select):
         custom_id = interaction.data['custom_id']
         value = interaction.data['values'][0].strip()
 
-        dc_dict(custom_id, value)  # Updates corresponding variables
+        data(custom_id, value)  # Updates corresponding variables
 
         if custom_id == 'server_panel1':
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
@@ -41,7 +73,7 @@ class Discord_Button(discord.ui.Button):
         # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         if params:
-            if params[0] == 'player': params[0] = dc_dict('player_selected')  # Use currently selected player as a parameter
+            if params[0] == 'player': params[0] = data('player_selected')  # Use currently selected player as a parameter
             await ctx.invoke(bot.get_command(custom_id), *params)
         else: await ctx.invoke(bot.get_command(custom_id))
 
@@ -67,38 +99,3 @@ def new_selection(select_options_args, custom_id, placeholder):
         select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
-
-async def delete_current_components():
-    """
-    Deletes old components to prevent conflicts.
-    When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
-    When new panel is opened the old one is deleted.
-
-    Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
-    e.g. Deleting a listing in a selection box.
-    """
-
-    for i in dc_dict('current_components'):
-        try: await i.delete()
-        except: pass
-    dc_dict('current_components', [])
-
-discord_components_dict = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
-                           'log_select_options': [], 'log_select_page': 0}
-def dc_dict(var, new_value=None):
-    """
-    Discord components dictionary value reader/setter function.
-
-
-    """
-
-    global discord_components_dict
-
-    # To set clear out the value use 0 instead of None. e.g. dc_dict('player_selected', 0)
-    if new_value is not None: discord_components_dict[var] = new_value
-
-    if var in discord_components_dict.keys():
-        return discord_components_dict[var]
-    else: return False
-
-

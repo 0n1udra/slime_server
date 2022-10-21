@@ -80,7 +80,7 @@ bot_files_path = os.path.dirname(os.path.abspath(__file__))
 slime_vars_file = bot_files_path + '/slime_vars.py'
 bot_log_file = f"{bot_files_path}/slime_bot.log"
 
-# The command to use in server to use to check status. server_command() will send something like 'xp 0.64356...'.
+# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
 
 # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)

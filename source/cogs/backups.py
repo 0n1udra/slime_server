@@ -1,8 +1,8 @@
 import asyncio, discord, shutil
 from discord.ext import commands, tasks
-from bot_files.backend_functions import server_command, format_args, server_status, lprint
-from bot_files.components import dc_dict, new_buttons
+from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
+import bot_files.components as components
 import slime_vars
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
@@ -56,7 +56,7 @@ class World_Backups(commands.Cog):
         name = format_args(name)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        await server_command(f"save-all", discord_msg=False)
+        await send_command(f"save-all", discord_msg=False)
         await asyncio.sleep(3)
         new_backup = backend.new_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
         if new_backup:
@@ -92,7 +92,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = dc_dict('world_backup_selected')
+            index = components.data('world_backup_selected')
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
@@ -101,7 +101,7 @@ class World_Backups(commands.Cog):
         fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
-        if await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
+        if await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -112,7 +112,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
         await asyncio.sleep(5)
 
-        await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
 
     @commands.command(aliases=['deleteworld', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
@@ -127,7 +127,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = dc_dict('world_backup_selected')
+            index = components.data('world_backup_selected')
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
@@ -159,7 +159,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await server_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
+        await send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
@@ -225,7 +225,7 @@ class Server_Backups(commands.Cog):
 
         name = format_args(name)
         await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        if await server_command(f"save-all", discord_msg=False):
+        if await send_command(f"save-all", discord_msg=False):
             await asyncio.sleep(3)
         new_backup = backend.new_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
         if new_backup:
@@ -259,7 +259,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = dc_dict('server_backup_selected')
+            index = components.data('server_backup_selected')
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
@@ -270,7 +270,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
         if await server_status():
-            await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
+            await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -278,7 +278,7 @@ class Server_Backups(commands.Cog):
             await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         else: await ctx.send("**ERROR:** Could not restore server!")
 
-        await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
 
     @commands.command(aliases=['deleteserverrestore', 'serverdeletebackup', 'serverrestoredelete', 'sbd'])
     async def serverbackupdelete(self, ctx, index=''):
@@ -294,7 +294,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = dc_dict('server_backup_selected')
+            index = components.data('server_backup_selected')
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")

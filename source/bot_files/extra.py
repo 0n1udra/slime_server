@@ -1,4 +1,5 @@
-import requests, datetime, psutil, json, math, csv, os, re
+import subprocess, requests, datetime, psutil, json, math, csv, os, re
+from bs4 import BeautifulSoup
 import slime_vars
 
 ctx = 'backend_functions.py'
@@ -34,7 +35,6 @@ def group_items(items, size=25):
     grouped_list = [items[i:i + size] for i in range(0, len(items), size)]
     num_of_groups = math.ceil(len(items) / size)
     return grouped_list, num_of_groups
-
 
 def get_proc(proc_name, proc_cmdline=None):
     """Returns a process by matching name and argument."""
@@ -101,3 +101,12 @@ def get_public_ip():
         slime_vars.server_ip = server_ip
     except: return None
     return server_ip
+
+def ping_url():
+    """Checks if server_url address works by pinging it twice."""
+
+    ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    ping_out, ping_error = ping.communicate()
+    if slime_vars.server_ip in str(ping_out):
+        return 'working'
+    return 'inactive'
