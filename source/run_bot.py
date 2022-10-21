@@ -45,7 +45,6 @@ def setup_directories():
     """Create necessary directories."""
 
     try:
-        # TODO Needed?
         # Creates Server folder, folder for world backups, and folder for server backups.
         os.makedirs(slime_vars.server_path)
         lprint(ctx, "INFO: Created: " + slime_vars.server_path)

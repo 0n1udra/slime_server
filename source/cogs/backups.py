@@ -97,15 +97,18 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
 
-        fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index)
+        fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
         lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
         if await server_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
+        if not backend.restore_backup(fetched_restore, slime_vars.server_path + '/world'):
+            await ctx.send(f"**Error:** Issue restoring world: {fetched_restore}")
+            return False
+
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
-        backend.restore_backup(fetched_restore, slime_vars.server_path + '/world')  # Gives computer time to move around world files.
         await asyncio.sleep(5)
 
         await ctx.send("Start server with `?start` or click button", view=new_buttons(start_button))
@@ -129,9 +132,11 @@ class World_Backups(commands.Cog):
             await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
             return False
 
-        to_delete = backend.get_from_index(slime_vars.world_backups_path, index)
+        to_delete = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
         await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
-        backend.delete_dir(to_delete)
+        if not backend.delete_dir(to_delete):
+            await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
+            return False
 
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
@@ -260,7 +265,7 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
 
-        fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index)
+        fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
         lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
@@ -295,9 +300,11 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")
             return False
 
-        to_delete = backend.get_from_index(slime_vars.server_backups_path, index)
+        to_delete = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
         await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
-        backend.delete_dir(to_delete)
+        if not backend.delete_dir(to_delete):
+            await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
+            return False
 
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
@@ -305,4 +312,6 @@ class Server_Backups(commands.Cog):
         try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'server_backups')  # Updates panel if open
         except: pass
 
-async def setup(bot): await bot.add_cog(World_Backups(bot))
+async def setup(bot):
+    await bot.add_cog(World_Backups(bot))
+    await bot.add_cog(Server_Backups(bot))

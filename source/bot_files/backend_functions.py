@@ -24,10 +24,8 @@ class Discord_Select(discord.ui.Select):
         await interaction.response.defer()  # Defer response so not to show failed interaction message.
         custom_id = interaction.data['custom_id']
         value = interaction.data['values'][0].strip()
-        print("WTF", value, '-----', interaction.data['values'])
 
         dc_dict(custom_id, value)  # Updates corresponding variables
-        print(f"dc_dict: {custom_id}", dc_dict(custom_id))
 
         if custom_id == 'server_panel1':
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
@@ -537,7 +535,7 @@ async def get_location(player=''):
 
 
 # ========== For Backup/Restore.
-def get_from_index(path, index):
+def get_from_index(path, index, mode):
     """
     Get server or world backup folder name from passed in index number
 
@@ -549,21 +547,29 @@ def get_from_index(path, index):
             str: file path of selected folder.
     """
 
-    return f'{path}/{os.listdir(path)[index-1]}'
+    items = ['placeholder']
+    for i in reversed(sorted(os.listdir(path))):
+        if mode == 'f': items.append(i)
+        elif mode == 'd': items.append(i)
+        else: continue
 
-def enum_dir(path, mode):
+    return f'{path}/{items[index]}'
+
+
+def enum_dir(path, mode, index_mode=False):
     """
     Returns enumerated list of directories in path.
 
     Args:
         path str: Path of world or server backups location.
-        mode
+        mode str: Aggregate only files or only directories.
+        index_mode bool: Put index as second item in list.
     """
 
     backups = []
     if not os.path.isdir(path): return False
 
-    counter = 1
+    index = 1
     for item in reversed(sorted(os.listdir(path))):
         flag = False
         if mode == 'f':
@@ -572,8 +578,10 @@ def enum_dir(path, mode):
             if os.path.isdir(os.path.join(path, item)): flag = True
 
         if flag:
-            backups.append([item, item, False, counter])  # Last 2 list items is for new_selection.
-            counter += 1
+            if index_mode:
+                backups.append([item, index, False, index])  # Need this for world/server commands
+            else: backups.append([item, item, False, index])  # Last 2 list items is for new_selection.
+            index += 1
         else: continue
     return backups
 

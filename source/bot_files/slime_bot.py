@@ -379,7 +379,6 @@ class Discord_Components_Funcs(commands.Cog):
     async def _update_server_panel(self, ctx, mode):
         """Show select menu of server log files available to download."""
 
-        # TODO support multi plage for all
         failed = False  # if failed to update the components
         spc = dc_dict('server_panel_components')  # [select options, select msg, button msg, current page, total pages]
         total_pages = 0
@@ -388,25 +387,25 @@ class Discord_Components_Funcs(commands.Cog):
             pass
 
         elif mode == 'world_backups':
-            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd'))
-            print('world----------', select_options)
-            if not select_options: await ctx.send("No world backups")
+            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd', True))
+            if not select_options: select_options, total_pages = [[['No world backups', '_', True]]], 1
             buttons = [['', 'serverpanel', '\U0001F504'],  ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
                        ['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
-            params = [f"**World Backups**", 'world_backup_selected', 'Select World Backup']
+            params = ["**World Backups**", 'world_backup_selected', 'Select World Backup']
 
         elif mode == 'server_backups':
-            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_backups_path, 'd'))
-            if not select_options: await ctx.send("No server backups")
+            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_backups_path, 'd', True))
+            if not select_options: select_options, total_pages = [[['No server backups', '_', True]]], 1
             buttons = [['', 'serverpanel', '\U0001F504'], ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
                        ['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
-            params = [f"**Server Backups**", 'server_backup_selected', 'Select Server Backup']
+            params = ["**Server Backups**", 'server_backup_selected', 'Select Server Backup']
 
         elif mode == 'log_files':
             await ctx.send("List limited to 25, use next/back buttons.")
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_log_path, 'f'))
+            if not select_options: select_options, total_pages = [[['No log files', '_', True]]], 1
             buttons = [['', 'serverpanel', '\U0001F504'], ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'], ['Download', '_get_log_file', '\U0001F4BE']]
-            params = [f"**Log Files**", 'log_file_selected', 'Select File']
+            params = ["**Log Files**", 'log_file_selected', 'Select File']
 
         try:
             new_select_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=new_selection(select_options[0], params[1], params[2]))
