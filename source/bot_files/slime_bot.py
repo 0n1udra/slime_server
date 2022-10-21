@@ -1,7 +1,9 @@
-import datetime, asyncio, discord, math, gzip, sys, os
+import datetime, asyncio, discord, gzip, sys, os
 from discord.ext import commands, tasks
-from bot_files.backend_functions import server_command, server_status, lprint, dc_dict, new_buttons, new_selection, delete_current_components
+from bot_files.backend_functions import server_command, server_status, lprint
 import bot_files.backend_functions as backend
+from bot_files.components import dc_dict, new_buttons, new_selection, delete_current_components
+import bot_files.components as components
 import slime_vars as slime_vars
 
 __version__ = "7.0"
@@ -15,7 +17,7 @@ ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 
 # Make sure command_prifex doesn't conflict with other bots.
 bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents)
-backend.bot = bot
+backend.bot = components.bot = bot
 
 @bot.event
 async def on_ready():
@@ -466,7 +468,23 @@ class Discord_Components_Funcs(commands.Cog):
         dc_dict('server_panel_components', spc)
 
     @commands.command(hidden=True)
-    async def _server_new(self, ctx): pass
+    async def _server_new(self, ctx):
+
+        class MyModal(discord.ui.Modal):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+
+                self.add_item(discord.ui.TextInput(label="Short Input"))
+                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
+
+            async def callback(self, interaction: discord.Interaction):
+                embed = discord.Embed(title="Modal Results")
+                embed.add_field(name="Short Input", value=self.children[0].value)
+                embed.add_field(name="Long Input", value=self.children[1].value)
+                await interaction.response.send_message(embeds=[embed])
+
+        modal = MyModal(title="Modal via Slash Command")
+        await ctx.send(view=modal)
 
     @commands.command(hidden=True)
     async def _server_edit(self, ctx): pass

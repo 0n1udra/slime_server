@@ -1,6 +1,7 @@
 import asyncio, discord, shutil
 from discord.ext import commands, tasks
-from bot_files.backend_functions import server_command, format_args, server_status, lprint, dc_dict, new_buttons
+from bot_files.backend_functions import server_command, format_args, server_status, lprint
+from bot_files.components import dc_dict, new_buttons
 import bot_files.backend_functions as backend
 import slime_vars
 

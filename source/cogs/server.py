@@ -277,23 +277,6 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('restartbot'))
         else: await ctx.send("**ERROR:** Server not found.")
 
-    @commands.command(aliases=['newserver', 'createserver'])
-    async def servercreate(self, ctx):
-        class MyModal(discord.ui.Modal):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-
-                self.add_item(discord.ui.TextInput(label="Short Input"))
-                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
-
-            async def callback(self, interaction: discord.Interaction):
-                embed = discord.Embed(title="Modal Results")
-                embed.add_field(name="Short Input", value=self.children[0].value)
-                embed.add_field(name="Long Input", value=self.children[1].value)
-                await interaction.response.send_message(embeds=[embed])
-
-        modal = MyModal(title="Modal via Slash Command")
-        await ctx.send(view=modal)
 
     # ===== Save/Autosave
     @commands.command(aliases=['sa', 'save-all'])
