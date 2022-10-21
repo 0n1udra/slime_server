@@ -555,7 +555,6 @@ def get_from_index(path, index, mode):
 
     return f'{path}/{items[index]}'
 
-
 def enum_dir(path, mode, index_mode=False):
     """
     Returns enumerated list of directories in path.

@@ -68,8 +68,8 @@ except:
 
 
 server_selected = server_list['papermc']
-server_path = f"{mc_path}/servers/{server_selected[0]}"
-# Where to save world and server backups.
+servers_path = f"{mc_path}/servers"
+server_path = f"{servers_path}/{server_selected[0]}"
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 server_log_file = f"{server_path}/logs/latest.log"

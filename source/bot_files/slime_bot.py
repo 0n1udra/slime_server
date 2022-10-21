@@ -384,7 +384,11 @@ class Discord_Components_Funcs(commands.Cog):
         total_pages = 0
 
         if mode == 'servers':
-            pass
+            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'd'))
+            if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
+            buttons = [['', 'serverpanel', '\U0001F504'],  ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
+                       ['New', '_server_new', '\U0001F195'], ['Edit', '_server_edit', '\U0000270F'], ['Delete', '_server_delete', '\U0001F5D1']]
+            params = ["**Servers**", 'server_selected', 'Select Server']
 
         elif mode == 'world_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd', True))
@@ -460,6 +464,33 @@ class Discord_Components_Funcs(commands.Cog):
         else: spc['pages'][0] = current_page
         spc['msg'][0] = new_msg
         dc_dict('server_panel_components', spc)
+
+    @commands.command(hidden=True)
+    async def _server_new(self, ctx): pass
+
+    @commands.command(hidden=True)
+    async def _server_edit(self, ctx): pass
+
+    @commands.command(hidden=True)
+    async def _server_delete(self, ctx):
+        """
+        Delete a server
+
+        Args:
+            server: I
+        """
+
+        to_delete = f"{slime_vars.servers_path}/{dc_dict('server_selected')}"
+        if not backend.delete_dir(to_delete):
+            await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
+            return False
+
+        await ctx.send(f"**Server Deleted:** `{to_delete}`")
+        lprint(ctx, "Deleted server: " + to_delete)
+
+        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+        except: pass
+
 
     # ===== Extra
     @commands.command(hidden=True, aliases=['killallplayers', 'kilkillkill', 'killall'])

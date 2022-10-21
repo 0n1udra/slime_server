@@ -133,7 +133,6 @@ class World_Backups(commands.Cog):
             return False
 
         to_delete = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
-        await ctx.send("***Deleting World Backup...*** :floppy_disk::wastebasket:")
         if not backend.delete_dir(to_delete):
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
             return False
@@ -301,7 +300,6 @@ class Server_Backups(commands.Cog):
             return False
 
         to_delete = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
-        await ctx.send("***Deleting Server Backup...*** :floppy_disk::wastebasket:")
         if not backend.delete_dir(to_delete):
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
             return False
