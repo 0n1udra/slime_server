@@ -263,7 +263,6 @@ class Player(commands.Cog):
 
         await ctx.send(f"**ERROR:** Could not get location.")
 
-
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
     def __init__(self, bot): self.bot = bot

@@ -97,6 +97,7 @@ class World_Backups(commands.Cog):
         except:
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
             return False
+        if not index: return
 
         fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
         lprint(ctx, "World restoring to: " + fetched_restore)
@@ -132,6 +133,7 @@ class World_Backups(commands.Cog):
         except:
             await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
             return False
+        if not index: return
 
         to_delete = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
         if not backend.delete_dir(to_delete):
@@ -264,6 +266,7 @@ class Server_Backups(commands.Cog):
         except:
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
             return False
+        if not index: return
 
         fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
         lprint(ctx, "Server restoring to: " + fetched_restore)
@@ -299,6 +302,7 @@ class Server_Backups(commands.Cog):
         except:
             await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")
             return False
+        if not index: return
 
         to_delete = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
         if not backend.delete_dir(to_delete):

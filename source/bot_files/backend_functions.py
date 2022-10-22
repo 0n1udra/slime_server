@@ -436,7 +436,7 @@ def get_from_index(path, index, mode):
             str: file path of selected folder.
     """
 
-    items = ['placeholder']
+    items = ['placeholder']  # Listed items in Discord (select menus, embeds) start at 1 (for user convients). But python is 0, soooo, yeah. need this.
     for i in reversed(sorted(os.listdir(path))):
         if mode == 'f': items.append(i)
         elif mode == 'd': items.append(i)
