@@ -1,5 +1,4 @@
 import subprocess, requests, datetime, psutil, json, math, csv, os, re
-from bs4 import BeautifulSoup
 import slime_vars
 
 ctx = 'backend_functions.py'

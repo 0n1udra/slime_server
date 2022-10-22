@@ -384,8 +384,8 @@ class Discord_Components_Funcs(commands.Cog):
         elif mode == 'servers':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons2 = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo', '\U00002139'], ['Edit', 'serveredit', '\U0000270F'],
-                       ['Copy', 'servercopy', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete', '\U0001F5D1']]
+            buttons2 = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo button', '\U00002139'], ['Edit', 'serveredit button', '\U0000270F'],
+                       ['Copy', 'servercopy button', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete button', '\U0001F5D1']]
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':

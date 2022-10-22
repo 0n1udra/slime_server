@@ -76,18 +76,26 @@ class Server(commands.Cog):
     async def serveredit(self, ctx):
         await ctx.send("Coming soon.")
 
-    @commands.command(hidden=True)
-    async def serverdelete(self, ctx):
-        await ctx.send("Coming Soon")
-        return
+    @commands.command(aliases=['sd', 'deleteserver'])
+    async def serverdelete(self, ctx, *server):
         """
-        Delete a server
+        Delete a server.
 
         Args:
-            server: I
+            server: Server to delete. Case sensitive!
+
+        Usage:
+            ?serverdelete papermc
+            ?sd valhesia 3
         """
 
-        to_delete = f"{slime_vars.servers_path}/{components.data('second_selected', reset=True)}"
+        if 'button' in server:
+            to_delete = components.data('second_selected', reset=True)
+            if not to_delete: return
+        elif server: to_delete = format_args(server)
+        else: return
+
+        to_delete = f"{slime_vars.servers_path}/{to_delete}"
         try: backend.delete_dir(to_delete)
         except:
             await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
@@ -96,8 +104,9 @@ class Server(commands.Cog):
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
-        except: pass
+        if 'button' in server:
+            try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
+            except: pass
 
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])
