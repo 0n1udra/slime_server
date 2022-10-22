@@ -23,13 +23,13 @@ class World_Backups(commands.Cog):
             ?saves 15
         """
 
-        embed = discord.Embed(title='World Backups :floppy_disk:')
         worlds = backend.enum_dir(slime_vars.world_backups_path, 'd')
         lprint(ctx, f"Fetched {amount} world saves")
         if worlds is False:
             await ctx.send("No world backups found.")
             return
 
+        embed = discord.Embed(title='World Backups :floppy_disk:')
         for backup in worlds[-amount:]:
             embed.add_field(name=backup[3], value=f"`{backup[0]}`", inline=False)
         await ctx.send(embed=embed)
@@ -197,13 +197,13 @@ class Server_Backups(commands.Cog):
             ?serversaves 15
         """
 
-        embed = discord.Embed(title='Server Backups :floppy_disk:')
         servers = backend.enum_dir(slime_vars.server_backups_path, 'd')
         lprint(ctx, f"Fetched {amount} world backups")
         if servers is False:
             await ctx.send("No server backups found.")
             return
 
+        embed = discord.Embed(title='Server Backups :floppy_disk:')
         for save in servers[-amount:]:
             embed.add_field(name=save[3], value=f"`{save[0]}`", inline=False)
         await ctx.send(embed=embed)

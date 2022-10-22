@@ -54,15 +54,11 @@ class Server(commands.Cog):
     @commands.command(hidden=True)
     async def servernew(self, ctx, interaction):
         await ctx.send("Coming soon")
-        return
+        #return
         if interaction == 'submitted':
             data = components.data('servernew')
-            embed = discord.Embed(title='New Server')
-            embed.add_field(name='Name', value=data['name'], inline=False)
-            embed.add_field(name='Description', value=data['description'], inline=False)
-            embed.add_field(name='Start Command', value=f"`{data['command']}`", inline=False)
-            embed.add_field(name='Wait time', value=data['wait'], inline=False)
-            await ctx.send(embed=embed)
+            fields = [['Name', data['name']], ['Description', data['description']], ['Start Command', f"`{data['command']}`"], ['Wait Time', data['wait']]]
+            await ctx.send(embed=components.new_embed(fields, 'New Server'))
             await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
 
         else:
@@ -242,15 +238,13 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        embed = discord.Embed(title='Server Status')
-        embed.add_field(name='Current Server', value=f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
-            Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\n\
-            MOTD: {backend.server_motd()}", inline=False)
-        embed.add_field(name='Autosave', value=f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_interval}min)", inline=False)
-        embed.add_field(name='Address', value=f"IP: ||`{backend.get_public_ip()}`||\nURL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})", inline=False)
-        embed.add_field(name='Location', value=f"`{slime_vars.server_path}`", inline=False)
-        embed.add_field(name='Start Command', value=f"`{slime_vars.server_selected[2]}`", inline=False)  # Shows server name, and small description.
-        await ctx.send(embed=embed)
+        fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
+Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+                  ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
+                  ['Address', f"IP: ||`{backend.get_public_ip()}`||\nURL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})"],
+                  ['Location', f"`{slime_vars.server_path}`"],
+                  ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
+        await ctx.send(embed=components.new_embed(fields, 'Server Status'))
 
         if await server_status():  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))

@@ -135,3 +135,13 @@ def new_selection(select_options_args, custom_id, placeholder):
         select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
     view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
     return view
+
+def new_embed(fields, title):
+    """Create new Embed, adds fields, returns embed."""
+
+    embed = discord.Embed(title=title)
+
+    for i in fields:
+        if len(i) == 2: i.append(False)
+        embed.add_field(name=i[0], value=i[1], inline=i[2])
+    return embed
