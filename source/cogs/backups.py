@@ -67,7 +67,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + name)
 
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'world_backups')  # Updates panel if open
+        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
         except: pass
 
     @commands.command(aliases=['wbdate'])
@@ -147,7 +147,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'world_backups')  # Updates panel if open
+        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
         except: pass
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
@@ -241,7 +241,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'server_backups')  # Updates panel if open
+        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
         except: pass
 
     @commands.command(aliases=['sbdate'])
@@ -321,7 +321,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'server_backups')  # Updates panel if open
+        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
         except: pass
 
 async def setup(bot):

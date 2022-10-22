@@ -13,7 +13,7 @@ class Player(commands.Cog):
     async def players(self, ctx, *args):
         """Show list of online players."""
 
-        player_list = await backend.get_player_list()
+        player_list = await backend.get_players()
         if player_list is False: return
 
         await ctx.send("***Fetching Player List...***")
@@ -23,7 +23,7 @@ class Player(commands.Cog):
             _player_list = []
             for i in player_list[0]:
                 if 'location' in args:
-                    player_location = await backend.get_location(i)
+                    player_location = await backend.get_coords(i)
                     _player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`\n')
                 else: _player_list.append(f'{i.strip()}, ')
 
@@ -135,7 +135,7 @@ class Player(commands.Cog):
         await ctx.send(f"***Teleporting in 5s...***")
 
         # Saves current coordinates of target player before teleporting them, so they may be returned.
-        targets_coords = await backend.get_location(target)
+        targets_coords = await backend.get_coords(target)
         try: components.data('teleport_return', targets_coords.replace(',', ''))
         except: components.data('teleport_return', 0)
 
@@ -145,7 +145,7 @@ class Player(commands.Cog):
         if '@r' in destination:
             destination_info = 'Random player'
         else:
-            dest_coord = await backend.get_location(destination)
+            dest_coord = await backend.get_coords(destination)
             destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
 
         await asyncio.sleep(5)
@@ -256,7 +256,7 @@ class Player(commands.Cog):
             ?locate Steve
         """
 
-        if location := await backend.get_location(player):
+        if location := await backend.get_coords(player):
             await ctx.send(f"Located `{player}`: `{location}`")
             lprint(ctx, f"Located {player}: {location}")
             return location

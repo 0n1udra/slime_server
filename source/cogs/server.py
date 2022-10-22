@@ -54,12 +54,12 @@ class Server(commands.Cog):
     @commands.command(hidden=True)
     async def servernew(self, ctx, interaction):
         await ctx.send("Coming soon")
-        #return
+        return
         if interaction == 'submitted':
             data = components.data('servernew')
             fields = [['Name', data['name']], ['Description', data['description']], ['Start Command', f"`{data['command']}`"], ['Wait Time', data['wait']]]
             await ctx.send(embed=components.new_embed(fields, 'New Server'))
-            await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
 
         else:
             modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
@@ -96,7 +96,7 @@ class Server(commands.Cog):
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
         except: pass
 
     # ===== Version
@@ -104,7 +104,7 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = backend.check_latest_version()
+        response = backend.check_latest()
         await ctx.send(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
@@ -136,7 +136,7 @@ class Server(commands.Cog):
         await asyncio.sleep(5)
 
         await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
-        server = backend.get_latest_version()  # Updats server.jar file.
+        server = backend.download_latest()  # Updates server.jar file.
         if server:
             await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
             await asyncio.sleep(3)

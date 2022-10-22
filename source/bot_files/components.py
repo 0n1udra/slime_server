@@ -67,9 +67,15 @@ class Discord_Select(discord.ui.Select):
 
         data(custom_id, value)  # Updates corresponding variables
 
-        if custom_id == 'server_panel1':
+        if custom_id == 'update_server_panel':
+            params = ['']
+            try:
+                value_split = value.split(' ')
+                command, params = value_split[0], value_split[1:]
+            except: pass
+
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
-            await ctx.invoke(bot.get_command('_update_server_panel'), value)
+            await ctx.invoke(bot.get_command(command), *params)
 
 class Discord_Button(discord.ui.Button):
     """
@@ -98,7 +104,9 @@ class Discord_Button(discord.ui.Button):
             if params[0] == 'interaction': params[0] = interaction  # Send interaction object
             else: await interaction.response.defer()
             await ctx.invoke(bot.get_command(custom_id), *params)
-        else: await ctx.invoke(bot.get_command(custom_id))
+        else:
+            await interaction.response.defer()
+            await ctx.invoke(bot.get_command(custom_id))
 
 def new_modal(field_args, title, custom_id):
     modal = Discord_Modal(title=title, custom_id=custom_id)

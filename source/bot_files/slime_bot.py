@@ -218,48 +218,6 @@ class Discord_Components_Funcs(commands.Cog):
 
         lprint(ctx, 'Opened secret panel')
 
-    @commands.command(aliases=['buttons', 'dashboard', 'controls', 'panel', 'cp'])
-    async def controlpanel(self, ctx):
-        """Quick action buttons."""
-        # TODO use select to update buttons instead of showing all
-        server_buttons = [['Status Page', 'serverstatus', '\U00002139'],
-                          ['Stop Server', 'serverstop', '\U0001F6D1'] if await server_status() else ['Start Server', 'serverstart', '\U0001F680'],
-                          ['Reboot Server', 'serverrestart', '\U0001F501']]
-        await ctx.send("**Control Panel**\nServer:", view=components.new_buttons(server_buttons))
-
-        server_buttons2 = [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
-                           ['Properties File', 'propertiesall', '\U0001F527'], ['Server Log', 'get_log_file', '\U0001F4C3'], ['Connections Log', 'serverconnections', '\U0001F4E1']]
-        await ctx.send("", view=components.new_buttons(server_buttons2))
-
-        # Two lists because I want the buttons on separate row.
-        sb_buttons = [['Backup World', 'worldbackupdate', '\U0001F195'], ['Backup Server', 'serverbackupdate', '\U0001F195'],
-                      ['World Backups', 'restoreworldpanel', '\U0001F4BE'], ['Server Backups', 'restoreserverpanel', '\U0001F4BE']]
-        sb_buttons2 = [['Disable Autosave', 'autosaveoff', '\U0001F504'] if slime_vars.autosave_status else ['Enable Autosave', 'autosaveon', '\U0001F504'],
-                       ['Save World', 'saveall', '\U0001F30E']]
-        await ctx.send("Saving & Backups:", view=components.new_buttons(sb_buttons))
-        await ctx.send("", view=components.new_buttons(sb_buttons2))
-
-        player_buttons = [['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
-                          ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'], ['OP List', 'oplist', '\U0001F4DC']]
-        player_buttons2 = [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]
-        await ctx.send("Players:", view=components.new_buttons(player_buttons))
-        await ctx.send("", view=components.new_buttons(player_buttons2))
-
-        tw_buttons = [['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
-                      ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']]
-        tw_buttons2 = [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
-                       ['Enable Weather', 'weatheron', '\U0001F7E2'], ['Disable Weather', '\U0001F534']]
-        await ctx.send("Time & Weather:", view=components.new_buttons(tw_buttons))
-        await ctx.send("", view=components.new_buttons(tw_buttons2))
-
-        bot_buttons = [['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Bot Log', 'botlog', '\U0001F4C3']]
-        await ctx.send("Bot:", view=components.new_buttons(bot_buttons))
-
-        extra_buttons = [['Refresh Control Panel', 'controlpanel', '\U0001F504'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
-        await ctx.send("Extra:", view=components.new_buttons(extra_buttons))
-
-        lprint(ctx, 'Opened control panel')
-
     @commands.command(hidden=True)
     async def _control_panel_msg(self, ctx):
         """Shows message and button to open the control panel."""
@@ -283,7 +241,7 @@ class Discord_Components_Funcs(commands.Cog):
         await components.clear()
         components.data('player_selected', 0)
 
-        players = await backend.get_player_list()  # Gets list of online players
+        players = await backend.get_players()  # Gets list of online players
         if not players: players = [["No Players Online"]]  # Shows 'No Player Online' as a list option to notify no players online.
 
         select_options = [['All Players', '@a'], ['Random Player', '@r']] + [[i, i] for i in players[0]]
@@ -325,7 +283,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         await components.clear()  # Clear out used components, so you don't run into conflicts and issues.
 
-        players = await backend.get_player_list()  # Get list of online players.
+        players = await backend.get_players()  # Get list of online players.
 
         # Options for selection boxes.
         if players:
@@ -350,73 +308,110 @@ class Discord_Components_Funcs(commands.Cog):
         await ctx.invoke(self.bot.get_command('teleport'), target_player, components.data('teleport_destination'))
 
     # ===== Server panel, change server, download logs, restore/delete server and world backups
-    @commands.command(aliases=['spanel', 'sp'])
-    async def serverpanel(self, ctx):
+    @commands.command(aliases=['cp', 'controls', 'panel'])
+    async def controlpanel(self, ctx):
         """
         A control panel to control servers, server backups, and world backups.
         """
 
-        await components.clear()  # Clear out used components, so you don't run into conflicts and issues.
+        await components.clear()
 
-        mode_select_options = [['Servers', 'servers', False, 'Change server'],  # label, value, is default, description
-                               ['Log Files', 'log_files', False, 'Download server log files'],
-                               ['World Backups', 'world_backups', False, 'Backups of world folder'],
-                               ['Server Backups', 'server_backups', False, 'Backups of server folder']]
-        selection_msg = await ctx.send("**Mode**", view=components.new_selection(mode_select_options, 'server_panel1', 'Select Mode'))
+        mode_select_options = [['Buttons', '_update_control_panel buttons', False, 'Show buttons for common actions'],  # label, value, is default, description
+                               ['Servers', '_update_control_panel servers', False, 'Change server'],
+                               ['Log Files', '_update_control_panel log_files', False, 'Download server log files'],
+                               ['World Backups', '_update_control_panel world_backups', False, 'Backups of world folder'],
+                               ['Server Backups', '_update_control_panel server_backups', False, 'Backups of server folder']]
+        selection_msg = await ctx.send("**Mode**", view=components.new_selection(mode_select_options, 'update_server_panel', 'Select Mode'))
 
         # Second select menu, world backups, server backups, log files.
         select_options2 = [[' ', '_', False]]
         selection_msg2 = await ctx.send("", view=components.new_selection(select_options2, 'server_panel2', ''))
         # Buttons will update depending on mode.
-        buttons_msg = await ctx.send("", view=components.new_buttons([['Reload', 'serverpanel', '\U0001F504']]))
+        buttons_msg = await ctx.send("", view=components.new_buttons([['Reload', 'controlpanel', '\U0001F504']]))
         buttons_msg2 = await ctx.send("", view=components.new_buttons([['Close', '_close_panel', '\U0000274C']]))
 
         components.data('server_panel_components', {'options': select_options2, 'msg': [selection_msg2, buttons_msg, buttons_msg2], 'pages': [0, 0], 'params': []})
-        components.data('current_components', [*components.data('current_components'), selection_msg, selection_msg2, buttons_msg, buttons_msg2])
+        components.data('current_components', [selection_msg, selection_msg2, buttons_msg, buttons_msg2])
         lprint(ctx, 'Opened server panel')
 
     @commands.command(hidden=True)
-    async def _update_server_panel(self, ctx, mode):
+    async def _update_control_panel(self, ctx, mode, buttons_mode='server'):
         """Show select menu of server log files available to download."""
 
         failed = False  # if failed to update the components
         components.data('second_selected', None)
         spc = components.data('server_panel_components')  # [select options, select msg, button msg, current page, total pages]
-        total_pages = 0
+        total_pages = 1
+        buttons1 = [['Reload', 'controlpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1']]
+        buttons_dict = {
+            'server':   [[['Status Page', 'serverstatus', '\U00002139'],
+                          ['Stop Server', 'serverstop', '\U0001F6D1'] if await server_status() else ['Start Server', 'serverstart', '\U0001F680'],
+                          ['Reboot Server', 'serverrestart', '\U0001F501']],
+                         [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
+                          ['Properties File', 'propertiesall', '\U0001F527'],
+                          ['Server Log', 'get_log_file', '\U0001F4C3'],
+                          ['Connections Log', 'serverconnections', '\U0001F4E1']]],
+            'backups':  [[['Backup World', 'worldbackupdate', '\U0001F195'],
+                          ['Backup Server', 'serverbackupdate', '\U0001F195'],
+                          ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
+                          ['Server Backups', 'restoreserverpanel', '\U0001F4C1']],
+                         [['Disable Autosave', 'autosaveoff', '\U0001F504'] if slime_vars.autosave_status else ['Enable Autosave', 'autosaveon', '\U0001F504'],
+                          ['Save World', 'saveall', '\U0001F30E']]],
+            'players':  [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
+                          ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
+                          ['OP List', 'oplist', '\U0001F4DC']],
+                         [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]],
+            'world':    [[['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
+                          ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
+                         [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
+                          ['Enable Weather', 'weatheron', '\U0001F7E2'],
+                          ['Disable Weather', 'weatheroff', '\U0001F534']]],
+            'extra':    [[['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'],
+                          ['Bot Log', 'botlog', '\U0001F4C3']],
+                         [['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]]}
 
-        if mode == 'servers':
+        buttons_select_options = [[['Server Actions', '_update_control_panel buttons server', False, 'Status, start, motd, server server logs, properties, etc'],  # label, value, is default, description
+                                   ['Save/Backup Actions', '_update_control_panel buttons backups', False, 'Autosave, save, backup/restore, etc'],
+                                   ['Player Actions', '_update_control_panel buttons players', False, 'Player panel, players list, teleport, chat, banlist/whitelisti, OP, etc'],
+                                   ['World Actions', '_update_control_panel buttons world', False, 'Weather, time, etc'],
+                                   ['Bot/Extra Actions', '_update_control_panel buttons extra', False, 'Bot log, restart bot, set channel, website links, etc']]]
+
+        if mode in 'buttons':
+            select_options = buttons_select_options
+            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], *buttons_dict[buttons_mode][0]], buttons_dict[buttons_mode][1]
+            params = ["**Buttons**", 'update_server_panel', 'Choose what buttons to show']
+
+        elif mode == 'servers':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo', '\U00002139'], ['Edit', 'serveredit', '\U0000270F'],
+            buttons2 = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo', '\U00002139'], ['Edit', 'serveredit', '\U0000270F'],
                        ['Copy', 'servercopy', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete', '\U0001F5D1']]
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd', True))
-            if not select_options: select_options, total_pages = [[['No world backups', '_', True]]], 1
-            buttons = [['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
+            if not select_options: select_options = [[['No world backups', '_', True]]]
+            buttons2 = [['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
             params = ["**World Backups**", 'second_selected', 'Select World Backup']
 
         elif mode == 'server_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_backups_path, 'd', True))
-            if not select_options: select_options, total_pages = [[['No server backups', '_', True]]], 1
-            buttons = [['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
+            if not select_options: select_options = [[['No server backups', '_', True]]]
+            buttons2 = [['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
             params = ["**Server Backups**", 'second_selected', 'Select Server Backup']
 
         elif mode == 'log_files':
-            await ctx.send("List limited to 25, use next/back buttons.")
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_log_path, 'f'))
-            if not select_options: select_options, total_pages = [[['No log files', '_', True]]], 1
-            buttons = [['Download', '_get_log_file', '\U0001F4BE']]
+            if not select_options: select_options = [[['No log files', '_', True]]]
+            buttons2 = [['Download', '_get_log_file', '\U0001F4BE']]
             params = ["**Log Files**", 'second_selected', 'Select File']
 
-        nav_buttons = [['Reload', 'serverpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1'], ['Close', '_close_panel', '\U0000274C']]
         try:
-            new_select_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=components.new_selection(select_options[0], params[1], params[2]))
-            new_buttons_msg = await spc['msg'][1].edit(content='', view=components.new_buttons(nav_buttons))
-            new_buttons_msg2 = await spc['msg'][2].edit(content='', view=components.new_buttons(buttons))
+            new_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=components.new_selection(select_options[0], params[1], params[2]))
+            new_msg2 = await spc['msg'][1].edit(content='', view=components.new_buttons(buttons1))
+            new_msg3 = await spc['msg'][2].edit(content='', view=components.new_buttons(buttons2))
             spc['options'] = select_options
-            spc['msg'] = [new_select_msg, new_buttons_msg, new_buttons_msg2]
+            spc['msg'] = [new_msg, new_msg2, new_msg3]
             spc['pages'][1] = total_pages
             spc['params'] = params
             components.data('server_panel_components', spc)
@@ -424,7 +419,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         if failed:
             await ctx.send("**Error:** Something went wrong with panel.")
-            await ctx.invoke(self.bot.get_command('serverpanel'))
+            await ctx.invoke(self.bot.get_command('controlpanel'))
         else: lprint(ctx, 'Updated server panel')
 
     @commands.command(hidden=True)
