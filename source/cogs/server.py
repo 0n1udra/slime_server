@@ -6,246 +6,13 @@ import bot_files.components as components
 import slime_vars
 
 ctx = 'slime_bot.py'
-
-# ========== Basics: Say, whisper, online players, server command pass through.
-class Basics(commands.Cog):
-    def __init__(self, bot): self.bot = bot
-
-    @commands.command(aliases=['mcommand', 'm/'])
-    async def servercommand(self, ctx, *command):
-        """
-        Pass command directly to server.
-
-        Args:
-            command: Server command, do not include the slash /.
-
-        Usage:
-            ?mcommand broadcast Hello Everyone!
-            ?m/ toggledownfall
-
-        Note: You will get the latest 2 lines from server output, if you need more use ?log.
-        """
-
-        command = format_args(command)
-        if not await send_command(command): return False
-
-        lprint(ctx, "Sent command: " + command)
-        await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
-
-    @commands.command(aliases=['broadcast', 's'])
-    async def say(self, ctx, *msg):
-        """
-        sends message to all online players.
-
-        Args:
-            msg: Message to broadcast.
-
-        Usage:
-            ?s Hello World!
-        """
-
-        msg = format_args(msg)
-
-        if not msg:
-            await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
-        else:
-            if await send_command('say ' + msg):
-                await ctx.send("Message circulated to all active players :loudspeaker:")
-                lprint(ctx, f"Server said: {msg}")
-
-    @commands.command(aliases=['whisper', 't', 'w'])
-    async def tell(self, ctx, player='', *msg):
-        """
-        Message online player directly.
-
-        Args:
-            player: Player name, casing does not matter.
-            msg optional: The message, no need for quotes.
-
-        Usage:
-            ?tell Steve Hello there!
-            ?t Jesse Do you have diamonds?
-        """
-
-        msg = format_args(msg)
-        if not player or not msg:
-            await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
-            return False
-
-        if not await send_command(f"tell {player} {msg}"): return
-
-        await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
-        lprint(ctx, f"Messaged {player} : {msg}")
-
-    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
-    async def chatlog(self, ctx, *args):
-        """
-        Shows chat log. Does not include whispers.
-
-        Args:
-            lines optional default(5): How many log lines to look through. This is not how many chat lines to show.
-
-        Usage:
-            ?chat - Shows latest 5 player chat lines from log file.
-            ?chat 50 - May take a while to load all 50 lines.
-        """
-
-        try:
-            lines = int(args[0])
-            args = args[1:]
-        except: lines = 5
-
-        try: keyword = ' ' .join(args)
-        except: keyword = None
-
-        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
-
-        # Get only log lines that are user chats.
-        log_data = backend.server_log(']: <', lines=lines, filter_mode=True, return_reversed=True)
-
-        try: log_data = log_data.strip().split('\n')
-        except:
-            await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
-            return False
-
-        # optionally filter out chat lines only with certain keywords.
-        log_data = [i for i in log_data if keyword.lower() in i.lower()]
-
-        i = lines
-        for line in log_data:
-            # Only show specified number of lines from 'lines' parameter.
-            if i <= 0: break
-            i -= 1
-
-            # Extracts wanted data from log line and formats it in Discord markdown.
-            # '[15:26:49 INFO]: <R3diculous> test' > '(15:26:49) R3diculous: test' (With Discord markdown)
-            timestamp = line.split(']', 1)[0][1:]
-            line = line.split(']: <', 1)[-1].split('>', 1)
-            await ctx.send(f"_({timestamp})_ **{line[0]}**: {line[-1][1:]}")
-
-        await ctx.send("-----END-----")
-        lprint(ctx, f"Fetched Chat Log: {lines}")
-
-# ========== World: weather, time.
-class World(commands.Cog):
-    def __init__(self, bot): self.bot = bot
-
-    # ===== Weather
-    @commands.command(aliases=['weather', 'setweather'])
-    async def weatherset(self, ctx, state='', duration=0):
-        """
-        Set weather.
-
-        Args:
-            state: <clear/rain/thunder>: Weather to change to.
-            duration optional default(0): Duration in seconds. 0 means random duration.
-
-        Usage:
-            ?weatherset rain - Rain for random duration.
-            ?weather thunder 60
-        """
-
-        if not state:
-            await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
-            return False
-
-        if not await send_command(f'weather {state} {duration}'): return
-
-        await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
-        lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
-
-    @commands.command(aliases=['enableweather', 'weatherenable'])
-    async def weatheron(self, ctx):
-        """Enable weather cycle."""
-
-        await send_command(f'gamerule doWeatherCycle true')
-        await ctx.send("Weather cycle **ENABLED**")
-        lprint(ctx, 'Weather Cycle: Enabled')
-
-    @commands.command(aliases=['disableweather', 'weatherdisable'])
-    async def weatheroff(self, ctx):
-        """Disable weather cycle."""
-
-        await send_command(f'gamerule doWeatherCycle false')
-        await ctx.send("Weather cycle **DISABLED**")
-        lprint(ctx, 'Weather Cycle: Disabled')
-
-    @commands.command(aliases=['clearweather', 'weathersetclear'])
-    async def weatherclear(self, ctx):
-        """Set weather to clear."""
-
-        await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
-        lprint(ctx, 'Weather: Disabled')
-
-    @commands.command(aliases=['rainweather', 'weathersetrain'])
-    async def weatherrain(self, ctx):
-        """Set weather to clear."""
-
-        await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
-        lprint(ctx, 'Weather: Disabled')
-
-    @commands.command(aliases=['thunderweather', 'weathersetthunder'])
-    async def weatherthunder(self, ctx):
-        """Set weather to clear."""
-
-        await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
-        lprint(ctx, 'Weather: Disabled')
-
-    # ===== Time
-    @commands.command(aliases=['time', 'settime'])
-    async def timeset(self, ctx, set_time=''):
-        """
-        Set time.
-
-        Args:
-            set_time: Set time either using day|night|noon|midnight or numerically.
-
-        Usage:
-            ?timeset day
-            ?time 12
-        """
-
-        if set_time:
-            if not await send_command(f"time set {set_time}"): return
-            await ctx.send("Time Updated  :clock9:")
-        else: await ctx.send("Need time input, like: `12`, `day`")
-        lprint(ctx, f"Timed set: {set_time}")
-
-    @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
-    async def timeday(self, ctx):
-        """Set time to day."""
-
-        await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
-
-    @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
-    async def timenight(self, ctx):
-        """Set time to night."""
-
-        await ctx.invoke(self.bot.get_command('timeset'), set_time='14000')
-
-    @commands.command(aliases=['enabletime', 'timecycleon'])
-    async def timeon(self, ctx):
-        """Enable day light cycle."""
-
-        await send_command(f'gamerule doDaylightCycle true')
-        await ctx.send("Daylight cycle **ENABLED**")
-        lprint(ctx, 'Daylight Cycle: Enabled')
-
-    @commands.command(aliases=['diabletime', 'timecycleoff'])
-    async def timeoff(self, ctx):
-        """Disable day light cycle."""
-
-        await send_command(f'gamerule doDaylightCycle false')
-        await ctx.send("Daylight cycle **DISABLED**")
-        lprint(ctx, 'Daylight Cycle: Disabled')
-
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
         if slime_vars.autosave_status is True:
-            #await self.autosave_loop.start()
+            self.autosave_loop.start()
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
@@ -279,6 +46,106 @@ class Server(commands.Cog):
             backend.edit_file('server_selected', f" server_list['{name}']", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
+
+    @commands.command(aliases=['si'])
+    async def serverinfo(self, ctx):
+        await ctx.send("Coming soon.")
+
+    @commands.command(hidden=True)
+    async def servernew(self, ctx, interaction):
+        await ctx.send("Coming soon")
+        return
+        if interaction == 'submitted':
+            data = components.data('servernew')
+            embed = discord.Embed(title='New Server')
+            embed.add_field(name='Name', value=data['name'], inline=False)
+            embed.add_field(name='Description', value=data['description'], inline=False)
+            embed.add_field(name='Start Command', value=f"`{data['command']}`", inline=False)
+            embed.add_field(name='Wait time', value=data['wait'], inline=False)
+            await ctx.send(embed=embed)
+            await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+
+        else:
+            modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
+                            ['text', 'Description', 'description', 'Add description', None, True, False, 500],
+                            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', f'java {slime_vars.java_params} -jar server.jar nogui', True, True, 500],
+                            ['text', 'Wait Time', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, False, 500]]
+            modal_msg = await interaction.response.send_modal(components.new_modal(modal_fields, 'New Server', 'servernew'))
+
+    @commands.command(aliases=['sc'])
+    async def servercopy(self, ctx, server=''):
+        await ctx.send("Coming soon.")
+
+    @commands.command(hidden=True)
+    async def serveredit(self, ctx):
+        await ctx.send("Coming soon.")
+
+    @commands.command(hidden=True)
+    async def serverdelete(self, ctx):
+        await ctx.send("Coming Soon")
+        return
+        """
+        Delete a server
+
+        Args:
+            server: I
+        """
+
+        to_delete = f"{slime_vars.servers_path}/{components.data('second_selected', reset=True)}"
+        try: backend.delete_dir(to_delete)
+        except:
+            await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
+            return False
+
+        await ctx.send(f"**Server Deleted:** `{to_delete}`")
+        lprint(ctx, "Deleted server: " + to_delete)
+
+        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+        except: pass
+
+    # ===== Version
+    @commands.command(aliases=['lversion', 'lver', 'lv'])
+    async def latestversion(self, ctx):
+        """Gets latest Minecraft server version number from official website."""
+
+        response = backend.check_latest_version()
+        await ctx.send(f"Latest version: `{response}`")
+        lprint(ctx, "Fetched latest Minecraft server version: " + response)
+
+    @commands.command(aliases=['updateserver', 'su'])
+    async def serverupdate(self, ctx, now=''):
+        """
+        Updates server.jar file by downloading latest from official Minecraft website.
+
+        Args:
+            now optional: Stops server immediately without giving online players 15s warning.
+
+        Usage:
+            ?serverupdate
+            ?su now
+
+        Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
+        """
+
+        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
+            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
+            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
+        else:
+            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
+            return False
+
+        # Halts server if running.
+        if await server_status():
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
+        await asyncio.sleep(5)
+
+        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
+        server = backend.get_latest_version()  # Updats server.jar file.
+        if server:
+            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
+            await asyncio.sleep(3)
+        else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
+        lprint(ctx, "Server Updated")
 
     # ===== Save/Autosave
     @commands.command(aliases=['sa', 'save-all'])
@@ -317,7 +184,7 @@ class Server(commands.Cog):
             ?autosave 60 - will send 'save-all' command to server every 60min.
         """
 
-        if not arg: await ctx.send(f"Usage Examples: Update interval (minutes) `?autosave 60`, turn on `?autosave on`.")
+        if not arg: await ctx.send(f"Usage: Update interval(min) `?autosave 60`, activate `?autosave on`.")
 
         # Parses user input and sets invertal for autosave.
         try: arg = int(arg)
@@ -329,19 +196,24 @@ class Server(commands.Cog):
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
         if arg.lower() in backend.enable_inputs:
-            slime_vars.autosave_status = True
+            # Starts loop, updates autosave_status, edits slime_vars.py, output to log
             self.autosave_loop.start()
+            slime_vars.autosave_status = True
             backend.edit_file('autosave_status', ' True', slime_vars.slime_vars_file)
             lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_interval}m)')
         elif arg.lower() in backend.disable_inputs:
-            slime_vars.autosave_status = False
             self.autosave_loop.cancel()
+            slime_vars.autosave_status = False
             backend.edit_file('autosave_status', ' False', slime_vars.slime_vars_file)
             lprint(ctx, 'Autosave: Disabled')
 
-        await ctx.send(f"Auto save function: {'**ENABLED** :repeat::floppy_disk:' if slime_vars.autosave_status else '**DISABLED**'}")
-        await ctx.send(f"Auto save interval: **{slime_vars.autosave_interval}** minutes.")
-        await ctx.send('**Note:** Auto save loop will pause(not same as disabled) when server is offline. If server is back online, use `?check` or `?stats` to update the bot.')
+        status_msg = ':red_circle: **DISABLED** '
+        if not await server_status(discord_msg=False): status_msg = ":pause_button: **PAUSED**"
+        elif slime_vars.autosave_status: status_msg = ':green_circle: **ENABLED**'
+
+        fields = [['Status', f"{status_msg} | **{slime_vars.autosave_interval}**min"],
+                  ['Note', 'Auto save pauses if server unreachable (not same as disabled). Update server status with `?check` or `?stats`.']]
+        await ctx.send(embed=components.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
         lprint(ctx, 'Fetched autosave information')
 
     @tasks.loop(seconds=slime_vars.autosave_interval * 60)
@@ -359,14 +231,14 @@ class Server(commands.Cog):
         await self.bot.wait_until_ready()
 
     # ===== Status/Info
-    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active'])
+    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
     async def servercheck(self, ctx, show_msg=True):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
         await server_status(discord_msg=show_msg)
 
-    @commands.command(aliases=['stat', 'stats', 'status'])
+    @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
@@ -673,50 +545,5 @@ class Server(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
-    @commands.command(aliases=['lversion', 'lver', 'lv'])
-    async def latestversion(self, ctx):
-        """Gets latest Minecraft server version number from official website."""
-
-        response = backend.check_latest_version()
-        await ctx.send(f"Latest version: `{response}`")
-        lprint(ctx, "Fetched latest Minecraft server version: " + response)
-
-    @commands.command(aliases=['updateserver', 'su'])
-    async def serverupdate(self, ctx, now=''):
-        """
-        Updates server.jar file by downloading latest from official Minecraft website.
-
-        Args:
-            now optional: Stops server immediately without giving online players 15s warning.
-
-        Usage:
-            ?serverupdate
-            ?su now
-
-        Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
-        """
-
-        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
-            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
-            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
-        else:
-            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
-            return False
-
-        # Halts server if running.
-        if await server_status():
-            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
-        await asyncio.sleep(5)
-
-        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
-        server = backend.get_latest_version()  # Updats server.jar file.
-        if server:
-            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
-            await asyncio.sleep(3)
-        else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
-        lprint(ctx, "Server Updated")
-
 async def setup(bot):
-    await bot.add_cog(Basics(bot))
-    await bot.add_cog(World(bot))
     await bot.add_cog(Server(bot))

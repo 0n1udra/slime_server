@@ -387,8 +387,8 @@ class Discord_Components_Funcs(commands.Cog):
         if mode == 'servers':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons = [['Select', 'serverlist button', '\U0001F446'], ['Info', '_server_info', '\U00002139'], ['Edit', '_server_edit', '\U0000270F'],
-                       ['Copy', '_server_copy', '\U0001F1E8'], ['New', '_server_new interaction', '\U0001F195'], ['Delete', '_server_delete', '\U0001F5D1']]
+            buttons = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo', '\U00002139'], ['Edit', 'serveredit', '\U0000270F'],
+                       ['Copy', 'servercopy', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete', '\U0001F5D1']]
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
@@ -468,62 +468,6 @@ class Discord_Components_Funcs(commands.Cog):
         else: spc['pages'][0] = current_page
         spc['msg'][0] = new_msg
         components.data('server_panel_components', spc)
-
-    @commands.command(hidden=True)
-    async def _server_info(self, ctx):
-        await ctx.send("Coming soon.")
-
-    @commands.command(hidden=True)
-    async def _server_new(self, ctx, interaction):
-        await ctx.send("Coming soon")
-        return
-        if interaction == 'submitted':
-            data = components.data('_server_new')
-            embed = discord.Embed(title='New Server')
-            embed.add_field(name='Name', value=data['name'], inline=False)
-            embed.add_field(name='Description', value=data['description'], inline=False)
-            embed.add_field(name='Start Command', value=f"`{data['command']}`", inline=False)
-            embed.add_field(name='Wait time', value=data['wait'], inline=False)
-            await ctx.send(embed=embed)
-            await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
-
-        else:
-            modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
-                            ['text', 'Description', 'description', 'Add description', None, True, False, 500],
-                            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', f'java {slime_vars.java_params} -jar server.jar nogui', True, True, 500],
-                            ['text', 'Wait Time', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, False, 500]]
-            modal_msg = await interaction.response.send_modal(components.new_modal(modal_fields, 'New Server', '_server_new'))
-
-    @commands.command(hidden=True)
-    async def _server_copy(self, ctx, server=''):
-        await ctx.send("Coming soon.")
-
-    @commands.command(hidden=True)
-    async def _server_edit(self, ctx):
-        await ctx.send("Coming soon.")
-
-    @commands.command(hidden=True)
-    async def _server_delete(self, ctx):
-        await ctx.send("Coming Soon")
-        return
-        """
-        Delete a server
-
-        Args:
-            server: I
-        """
-
-        to_delete = f"{slime_vars.servers_path}/{components.data('second_selected', reset=True)}"
-        try: backend.delete_dir(to_delete)
-        except:
-            await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
-            return False
-
-        await ctx.send(f"**Server Deleted:** `{to_delete}`")
-        lprint(ctx, "Deleted server: " + to_delete)
-
-        try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
-        except: pass
 
     # ===== Extra
     @commands.command(hidden=True, aliases=['killallplayers', 'kilkillkill', 'killall'])
