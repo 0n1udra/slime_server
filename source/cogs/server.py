@@ -2,6 +2,7 @@ import discord, asyncio
 from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
+import bot_files.components as components
 import slime_vars
 
 ctx = 'slime_bot.py'
@@ -260,7 +261,10 @@ class Server(commands.Cog):
             ?selectserver papermc
         """
 
-        name = format_args(name)
+        if 'button' in name:
+            name = components.data('second_selected')
+            if not name: return
+        else: name = format_args(name)
         if not name or 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
             for server in slime_vars.server_list.values():
@@ -269,11 +273,11 @@ class Server(commands.Cog):
             await ctx.send(embed=embed)
             await ctx.send(f"**Current Server:** `{slime_vars.server_selected[0]}`")
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
-        elif name in slime_vars.server_list.keys():
+        elif name in slime_vars.server_list:
             backend.server_selected = slime_vars.server_list[name]
             backend.server_path = f"{slime_vars.mc_path}/{slime_vars.server_selected[0]}"
             backend.edit_file('server_selected', f" server_list['{name}']", slime_vars.slime_vars_file)
-            await ctx.invoke(self.bot.get_command('restartbot'))
+            await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
 
     # ===== Save/Autosave

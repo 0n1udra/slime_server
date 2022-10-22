@@ -13,7 +13,6 @@ __license__ = "GPL 3"
 __status__ = "Development"
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
-
 # Make sure command_prifex doesn't conflict with other bots.
 bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents)
 backend.bot = components.bot = bot
@@ -37,8 +36,6 @@ async def on_ready():
         on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Minecraft Status', 'serverstatus', '\U00002139']]
         await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
-
-# ========== Extra: restart bot, botlog, get ip, help2.
 class Slime_Bot_Commands(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
@@ -52,6 +49,7 @@ class Slime_Bot_Commands(commands.Cog):
     async def botrestart(self, ctx):
         """Restart this bot."""
 
+        await components.clear()
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
@@ -105,7 +103,7 @@ class Slime_Bot_Commands(commands.Cog):
         os.chdir(slime_vars.bot_files_path)
         os.system('git pull')
 
-        await ctx.invoke(self.bot.get_command("restartbot"))
+        await ctx.invoke(self.bot.get_command("botrestart"))
 
     @commands.command()
     async def help2(self, ctx):
@@ -254,7 +252,7 @@ class Discord_Components_Funcs(commands.Cog):
         await ctx.send("Time & Weather:", view=components.new_buttons(tw_buttons))
         await ctx.send("", view=components.new_buttons(tw_buttons2))
 
-        bot_buttons = [['Restart Bot', 'restartbot', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Bot Log', 'botlog', '\U0001F4C3']]
+        bot_buttons = [['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Bot Log', 'botlog', '\U0001F4C3']]
         await ctx.send("Bot:", view=components.new_buttons(bot_buttons))
 
         extra_buttons = [['Refresh Control Panel', 'controlpanel', '\U0001F504'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
@@ -371,9 +369,10 @@ class Discord_Components_Funcs(commands.Cog):
         selection_msg2 = await ctx.send("", view=components.new_selection(select_options2, 'server_panel2', ''))
         # Buttons will update depending on mode.
         buttons_msg = await ctx.send("", view=components.new_buttons([['Reload', 'serverpanel', '\U0001F504']]))
+        buttons_msg2 = await ctx.send("", view=components.new_buttons([['Close', '_close_panel', '\U0000274C']]))
 
-        components.data('server_panel_components', {'options': select_options2, 'msg': [selection_msg2, buttons_msg], 'pages': [0, 0], 'params': []})
-        components.data('current_components', [*components.data('current_components'), selection_msg, selection_msg2, buttons_msg])
+        components.data('server_panel_components', {'options': select_options2, 'msg': [selection_msg2, buttons_msg, buttons_msg2], 'pages': [0, 0], 'params': []})
+        components.data('current_components', [*components.data('current_components'), selection_msg, selection_msg2, buttons_msg, buttons_msg2])
         lprint(ctx, 'Opened server panel')
 
     @commands.command(hidden=True)
@@ -381,42 +380,43 @@ class Discord_Components_Funcs(commands.Cog):
         """Show select menu of server log files available to download."""
 
         failed = False  # if failed to update the components
+        components.data('second_selected', None)
         spc = components.data('server_panel_components')  # [select options, select msg, button msg, current page, total pages]
         total_pages = 0
 
         if mode == 'servers':
-            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'd'))
+            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons = [['', 'serverpanel', '\U0001F504'],  ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
-                       ['New', '_server_new', '\U0001F195'], ['Edit', '_server_edit', '\U0000270F'], ['Delete', '_server_delete', '\U0001F5D1']]
-            params = ["**Servers**", 'server_selected', 'Select Server']
+            buttons = [['Select', 'serverlist button', '\U0001F446'], ['Info', '_server_info', '\U00002139'], ['Edit', '_server_edit', '\U0000270F'],
+                       ['Copy', '_server_copy', '\U0001F1E8'], ['New', '_server_new interaction', '\U0001F195'], ['Delete', '_server_delete', '\U0001F5D1']]
+            params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd', True))
             if not select_options: select_options, total_pages = [[['No world backups', '_', True]]], 1
-            buttons = [['', 'serverpanel', '\U0001F504'],  ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
-                       ['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
-            params = ["**World Backups**", 'world_backup_selected', 'Select World Backup']
+            buttons = [['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
+            params = ["**World Backups**", 'second_selected', 'Select World Backup']
 
         elif mode == 'server_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_backups_path, 'd', True))
             if not select_options: select_options, total_pages = [[['No server backups', '_', True]]], 1
-            buttons = [['', 'serverpanel', '\U0001F504'], ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'],
-                       ['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
-            params = ["**Server Backups**", 'server_backup_selected', 'Select Server Backup']
+            buttons = [['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
+            params = ["**Server Backups**", 'second_selected', 'Select Server Backup']
 
         elif mode == 'log_files':
             await ctx.send("List limited to 25, use next/back buttons.")
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_log_path, 'f'))
             if not select_options: select_options, total_pages = [[['No log files', '_', True]]], 1
-            buttons = [['', 'serverpanel', '\U0001F504'], ['', '_update_select_page back', '\U00002B05'], ['', '_update_select_page next', '\U000027A1'], ['Download', '_get_log_file', '\U0001F4BE']]
-            params = ["**Log Files**", 'log_file_selected', 'Select File']
+            buttons = [['Download', '_get_log_file', '\U0001F4BE']]
+            params = ["**Log Files**", 'second_selected', 'Select File']
 
+        nav_buttons = [['Reload', 'serverpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1'], ['Close', '_close_panel', '\U0000274C']]
         try:
             new_select_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=components.new_selection(select_options[0], params[1], params[2]))
-            new_buttons_msg = await spc['msg'][1].edit(content='', view=components.new_buttons(buttons))
+            new_buttons_msg = await spc['msg'][1].edit(content='', view=components.new_buttons(nav_buttons))
+            new_buttons_msg2 = await spc['msg'][2].edit(content='', view=components.new_buttons(buttons))
             spc['options'] = select_options
-            spc['msg'] = [new_select_msg, new_buttons_msg]
+            spc['msg'] = [new_select_msg, new_buttons_msg, new_buttons_msg2]
             spc['pages'][1] = total_pages
             spc['params'] = params
             components.data('server_panel_components', spc)
@@ -428,10 +428,13 @@ class Discord_Components_Funcs(commands.Cog):
         else: lprint(ctx, 'Updated server panel')
 
     @commands.command(hidden=True)
+    async def _close_panel(self, ctx): await components.clear()
+
+    @commands.command(hidden=True)
     async def _get_log_file(self, ctx):
         """Download server log file, also unzips beforehand if it's a .gz file."""
 
-        log_selected = components.data('log_file_selected')
+        log_selected = components.data('second_selected')
         if not log_selected: return  # If not log is selected from Discord selection component
         # Unzips file if it's a .gz file. Will delete file afterwards.
         if log_selected.endswith('.gz'):
@@ -467,29 +470,42 @@ class Discord_Components_Funcs(commands.Cog):
         components.data('server_panel_components', spc)
 
     @commands.command(hidden=True)
-    async def _server_new(self, ctx):
-
-        class MyModal(discord.ui.Modal):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-
-                self.add_item(discord.ui.TextInput(label="Short Input"))
-                self.add_item(discord.ui.TextInput(label="Long Input", style=discord.TextStyle.long))
-
-            async def callback(self, interaction):
-                embed = discord.Embed(title="Modal Results")
-                embed.add_field(name="Short Input", value=self.children[0].value)
-                embed.add_field(name="Long Input", value=self.children[1].value)
-                await interaction.response.send_message(embeds=[embed])
-
-        modal = MyModal(title="Modal via Slash Command")
-        await ctx.send(view=modal)
+    async def _server_info(self, ctx):
+        await ctx.send("Coming soon.")
 
     @commands.command(hidden=True)
-    async def _server_edit(self, ctx): pass
+    async def _server_new(self, ctx, interaction):
+        await ctx.send("Coming soon")
+        return
+        if interaction == 'submitted':
+            data = components.data('_server_new')
+            embed = discord.Embed(title='New Server')
+            embed.add_field(name='Name', value=data['name'], inline=False)
+            embed.add_field(name='Description', value=data['description'], inline=False)
+            embed.add_field(name='Start Command', value=f"`{data['command']}`", inline=False)
+            embed.add_field(name='Wait time', value=data['wait'], inline=False)
+            await ctx.send(embed=embed)
+            await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
+
+        else:
+            modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
+                            ['text', 'Description', 'description', 'Add description', None, True, False, 500],
+                            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', f'java {slime_vars.java_params} -jar server.jar nogui', True, True, 500],
+                            ['text', 'Wait Time', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, False, 500]]
+            modal_msg = await interaction.response.send_modal(components.new_modal(modal_fields, 'New Server', '_server_new'))
+
+    @commands.command(hidden=True)
+    async def _server_copy(self, ctx, server=''):
+        await ctx.send("Coming soon.")
+
+    @commands.command(hidden=True)
+    async def _server_edit(self, ctx):
+        await ctx.send("Coming soon.")
 
     @commands.command(hidden=True)
     async def _server_delete(self, ctx):
+        await ctx.send("Coming Soon")
+        return
         """
         Delete a server
 
@@ -497,8 +513,9 @@ class Discord_Components_Funcs(commands.Cog):
             server: I
         """
 
-        to_delete = f"{slime_vars.servers_path}/{components.data('server_selected')}"
-        if not backend.delete_dir(to_delete):
+        to_delete = f"{slime_vars.servers_path}/{components.data('second_selected', reset=True)}"
+        try: backend.delete_dir(to_delete)
+        except:
             await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
             return False
 
@@ -507,7 +524,6 @@ class Discord_Components_Funcs(commands.Cog):
 
         try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'servers')
         except: pass
-
 
     # ===== Extra
     @commands.command(hidden=True, aliases=['killallplayers', 'kilkillkill', 'killall'])
@@ -534,8 +550,6 @@ class Discord_Components_Funcs(commands.Cog):
         await send_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
-
-# Adds functions to bot.
 async def setup(bot):
     for i in os.listdir('./cogs'):
         if i.endswith('.py'):

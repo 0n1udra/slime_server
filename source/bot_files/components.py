@@ -4,7 +4,7 @@ bot = None
 _data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
          'log_select_options': [], 'log_select_page': 0}
 
-def data(var, new_value=None):
+def data(var, new_value=None, reset=False):
     """
     Discord components dictionary value reader/setter function.
 
@@ -16,8 +16,10 @@ def data(var, new_value=None):
     # To set clear out the value use 0 instead of None. e.g. data('player_selected', 0)
     if new_value is not None: _data[var] = new_value
 
-    if var in _data.keys():
-        return _data[var]
+    if var in _data:
+        return_data = _data[var]
+        if reset: _data.pop(var)
+        return return_data
     else: return False
 
 async def clear():
@@ -34,6 +36,25 @@ async def clear():
         try: await i.delete()
         except: pass
     data('current_components', [])
+
+class Discord_Modal(discord.ui.Modal):
+    def __init__(self, title, custom_id):
+        super().__init__(title=title, custom_id=custom_id)
+
+    async def on_submit(self, interaction):
+        await interaction.response.defer()
+        custom_id = interaction.data['custom_id']
+
+        # Extracts data from fields from modal using component's custom_id as dictionary keys.
+        submitted_data = {}
+        for i in interaction.data['components']:
+            i = i['components'][0]
+            submitted_data[i['custom_id']] = i['value']
+
+        # Saves data so it can be retrieved later by other functions, and calls corresponding function using modal's custom_id.
+        data(custom_id, submitted_data)
+        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        await ctx.invoke(bot.get_command(custom_id), 'submitted')
 
 class Discord_Select(discord.ui.Select):
     def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
@@ -60,7 +81,7 @@ class Discord_Button(discord.ui.Button):
         super().__init__(label=label, custom_id=custom_id, emoji=emoji, style=style)
 
     async def callback(self, interaction):
-        await interaction.response.defer()
+
         custom_id = interaction.data['custom_id']
 
         # Get parameter for use of command being invoke from custom_id. E.g. 'gamemode player survival'
@@ -74,8 +95,23 @@ class Discord_Button(discord.ui.Button):
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         if params:
             if params[0] == 'player': params[0] = data('player_selected')  # Use currently selected player as a parameter
+            if params[0] == 'interaction': params[0] = interaction  # Send interaction object
+            else: await interaction.response.defer()
             await ctx.invoke(bot.get_command(custom_id), *params)
         else: await ctx.invoke(bot.get_command(custom_id))
+
+def new_modal(field_args, title, custom_id):
+    modal = Discord_Modal(title=title, custom_id=custom_id)
+
+    for field in field_args:
+        if field[0] == 'text':
+            style = discord.TextStyle.short
+            if field[5]: style = discord.TextStyle.long  # If long, default is short
+            modal.add_item(discord.ui.TextInput(label=field[1], custom_id=field[2], placeholder=field[3], default=field[4], style=style, required=field[6], max_length=field[7]))
+        elif field[0] == 'select':
+            pass
+        else: continue
+    return modal
 
 def new_buttons(buttons_list):
     """Create new discord.ui.View and add buttons, then return said view."""
