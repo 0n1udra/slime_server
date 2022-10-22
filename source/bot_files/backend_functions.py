@@ -454,24 +454,29 @@ def enum_dir(path, mode, index_mode=False):
         index_mode bool: Put index as second item in list.
     """
 
-    backups = []
+    return_list = []
     if not os.path.isdir(path): return False
 
     index = 1
     for item in reversed(sorted(os.listdir(path))):
+        # Appends only either file or directory to items list.
         flag = False
-        if mode == 'f':
+        if 'f' in mode:
             if os.path.isfile(os.path.join(path, item)): flag = True
-        elif mode == 'd':
+        elif 'd' in mode:
             if os.path.isdir(os.path.join(path, item)): flag = True
 
         if flag:
-            if index_mode:
-                backups.append([item, index, False, index])  # Need this for world/server commands
-            else: backups.append([item, item, False, index])  # Last 2 list items is for new_selection.
             index += 1
+            if index_mode:
+                return_list.append([item, index, False, index])  # Need this for world/server commands
+                continue
+            if 's' in mode and item in slime_vars.server_list:
+                return_list.append([item, item, False, slime_vars.server_list[item][1]])  # For server mode for ?serverpanel command component
+                continue
+            return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
         else: continue
-    return backups
+    return return_list
 
 def delete_dir(backup):
     """
@@ -481,10 +486,7 @@ def delete_dir(backup):
         backup str: Path of backup to delete.
     """
 
-    try:
-        shutil.rmtree(backup)
-        return True
-    except: lprint(ctx, "Error deleting: " + str(backup))
+    shutil.rmtree(backup)
 
 def new_backup(new_name, src, dst):
     """
@@ -502,13 +504,7 @@ def new_backup(new_name, src, dst):
     new_name = f"({get_datetime()}) {version}{new_name}"
     new_backup_path = dst + '/' + new_name.strip()
     shutil.copytree(src, new_backup_path)
-
-    if os.path.isdir(new_backup_path):
-        lprint(ctx, "Backed up to: " + new_backup_path)
-        return new_name
-    else:
-        lprint(ctx, "Error creating backup at: " + new_backup_path)
-        return False
+    return new_backup_path
 
 def restore_backup(src, dst):
     """
@@ -519,10 +515,5 @@ def restore_backup(src, dst):
         dst str: Location to copy backup to.
     """
 
-    try: shutil.rmtree(dst)
-    except: pass
-
-    try:
-        shutil.copytree(src, dst)
-        return True
-    except: lprint(ctx, "Error restoring: " + str(src + ' > ' + dst))
+    shutil.rmtree(dst)
+    shutil.copytree(src, dst)

@@ -32,9 +32,11 @@ def group_items(items, size=25):
         size int: Size of sublist.
     """
 
-    grouped_list = [items[i:i + size] for i in range(0, len(items), size)]
-    num_of_groups = math.ceil(len(items) / size)
-    return grouped_list, num_of_groups
+    try:
+        grouped_list = [items[i:i + size] for i in range(0, len(items), size)]
+        num_of_groups = math.ceil(len(items) / size)
+        return grouped_list, num_of_groups
+    except: return None, None
 
 def get_proc(proc_name, proc_cmdline=None):
     """Returns a process by matching name and argument."""

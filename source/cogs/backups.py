@@ -25,17 +25,16 @@ class World_Backups(commands.Cog):
 
         embed = discord.Embed(title='World Backups :floppy_disk:')
         worlds = backend.enum_dir(slime_vars.world_backups_path, 'd')
+        lprint(ctx, f"Fetched {amount} world saves")
         if worlds is False:
             await ctx.send("No world backups found.")
-            return False
+            return
 
         for backup in worlds[-amount:]:
             embed.add_field(name=backup[3], value=f"`{backup[0]}`", inline=False)
         await ctx.send(embed=embed)
         await ctx.send("Use `?worldrestore <index>` to restore world save.")
-
         await ctx.send("**WARNING:** Restore will overwrite current world. Make a backup using `?backup <codename>`.")
-        lprint(ctx, f"Fetched {amount} world saves")
 
     @commands.command(aliases=['backupworld', 'newworldbackup', 'worldbackupnew', 'wbn'])
     async def worldbackup(self, ctx, *name):
@@ -52,19 +51,21 @@ class World_Backups(commands.Cog):
 
         if not name:
             await ctx.send("Usage: `?worldbackup <name>`\nExample: `?worldbackup Before the reckoning`")
-            return False
+            return
         name = format_args(name)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
         await send_command(f"save-all", discord_msg=False)
         await asyncio.sleep(3)
-        new_backup = backend.new_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
-        if new_backup:
-            await ctx.send(f"**New World Backup:** `{new_backup}`")
-        else: await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
+        try: new_backup = backend.new_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
+        except:
+            await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
+            lprint(ctx, "ERROR: New world backup: " + name)
+            return
 
+        await ctx.send(f"**New World Backup:** `{new_backup}`")
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
-        lprint(ctx, "New world backup: " + new_backup)
+        lprint(ctx, "New world backup: " + name)
 
         try: await ctx.invoke(self.bot.get_command('_update_server_panel'), 'world_backups')  # Updates panel if open
         except: pass
@@ -92,27 +93,28 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = components.data('world_backup_selected')
+            index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
-            return False
+            return
         if not index: return
 
         fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
-        lprint(ctx, "World restoring to: " + fetched_restore)
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
         if await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if not backend.restore_backup(fetched_restore, slime_vars.server_path + '/world'):
+        try: backend.restore_backup(fetched_restore, slime_vars.server_path + '/world')
+        except:
             await ctx.send(f"**Error:** Issue restoring world: {fetched_restore}")
-            return False
+            lprint(ctx, "ERROR: World restore: " + fetched_restore)
+            return
 
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
+        lprint(ctx, "World restored: " + fetched_restore)
         await asyncio.sleep(5)
-
         await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
 
     @commands.command(aliases=['deleteworld', 'wbd'])
@@ -127,18 +129,20 @@ class World_Backups(commands.Cog):
             ?delete 0
         """
 
-        if index == 'button':  # If this command triggered from a button.
-            index = components.data('world_backup_selected')
+        if index == 'button':
+            index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
-            return False
+            return
         if not index: return
 
         to_delete = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
-        if not backend.delete_dir(to_delete):
+        try: backend.delete_dir(to_delete)
+        except:
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
-            return False
+            lprint(ctx, "ERROR: Deleting world backup: " + to_delete)
+            return
 
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
@@ -168,8 +172,7 @@ class World_Backups(commands.Cog):
         if await server_status():
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try:
-            shutil.rmtree(slime_vars.server_path + '/world')
+        try: shutil.rmtree(slime_vars.server_path + '/world')
         except:
             await ctx.send("Error trying to reset world.")
             lprint(ctx, "ERROR: Issue deleting world folder.")
@@ -195,11 +198,11 @@ class Server_Backups(commands.Cog):
         """
 
         embed = discord.Embed(title='Server Backups :floppy_disk:')
-        servers = backend.enum_dir(slime_vars.server_backups_path)
-
+        servers = backend.enum_dir(slime_vars.server_backups_path, 'd')
+        lprint(ctx, f"Fetched {amount} world backups")
         if servers is False:
             await ctx.send("No server backups found.")
-            return False
+            return
 
         for save in servers[-amount:]:
             embed.add_field(name=save[3], value=f"`{save[0]}`", inline=False)
@@ -207,7 +210,6 @@ class Server_Backups(commands.Cog):
 
         await ctx.send("Use `?serverrestore <index>` to restore server.")
         await ctx.send("**WARNING:** Restore will overwrite current server. Create backup using `?serverbackup <codename>`.")
-        lprint(ctx, f"Fetched {amount} world backups")
 
     @commands.command(aliases=['backupserver', 'newserverbackup', 'serverbackupnew', 'sbn'])
     async def serverbackup(self, ctx, *name):
@@ -223,17 +225,19 @@ class Server_Backups(commands.Cog):
 
         if not name:
             await ctx.send("Usage: `?serverbackup <name>`\nExample: `?serverbackup Everything just dandy`")
-            return False
+            return
 
         name = format_args(name)
         await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        if await send_command(f"save-all", discord_msg=False):
-            await asyncio.sleep(3)
-        new_backup = backend.new_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
-        if new_backup:
-            await ctx.send(f"**New Server Backup:** `{new_backup}`")
-        else: await ctx.send("**ERROR:** Server backup failed! :interrobang:")
+        if await send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
 
+        try: new_backup = backend.new_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
+        except:
+            await ctx.send("**ERROR:** Server backup failed! :interrobang:")
+            lprint(ctx, "ERROR: New server backup: " + name)
+            return
+
+        await ctx.send(f"**New Server Backup:** `{new_backup}`")
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
@@ -260,16 +264,15 @@ class Server_Backups(commands.Cog):
             ?sbr 1 now
         """
 
-        if index == 'button':  # If this command triggered from a button.
-            index = components.data('server_backup_selected')
+        if index == 'button':
+            index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
-            return False
+            return
         if not index: return
 
         fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
-        lprint(ctx, "Server restoring to: " + fetched_restore)
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
         if await server_status():
@@ -277,11 +280,15 @@ class Server_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if backend.restore_backup(fetched_restore, slime_vars.server_path):
-            await ctx.send(f"**Server Restored:** `{fetched_restore}`")
-        else: await ctx.send("**ERROR:** Could not restore server!")
+        try: backend.restore_backup(fetched_restore, slime_vars.server_path)
+        except:
+            await ctx.send("**ERROR:** Could not restore server!")
+            lprint(ctx, "ERROR: Server restore: " + fetched_restore)
+            return
 
+        await ctx.send(f"**Server Restored:** `{fetched_restore}`")
         await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
+        lprint(ctx, "Server restored: " + fetched_restore)
 
     @commands.command(aliases=['deleteserverrestore', 'serverdeletebackup', 'serverrestoredelete', 'sbd'])
     async def serverbackupdelete(self, ctx, index=''):
@@ -297,17 +304,19 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'button':  # If this command triggered from a button.
-            index = components.data('server_backup_selected')
+            index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")
-            return False
+            return
         if not index: return
 
         to_delete = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
-        if not backend.delete_dir(to_delete):
+        try: backend.delete_dir(to_delete)
+        except:
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
-            return False
+            lprint(ctx, "ERROR: Deleting server backup: " + to_delete)
+            return
 
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
