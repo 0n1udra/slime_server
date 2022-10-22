@@ -14,7 +14,8 @@ __status__ = "Development"
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
-bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents)
+help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False, )
+bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
 backend.bot = components.bot = bot
 
 @bot.event
