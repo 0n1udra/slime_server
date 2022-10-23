@@ -1,6 +1,8 @@
 import discord
 
 bot = None
+
+# _data dictionary stores active components and relating data. Saved components in dict can be edited later on.
 _data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
          'log_select_options': [], 'log_select_page': 0}
 
@@ -51,7 +53,7 @@ class Discord_Modal(discord.ui.Modal):
             i = i['components'][0]
             submitted_data[i['custom_id']] = i['value']
 
-        # Saves data so it can be retrieved later by other functions, and calls corresponding function using modal's custom_id.
+        # Saves data, so it can be retrieved later by other functions, and calls corresponding function using modal's custom_id.
         data(custom_id, submitted_data)
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         await ctx.invoke(bot.get_command(custom_id), 'submitted')
@@ -79,7 +81,7 @@ class Discord_Select(discord.ui.Select):
 
 class Discord_Button(discord.ui.Button):
     """
-    Create button from received list containing label, custom_id, and emoji.
+    Create bmode from received list containing label, custom_id, and emoji.
     Uses custom_id with ctx.invoke to call corresponding function.
     """
 
@@ -97,7 +99,7 @@ class Discord_Button(discord.ui.Button):
             custom_id, params = custom_id_split[0], custom_id_split[1:]
         except: pass
 
-        # Runs function of same name as button's .custom_id variable. e.g. _teleport_selected()
+        # Runs function of same name as bmode's .custom_id variable. e.g. _teleport_selected()
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         if params:
             if params[0] == 'player': params[0] = data('player_selected')  # Use currently selected player as a parameter
@@ -125,9 +127,9 @@ def new_buttons(buttons_list):
     """Create new discord.ui.View and add buttons, then return said view."""
 
     view = discord.ui.View(timeout=None)
-    for button in buttons_list:
-        if len(button) == 2: button.append(None)  # For button with no emoji.
-        view.add_item(Discord_Button(label=button[0], custom_id=button[1], emoji=button[2]))
+    for bmode in buttons_list:
+        if len(bmode) == 2: bmode.append(None)  # For bmode with no emoji.
+        view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
     return view
 
 def new_selection(select_options_args, custom_id, placeholder):

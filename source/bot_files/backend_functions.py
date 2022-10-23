@@ -1,6 +1,7 @@
-import discord, fileinput, asyncio, shutil, random
+import discord, asyncio, random
 from file_read_backwards import FileReadBackwards
 from bot_files.extra import *
+from bs4 import BeautifulSoup
 if slime_vars.use_rcon: import mctools
 
 ctx = 'backend_functions.py'
@@ -378,115 +379,22 @@ def download_latest():
 
     return False
 
-# ========== Anything relating to file/folder editing/manipulation
-def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
+# ========== Servers and backups
+def new_server(name):
     """
-    Edits server.properties file if received target_property and value. Edits inplace with fileinput
-    If receive no value, will return current set value if property exists.
+    Create a new world or server backup, by copying and renaming folder.
 
     Args:
-        target_property str(None): Find Minecraft server property.
-        value str(''): If received argument, will change value.
-        file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
-
-    Returns:
-        str: If target_property was not found.
-        tuple: First item is line from file that matched target_property. Second item is just the current value.
+        new_name str: Name of new copy. Final name will have date and time prefixed.
+        src str: Folder to backup, whether it's a world folder or a entire server folder.
+        dst str: Destination for backup.
     """
 
-    try: os.chdir(slime_vars.server_path)
-    except: pass
-    return_line = ''
+    if not os.path.isdir(name): return False
 
-    # print() writes to file while using it in FileInput() with inplace=True
-    # fileinput doc: https://docs.python.org/3/library/fileinput.html
-    with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
-        for line in file:
-            split_line = line.split('=', 1)
 
-            if target_property == 'all':  # Return all lines of file.
-                return_line += line.strip() + '\n'
-                print(line, end='')
-
-            # If found match, and user passed in new value to update it.
-            elif target_property in split_line[0] and len(split_line) > 1:
-                if value:
-                    split_line[1] = value  # edits value section of line
-                    new_line = return_line = '='.join(split_line)
-                    print(new_line, end='\n')  # Writes new line to file
-                # If user did not pass a new value to update property, just return the line from file.
-                else:
-                    return_line = '='.join(split_line)
-                    print(line, end='')
-            else: print(line, end='')
-
-    if return_line:
-        return return_line, return_line.split('=')[1].strip()
-    else: return "Match not found.", 'Match not found.'
-
-def get_from_index(path, index, mode):
-    """
-    Get server or world backup folder name from passed in index number
-
-    Args:
-        path str: Location to find world or server backups.
-        index int: Select specific folder, get index from other functions like ?worldbackupslist, ?serverbackupslist
-
-    Returns:
-            str: file path of selected folder.
-    """
-
-    items = ['placeholder']  # Listed items in Discord (select menus, embeds) start at 1 (for user convients). But python is 0, soooo, yeah. need this.
-    for i in reversed(sorted(os.listdir(path))):
-        if mode == 'f': items.append(i)
-        elif mode == 'd': items.append(i)
-        else: continue
-
-    return f'{path}/{items[index]}'
-
-def enum_dir(path, mode, index_mode=False):
-    """
-    Returns enumerated list of directories in path.
-
-    Args:
-        path str: Path of world or server backups location.
-        mode str: Aggregate only files or only directories.
-        index_mode bool: Put index as second item in list.
-    """
-
-    return_list = []
-    if not os.path.isdir(path): return False
-
-    index = 1
-    for item in reversed(sorted(os.listdir(path))):
-        # Appends only either file or directory to items list.
-        flag = False
-        if 'f' in mode:
-            if os.path.isfile(os.path.join(path, item)): flag = True
-        elif 'd' in mode:
-            if os.path.isdir(os.path.join(path, item)): flag = True
-
-        if flag:
-            index += 1
-            if index_mode:
-                return_list.append([item, index, False, index])  # Need this for world/server commands
-                continue
-            if 's' in mode and item in slime_vars.server_list:
-                return_list.append([item, item, False, slime_vars.server_list[item][1]])  # For server mode for ?controlpanel command component
-                continue
-            return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
-        else: continue
-    return return_list
-
-def delete_dir(backup):
-    """
-    Delete world or server backup.
-
-    Args:
-        backup str: Path of backup to delete.
-    """
-
-    shutil.rmtree(backup)
+    new_folder = slime_vars.servers_path + '/' + name.strip()
+    return new_folder
 
 def new_backup(new_name, src, dst):
     """
