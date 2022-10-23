@@ -159,7 +159,8 @@ def new_embed(fields, title):
 
 def server_modal_fields(server='example'):
     data = slime_vars.servers[server]
+
     return [['text', 'Server Name', 'name', 'Name of new server', data[0], False, True, 50], # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
             ['text', 'Description', 'description', 'Add description', data[1], True, True, 500],
             ['text', 'Start Command', 'command', 'Runtime start command for .jar file', data[2], True, True, 500],
-            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data[3], True, True, 500]]
+            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data[3], True, True, 10]]

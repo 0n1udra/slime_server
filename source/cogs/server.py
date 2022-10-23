@@ -53,8 +53,7 @@ class Server(commands.Cog):
     async def serverinfo(self, ctx, *name):
         server = get_parameter(name)
         data = slime_vars.servers[server]
-        fields = [['Name', data[0]], ['Description', data[1]], ['Start Command', f"`{data[2]}`"],
-                  ['Wait Time', data[3]]]
+        fields = [['Name', data[0]], ['Description', data[1]], ['Start Command', f"`{data[2]}`"], ['Wait Time', data[3]]]
         await ctx.send(embed=components.new_embed(fields, 'Server Info'))
         await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
 
@@ -90,25 +89,17 @@ class Server(commands.Cog):
     @commands.command(hidden=True)
     async def serveredit(self, ctx, interaction):
 
-        server_name = get_parameter(interaction)
+        server_name = components.data('second_selected')
         if interaction == 'submitted':
+            new_data = components.data('serveredit')
 
-            server_name = components.data('second_selected')
-            server_data = components.data('serveredit')
-            new_name = server_data['name']
-            if server_name in slime_vars.servers:
-                await ctx.send("Server name already used.")
-                return
+            try: os.rename(slime_vars.servers_path + '/' + server_name, slime_vars.servers_path + '/' + new_data['name'])
+            except: pass
 
-            try:
-                os.rename(slime_vars.servers_path + '/' + server_name, slime_vars.servers_path + '/' + new_name)
-            except:
-                await ctx.send("**Error**: Issue renaming server.")
-                lprint(ctx, f"ERROR: Renaming: {server_name}")
-                return
+            slime_vars.servers.pop(server_name)
+            update_servers(new_data)
 
-            update_servers(server_data)
-            await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
+            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['name'])
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
