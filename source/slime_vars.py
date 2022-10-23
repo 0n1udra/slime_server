@@ -60,6 +60,7 @@ try:  # Get server list data containing run command and parameters.
     with open('bot_files/servers.csv', 'r') as f:
         csv_data = csv.reader(f, skipinitialspace=True)
         for i in csv_data:
+            if 'Example Entry' == i[0]: continue
             i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
             servers[i[0]] = i
 except:
