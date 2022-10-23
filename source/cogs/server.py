@@ -86,7 +86,7 @@ class Server(commands.Cog):
             modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
                             ['text', 'Description', 'description', 'Add description', None, True, True, 500],
                             ['text', 'Start Command', 'command', 'Runtime start command for .jar file', f'java {slime_vars.java_params} -jar server.jar nogui', True, True, 500],
-                            ['text', 'Wait Time', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, True, 500]]
+                            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, True, 500]]
             modal_msg = await interaction.response.send_modal(components.new_modal(modal_fields, 'New Server', 'servernew'))
 
     @commands.command(aliases=['sc'])
@@ -500,7 +500,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nAddress: `{slime_vars.server_url}`\nPlease wait about 15s before attempting to connect.")
+        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{slime_vars.server_selected[0]}**\nStartup time: {slime_vars.server_selected[3]}s.")
         backend.server_start()
 
         # checks if set custom wait time in server_selected list.
