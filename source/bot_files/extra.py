@@ -23,9 +23,20 @@ def lprint(ctx, msg):
 lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
 
 def get_parameter(arg, nrg_msg=False, key='second_selected', **kwargs):
+    """
+    Gets needed parameter for function to run properly.
+    Discord commands can be called from buttons or prefix command.
+    If using prefix command, it'll just format the parameters as needed.
+    If function being called from button, will get needed parameter using components.data func.
+
+    Args:
+        arg: Will either receive parameters from using prefix, or will be bmode.
+        nrg_msg bool: Returns 'No reason given' string, if arg is empty.
+        key str: Key of data dict to get parameter from. Used for getting selection from components.
+    """
+
     # Checks if command was called from button
     if 'bmode' in arg:
-        print("OK", arg, key)
         from_data_dict = components.data(key, reset=True)
         if from_data_dict: return from_data_dict
 
@@ -164,20 +175,26 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
 
 def read_json(json_file):
     """Read .json files."""
-    os.chdir(slime_vars.bot_files_path)
+    os.chdir(slime_vars.bot_src_path)
     with open(slime_vars.server_path + '/' + json_file) as file:
         return [i for i in json.load(file)]
 
 def read_csv(csv_file):
     """Read .csv files."""
-    os.chdir(slime_vars.bot_files_path + '/bot_files')
+    os.chdir(slime_vars.bot_files_path)
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
-def update_csv(csv_file):
-    os.chdir(slime_vars.bot_files_path + '/bot_files')
-    with open(csv_file) as file:
-        return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
+def update_csv(csv_file, new_data=None):
+    os.chdir(slime_vars.bot_files_path)
+
+    if csv_file == 'servers':
+        csv_file = 'servers.csv'
+        new_data = [i for i in slime_vars.servers.values()]
+
+    with open(csv_file, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows(new_data)
 
 def get_from_index(path, index, mode):
     """

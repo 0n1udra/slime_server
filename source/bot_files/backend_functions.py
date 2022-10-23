@@ -390,11 +390,12 @@ def new_server(name):
         dst str: Destination for backup.
     """
 
-    if not os.path.isdir(name): return False
-
 
     new_folder = slime_vars.servers_path + '/' + name.strip()
-    return new_folder
+    if os.path.isdir(new_folder): return 2, new_folder  # If folder already exist
+
+    os.mkdir(new_folder)
+    return new_folder, 1
 
 def new_backup(new_name, src, dst):
     """
