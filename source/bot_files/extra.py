@@ -226,8 +226,8 @@ def enum_dir(path, mode, index_mode=False):
             if index_mode:
                 return_list.append([item, index, False, index])  # Need this for world/server commands
                 continue
-            if 's' in mode and item in slime_vars.server_list:
-                return_list.append([item, item, False, slime_vars.server_list[item][1]])  # For server mode for ?controlpanel command component
+            if 's' in mode and item in slime_vars.servers:
+                return_list.append([item, item, False, slime_vars.servers[item][1]])  # For server mode for ?controlpanel command component
                 continue
             return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
         else: continue

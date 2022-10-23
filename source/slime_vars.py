@@ -53,21 +53,21 @@ default_wait_time = 30
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
-server_list = {}
+servers = {}
 # Create file if not exist.
-with open('bot_files/server_list.csv', "a") as f: pass
+with open('bot_files/servers.csv', "a") as f: pass
 try:  # Get server list data containing run command and parameters.
-    with open('bot_files/server_list.csv', 'r') as f:
+    with open('bot_files/servers.csv', 'r') as f:
         csv_data = csv.reader(f, skipinitialspace=True)
         for i in csv_data:
             i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
-            server_list[i[0]] = i
+            servers[i[0]] = i
 except:
-    print("Error reading server_list.csv file.")
+    print("Error reading servers.csv file.")
     exit()
 
 
-server_selected = server_list['papermc']
+server_selected = servers['papermc']
 servers_path = f"{mc_path}/servers"
 server_path = f"{servers_path}/{server_selected[0]}"
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
@@ -76,9 +76,10 @@ server_log_file = f"{server_path}/logs/latest.log"
 server_log_path = f"{server_path}/logs"
 
 # ========== Bot Config
-bot_files_path = os.path.dirname(os.path.abspath(__file__))
-slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_log_file = f"{bot_files_path}/slime_bot.log"
+bot_src_path = os.path.dirname(os.path.abspath(__file__))
+bot_files_path = bot_src_path + '/bot_files'
+slime_vars_file = bot_src_path + '/slime_vars.py'
+bot_log_file = f"{bot_src_path}/slime_bot.log"
 
 # The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '

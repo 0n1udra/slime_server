@@ -92,7 +92,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        if index == 'button':  # If this command triggered from a button.
+        if index == 'bmode':  # If this command triggered from a bmode.
             index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
@@ -115,7 +115,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
         lprint(ctx, "World restored: " + fetched_restore)
         await asyncio.sleep(5)
-        await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click bmode", view=components.new_buttons(start_button))
 
     @commands.command(aliases=['deleteworld', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
@@ -129,7 +129,7 @@ class World_Backups(commands.Cog):
             ?delete 0
         """
 
-        if index == 'button':
+        if index == 'bmode':
             index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
@@ -264,7 +264,7 @@ class Server_Backups(commands.Cog):
             ?sbr 1 now
         """
 
-        if index == 'button':
+        if index == 'bmode':
             index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:
@@ -287,7 +287,7 @@ class Server_Backups(commands.Cog):
             return
 
         await ctx.send(f"**Server Restored:** `{fetched_restore}`")
-        await ctx.send("Start server with `?start` or click button", view=components.new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click bmode", view=components.new_buttons(start_button))
         lprint(ctx, "Server restored: " + fetched_restore)
 
     @commands.command(aliases=['deleteserverrestore', 'serverdeletebackup', 'serverrestoredelete', 'sbd'])
@@ -303,7 +303,7 @@ class Server_Backups(commands.Cog):
             ?sbd 5
         """
 
-        if index == 'button':  # If this command triggered from a button.
+        if index == 'bmode':  # If this command triggered from a bmode.
             index = components.data('second_selected', reset=True)
         try: index = int(index)
         except:

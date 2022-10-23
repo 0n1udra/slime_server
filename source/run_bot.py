@@ -26,8 +26,8 @@ def start_bot():
     if slime_vars.use_tmux is True:
         no_tmux = False
         # Sources pyenv if set in slime_vars.
-        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_files_path}" ENTER'):
-            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_files_path})")
+        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_src_path}" ENTER'):
+            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_src_path})")
             no_tmux = True
 
         if no_tmux:

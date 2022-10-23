@@ -58,7 +58,7 @@ class Slime_Bot_Commands(commands.Cog):
             if await server_status():
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
-        os.chdir(slime_vars.bot_files_path)
+        os.chdir(slime_vars.bot_src_path)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['botquit'])
@@ -101,7 +101,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         await ctx.send("***Updating from GitHub...*** :arrows_counterclockwise:")
 
-        os.chdir(slime_vars.bot_files_path)
+        os.chdir(slime_vars.bot_src_path)
         os.system('git pull')
 
         await ctx.invoke(self.bot.get_command("botrestart"))
@@ -221,7 +221,7 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _control_panel_msg(self, ctx):
-        """Shows message and button to open the control panel."""
+        """Shows message and bmode to open the control panel."""
 
         cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
         await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=components.new_buttons(cp_buttons))
@@ -292,7 +292,7 @@ class Discord_Components_Funcs(commands.Cog):
         else: teleport_select_options = [['No Online Players', '_', True]]
         if target: teleport_select_options += [[target, target, True]]
 
-        # Selections updates teleport_selected list, which will be used in _teleport_selected() when button clicked.
+        # Selections updates teleport_selected list, which will be used in _teleport_selected() when bmode clicked.
         select1 = await ctx.send("**Teleport**", view=components.new_selection([['All Players', '@a']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
         select2 = await ctx.send('', view=components.new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
 
@@ -303,7 +303,7 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _teleport_selected(self, ctx, target_player=None):
-        """Teleports selected targets from ?teleport command when use Teleport! button."""
+        """Teleports selected targets from ?teleport command when use Teleport! bmode."""
 
         if not target_player: target_player = components.data('teleport_target')  # if not provided player param
         await ctx.invoke(self.bot.get_command('teleport'), target_player, components.data('teleport_destination'))
@@ -341,7 +341,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         failed = False  # if failed to update the components
         components.data('second_selected', None)
-        spc = components.data('server_panel_components')  # [select options, select msg, button msg, current page, total pages]
+        spc = components.data('server_panel_components')  # [select options, select msg, bmode msg, current page, total pages]
         total_pages = 1
         buttons1 = [['Reload', 'controlpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1']]
         buttons_dict = {
@@ -385,20 +385,20 @@ class Discord_Components_Funcs(commands.Cog):
         elif mode == 'servers':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons2 = [['Select', 'serverlist button', '\U0001F446'], ['Info', 'serverinfo button', '\U00002139'], ['Edit', 'serveredit button', '\U0000270F'],
-                       ['Copy', 'servercopy button', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete button', '\U0001F5D1']]
+            buttons2 = [['Select', 'serverlist bmode', '\U0001F446'], ['Info', 'serverinfo bmode', '\U00002139'], ['Edit', 'serveredit bmode', '\U0000270F'],
+                       ['Copy', 'servercopy bmode', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete bmode', '\U0001F5D1']]
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.world_backups_path, 'd', True))
             if not select_options: select_options = [[['No world backups', '_', True]]]
-            buttons2 = [['Restore', 'worldbackuprestore button', '\U000021A9'], ['Delete', 'worldbackupdelete button', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
+            buttons2 = [['Restore', 'worldbackuprestore bmode', '\U000021A9'], ['Delete', 'worldbackupdelete bmode', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
             params = ["**World Backups**", 'second_selected', 'Select World Backup']
 
         elif mode == 'server_backups':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_backups_path, 'd', True))
             if not select_options: select_options = [[['No server backups', '_', True]]]
-            buttons2 = [['Restore', 'serverrestore button', '\U000021A9'], ['Delete', 'serverbackupdelete button', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
+            buttons2 = [['Restore', 'serverrestore bmode', '\U000021A9'], ['Delete', 'serverbackupdelete bmode', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
             params = ["**Server Backups**", 'second_selected', 'Select Server Backup']
 
         elif mode == 'log_files':
@@ -421,7 +421,7 @@ class Discord_Components_Funcs(commands.Cog):
         if failed:
             await ctx.send("**Error:** Something went wrong with panel.")
             await ctx.invoke(self.bot.get_command('controlpanel'))
-        else: lprint(ctx, 'Updated server panel')
+        else: lprint(ctx, f'Updated server panel {mode}')
 
     @commands.command(hidden=True)
     async def _close_panel(self, ctx): await components.clear()
