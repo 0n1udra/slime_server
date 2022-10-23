@@ -53,7 +53,7 @@ default_wait_time = 30
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
-servers = {}
+servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
 # Create file if not exist.
 with open('bot_files/servers.csv', "a") as f: pass
 try:  # Get server list data containing run command and parameters.
@@ -65,6 +65,7 @@ try:  # Get server list data containing run command and parameters.
 except:
     print("Error reading servers.csv file.")
     exit()
+
 
 
 server_selected = servers['papermc']

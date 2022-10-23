@@ -1,8 +1,8 @@
-import discord, asyncio
+import discord, asyncio, os
 from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
-from bot_files.extra import get_parameter, update_csv
+from bot_files.extra import get_parameter, update_csv, update_servers
 import bot_files.components as components
 import slime_vars
 
@@ -16,6 +16,7 @@ class Server(commands.Cog):
             self.autosave_loop.start()
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
+    # ===== Servers, new, delete, editing, etc
     @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
     async def serverlist(self, ctx, *name):
         """
@@ -67,35 +68,52 @@ class Server(commands.Cog):
                 await ctx.send("Server name already used.")
                 return
 
-            try: new_folder, status = backend.new_server(server_name)
+            try: backend.new_server(server_name)
             except:
-                await ctx.send("**Error**: Issue creating new server.")
-                lprint(ctx, f"ERROR: New server folder: {server_name}")
+                await ctx.send("**Error**: Issue creating server.")
+                lprint(ctx, f"ERROR: Creating server: {server_name}")
                 return
-            else:
-                if status == 2: await ctx.send(f"Folder with name already exist at: `{new_folder}`")
 
-            slime_vars.servers[server_name] = [server_name, server_data['description'], server_data['command'], server_data['wait']]
-            update_csv('servers')
+            update_servers(server_data)
             await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
 
         else:
-            modal_fields = [['text', 'Server Name', 'name', 'Name of new server', None, False, True, 50],  # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
-                            ['text', 'Description', 'description', 'Add description', None, True, True, 500],
-                            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', f'java {slime_vars.java_params} -jar server.jar nogui', True, True, 500],
-                            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', 30, True, True, 500]]
-            modal_msg = await interaction.response.send_modal(components.new_modal(modal_fields, 'New Server', 'servernew'))
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(), 'New Server', 'servernew'))
 
     @commands.command(aliases=['sc'])
     async def servercopy(self, ctx, server=''):
         await ctx.send("Coming soon.")
 
     @commands.command(hidden=True)
-    async def serveredit(self, ctx):
-        await ctx.send("Coming soon.")
+    async def serveredit(self, ctx, interaction):
+
+        server_name = get_parameter(interaction)
+        if interaction == 'submitted':
+
+            server_name = components.data('second_selected')
+            server_data = components.data('serveredit')
+            new_name = server_data['name']
+            if server_name in slime_vars.servers:
+                await ctx.send("Server name already used.")
+                return
+
+            try:
+                os.rename(slime_vars.servers_path + '/' + server_name, slime_vars.servers_path + '/' + new_name)
+            except:
+                await ctx.send("**Error**: Issue renaming server.")
+                lprint(ctx, f"ERROR: Renaming: {server_name}")
+                return
+
+            update_servers(server_data)
+            await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
+
+            try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
+            except: pass
+        else:
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
 
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
@@ -124,7 +142,7 @@ class Server(commands.Cog):
 
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server: " + to_delete)
-        update_csv('servers')
+        update_servers()
 
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')

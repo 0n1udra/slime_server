@@ -493,7 +493,7 @@ class Permissions(commands.Cog):
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['name']}`" for i in backend.read_json('ops.json')]
+        op_players = [f"`{i['name']}`" for i in backend.read_json(slime_vars.server_path + '/' + 'ops.json')]
         if op_players:
             await ctx.send(f"**OP List** :scroll:")
             await ctx.send('\n'.join(op_players))

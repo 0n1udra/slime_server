@@ -175,26 +175,30 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
 
 def read_json(json_file):
     """Read .json files."""
-    os.chdir(slime_vars.bot_src_path)
-    with open(slime_vars.server_path + '/' + json_file) as file:
+    with open(json_file) as file:
         return [i for i in json.load(file)]
 
 def read_csv(csv_file):
-    """Read .csv files."""
+    """Read .csv files in bot_files directory."""
     os.chdir(slime_vars.bot_files_path)
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 def update_csv(csv_file, new_data=None):
-    os.chdir(slime_vars.bot_files_path)
+    """Updates csv files in bot_files directory."""
 
-    if csv_file == 'servers':
-        csv_file = 'servers.csv'
-        new_data = [i for i in slime_vars.servers.values()]
+    os.chdir(slime_vars.bot_files_path)
 
     with open(csv_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerows(new_data)
+
+def update_servers(new_data=None):
+    if new_data:
+        slime_vars.servers[new_data['name']] = [new_data['name'], new_data['description'], new_data['command'], new_data['wait']]
+
+    update_csv('servers.csv', [i for i in slime_vars.servers.values()])
+
 
 def get_from_index(path, index, mode):
     """
