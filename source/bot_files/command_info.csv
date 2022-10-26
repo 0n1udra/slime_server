@@ -24,7 +24,8 @@ Server Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log 
 Player list, `?players` `?p`, Shows online users.
 Player Locations, `?p location` `?pl`, Gets location coordinates for all online players.
 Player Locate, `?locate <player>`, Get player coordinates.
-Teleport, `?teleport <select_user> <target_user> [reason]` `?tp`, After 5s teleports player to targeted player. Use without arguments to bring up panel.
+Teleport, `?teleport [target_player] [destination] [reason]` `?tp`, "After 5s teleports player to targeted player or xyz coords. Use without arguments or provide only select_user to bring up panel."
+Teleport Return, `?teleportreturn` `?return` `?tpr`, Returns last teleported player with bot to original location.
 Invenotry Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
 Kill, `?kill <target> [reason]` `?pk`, Kill player, default reason 'No reason given'.
 Kill Delayed, `?killwait <target> <seconds> [reason]` `?dw`, Kills target after waiting for x seconds.
@@ -47,11 +48,13 @@ OP Remove, `?opremove <player>`, Remove players OP privileges.
 OP Timed, `?optimed <player> <minutes>` `?opt`, Set player to OP for a set time in minutes.
 World Backups, `?worldbackupslist [amount]` `?backups`, Shows list of created backups along with corresponding index number. Amount is how many latest backups to show.
 World New Backup, `?worldbackupnew <codename>`, Create a new backup, need to provide a name or keywords. Cannot overwrite existing backup, use `?delete` first.
+World New Backup Date, `?worldbackupdate` `?wbdate`, Create new world backup with the current date as name.
 World Restore, `?worldbackuprestore <index>` `?worldrestore`, Restore to a saved backup, need to input a index number you get from `?saves`.
 World Backup Delete, `?worldbackupdelete <index>` `?worlddelete`, Delete a saved world backup.
 Server Backups, `?serverbackupslist [amount]` `?serverbackups`, Get list of server backups, can specify how many of latest to show.
 Server New Backup, `?serverbackup <codename>`, Create backup of all server files.
-Server Delete backup, `?serverdelete <index>`, Get index number from `?serverbackups`.
+Server New Backup Date, `?serverbackupdate` `?sbdate`, Create new server backup with the current date as name.
+Server Delete Backup, `?serverdelete <index>`, Get index number from `?serverbackups`.
 Server Restore, `?serverbackuprestore <index>` '?serverrestore` `?restoreserver`, Restores server files from backup.
 Server Update, `?serverupdate [now]` `?su`, Updates server.jar from official Minecraft website.
 Server Properties, `?property <all/property name> [new value]` `?pr`, Check and change server server.properties file.

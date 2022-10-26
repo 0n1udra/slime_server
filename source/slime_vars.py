@@ -119,7 +119,7 @@ useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/mo
 
 # ========== Misc
 updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend.py
-server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
+server_ip = server_url  # Will be updated by get_ip() function in backend.py on bot startup.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
