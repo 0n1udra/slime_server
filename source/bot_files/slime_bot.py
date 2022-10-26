@@ -399,6 +399,8 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(aliases=['cp2', 'buttons'])
     async def buttonspanel(self, ctx):
+        """Shows all the buttons!"""
+
         for k, v in components.buttons_dict.items():
 
             await ctx.send(content=k.capitalize(), view=components.new_buttons(v[1]))
