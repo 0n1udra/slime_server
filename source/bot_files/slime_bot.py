@@ -1,7 +1,7 @@
 import datetime, asyncio, discord, gzip, sys, os
 from discord.ext import commands, tasks
-from bot_files.backend import send_command, server_status, lprint
-import bot_files.backend as backend
+from bot_files.backend_functions import send_command, server_status, lprint
+import bot_files.backend_functions as backend
 import bot_files.components as components
 import slime_vars as slime_vars
 
@@ -14,7 +14,7 @@ __status__ = "Development"
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
-help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False, )
+help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
 bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
 backend.bot = components.bot = bot
 
@@ -344,33 +344,6 @@ class Discord_Components_Funcs(commands.Cog):
         spc = components.data('server_panel_components')  # [select options, select msg, bmode msg, current page, total pages]
         total_pages = 1
         buttons1 = [['Reload', 'controlpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1']]
-        buttons_dict = {
-            'server':   [[['Status Page', 'serverstatus', '\U00002139'],
-                          ['Stop Server', 'serverstop', '\U0001F6D1'] if await server_status() else ['Start Server', 'serverstart', '\U0001F680'],
-                          ['Reboot Server', 'serverrestart', '\U0001F501']],
-                         [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
-                          ['Properties File', 'propertiesall', '\U0001F527'],
-                          ['Server Log', 'get_log_file', '\U0001F4C3'],
-                          ['Connections Log', 'serverconnections', '\U0001F4E1']]],
-            'backups':  [[['Backup World', 'worldbackupdate', '\U0001F195'],
-                          ['Backup Server', 'serverbackupdate', '\U0001F195'],
-                          ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
-                          ['Server Backups', 'restoreserverpanel', '\U0001F4C1']],
-                         [['Disable Autosave', 'autosaveoff', '\U0001F504'] if slime_vars.autosave_status else ['Enable Autosave', 'autosaveon', '\U0001F504'],
-                          ['Save World', 'saveall', '\U0001F30E']]],
-            'players':  [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
-                          ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
-                          ['OP List', 'oplist', '\U0001F4DC']],
-                         [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]],
-            'world':    [[['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
-                          ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
-                         [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
-                          ['Enable Weather', 'weatheron', '\U0001F7E2'],
-                          ['Disable Weather', 'weatheroff', '\U0001F534']]],
-            'extra':    [[['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'],
-                          ['Bot Log', 'botlog', '\U0001F4C3']],
-                         [['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]]}
-
         buttons_select_options = [[['Server Actions', '_update_control_panel buttons server', False, 'Status, start, motd, server server logs, properties, etc'],  # label, value, is default, description
                                    ['Save/Backup Actions', '_update_control_panel buttons backups', False, 'Autosave, save, backup/restore, etc'],
                                    ['Player Actions', '_update_control_panel buttons players', False, 'Player panel, players list, teleport, chat, banlist/whitelisti, OP, etc'],
@@ -379,7 +352,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         if mode in 'buttons':
             select_options = buttons_select_options
-            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], *buttons_dict[buttons_mode][0]], buttons_dict[buttons_mode][1]
+            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], *components.buttons_dict[buttons_mode][0]], components.buttons_dict[buttons_mode][1]
             params = ["**Buttons**", 'update_server_panel', 'Choose what buttons to show']
 
         elif mode == 'servers':
@@ -423,6 +396,13 @@ class Discord_Components_Funcs(commands.Cog):
             await ctx.send("**Error:** Something went wrong with panel.")
             await ctx.invoke(self.bot.get_command('controlpanel'))
         else: lprint(ctx, f'Updated server panel {mode}')
+
+    @commands.command(aliases=['cp2', 'buttons'])
+    async def buttonspanel(self, ctx):
+        for k, v in components.buttons_dict.items():
+
+            await ctx.send(content=k.capitalize(), view=components.new_buttons(v[1]))
+            await ctx.send(content='', view=components.new_buttons(v[0]))
 
     @commands.command(hidden=True)
     async def _close_panel(self, ctx): await components.clear()

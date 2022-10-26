@@ -74,8 +74,8 @@ class Other_Games(commands.Cog):
                           ['Control Panel', 'controlpanel', '\U0001F39B']]
         await ctx.send('', view=new_buttons(splash_buttons))
 
-    @commands.command()
-    async def help(self, ctx):
+    @commands.command
+    async def gameshelp(self, ctx):
         """Custom help command for my setup."""
 
         await ctx.send("""```
@@ -110,7 +110,7 @@ Minecraft:
         lprint(ctx, "Show help page")
 
     @commands.command(aliases=['infopage'])
-    async def info(self, ctx):
+    async def gameinfo(self, ctx):
         """Shows IP address and other info for my servers."""
 
         await ctx.send(f"""
@@ -327,3 +327,6 @@ Password for Valheim: `{slime_vars.valheim_password}`
 
         await get_log_lines(ctx, 'Zomboid', lines, f'/home/{slime_vars.user}/Zomboid/server-console.txt')
 
+async def setup(bot):
+    await bot.add_cog(System(bot))
+    await bot.add_cog(Other_Games(bot))

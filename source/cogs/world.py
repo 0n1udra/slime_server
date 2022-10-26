@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
-from bot_files.backend import send_command, format_args, lprint
-import bot_files.backend as backend
+from bot_files.backend_functions import send_command, format_args, lprint
+import bot_files.backend_functions as backend
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):

@@ -3,7 +3,7 @@
 import time, sys, os
 from bot_files.slime_bot import bot
 from bot_files.extra import lprint
-import bot_files.backend as backend
+import bot_files.backend_functions as backend
 import slime_vars
 
 ctx = 'run_bot.py'  # So you know which log lines come from which file.

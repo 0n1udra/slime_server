@@ -1,7 +1,7 @@
 import discord, asyncio, shutil, os
 from discord.ext import commands, tasks
-from bot_files.backend import send_command, format_args, server_status, lprint
-import bot_files.backend as backend
+from bot_files.backend_functions import send_command, format_args, server_status, lprint
+import bot_files.backend_functions as backend
 from bot_files.extra import get_parameter, update_csv, update_servers
 import bot_files.components as components
 import slime_vars
