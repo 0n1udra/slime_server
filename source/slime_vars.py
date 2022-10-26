@@ -1,14 +1,19 @@
-import os
+import discord, csv, os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
 user = os.getlogin()
 
+# Set as None if not using a python virtual env.
+pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
+
 # ========== Discord
 # Set location of Discord bot token.
 bot_token_file = f'/home/{user}/keys/slime_server.token'
-
-# Set as None if not using a python virtual env.
-pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
+command_prefex = '?'
+case_insensitive = True  # Case insensitivy for discord commands. e.g. ?players, ?Players, ?pLaYers
+# Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
+intents = discord.Intents.default()
+intents.message_content = True
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = 860361620492255292  # Default: None
@@ -28,8 +33,7 @@ server_port = 25566
 server_files_access = True
 
 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
-# Prioritize use_subprocess over Tmux option.
-use_subprocess = False
+use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
@@ -54,26 +58,38 @@ default_wait_time = 30
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
-server_list = {'papermc': ["papermc", 'Lightweight PaperMC.', f'java {java_params} -jar server.jar nogui', 'https://papermc.io/downloads', 15],
-               'vanilla': ["vanilla", 'Plain old vanilla.', f"java {java_params} -jar server.jar nogui", 'https://www.minecraft.net/en-us/download/server', 20],
-               'vvolatile': ["vvolatile", "140 mods!, Note: Takes a long time to start.", f"sh ServerStart.sh", 60],
-               'ulibrary': ['ulibrary', 'The Uncensored Library.', f'java -Xmx3G -Xms1G -jar server.jar nogui'],
-               }
 
-server_selected = server_list['papermc']
-server_path = f"{mc_path}/{server_selected[0]}"
-# Where to save world and server backups.
+servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
+# Create file if not exist.
+with open('bot_files/servers.csv', "a") as f: pass
+try:  # Get server list data containing run command and parameters.
+    with open('bot_files/servers.csv', 'r') as f:
+        csv_data = csv.reader(f, skipinitialspace=True)
+        for i in csv_data:
+            if 'Example Entry' == i[0]: continue
+            i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+            servers[i[0]] = i
+except:
+    print("Error reading servers.csv file.")
+    exit()
+
+
+
+server_selected = servers['papermc']
+servers_path = f"{mc_path}/servers"
+server_path = f"{servers_path}/{server_selected[0]}"
 world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
 server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
 server_log_file = f"{server_path}/logs/latest.log"
 server_log_path = f"{server_path}/logs"
 
 # ========== Bot Config
-bot_files_path = os.path.dirname(os.path.abspath(__file__))
-slime_vars_file = bot_files_path + '/slime_vars.py'
-bot_log_file = f"{bot_files_path}/bot_log.txt"
+bot_src_path = os.path.dirname(os.path.abspath(__file__))
+bot_files_path = bot_src_path + '/bot_files'
+slime_vars_file = bot_src_path + '/slime_vars.py'
+bot_log_file = f"{bot_src_path}/slime_bot.log"
 
-# The command to use in server to use to check status. server_command() will send something like 'xp 0.64356...'.
+# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
 
 # Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
@@ -102,7 +118,7 @@ useful_websites = {'Valhesia Volatile': 'https://www.curseforge.com/minecraft/mo
                    }
 
 # ========== Misc
-updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend_functions.py
+updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend.py
 server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re

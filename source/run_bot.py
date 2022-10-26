@@ -1,7 +1,10 @@
+#!/usr/bin/python3
+
 import time, sys, os
-from slime_bot import bot
-from backend_functions import lprint
-import backend_functions, slime_vars
+from bot_files.slime_bot import bot
+from bot_files.extra import lprint
+import bot_files.backend_functions as backend
+import slime_vars
 
 ctx = 'run_bot.py'  # So you know which log lines come from which file.
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
@@ -21,9 +24,15 @@ def _start_bot():
 
 def start_bot():
     if slime_vars.use_tmux is True:
+        no_tmux = False
         # Sources pyenv if set in slime_vars.
-        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_files_path}" ENTER'):
-            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_files_path})")
+        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_src_path}" ENTER'):
+            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_src_path})")
+            no_tmux = True
+
+        if no_tmux:
+            _start_bot()
+            return
 
         # Activate python env.
         if slime_vars.pyenv_activate_command:
@@ -42,7 +51,6 @@ def setup_directories():
     """Create necessary directories."""
 
     try:
-        # TODO Needed?
         # Creates Server folder, folder for world backups, and folder for server backups.
         os.makedirs(slime_vars.server_path)
         lprint(ctx, "INFO: Created: " + slime_vars.server_path)
@@ -70,12 +78,12 @@ def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
 
     if slime_vars.use_tmux is True:
-        backend_functions.server_start()
+        backend.server_start()
 
 def kill_slime_proc():
     """Kills bot process."""
 
-    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
+    if proc := backend.get_proc(slime_proc_name, slime_proc_cmdline):
         proc.kill()
         lprint(ctx, "INFO: Bot process killed")
     else: lprint(ctx, "ERROR: Bot process not found")
@@ -83,7 +91,7 @@ def kill_slime_proc():
 def status_slime_proc():
     """Get bot process name and pid."""
 
-    if proc := backend_functions.get_proc(slime_proc_name, slime_proc_cmdline):
+    if proc := backend.get_proc(slime_proc_name, slime_proc_cmdline):
         lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
 
 def show_log():
@@ -112,7 +120,6 @@ def script_help():
             Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then start server and bot, then attach to Tmux session.
     """
     print(help)
-
 
 if __name__ == '__main__':
     # The order of the if statements is important.
