@@ -1,4 +1,4 @@
-import discord, asyncio, os
+import discord, asyncio, shutil, os
 from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
@@ -51,6 +51,8 @@ class Server(commands.Cog):
 
     @commands.command(aliases=['si'])
     async def serverinfo(self, ctx, *name):
+        """Embed of server information."""
+
         server = get_parameter(name)
         data = slime_vars.servers[server]
         fields = [['Name', data[0]], ['Description', data[1]], ['Start Command', f"`{data[2]}`"], ['Wait Time', data[3]]]
@@ -59,6 +61,8 @@ class Server(commands.Cog):
 
     @commands.command(hidden=True)
     async def servernew(self, ctx, interaction):
+        """Create new server. Only works from control panel."""
+
         if interaction == 'submitted':
 
             server_data = components.data('servernew')
@@ -82,29 +86,64 @@ class Server(commands.Cog):
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(), 'New Server', 'servernew'))
 
-    @commands.command(aliases=['sc'])
-    async def servercopy(self, ctx, server=''):
-        await ctx.send("Coming soon.")
-
     @commands.command(hidden=True)
     async def serveredit(self, ctx, interaction):
+        """Edit server information. Updates servers.csv file."""
 
         server_name = components.data('second_selected')
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            try: os.rename(slime_vars.servers_path + '/' + server_name, slime_vars.servers_path + '/' + new_data['name'])
-            except: pass
+            server_path = slime_vars.servers_path + '/' + server_name
+            new_path = slime_vars.servers_path + '/' + new_data['name']
+            try: os.rename(server_path, new_path)
+            except:
+                await ctx.send("**ERROR:** Couldn't update server info")
+                lprint(f"ERROR: Editing server info {server_path} > {new_path}")
+                return
 
             slime_vars.servers.pop(server_name)
             update_servers(new_data)
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['name'])
+            lprint(f"Edited server info {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
+
+    @commands.command(hidden=True)
+    async def servercopy(self, ctx, interaction):
+        """Copy server. Only works from control panel for now."""
+
+        server_name = components.data('second_selected')
+        if interaction == 'submitted':
+            new_data = components.data('servercopy')
+
+            if new_data['name'] in slime_vars.servers:
+                await ctx.send("Server name already used.")
+                return
+
+            server_path = slime_vars.servers_path + '/' + server_name
+            new_path = slime_vars.servers_path + '/' + new_data['name']
+            try: shutil.copytree(server_path, new_path)
+            except:
+                await ctx.send("**Error:** Issue copying server.")
+                lprint(f"ERROR: Issue copying server: {server_path} > {new_path}")
+                return
+
+            slime_vars.servers.pop(server_name)
+            update_servers(new_data)
+
+            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['name'])
+            lprint(f"ERROR: Copied server: {server_path} > {new_path}")
+
+            try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
+            except: pass
+        else:
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
+
 
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):

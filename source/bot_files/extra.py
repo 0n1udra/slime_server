@@ -199,7 +199,6 @@ def update_servers(new_data=None):
 
     update_csv('servers.csv', [i for i in slime_vars.servers.values()])
 
-
 def get_from_index(path, index, mode):
     """
     Get server or world backup folder name from passed in index number
