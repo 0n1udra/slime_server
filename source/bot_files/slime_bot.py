@@ -34,7 +34,7 @@ async def on_ready():
         await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
-        on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+        on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
         await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
 class Slime_Bot_Commands(commands.Cog):
