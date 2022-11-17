@@ -427,7 +427,9 @@ class Permissions(commands.Cog):
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if server online.
-        if not await server_status(discord_msg=True): return
+        if not await server_status():
+            ctx.send("**ERROR:** Server offline.")
+            return
 
         # Enable/disable whitelisting.
         if arg.lower() in backend.enable_inputs:
@@ -589,7 +591,7 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if not await server_status(discord_msg=True): return
+        if not await server_status(): return
 
         if not player:
             await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")

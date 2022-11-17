@@ -310,11 +310,11 @@ class Server(commands.Cog):
 
     # ===== Status/Info
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
-    async def servercheck(self, ctx, show_msg=True):
+    async def servercheck(self, ctx):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        await server_status(discord_msg=show_msg)
+        await server_status(discord_msg=True, ctx=ctx)
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
