@@ -91,6 +91,8 @@ class Server(commands.Cog):
         """Edit server information. Updates servers.csv file."""
 
         server_name = components.data('second_selected')
+        if not server_name in slime_vars.servers:
+            slime_vars.servers[server_name] = [server_name, 'Description of server', f'java {slime_vars.java_params} server.jar nogui', 30]
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
@@ -98,7 +100,7 @@ class Server(commands.Cog):
             new_path = slime_vars.servers_path + '/' + new_data['name']
             try: os.rename(server_path, new_path)
             except:
-                await ctx.send("**ERROR:** Couldn't update server info")
+                await ctx.send("Server name already in use.")
                 lprint(f"ERROR: Editing server info {server_path} > {new_path}")
                 return
 
@@ -121,6 +123,7 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('servercopy')
 
+            # If server name already in use
             if new_data['name'] in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
@@ -167,7 +170,7 @@ class Server(commands.Cog):
             await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
             return False
 
-        try: slime_vars.servers.pop(name)
+        try: slime_vars.servers.pop(server_name)
         except: pass
 
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
@@ -307,11 +310,11 @@ class Server(commands.Cog):
 
     # ===== Status/Info
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
-    async def servercheck(self, ctx, show_msg=True):
+    async def servercheck(self, ctx):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        await server_status(discord_msg=show_msg)
+        await server_status(discord_msg=True, ctx=ctx)
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):

@@ -173,7 +173,7 @@ async def server_rcon(command=''):
         server_rcon_client.stop()
         return return_data
 
-async def server_status(discord_msg=False):
+async def server_status(discord_msg=False, ctx=None):
     """
     Gets server active status, by sending command to server and checking server log.
 
@@ -188,7 +188,7 @@ async def server_status(discord_msg=False):
     # send_command() will send random number, server is online if match is found in log.
     response = await send_command(' ', force_check=True, discord_msg=discord_msg)
     if response:
-        if discord_msg: await channel_send("**Server ACTIVE** :green_circle:")
+        if discord_msg: await ctx.send("**Server ACTIVE** :green_circle:")
         lprint(ctx, "Server Status: Active")
         server_active = True
         return True

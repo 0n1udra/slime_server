@@ -130,7 +130,7 @@ if __name__ == '__main__':
         if slime_vars.use_tmux is True:
             start_tmux_session()
         if slime_vars.use_rcon is True:
-            lprint(ctx, "INFO: Using RCON. Make sure relevant variables are set properly in backend_functions.py.")
+            lprint(ctx, "INFO: Using RCON. Make sure relevant variables are set properly in backend.py.")
 
     if 'beta' in sys.argv:
         slime_vars.bot_token_file, slime_vars.channel_id = f'/home/{os.getlogin()}/keys/slime_server_beta.token', 916450451061350420
