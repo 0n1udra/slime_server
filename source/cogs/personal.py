@@ -63,7 +63,18 @@ class System(commands.Cog):
 class Other_Games(commands.Cog):
     def __init__(self, bot):
         self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend.get_public_ip()}` (Use if URL not working)'
-        self.valheim_text = f"{self.ip_text}\nPass: `{slime_vars.valheim_password}`"
+
+        # Get valheim password by reading and parsing start_server.sh file.
+        vpassword = 'N/A'
+        try:
+            _line = None
+            with open(f'{slime_vars.steam_path}/Valheim dedicated server/start_server.sh', 'r') as f:
+                for i in f.readlines():
+                    if '-password' in i: _line = i
+            vpassword = _line.split(' ')[-2].replace('"', '')
+        except: pass
+
+        self.valheim_text = f"{self.ip_text}\nPass: `{vpassword}`"
         self.bot = bot
 
     @commands.command(aliases=['welcome', 'start'])

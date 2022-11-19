@@ -20,9 +20,6 @@ channel_id = 860361620492255292  # Default: None
 
 # ========== Other Games
 steam_path = f'/home/{user}/.steam/steam/steamapps/common'
-pass_path, valheim_password = f'/home/{user}/keys/valheim_password.txt', ''
-if os.path.isfile(pass_path):
-    with open(pass_path, 'r') as file: valheim_password = file.readline()
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. In case you're using a DDNS or something.

@@ -397,7 +397,7 @@ class Discord_Components_Funcs(commands.Cog):
             await ctx.invoke(self.bot.get_command('controlpanel'))
         else: lprint(ctx, f'Updated server panel {mode}')
 
-    @commands.command(aliases=['cp2', 'buttons'])
+    @commands.command(aliases=['cp2', 'buttons', 'b'])
     async def buttonspanel(self, ctx):
         """Shows all the buttons!"""
 
