@@ -37,12 +37,14 @@ Scroll down for requirements, setup instructions and screenshots.
 6. Read through the help pages with `?help` or `?help2` in Discord.  
 
 ### Using Virtualenv or venv:
+Install Python3 venv:
+```bash
+sudo apt install python3-venv -y
+```
+
 Create Python Virtualenvt:
 ```bash
 python -m venv ~/pyenvs/slime_server 
-or
-virtualenv ~/pyenvs/slime_server
-
 ```
 Activate new Python Virtualenv:
 ```bash
