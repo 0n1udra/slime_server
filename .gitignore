@@ -9,3 +9,5 @@ test.py
 source/bot_log.txt
 
 *.bak
+
+*.log
