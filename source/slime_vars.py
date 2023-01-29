@@ -8,7 +8,7 @@ pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
 # ========== Discord
 # Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_server.token'
+bot_token_file = f'/home/{user}/keys/slime_bot.token'
 command_prefex = '?'
 case_insensitive = True  # Case insensitivy for discord commands. e.g. ?players, ?Players, ?pLaYers
 # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
@@ -32,8 +32,8 @@ use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
-tmux_bot_pane = '0.6'  # tmux pane for slime_bot
-tmux_minecraft_pane = '0.0'  # tmux pane for miencraft server
+tmux_bot_pane = '0.0'  # tmux pane for slime_bot
+tmux_minecraft_pane = '0.1'  # tmux pane for miencraft server
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False

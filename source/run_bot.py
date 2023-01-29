@@ -68,7 +68,7 @@ def start_tmux_session():
         lprint(ctx, f"ERROR: Starting tmux session")
     else: lprint(ctx, f"INFO: Started Tmux detached session")
 
-    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane}'):
+    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane}'):
         lprint(ctx, "ERROR: Creating second tmux panes")
     else: lprint(ctx, "INFO: Created second tmux panes")
 
