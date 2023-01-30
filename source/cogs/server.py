@@ -17,10 +17,11 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
+    @commands.command(aliases=['sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
+        This command is also used to list available servers.
 
         Args:
             name: name of server to select, use ?selectserver list or without arguments to show list.
@@ -82,6 +83,7 @@ class Server(commands.Cog):
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
+            await ctx.send("Use `?selectserver` to use bot commands on new server.")
 
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(), 'New Server', 'servernew'))
@@ -205,12 +207,8 @@ class Server(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
 
-        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
-            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
-            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
-        else:
-            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
-            return False
+        lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
+        await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
         if await server_status():
@@ -222,7 +220,7 @@ class Server(commands.Cog):
         if server:
             await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
             await asyncio.sleep(3)
-        else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
+        else: await ctx.send("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
 
     # ===== Save/Autosave

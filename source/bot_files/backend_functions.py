@@ -1,7 +1,8 @@
 import discord, asyncio, random
 from file_read_backwards import FileReadBackwards
-from bot_files.extra import *
 from bs4 import BeautifulSoup
+from bot_files.extra import *
+import slime_vars
 if slime_vars.use_rcon: import mctools
 
 ctx = 'backend_functions.py'

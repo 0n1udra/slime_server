@@ -10,6 +10,7 @@ ctx = 'run_bot.py'  # So you know which log lines come from which file.
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
+beta_mode = ''
 
 def _start_bot():
     if os.path.isfile(slime_vars.bot_token_file):
@@ -40,7 +41,7 @@ def start_bot():
                 lprint(ctx, f"ERROR: {slime_vars.pyenv_activate_command}")
             else: lprint(ctx, f"INFO: Activated pyenv")
 
-        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} 'python3 run_bot.py _startbot' ENTER"):
+        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} 'python3 run_bot.py _startbot {beta_mode}' ENTER"):
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
             _start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
@@ -50,16 +51,13 @@ def start_bot():
 def setup_directories():
     """Create necessary directories."""
 
-    try:
-        # Creates Server folder, folder for world backups, and folder for server backups.
-        os.makedirs(slime_vars.server_path)
-        lprint(ctx, "INFO: Created: " + slime_vars.server_path)
-        os.makedirs(slime_vars.world_backups_path)
-        lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
-        os.makedirs(slime_vars.server_backups_path)
-        lprint(ctx, "INFO: Created: " + slime_vars.server_backups_path)
-    except:
-        lprint(ctx, "ERROR: Creating folder structure at: " + slime_vars.server_path)
+    # Creates Server folder, folder for world backups, and folder for server backups.
+    os.makedirs(slime_vars.servers_path)
+    lprint(ctx, "INFO: Created: " + slime_vars.servers_path)
+    os.makedirs(slime_vars.world_backups_path)
+    lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
+    os.makedirs(slime_vars.server_backups_path)
+    lprint(ctx, "INFO: Created: " + slime_vars.server_backups_path)
 
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
@@ -121,19 +119,65 @@ def script_help():
     """
     print(help)
 
+vars_msg = f"""
+Bot:
+    User                {slime_vars.user}
+    Python Env          {slime_vars.pyenv_activate_command}
+    Subprocess          {slime_vars.use_subprocess}
+    Tmux                {slime_vars.use_tmux}
+    RCON                {slime_vars.use_rcon}
+    Bot Log             {slime_vars.bot_log_file}
+    
+Discord:
+    Discord Token       {slime_vars.bot_token_file}
+    Command Prefix      {slime_vars.command_prefex}
+    Case Insensitive    {slime_vars.case_insensitive}
+    Intents             {slime_vars.intents}
+    Channel ID          {slime_vars.channel_id}
+
+Server:
+    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
+    File Access         {slime_vars.server_files_access}
+    Server Selected     {slime_vars.server_selected}
+    Server URL          {slime_vars.server_url}
+    Server Port         {slime_vars.server_port}
+"""
+if slime_vars.use_tmux:
+    vars_msg += f"""
+Tmux:
+    Session Name        {slime_vars.tmux_session_name}
+    Bot Pane            {slime_vars.tmux_bot_pane}
+    Server Pane         {slime_vars.tmux_minecraft_pane}
+"""
+
+if slime_vars.use_rcon:
+    vars_msg += f"""
+RCON:
+    Pass                {slime_vars.rcon_pass}
+    Port                {slime_vars.rcon_port}
+    """
+
+if slime_vars.server_files_access:
+    vars_msg += f"""
+Local Server:
+    Minecraft Path      {slime_vars.mc_path}
+    Server Path         {slime_vars.server_path}
+    """
+
 if __name__ == '__main__':
     # The order of the if statements is important.
+    print(vars_msg)
 
     if 'setup' in sys.argv:
         if slime_vars.server_files_access is True:
             setup_directories()
-        if slime_vars.use_tmux is True:
-            start_tmux_session()
         if slime_vars.use_rcon is True:
             lprint(ctx, "INFO: Using RCON. Make sure relevant variables are set properly in backend.py.")
 
     if 'beta' in sys.argv:
-        slime_vars.bot_token_file, slime_vars.channel_id = f'/home/{os.getlogin()}/keys/slime_server_beta.token', 916450451061350420
+        beta_mode = 'beta'
+        slime_vars.bot_token_file = f'/home/{slime_vars.user}/keys/slime_bot_beta.token'
+        slime_vars.channel_id = 916450451061350420
 
     if 'starttmux' in sys.argv and slime_vars.use_tmux:
         start_tmux_session()

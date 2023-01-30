@@ -1,7 +1,12 @@
 import discord, csv, os
 
 # Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
-user = os.getlogin()
+try: user = os.getlogin()
+except:
+    import getpass
+    user = getpass.getuser()
+
+if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
@@ -19,7 +24,7 @@ intents.message_content = True
 channel_id = 860361620492255292  # Default: None
 
 # ========== Minecraft Interfacing Options
-# Server URL or IP address. In case you're using a DDNS or something.
+# Server URL or IP address. Used for server_ping(), ping_url(), etc, .
 server_url = 'arcpy.asuscomm.com'
 server_port = 25566
 
@@ -110,7 +115,6 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    }
 
 # ========== Misc
-updatable_mc = ['vanilla', 'papermc']  # What server has update functionality. See get_latest_version() in backend.py
 server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
