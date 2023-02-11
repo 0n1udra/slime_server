@@ -229,7 +229,10 @@ async def get_players():
         # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
         new = []
         for i in player_names:
-            new.append(reaesc.sub('', i).strip().replace('[3', ''))
+            x = reaesc.sub('', i).strip().replace('[3', '')
+            x = x.split(' ')[-1]
+            x = x.replace('\\x1b', '').strip()
+            new.append(x)
         player_names = new
         return player_names, text
 
