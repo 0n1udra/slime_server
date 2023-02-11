@@ -5,6 +5,11 @@ from bot_files.extra import *
 import slime_vars
 if slime_vars.use_rcon: import mctools
 
+# Remove ANSI escape characters
+import re
+text = 'ls\r\n\x1b[00m\x1b[01;31mexamplefile.zip\x1b[00m\r\n\x1b[01;31m'
+reaesc = re.compile(r'\x1b[^m]*m')
+
 ctx = 'backend_functions.py'
 bot = None
 server_active = False
@@ -214,6 +219,7 @@ async def get_players():
 
     log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
     text = log_data[-2]  # There are 2 of a max of 20 players online
+    text = reaesc.sub('', text)
     player_names = log_data[-1]  # R3diculous, MysticFrogo
     # If there's no players active, player_names will still contain some anso escape characters.
     if len(player_names.strip()) < 5: return None
@@ -221,8 +227,12 @@ async def get_players():
         player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
         # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-
+        new = []
+        for i in player_names:
+            new.append(reaesc.sub('', i).strip().replace('[3', ''))
+        player_names = new
         return player_names, text
+
 
 async def get_coords(player=''):
     """Gets player's location coordinates."""
