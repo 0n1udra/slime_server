@@ -110,7 +110,7 @@ def script_help():
     startserver - Start MC server.
     startboth   - Start Minecraft server and bot either using Tmux or in current console depending on corresponding variables.
     attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
-    showlog     - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
+    log         - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
                   Use standalone, showlog will not work properly if used with other arguments.
 
     NOTE:   The corresponding functions will run in the order you pass arguments in.
@@ -201,7 +201,7 @@ if __name__ == '__main__':
         server_start()
         start_bot()
 
-    if 'showlog' in sys.argv: show_log()
+    if 'log' in sys.argv: show_log()
 
     # My personal shortcut.
     if 'slime' in sys.argv:
