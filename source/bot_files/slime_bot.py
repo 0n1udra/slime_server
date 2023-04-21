@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
+from bot_files.components import buttons_dict
 import slime_vars as slime_vars
 
 __version__ = "7.1"
@@ -337,6 +338,7 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _update_control_panel(self, ctx, mode, buttons_mode='server'):
+        global buttons_dict
         """Show select menu of server log files available to download."""
 
         failed = False  # if failed to update the components
@@ -352,7 +354,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         if mode in 'buttons':
             select_options = buttons_select_options
-            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], *components.buttons_dict[buttons_mode][0]], components.buttons_dict[buttons_mode][1]
+            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], buttons_dict[buttons_mode][0]], buttons_dict[buttons_mode][1]
             params = ["**Buttons**", 'update_server_panel', 'Choose what buttons to show']
 
         elif mode == 'servers':
@@ -401,7 +403,9 @@ class Discord_Components_Funcs(commands.Cog):
     async def buttonspanel(self, ctx):
         """Shows all the buttons!"""
 
-        for k, v in components.buttons_dict.items():
+        global buttons_dict
+        print('panel', buttons_dict)
+        for k, v in buttons_dict.items():
 
             await ctx.send(content=k.capitalize(), view=components.new_buttons(v[1]))
             await ctx.send(content='', view=components.new_buttons(v[0]))
@@ -491,3 +495,7 @@ if slime_vars.server_files_access is False and slime_vars.use_rcon is True:
 
 if slime_vars.use_tmux is False:
     for command in if_no_tmux: bot.remove_command(command)
+
+
+for k, v in buttons_dict.items():
+    buttons_dict[k] = [sublist for sublist in v[0] if sublist[1] not in if_no_tmux + if_using_rcon]

@@ -218,6 +218,7 @@ async def get_players():
 
     if not log_data: return False
 
+    # Use regular expression to extract player names
     log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
     text = log_data[-2]  # There are 2 of a max of 20 players online
     text = reaesc.sub('', text)
@@ -225,6 +226,7 @@ async def get_players():
     # If there's no players active, player_names will still contain some anso escape characters.
     if len(player_names.strip()) < 5: return None
     else:
+
         player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
         # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
