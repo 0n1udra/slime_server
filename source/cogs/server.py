@@ -149,7 +149,6 @@ class Server(commands.Cog):
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
 
-
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
         """

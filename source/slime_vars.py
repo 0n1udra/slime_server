@@ -1,6 +1,8 @@
 import discord, csv, os
+from os.path import join
 
-# Set this variable if you're also using Debian based system. if not ignore this and manually set your file/folder paths.
+home_dir = os.path.expanduser('~')
+
 try: user = os.getlogin()
 except:
     import getpass
@@ -12,8 +14,8 @@ if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
 # ========== Discord
-# Set location of Discord bot token.
-bot_token_file = f'/home/{user}/keys/slime_bot.token'
+# Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
+bot_token_file = join(home_dir, 'keys', 'slime_bot.token')
 command_prefex = '?'
 case_insensitive = True  # Case insensitivy for discord commands. e.g. ?players, ?Players, ?pLaYers
 # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
@@ -25,29 +27,32 @@ channel_id = 860361620492255292  # Default: None
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-server_url = 'arcpy.asuscomm.com'
-server_port = 25566
+#server_url = 'arcpy.asuscomm.com'
+server_url = '213.136.72.135'
+server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = True
+server_files_access = False
 
 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
 use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-use_tmux = True
+use_tmux = False
 tmux_session_name = 'sess'
 tmux_bot_pane = '0.0'  # tmux pane for slime_bot
 tmux_minecraft_pane = '0.1'  # tmux pane for miencraft server
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = False
-rcon_pass = 'rconpass420'
+use_rcon = True
+rcon_pass = 'pass'
+#rcon_pass = 'z7m5JjtEJ4qGRwQK'
 rcon_port = 25575
 
 # ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
-mc_path = f'/home/{user}/Games/Minecraft'
+# Use os.path.join. e.g. join(home_dir, 'Games', 'Minecraft) is ~/Games/Minecraft/
+mc_path = join(home_dir, 'Games', 'Minecraft')
 
 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
 default_wait_time = 30
@@ -58,7 +63,9 @@ default_wait_time = 30
 # Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
+# Do not edit this line
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
+
 # Create file if not exist.
 with open('bot_files/servers.csv', "a") as f: pass
 try:  # Get server list data containing run command and parameters.
@@ -72,21 +79,20 @@ except:
     print("Error reading servers.csv file.")
     exit()
 
-
-
-server_selected = servers['papermc']
-servers_path = f"{mc_path}/servers"
-server_path = f"{servers_path}/{server_selected[0]}"
-world_backups_path = f"{mc_path}/world_backups/{server_selected[0]}"
-server_backups_path = f"{mc_path}/server_backups/{server_selected[0]}"
-server_log_file = f"{server_path}/logs/latest.log"
-server_log_path = f"{server_path}/logs"
+# Do not edit these.
+server_selected = servers['papermc']  # Currently selected server
+servers_path = join(mc_path, 'servers')  # Path to all servers
+server_path = join(servers_path, server_selected[0])  # Path to currently selected server
+world_backups_path = join(mc_path, 'world_backups', server_selected[0])
+server_backups_path = join(mc_path, 'server_backups', server_selected[0])
+server_log_path = join(server_path, 'logs')
+server_log_file = join(server_log_path, 'latest.log')
 
 # ========== Bot Config
 bot_src_path = os.path.dirname(os.path.abspath(__file__))
-bot_files_path = bot_src_path + '/bot_files'
-slime_vars_file = bot_src_path + '/slime_vars.py'
-bot_log_file = f"{bot_src_path}/slime_bot.log"
+bot_files_path = join(bot_src_path, 'bot_files')
+slime_vars_file = join(bot_src_path, 'slime_vars.py')
+bot_log_file = join(bot_src_path, 'slime_bot.log')
 
 # The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '

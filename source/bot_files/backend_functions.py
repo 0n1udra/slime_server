@@ -1,7 +1,8 @@
-import discord, asyncio, random
+import discord, requests, asyncio, random
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from bot_files.extra import *
+from os.path import join
 import slime_vars
 if slime_vars.use_rcon: import mctools
 
@@ -422,7 +423,7 @@ def new_server(name):
         dst str: Destination for backup.
     """
 
-    new_folder = slime_vars.servers_path + '/' + name.strip()
+    new_folder = join(slime_vars.servers_path, name.strip())
     os.mkdir(new_folder)
     return new_folder
 
@@ -440,7 +441,7 @@ def new_backup(new_name, src, dst):
 
     version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
     new_name = f"({get_datetime()}) {version}{new_name}"
-    new_backup_path = dst + '/' + new_name.strip()
+    new_backup_path = join(dst, new_name.strip())
     shutil.copytree(src, new_backup_path)
     return new_backup_path
 
