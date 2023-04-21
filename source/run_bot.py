@@ -176,7 +176,8 @@ if __name__ == '__main__':
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
-        slime_vars.bot_token_file = f'/home/{slime_vars.user}/keys/slime_bot_beta.token'
+        slime_vars.bot_token_file = f'C:\\Users\\0n1udra\\keys\\slime_bot_beta.token'
+        #slime_vars.bot_token_file = f'/home/{slime_vars.user}/keys/slime_bot_beta.token'
         slime_vars.channel_id = 916450451061350420
 
     if 'starttmux' in sys.argv and slime_vars.use_tmux:
