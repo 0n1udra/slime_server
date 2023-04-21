@@ -207,17 +207,6 @@ async def server_status(discord_msg=False, ctx=None):
 async def get_players():
     """Extracts wanted data from output of 'list' command."""
 
-    log_data = '''There are 9 out of maximum 30 players online.
-Higher-Staff: [Developer] [Count] 3mek_Pluto
-Members: ┝ ✩ Player ┥ 1SONY1, ┝ ✩ Player ┥ a7mad12128, ┝ ✩ Player ┥ Eren_Aep, ┝ ✩ Player ┥ FRN2, ┝ ✩ Player ┥ Mouhama6, ┝ ✩ Player ┥ MrAl3ab, ┝ ✩ Player ┥ RillaGG, ┝ ✩ Player ┥ ~جحيم_السماء
-'''
-    #print(log_data)
-    #new_string = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', log_data)
-
-    print('server', server_ping())
-    print('players:', server_ping()['players'])
-    #print('hi', new_string.split('Player'))
-    return
     response = await send_command("list")
     if not response: return False
 
@@ -230,8 +219,6 @@ Members: ┝ ✩ Player ┥ 1SONY1, ┝ ✩ Player ┥ a7mad12128, ┝ ✩ Playe
     if not log_data: return False
 
     # Use regular expression to extract player names
-
-
     log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
     text = log_data[-2]  # There are 2 of a max of 20 players online
     text = reaesc.sub('', text)
@@ -245,12 +232,9 @@ Members: ┝ ✩ Player ┥ 1SONY1, ┝ ✩ Player ┥ a7mad12128, ┝ ✩ Playe
         # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
         new = []
         for i in player_names:
-          #  x = reaesc.sub('', i).strip().replace('[3', '')
-          #  x = x.split(' ')[-1]
-          #  x = x.replace('\\x1b', '').strip()
-
-
-            print(x)
+            x = reaesc.sub('', i).strip().replace('[3', '')
+            x = x.split(' ')[-1]
+            x = x.replace('\\x1b', '').strip()
             new.append(x)
         player_names = new
         return player_names, text
