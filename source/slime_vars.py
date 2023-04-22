@@ -23,12 +23,11 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 860361620492255292  # Default: None
+channel_id = None  # Default: None
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-#server_url = 'arcpy.asuscomm.com'
-server_url = '213.136.72.135'
+server_url = ''
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -44,9 +43,8 @@ tmux_bot_pane = '0.0'  # tmux pane for slime_bot
 tmux_minecraft_pane = '0.1'  # tmux pane for miencraft server
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = True
-rcon_pass = 'pass'
-#rcon_pass = 'z7m5JjtEJ4qGRwQK'
+use_rcon = False
+rcon_pass = ''
 rcon_port = 25575
 
 # ========== Minecraft Server Config
@@ -67,20 +65,16 @@ java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:P
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
 
 # Create file if not exist.
-with open('bot_files/servers.csv', "a") as f: pass
-try:  # Get server list data containing run command and parameters.
-    with open('bot_files/servers.csv', 'r') as f:
-        csv_data = csv.reader(f, skipinitialspace=True)
-        for i in csv_data:
-            if 'Example Entry' == i[0]: continue
-            i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
-            servers[i[0]] = i
-except:
-    print("Error reading servers.csv file.")
-    exit()
+with open(join('bot_files', 'servers.csv'), "a") as f: pass
+with open(join('bot_files', 'servers.csv'), 'r') as f:
+    csv_data = csv.reader(f, skipinitialspace=True)
+    for i in csv_data:
+        if 'Example Entry' == i[0]: continue
+        i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+        servers[i[0]] = i
 
 # Do not edit these.
-server_selected = servers['papermc']  # Currently selected server
+server_selected = servers['example']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
 world_backups_path = join(mc_path, 'world_backups', server_selected[0])

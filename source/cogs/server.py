@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 from bot_files.extra import get_parameter, update_csv, update_servers
+from os.path import join
 import bot_files.components as components
 import slime_vars
 
@@ -45,7 +46,7 @@ class Server(commands.Cog):
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in slime_vars.servers:
             backend.server_selected = slime_vars.servers[name]
-            backend.server_path = f"{slime_vars.mc_path}/{slime_vars.server_selected[0]}"
+            backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
             backend.edit_file('server_selected', f" servers['{name}']", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
@@ -98,8 +99,8 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            server_path = slime_vars.servers_path + '/' + server_name
-            new_path = slime_vars.servers_path + '/' + new_data['name']
+            server_path = joini(slime_vars.servers_path, server_name)
+            new_path = join(slime_vars.servers_path, new_data['name'])
             try: os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
@@ -130,8 +131,8 @@ class Server(commands.Cog):
                 await ctx.send("Server name already used.")
                 return
 
-            server_path = slime_vars.servers_path + '/' + server_name
-            new_path = slime_vars.servers_path + '/' + new_data['name']
+            server_path = join(slime_vars.servers_path, server_name)
+            new_path = join(slime_vars.servers_path, new_data['name'])
             try: shutil.copytree(server_path, new_path)
             except:
                 await ctx.send("**Error:** Issue copying server.")
@@ -163,7 +164,7 @@ class Server(commands.Cog):
         """
 
         server_name = get_parameter(name)
-        to_delete = f"{slime_vars.servers_path}/{server_name}"
+        to_delete = join(slime_vars.servers_path, server_name)
 
         try: backend.delete_dir(to_delete)
         except:
@@ -352,9 +353,8 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         filter_mode, log_mode = False, True
         if match: filter_mode, log_mode = True, False
 
-        file_path = f"{slime_vars.server_path}/logs/latest.log"
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
-        log_data = backend.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
+        log_data = backend.server_log(match=match, file_path=slime_vars.server_log_file, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
             i = 0
             for line in log_data.split('\n'):
