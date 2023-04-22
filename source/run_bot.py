@@ -136,8 +136,9 @@ Discord:
     Channel ID          {slime_vars.channel_id}
 
 Server:
-    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
+    Minecraft Folder    {slime_vars.mc_path}
     File Access         {slime_vars.server_files_access}
+    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
     Server Selected     {slime_vars.server_selected}
     Server URL          {slime_vars.server_url}
     Server Port         {slime_vars.server_port}

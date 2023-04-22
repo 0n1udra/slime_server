@@ -486,7 +486,7 @@ async def setup(bot):
 
 # Disable certain commands depending on if using Tmux, RCON, or subprocess.
 if_no_tmux = ['serverstart', 'serverrestart']
-if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'serverstart', 'serverrestart', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
+if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
                  'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
 
 # Removes certain commands depending on your setup.

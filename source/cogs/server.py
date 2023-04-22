@@ -66,6 +66,7 @@ class Server(commands.Cog):
         """Create new server. Only works from control panel."""
 
         if interaction == 'submitted':
+            await ctx.send("***Creating New Server...***")
 
             server_data = components.data('servernew')
             server_name = server_data['name']
@@ -99,8 +100,9 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            server_path = joini(slime_vars.servers_path, server_name)
+            server_path = join(slime_vars.servers_path, server_name)
             new_path = join(slime_vars.servers_path, new_data['name'])
+            await ctx.send("***Updating Server Info...***")
             try: os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
@@ -126,6 +128,7 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('servercopy')
 
+            await ctx.send("***Copying Server...***")
             # If server name already in use
             if new_data['name'] in slime_vars.servers:
                 await ctx.send("Server name already used.")
@@ -166,6 +169,7 @@ class Server(commands.Cog):
         server_name = get_parameter(name)
         to_delete = join(slime_vars.servers_path, server_name)
 
+        await ctx.send("***Deleting Server...***")
         try: backend.delete_dir(to_delete)
         except:
             if 'bmode' in to_delete: return False
@@ -535,7 +539,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startminecraft', 'mstart'])
+    @commands.command(aliases=['startminecraft', 'start'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
