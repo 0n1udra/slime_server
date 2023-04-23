@@ -1,13 +1,17 @@
-import discord, csv, os
+import discord, platform, csv, os
 from os.path import join
 
 home_dir = os.path.expanduser('~')
+
+# Get the operating system name
+if platform.system() == 'Windows':
+    on_windows = True
+    use_cmdline_start = True  # Enable to use the 'start' command in windows cmd to start java server.
 
 try: user = os.getlogin()
 except:
     import getpass
     user = getpass.getuser()
-
 if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 
 # Set as None if not using a python virtual env.
@@ -69,6 +73,7 @@ with open(join('bot_files', 'servers.csv'), "a") as f: pass
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)
     for i in csv_data:
+        if not i: continue
         if 'Example Entry' == i[0]: continue
         i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
         servers[i[0]] = i

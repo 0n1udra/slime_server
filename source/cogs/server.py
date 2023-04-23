@@ -106,7 +106,7 @@ class Server(commands.Cog):
             try: os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
-                lprint(f"ERROR: Editing server info {server_path} > {new_path}")
+                lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
                 return
 
             slime_vars.servers.pop(server_name)
