@@ -539,7 +539,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startminecraft', 'start'])
+    @commands.command(aliases=['startminecraft', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.

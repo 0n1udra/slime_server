@@ -77,7 +77,7 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPass: `{vpassword}`"
         self.bot = bot
 
-    @commands.command(aliases=['welcome', 'start'])
+    @commands.command(aliases=['welcome', 'splash', 'banner'])
     async def splash(self, ctx):
         """Bot splash/startup message."""
 
@@ -157,7 +157,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
             await ctx.send(f"Error: Unknown error")
             lprint(ctx, f"Error: Updating {game_name}, Unknown error")
 
-    @commands.command(aliases=['servers', 'game'])
+    @commands.command(aliases=['game'])
     async def games(self, ctx):
         """Quickly start/stop games with buttons."""
 

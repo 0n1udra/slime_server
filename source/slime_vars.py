@@ -3,6 +3,7 @@ from os.path import join
 
 home_dir = os.path.expanduser('~')
 
+use_cmdline_start = False
 # Get the operating system name
 if platform.system() == 'Windows':
     on_windows = True
