@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
+from os.path import join
 import slime_vars
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
@@ -106,7 +107,7 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: backend.restore_backup(fetched_restore, slime_vars.server_path + '/world')
+        try: backend.restore_backup(fetched_restore, join(slime_vars.server_path, 'world'))
         except:
             await ctx.send(f"**Error:** Issue restoring world: {fetched_restore}")
             lprint(ctx, "ERROR: World restore: " + fetched_restore)
@@ -172,7 +173,7 @@ class World_Backups(commands.Cog):
         if await server_status():
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: shutil.rmtree(slime_vars.server_path + '/world')
+        try: shutil.rmtree(join(slime_vars.server_path, 'world'))
         except:
             await ctx.send("Error trying to reset world.")
             lprint(ctx, "ERROR: Issue deleting world folder.")

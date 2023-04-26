@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 from bot_files.extra import get_parameter, update_csv, update_servers
+from os.path import join
 import bot_files.components as components
 import slime_vars
 
@@ -17,10 +18,11 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['sselect', 'serversselect', 'serverslist', 'ss'])
+    @commands.command(aliases=['sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
+        This command is also used to list available servers.
 
         Args:
             name: name of server to select, use ?selectserver list or without arguments to show list.
@@ -44,7 +46,7 @@ class Server(commands.Cog):
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in slime_vars.servers:
             backend.server_selected = slime_vars.servers[name]
-            backend.server_path = f"{slime_vars.mc_path}/{slime_vars.server_selected[0]}"
+            backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
             backend.edit_file('server_selected', f" servers['{name}']", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
@@ -64,6 +66,7 @@ class Server(commands.Cog):
         """Create new server. Only works from control panel."""
 
         if interaction == 'submitted':
+            await ctx.send("***Creating New Server...***")
 
             server_data = components.data('servernew')
             server_name = server_data['name']
@@ -82,6 +85,7 @@ class Server(commands.Cog):
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
+            await ctx.send("Use `?selectserver` to use bot commands on new server.")
 
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(), 'New Server', 'servernew'))
@@ -96,12 +100,13 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            server_path = slime_vars.servers_path + '/' + server_name
-            new_path = slime_vars.servers_path + '/' + new_data['name']
+            server_path = join(slime_vars.servers_path, server_name)
+            new_path = join(slime_vars.servers_path, new_data['name'])
+            await ctx.send("***Updating Server Info...***")
             try: os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
-                lprint(f"ERROR: Editing server info {server_path} > {new_path}")
+                lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
                 return
 
             slime_vars.servers.pop(server_name)
@@ -123,13 +128,14 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('servercopy')
 
+            await ctx.send("***Copying Server...***")
             # If server name already in use
             if new_data['name'] in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
 
-            server_path = slime_vars.servers_path + '/' + server_name
-            new_path = slime_vars.servers_path + '/' + new_data['name']
+            server_path = join(slime_vars.servers_path, server_name)
+            new_path = join(slime_vars.servers_path, new_data['name'])
             try: shutil.copytree(server_path, new_path)
             except:
                 await ctx.send("**Error:** Issue copying server.")
@@ -147,7 +153,6 @@ class Server(commands.Cog):
         else:
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
 
-
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
         """
@@ -162,8 +167,9 @@ class Server(commands.Cog):
         """
 
         server_name = get_parameter(name)
-        to_delete = f"{slime_vars.servers_path}/{server_name}"
+        to_delete = join(slime_vars.servers_path, server_name)
 
+        await ctx.send("***Deleting Server...***")
         try: backend.delete_dir(to_delete)
         except:
             if 'bmode' in to_delete: return False
@@ -205,12 +211,8 @@ class Server(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
 
-        if slime_vars.server_selected[0] in slime_vars.updatable_mc:
-            lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
-            await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
-        else:
-            await ctx.send(f"**ERROR:** This command is not compatible with you're server variant.\n`{slime_vars.server_selected[0]}` currently selected.")
-            return False
+        lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
+        await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
         if await server_status():
@@ -222,7 +224,7 @@ class Server(commands.Cog):
         if server:
             await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
             await asyncio.sleep(3)
-        else: await ctx.send("**ERROR:** Updating server failed. Suggest restoring from a backup if updating corrupted any files.")
+        else: await ctx.send("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
 
     # ===== Save/Autosave
@@ -355,9 +357,8 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         filter_mode, log_mode = False, True
         if match: filter_mode, log_mode = True, False
 
-        file_path = f"{slime_vars.server_path}/logs/latest.log"
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
-        log_data = backend.server_log(match=match, file_path=file_path, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
+        log_data = backend.server_log(match=match, file_path=slime_vars.server_log_file, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
             i = 0
             for line in log_data.split('\n'):
@@ -538,7 +539,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startminecraft', 'mstart'])
+    @commands.command(aliases=['startminecraft', 'start'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.

@@ -5,9 +5,5 @@ test.py
 *__pycache__/*
 *.swp
 *.pyc
-
-source/bot_log.txt
-
 *.bak
-
 *.log

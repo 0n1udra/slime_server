@@ -1,10 +1,18 @@
-import discord, asyncio, random
+import discord, requests, asyncio, random
 from file_read_backwards import FileReadBackwards
-from bot_files.extra import *
 from bs4 import BeautifulSoup
+from bot_files.extra import *
+from os.path import join
+import slime_vars
 if slime_vars.use_rcon: import mctools
+if slime_vars.use_cmdline_start: import subprocess
 
-ctx = 'backend.py'
+# Remove ANSI escape characters
+import re
+text = 'ls\r\n\x1b[00m\x1b[01;31mexamplefile.zip\x1b[00m\r\n\x1b[01;31m'
+reaesc = re.compile(r'\x1b[^m]*m')
+
+ctx = 'backend_functions.py'
 bot = None
 server_active = False
 discord_channel = None
@@ -23,22 +31,6 @@ async def channel_send(msg):
     """Send message to discord_channel."""
 
     if discord_channel: await discord_channel.send(msg)
-
-# ========== Other Games
-def valheim_proc():
-    """Returns valheim process if found."""
-    # Sets slime_proc and slime_pid variable so bot can be stopped with a Discord command.
-    for proc in psutil.process_iter():
-        if proc.name() == 'valheim_server.x86_64': return proc
-    else: return None
-
-def valheim_command(command):
-    """Use vhserver script"""
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
-
-def zomboid_command(command):
-    """Sends command to tmux 0.1 Project Zomboid server."""
-    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
 
 # ========== Server Commands: start, send command, read log, etc
 def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
@@ -227,17 +219,27 @@ async def get_players():
 
     if not log_data: return False
 
+    # Use regular expression to extract player names
     log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
     text = log_data[-2]  # There are 2 of a max of 20 players online
+    text = reaesc.sub('', text)
     player_names = log_data[-1]  # R3diculous, MysticFrogo
     # If there's no players active, player_names will still contain some anso escape characters.
     if len(player_names.strip()) < 5: return None
     else:
+
         player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
         # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
         # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-
+        new = []
+        for i in player_names:
+            x = reaesc.sub('', i).strip().replace('[3', '')
+            x = x.split(' ')[-1]
+            x = x.replace('\\x1b', '').strip()
+            new.append(x)
+        player_names = new
         return player_names, text
+
 
 async def get_coords(player=''):
     """Gets player's location coordinates."""
@@ -269,6 +271,12 @@ def server_start():
         except: lprint(ctx, "Error server starting subprocess")
 
         if type(mc_subprocess) == subprocess.Popen: return True
+
+    # Start java server using subprocess and cmd's start command.
+    elif slime_vars.use_cmdline_start is True:
+        os.chdir(slime_vars.server_path)
+        command = 'start "Minecraft server" java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
+        subprocess.Popen(command, shell=True)
 
     elif slime_vars.use_tmux is True:
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "cd {slime_vars.server_path}" ENTER')
@@ -406,7 +414,7 @@ def new_server(name):
         dst str: Destination for backup.
     """
 
-    new_folder = slime_vars.servers_path + '/' + name.strip()
+    new_folder = join(slime_vars.servers_path, name.strip())
     os.mkdir(new_folder)
     return new_folder
 
@@ -424,7 +432,7 @@ def new_backup(new_name, src, dst):
 
     version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
     new_name = f"({get_datetime()}) {version}{new_name}"
-    new_backup_path = dst + '/' + new_name.strip()
+    new_backup_path = join(dst, new_name.strip())
     shutil.copytree(src, new_backup_path)
     return new_backup_path
 
