@@ -39,13 +39,13 @@ server_url = ''
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = False
+server_files_access = True
 
 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
 use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-use_tmux = False
+use_tmux = True
 tmux_session_name = 'sess'
 tmux_bot_pane = '0.0'  # tmux pane for slime_bot
 tmux_minecraft_pane = '0.1'  # tmux pane for miencraft server
@@ -71,7 +71,7 @@ java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:P
 
 # Do not edit these lines.
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
-server_selected = servers['example']  # Currently selected server
+server_selected = servers['papermc']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
 world_backups_path = join(mc_path, 'world_backups', server_selected[0])

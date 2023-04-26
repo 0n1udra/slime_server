@@ -77,7 +77,7 @@ class Other_Games(commands.Cog):
         self.valheim_text = f"{self.ip_text}\nPass: `{vpassword}`"
         self.bot = bot
 
-    @commands.command(aliases=['welcome', 'splash', 'banner'])
+    @commands.command(aliases=['welcome', 'banner'])
     async def splash(self, ctx):
         """Bot splash/startup message."""
 
