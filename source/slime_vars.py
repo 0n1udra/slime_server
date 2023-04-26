@@ -77,7 +77,7 @@ with open(join('bot_files', 'servers.csv'), 'r') as f:
         if 'Example Entry' == i[0]: continue
         i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
         servers[i[0]] = i
-server_selected = servers['papermc']  # Currently selected server
+server_selected = servers['example']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
 world_backups_path = join(mc_path, 'world_backups', server_selected[0])
