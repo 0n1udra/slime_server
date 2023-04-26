@@ -475,7 +475,7 @@ class Permissions(commands.Cog):
             else:
                 await send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-                log_data = backend.server_log('whitelisted players:')
+                log_data = backend.server_log('whitelisted:')
                 if not log_data:
                     await ctx.send('No whitelisted')
                     return
@@ -488,6 +488,7 @@ class Permissions(commands.Cog):
             await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
             lprint(ctx, f"Showing whitelist: {log_data[1]}")
             await ctx.send("-----END-----")
+            await ctx.send("Note: Players with OP will bypass whitelisting.")
             return False
         else: await ctx.send("**ERROR:** Something went wrong.")
 
