@@ -91,7 +91,7 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
             log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
         return log_data
 
-async def send_command(command, force_check=False, skip_check=False, discord_msg=True):
+async def send_command(command, force_check=False, skip_check=False, discord_msg=True, ctx=None):
     """
     Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
     Sends command to server, then reads from latest.log file for output.
@@ -111,7 +111,10 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
     global mc_subprocess, server_active
 
     async def inactive_msg():
-        if discord_msg: await channel_send("**Server INACTIVE** :red_circle:\nUse `?check` to update server status.")
+        msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."
+        if discord_msg:
+            try: await ctx.send(msg)
+            except: await channel_send(msg)
 
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
@@ -194,7 +197,7 @@ async def server_status(discord_msg=False, ctx=None):
     lprint(ctx, "Checking Minecraft server status...")
 
     # send_command() will send random number, server is online if match is found in log.
-    response = await send_command(' ', force_check=True, discord_msg=discord_msg)
+    response = await send_command(' ', force_check=True, discord_msg=discord_msg, ctx=ctx)
     if response:
         if discord_msg: await ctx.send("**Server ACTIVE** :green_circle:")
         lprint(ctx, "Server Status: Active")
