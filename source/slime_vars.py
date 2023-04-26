@@ -1,8 +1,9 @@
-import discord, platform, os
+import discord, platform, csv, os
 from os.path import join
 
 home_dir = os.path.expanduser('~')
 
+use_cmdline_start = False
 # Get the operating system name
 if platform.system() == 'Windows':
     on_windows = True
@@ -35,7 +36,7 @@ server_url = ''
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = False
+server_files_access = True
 
 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
 use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
@@ -66,8 +67,17 @@ default_wait_time = 30
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
 # Do not edit these lines.
+# Create servers.csv file if not exist.
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
-server_selected = servers['example']  # Currently selected server
+with open(join('bot_files', 'servers.csv'), "a") as f: pass
+with open(join('bot_files', 'servers.csv'), 'r') as f:
+    csv_data = csv.reader(f, skipinitialspace=True)
+    for i in csv_data:
+        if not i: continue
+        if 'Example Entry' == i[0]: continue
+        i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+        servers[i[0]] = i
+server_selected = servers['papermc']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
 world_backups_path = join(mc_path, 'world_backups', server_selected[0])
