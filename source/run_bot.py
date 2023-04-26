@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import time, sys, csv, os
+import time, sys, os
 from bot_files.slime_bot import bot
 from bot_files.extra import lprint
 import bot_files.backend_functions as backend
@@ -165,16 +165,6 @@ Local Server:
     Minecraft Path      {slime_vars.mc_path}
     Server Path         {slime_vars.server_path}
     """
-
-# Create servers.csv file if not exist.
-with open(join('bot_files', 'servers.csv'), "a") as f: pass
-with open(join('bot_files', 'servers.csv'), 'r') as f:
-    csv_data = csv.reader(f, skipinitialspace=True)
-    for i in csv_data:
-        if not i: continue
-        if 'Example Entry' == i[0]: continue
-        i[2] = i[2].replace('PARAMS', slime_vars.java_params)  # Replaces 'PARAMS' with java_params string.
-        slime_vars.servers[i[0]] = i
 
 if __name__ == '__main__':
     # The order of the if statements is important.

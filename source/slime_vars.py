@@ -1,4 +1,4 @@
-import discord, platform, os
+import discord, platform, csv, os
 from os.path import join
 
 home_dir = os.path.expanduser('~')
@@ -70,7 +70,16 @@ default_wait_time = 30
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
 # Do not edit these lines.
+# Create servers.csv file if not exist.
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
+with open(join('bot_files', 'servers.csv'), "a") as f: pass
+with open(join('bot_files', 'servers.csv'), 'r') as f:
+    csv_data = csv.reader(f, skipinitialspace=True)
+    for i in csv_data:
+        if not i: continue
+        if 'Example Entry' == i[0]: continue
+        i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+        servers[i[0]] = i
 server_selected = servers['papermc']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
