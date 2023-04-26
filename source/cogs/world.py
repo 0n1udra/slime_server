@@ -202,7 +202,7 @@ class World(commands.Cog):
 
         if set_time:
             if not await send_command(f"time set {set_time}"): return
-            await ctx.send("Time Updated  :clock9:")
+            await ctx.send(f"Time Updated ({set_time})  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
 
@@ -210,7 +210,7 @@ class World(commands.Cog):
     async def timeday(self, ctx):
         """Set time to day."""
 
-        await ctx.invoke(self.bot.get_command('timeset'), set_time='10000')
+        await ctx.invoke(self.bot.get_command('timeset'), set_time='0')
 
     @commands.command(aliases=['nighttime', 'setnight', 'timesetnight'])
     async def timenight(self, ctx):
