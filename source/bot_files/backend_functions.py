@@ -114,8 +114,7 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
         msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."
         if discord_msg:
             try: await ctx.send(msg)
-            except: pass
-            else: await channel_send(msg)
+            except: await channel_send(msg)
 
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
