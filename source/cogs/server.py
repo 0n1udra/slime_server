@@ -362,10 +362,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         if log_data:
             i = 0
             for line in log_data.split('\n'):
-                i += 1
-                # E.g. '[16:28:28 INFO]: There are 1 of a max of 20 players online: R3diculous' >
-                # '3: (16:28:28) [Server thread/INFO]: There are 1 of a max of 20 players online: R3diculous' (With Discord markdown)
-                await ctx.send(f"**{i}**: _({line.split(']', 1)[0][1:]})_ `{line.split(']', 1)[-1][1:]}`")
+                await ctx.send(f">`{line}`")
             await ctx.send("-----END-----")
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
