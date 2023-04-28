@@ -47,8 +47,8 @@ use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
-tmux_bot_pane = '0.6'  # tmux pane for slime_bot
-tmux_minecraft_pane = '0.0'  # tmux pane for miencraft server
+tmux_bot_pane = '0.0'  # tmux pane for slime_bot. Default: 0.0
+tmux_minecraft_pane = '0.1'  # tmux pane for Miencraft server. Default: 0.1
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
@@ -71,7 +71,7 @@ java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:P
 
 # Do not edit these lines.
 # Create servers.csv file if not exist.
-servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} server.jar nogui' , 30]}
+servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} -jar server.jar nogui', 30]}
 with open(join('bot_files', 'servers.csv'), "a") as f: pass
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)
