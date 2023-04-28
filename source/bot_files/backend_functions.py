@@ -243,7 +243,6 @@ async def get_players():
         player_names = new
         return player_names, text
 
-
 async def get_coords(player=''):
     """Gets player's location coordinates."""
 
