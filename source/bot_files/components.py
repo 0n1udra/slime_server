@@ -184,7 +184,7 @@ def new_embed(fields, title):
         embed.add_field(name=i[0], value=i[1], inline=i[2])
     return embed
 
-def server_modal_fields(server='example'):
+def server_modal_fields(server=slime_vars.server_selected[0]):
     data = slime_vars.servers[server]
 
     return [['text', 'Server Name', 'name', 'Name of new server', data[0], False, True, 50], # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length

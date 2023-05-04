@@ -196,7 +196,7 @@ class Server(commands.Cog):
         await ctx.send(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
-    @commands.command(aliases=['updateserver', 'su'])
+    @commands.command(aliases=['updateserver', 'su', 'update'])
     async def serverupdate(self, ctx, now=''):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
@@ -219,10 +219,10 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
-        server = backend.download_latest()  # Updates server.jar file.
-        if server:
-            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
+        await ctx.send(f"***Downloading latest server jar***")
+        version, url = backend.download_latest()  # Updates server.jar file.
+        if version:
+            await ctx.send(f"Version: `{version}`\nSource: `{url}`\nNOTE: Next launch may take longer than usual.")
             await asyncio.sleep(3)
         else: await ctx.send("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
