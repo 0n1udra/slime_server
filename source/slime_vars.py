@@ -60,14 +60,16 @@ mc_path = join(home_dir, 'Games', 'Minecraft')
 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
 default_wait_time = 30
 
-# Server profiles, allows you to have different servers and each with their own backups/restores.
-# {'server_name': ['server_name', 'description', 'start_Command', 'optional_jar_download_url', optional_wait_time]}
-# No spaces allowed in server name. Always put optional_wait_time at tail of list.
+# Server profiles, allows you to have different servers and each with their own .jar, backups/restores, and launch command.
+# Create new server profile with ?panel command, do NOT edit 'servers' dictionary or servers.csv file directly.
+# ?update command downloads papermc or vanilla depending on if 'papermc' or 'vanilla' is IN the name.
+# E.g. 'my vanilla server', 'custom_papermc', etc... or just 'papermc', 'vanilla' works too. (Case insensitive)
+# You can implement your own downloader in the download_latest() func in backend_functions.py
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
+servers = {'papermc': ['papermc', 'Description of server', f'java {java_params} -jar server.jar nogui', default_wait_time]}
 
-# Do not edit these lines.
+# ===== Do NOT edit, unless you want to ofc =====
 # Create servers.csv file if not exist.
-servers = {'papermc': ['papermc', 'Description of server', f'java {java_params} -jar server.jar nogui', 30]}
 with open(join('bot_files', 'servers.csv'), "a") as f: pass
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)

@@ -18,7 +18,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
+    @commands.command(aliases=['select', 'sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
