@@ -549,8 +549,10 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
+        if not backend.server_start():
+            await ctx.send("**Error:** Could not start Minecraft server.")
+            return False
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{slime_vars.server_selected[0]}**\nStartup time: {slime_vars.server_selected[3]}s.")
-        backend.server_start()
 
         # checks if set custom wait time in server_selected list.
         try: wait_time = int(slime_vars.server_selected[-1])
