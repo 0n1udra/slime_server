@@ -36,7 +36,7 @@ Scroll down for requirements, setup instructions and screenshots.
   `python3 run_bot.py starttmux startboth attachtmux` - Starts tmux session, bot and MC server, then attaches to tmux session.
 5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.  
 6. Read through the help pages with `?help` or `?help2` in Discord.  
-7. Optional: Use `?update` to download latest .jar file (Downloads latest PaperMC by default, can change to vanilla in `slime_vars.py`)
+7. Optional: You can use `?update` to download latest .jar file (Downloads latest PaperMC by default, more details in `slime_vars.py` comments, line 63)
 
 ### Using Virtualenv or venv:
 Install Python3 venv:
