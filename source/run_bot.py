@@ -55,6 +55,8 @@ def setup_directories():
     # Creates Server folder, folder for world backups, and folder for server backups.
     os.makedirs(slime_vars.servers_path)
     lprint(ctx, "INFO: Created: " + slime_vars.servers_path)
+    os.makedirs(slime_vars.server_path)
+    lprint(ctx, "INFO: Created: " + slime_vars.server_path)
     os.makedirs(slime_vars.world_backups_path)
     lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
     os.makedirs(slime_vars.server_backups_path)
