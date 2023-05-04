@@ -536,7 +536,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startminecraft', 'start'])
+    @commands.command(aliases=['startserver', 'start'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -563,7 +563,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
+    @commands.command(aliases=['stopserver', 'stop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -600,7 +600,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         backend.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
+    @commands.command(aliases=['restartserver', 'restart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
