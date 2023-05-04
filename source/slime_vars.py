@@ -32,7 +32,7 @@ channel_id = None  # Default: None
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-server_url = ''
+server_address = ''
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -63,7 +63,6 @@ default_wait_time = 30
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'server_name': ['server_name', 'description', 'start_Command', 'optional_jar_download_url', optional_wait_time]}
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
-# Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
 # Do not edit these lines.
@@ -118,7 +117,7 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    }
 
 # ========== Misc
-server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
+server_ip = server_address  # Will be updated by get_ip() function in backend_functions.py on bot startup.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json

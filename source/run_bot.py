@@ -141,7 +141,7 @@ Server:
     File Access         {slime_vars.server_files_access}
     Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
     Server Selected     {slime_vars.server_selected}
-    Server URL          {slime_vars.server_url}
+    Server URL          {slime_vars.server_address}
     Server Port         {slime_vars.server_port}
 """
 if slime_vars.use_tmux:

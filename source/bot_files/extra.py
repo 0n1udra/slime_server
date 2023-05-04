@@ -119,9 +119,9 @@ def get_public_ip():
     return server_ip
 
 def ping_url():
-    """Checks if server_url address works by pinging it twice."""
+    """Checks if server_address address works by pinging it twice."""
 
-    ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_url], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ping_out, ping_error = ping.communicate()
     if slime_vars.server_ip in str(ping_out):
         return 'working'
