@@ -226,7 +226,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         """Checks valheim server active status using 'vhserver details' command."""
         await ctx.send("***Checking Valheim Server Status...***")
 
-        if backend.get_proc('valheim_server.x86_64'):
+        if backend.get_proc('MainValheimThre'):
             await ctx.send(f"Valheim Server **Online**.\n{self.valheim_text}")
         else:
             await ctx.send("Valheim Server **Offline**.\nUse `?vstart` to launch server.")
