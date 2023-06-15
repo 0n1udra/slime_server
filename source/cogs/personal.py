@@ -62,7 +62,7 @@ class System(commands.Cog):
 # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
     def __init__(self, bot):
-        self.ip_text = f'URL: `{slime_vars.server_url}`\nIP: `{backend.get_public_ip()}` (Use if URL not working)'
+        self.ip_text = f'URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use URL broken)'
 
         # Get valheim password by reading and parsing start_server.sh file.
         vpassword = 'N/A'
@@ -313,8 +313,7 @@ Password for Valheim: `{slime_vars.valheim_password}`
         random_number = str(random.random())
         backend.zomboid_command(random_number)
         await asyncio.sleep(1)
-        log_data = backend.server_log(random_number,
-                                                file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
+        log_data = backend.server_log(random_number, file_path=f'/home/{slime_vars.user}/Zomboid/server-console.txt')
         if log_data:
             await ctx.send(f"Project Zomboid Server **Online**.\n{self.ip_text}")
         else:

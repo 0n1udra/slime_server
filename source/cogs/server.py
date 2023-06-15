@@ -325,7 +325,7 @@ class Server(commands.Cog):
         fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
 Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
                   ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
-                  ['Address', f"IP: ||`{backend.get_public_ip()}`||\nURL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})"],
+                  ['Address', f"URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL broken)"],
                   ['Location', f"`{slime_vars.server_path}`"],
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
