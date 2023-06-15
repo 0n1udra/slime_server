@@ -62,7 +62,7 @@ class System(commands.Cog):
 # ========== Other Games: Valheim, Project Zomboid
 class Other_Games(commands.Cog):
     def __init__(self, bot):
-        self.ip_text = f'URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use URL broken)'
+        self.ip_text = f'URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)'
 
         # Get valheim password by reading and parsing start_server.sh file.
         vpassword = 'N/A'
