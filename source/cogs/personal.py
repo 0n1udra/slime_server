@@ -71,7 +71,7 @@ class Other_Games(commands.Cog):
             with open(f'{slime_vars.steam_path}/Valheim dedicated server/start_server.sh', 'r') as f:
                 for i in f.readlines():
                     if '-password' in i: _line = i
-            vpassword = _line.split(' ')[-2].replace('"', '')
+            vpassword = _line.split(' ')[-1].replace('"', '')
         except: pass
 
         self.valheim_text = f"{self.ip_text}\nPass: `{vpassword}`"

@@ -1,4 +1,4 @@
-import discord, requests, asyncio, random
+import discord, requests, asyncio, psutil, random
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from bot_files.extra import *
@@ -18,6 +18,8 @@ server_active = False
 discord_channel = None
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 
+
+# ========== Discord Bot
 def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
     slime_proc, slime_pid = proc, pid
@@ -31,6 +33,17 @@ async def channel_send(msg):
     """Send message to discord_channel."""
 
     if discord_channel: await discord_channel.send(msg)
+
+
+# ========== Other Games
+def valheim_command(command):
+    """Use vhserver script"""
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.1 "{command}" ENTER')
+
+def zomboid_command(command):
+    """Sends command to tmux 0.1 Project Zomboid server."""
+    os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:0.2 "{command}" ENTER')
+
 
 # ========== Server Commands: start, send command, read log, etc
 def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
@@ -404,6 +417,7 @@ def download_latest():
     else: return version_info
 
     return False
+
 
 # ========== Servers and backups
 def new_server(name):

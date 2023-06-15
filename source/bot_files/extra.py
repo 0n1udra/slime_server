@@ -69,12 +69,11 @@ def get_proc(proc_name, proc_cmdline=None):
 
     for proc in psutil.process_iter():
         if proc.name() == proc_name:
-            # Narrow down process by it's arguments. E.g. python3 could have multiple processes.
+            # Narrow down process by its arguments. E.g. python3 could have multiple processes.
             if proc_cmdline:
                 if any(proc_cmdline in i for i in proc.cmdline()):
                     return proc
-            else:
-                return proc
+            else: return proc
 
 def format_args(args, return_no_reason=False):
     """
