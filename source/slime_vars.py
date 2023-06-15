@@ -35,7 +35,7 @@ steam_path = f'/home/{user}/.steam/steam/steamapps/common'
 
 # ========== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-server_url = ''
+server_url = 'arcpy.asuscomm.com'
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -125,3 +125,4 @@ server_ip = server_url  # Will be updated by get_ip() function in backend_functi
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
+if not server_url: server_url = 'N/A'
