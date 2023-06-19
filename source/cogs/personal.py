@@ -74,7 +74,7 @@ class Other_Games(commands.Cog):
             vpassword = _line.split(' ')[-1].replace('"', '')
         except: pass
 
-        self.valheim_text = f"{self.ip_text}\nPass: `{vpassword}`"
+        self.valheim_text = f"{self.ip_text}\nPass: ||`{vpassword}`||"
         self.bot = bot
 
     @commands.command(aliases=['welcome', 'banner'])
