@@ -63,14 +63,43 @@ mc_path = join(home_dir, 'Games', 'Minecraft')
 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
 default_wait_time = 30
 
-# Server profiles, allows you to have different servers and each with their own backups/restores.
-# {'server_name': ['server_name', 'description', 'start_Command', 'optional_jar_download_url', optional_wait_time]}
-# No spaces allowed in server name. Always put optional_wait_time at tail of list.
-# Note: the URL is just for show, the bot uses corresponding API to check and download latest server jar file.
 java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
 
-# Do not edit these lines.
+# ========== Bot Config
+# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
+status_checker_command = 'xp '
+
+# Max number of log lines to read. Increase if server is really busy.
+log_lines_limit = 500
+
+# Wait time (in seconds) between sending command to MC server and reading server logs for output.
+# Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
+command_buffer_time = 1
+
+# Send 'save-all' to MC server every X minutes (default 60 minutes).
+autosave_status = True
+autosave_min_interval = 60
+
+# For '?links' command. Shows helpful websites.
+useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
+                   'Forge Installer': 'https://files.minecraftforge.net/',
+                   'CurseForge Download': 'https://curseforge.overwolf.com/',
+                   'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
+                   'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
+                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
+                   }
+
+
+# ========== Don't need to edit.
+bot_src_path = os.path.dirname(os.path.abspath(__file__))
+bot_files_path = join(bot_src_path, 'bot_files')
+slime_vars_file = join(bot_src_path, 'slime_vars.py')
+bot_log_file = join(bot_src_path, 'slime_bot.log')
+
 # Create servers.csv file if not exist.
+# Server profiles, allows you to have different servers and each with their own backups/restores.
+# {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
+# No spaces allowed in server name. Always put optional_wait_time at tail of list.
 servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} -jar server.jar nogui', 30]}
 with open(join('bot_files', 'servers.csv'), "a") as f: pass
 with open(join('bot_files', 'servers.csv'), 'r') as f:
@@ -88,40 +117,11 @@ server_backups_path = join(mc_path, 'server_backups', server_selected[0])
 server_log_path = join(server_path, 'logs')
 server_log_file = join(server_log_path, 'latest.log')
 
-# ========== Bot Config
-bot_src_path = os.path.dirname(os.path.abspath(__file__))
-bot_files_path = join(bot_src_path, 'bot_files')
-slime_vars_file = join(bot_src_path, 'slime_vars.py')
-bot_log_file = join(bot_src_path, 'slime_bot.log')
 
-# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
-status_checker_command = 'xp '
-
-# Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
-log_lines_limit = 500
-
-# Wait time (in seconds) between sending command to MC server and reading server logs for output.
-# Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
-command_buffer_time = 1
-
-# Autosave functionality. interval is in minutes.
-autosave_status = True
-autosave_interval = 60
-
-mc_active_status = False  # If Minecraft server is running.
-mc_subprocess = None  # If using subprocess, this is will be the Minecraft server.
-
-# For '?links' command. Shows helpful websites.
-useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
-                   'Forge Installer': 'https://files.minecraftforge.net/',
-                   'CurseForge Download': 'https://curseforge.overwolf.com/',
-                   'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
-                   'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
-                   }
-
-# ========== Misc
+exact_foldername = False  # Set to True to backup 'world' folder only.
 server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
+mc_active_status = False  # If Minecraft server is running.
+mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
