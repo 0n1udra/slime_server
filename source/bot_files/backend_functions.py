@@ -434,7 +434,7 @@ def new_server(name):
     os.mkdir(new_folder)
     return new_folder
 
-def new_backup(new_name, src, dst):
+def new_backup(new_name, src, dst, exact=slime_vars.exact_foldername):
     """
     Create a new world or server backup, by copying and renaming folder.
 
@@ -445,7 +445,8 @@ def new_backup(new_name, src, dst):
     """
 
     if not os.path.isdir(dst): os.makedirs(dst)
-
+    # TODO add multiple world folders backup
+    # folder name: version tag if known, date, optional name
     version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
     new_name = f"({get_datetime()}) {version}{new_name}"
     new_backup_path = join(dst, new_name.strip())

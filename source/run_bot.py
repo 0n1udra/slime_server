@@ -139,7 +139,7 @@ Discord:
 Server:
     Minecraft Folder    {slime_vars.mc_path}
     File Access         {slime_vars.server_files_access}
-    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
+    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_min_interval}
     Server Selected     {slime_vars.server_selected}
     Server URL          {slime_vars.server_url}
     Server Port         {slime_vars.server_port}
