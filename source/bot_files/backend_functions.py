@@ -5,7 +5,7 @@ from bot_files.extra import *
 from os.path import join
 import slime_vars
 if slime_vars.use_rcon: import mctools
-if slime_vars.use_cmdline_start: import subprocess
+if slime_vars.windows_cmdline_start: import subprocess
 
 # Remove ANSI escape characters
 import re
@@ -288,10 +288,9 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     # Start java server using subprocess and cmd's start command.
-    elif slime_vars.use_cmdline_start is True:
+    elif slime_vars.windows_cmdline_start:
         os.chdir(slime_vars.server_path)
-        command = 'start "Minecraft server" java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
-        subprocess.Popen(command, shell=True)
+        subprocess.Popen(slime_vars.windows_cmdline_start + slime_vars.server_launch_command, shell=True)
 
     elif slime_vars.use_tmux is True:
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "cd {slime_vars.server_path}" ENTER')

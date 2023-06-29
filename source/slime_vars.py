@@ -2,13 +2,15 @@ import discord, platform, csv, os
 from os.path import join
 
 home_dir = os.path.expanduser('~')
+windows_cmdline_start = False
 
-use_cmdline_start = False
 # Get the operating system name
 if platform.system() == 'Windows':
     on_windows = True
-    use_cmdline_start = True  # Enable to use the 'start' command in windows cmd to start java server.
+    windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
 
+# Needs user's name for setting directory paths
+user = ''
 try: user = os.getlogin()
 except:
     import getpass
@@ -63,7 +65,8 @@ mc_path = join(home_dir, 'Games', 'Minecraft')
 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
 default_wait_time = 30
 
-java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
+# Default server launch command to start Minecraft java server.
+server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
 # ========== Bot Config
 # The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
@@ -100,14 +103,14 @@ bot_log_file = join(bot_src_path, 'slime_bot.log')
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
-servers = {'example': ['Example Entry', 'Description of server', f'java {java_params} -jar server.jar nogui', 30]}
-with open(join('bot_files', 'servers.csv'), "a") as f: pass
+servers = {'example': ['Example Entry', 'Description of server', server_launch_command, 30]}
+with open(join('bot_files', 'servers.csv'), "a") as f: pass  # Create file if not exist.
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)
     for i in csv_data:
         if not i: continue
         if 'Example Entry' == i[0]: continue
-        i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
+        i[2] = i[2].replace('PARAMS', server_launch_command)  # Replaces 'PARAMS' with server_launch_command string.
         servers[i[0]] = i
 server_selected = servers['papermc']  # Currently selected server
 servers_path = join(mc_path, 'servers')  # Path to all servers

@@ -96,7 +96,7 @@ class Server(commands.Cog):
 
         server_name = components.data('second_selected')
         if not server_name in slime_vars.servers:
-            slime_vars.servers[server_name] = [server_name, 'Description of server', f'java {slime_vars.java_params} server.jar nogui', 30]
+            slime_vars.servers[server_name] = [server_name, 'Description of server', slime_vars.server_launch_command, 30]
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
