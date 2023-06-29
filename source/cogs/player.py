@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):

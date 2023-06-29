@@ -8,3 +8,4 @@ test.py
 *.bak
 *.log
 source/bot_files/servers.csv
+source/user_config.py

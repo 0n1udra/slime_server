@@ -5,7 +5,7 @@ import bot_files.backend_functions as backend
 from bot_files.extra import get_parameter, update_csv, update_servers
 from os.path import join
 import bot_files.components as components
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 ctx = 'slime_bot.py'
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
@@ -47,7 +47,7 @@ class Server(commands.Cog):
         elif name in slime_vars.servers:
             backend.server_selected = slime_vars.servers[name]
             backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
-            backend.edit_file('_server_selected', f" '{name}'", slime_vars.slime_vars_file)
+            backend.edit_file('_server_selected', f" '{name}'", slime_vars.user_config_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
 
@@ -300,7 +300,7 @@ class Server(commands.Cog):
         except: pass
         else:
             slime_vars.autosave_min_interval = arg
-            backend.edit_file('autosave_min_interval', f" {arg}", slime_vars.slime_vars_file)
+            backend.edit_file('autosave_min_interval', f" {arg}", slime_vars.user_config_file)
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
@@ -308,12 +308,12 @@ class Server(commands.Cog):
             # Starts loop, updates autosave_status, edits slime_vars.py, output to log
             self.autosave_loop.start()
             slime_vars.autosave_status = True
-            backend.edit_file('autosave_status', ' True', slime_vars.slime_vars_file)
+            backend.edit_file('autosave_status', ' True', slime_vars.user_config_file)
             lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_min_interval}m)')
         elif arg.lower() in backend.disable_inputs:
             self.autosave_loop.cancel()
             slime_vars.autosave_status = False
-            backend.edit_file('autosave_status', ' False', slime_vars.slime_vars_file)
+            backend.edit_file('autosave_status', ' False', slime_vars.user_config_file)
             lprint(ctx, 'Autosave: Disabled')
 
         status_msg = ':red_circle: **DISABLED** '

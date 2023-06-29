@@ -1,5 +1,5 @@
 import discord
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 bot = None
 

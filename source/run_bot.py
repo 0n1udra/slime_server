@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-import time, sys, os
+import shutil, time, sys, os
 from bot_files.slime_bot import bot
 from bot_files.extra import lprint
 import bot_files.backend_functions as backend
 from os.path import join
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 ctx = 'run_bot.py'  # So you know which log lines come from which file.
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
@@ -178,6 +178,16 @@ Local Server:
 if __name__ == '__main__':
     # The order of the if statements is important.
     print(vars_msg)
+
+    if not os.path.isfile(slime_vars.user_config_file):
+        lprint(ctx, "No 'user_config.py' file detected.")
+        try: shutil.copy2(slime_vars.user_config_template_file, slime_vars.bot_src_path + '/user_config.py')
+        except:
+            lprint(ctx, "ERROR: Unable to create 'user_config.py' file.")
+            exit()
+        else:
+            lprint(ctx, "Please set variables in the newly created user_config.py file.")
+            exit()
 
     if 'setup' in sys.argv:
         if slime_vars.server_files_access is True:

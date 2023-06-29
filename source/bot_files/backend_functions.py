@@ -3,7 +3,7 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from bot_files.extra import *
 from os.path import join
-import slime_vars
+import bot_files.slime_vars as slime_vars
 if slime_vars.use_rcon: import mctools
 if slime_vars.windows_cmdline_start: import subprocess
 
