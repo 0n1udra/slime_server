@@ -4,19 +4,19 @@ import slime_vars
 bot = None
 
 buttons_dict = {
-    'server': [[['Status Page', 'serverstatus', '\U00002139'],
+    'server': [[['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
                 ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'],
                 ['Reboot Server', 'serverrestart', '\U0001F501']],
                [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
                 ['Properties File', 'propertiesall', '\U0001F527'],
                 ['Server Log', 'get_log_file', '\U0001F4C3'],
                 ['Connections Log', 'serverconnections', '\U0001F4E1']]],
-    'backups': [[['Backup World', 'worldbackupdate', '\U0001F195'],
+    'backups': [[['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504']],
+                [['Backup World', 'worldbackupdate', '\U0001F195'],
                  ['Backup Server', 'serverbackupdate', '\U0001F195'],
                  ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
                  ['Server Backups', 'restoreserverpanel', '\U0001F4C1']],
-                [['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504'],
-                 ['Save World', 'saveall', '\U0001F30E']]],
+                ],
     'players': [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
                  ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
                  ['OP List', 'oplist', '\U0001F4DC']],
@@ -156,7 +156,8 @@ def new_buttons(buttons_list):
 
     view = discord.ui.View(timeout=None)
     for bmode in buttons_list:
-        if len(bmode) == 2: bmode.append(None)  # For bmode with no emoji.
+        if bmode[1] in slime_vars.if_no_file_access: continue  # Disable certain buttons if no local server file access.
+        if len(bmode) == 2: bmode.append(None)  # For buttons with no emoji.
         view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
     return view
 

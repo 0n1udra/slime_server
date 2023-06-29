@@ -7,6 +7,12 @@ import bot_files.backend_functions as backend
 from os.path import join
 import slime_vars
 
+__version__ = "7.2"
+__date__ = '29/06/2023'
+__author__ = "github.com/0n1udra"
+__license__ = "GPL 3"
+__status__ = "Development"
+
 ctx = 'run_bot.py'  # So you know which log lines come from which file.
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
@@ -141,7 +147,7 @@ Discord:
 Server:
     Minecraft Folder    {slime_vars.mc_path}
     File Access         {slime_vars.server_files_access}
-    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_interval}
+    Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_min_interval}
     Server Selected     {slime_vars.server_selected}
     Server URL          {slime_vars.server_address}
     Server Port         {slime_vars.server_port}

@@ -15,7 +15,7 @@ class Server(commands.Cog):
 
         if slime_vars.autosave_status is True:
             self.autosave_loop.start()
-            lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
+            lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_min_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
     @commands.command(aliases=['select', 'sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
@@ -96,7 +96,7 @@ class Server(commands.Cog):
 
         server_name = components.data('second_selected')
         if not server_name in slime_vars.servers:
-            slime_vars.servers[server_name] = [server_name, 'Description of server', f'java {slime_vars.java_params} server.jar nogui', 30]
+            slime_vars.servers[server_name] = [server_name, 'Description of server', slime_vars.server_launch_command, 30]
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
@@ -270,8 +270,8 @@ class Server(commands.Cog):
         try: arg = int(arg)
         except: pass
         else:
-            slime_vars.autosave_interval = arg
-            backend.edit_file('autosave_interval', f" {arg}", slime_vars.slime_vars_file)
+            slime_vars.autosave_min_interval = arg
+            backend.edit_file('autosave_min_interval', f" {arg}", slime_vars.slime_vars_file)
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
@@ -280,7 +280,7 @@ class Server(commands.Cog):
             self.autosave_loop.start()
             slime_vars.autosave_status = True
             backend.edit_file('autosave_status', ' True', slime_vars.slime_vars_file)
-            lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_interval}m)')
+            lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_min_interval}m)')
         elif arg.lower() in backend.disable_inputs:
             self.autosave_loop.cancel()
             slime_vars.autosave_status = False
@@ -291,18 +291,18 @@ class Server(commands.Cog):
         if not await server_status(discord_msg=False): status_msg = ":pause_button: **PAUSED**"
         elif slime_vars.autosave_status: status_msg = ':green_circle: **ENABLED**'
 
-        fields = [['Status', f"{status_msg} | **{slime_vars.autosave_interval}**min"],
+        fields = [['Status', f"{status_msg} | **{slime_vars.autosave_min_interval}**min"],
                   ['Note', 'Auto save pauses if server unreachable (not same as disabled). Update server status with `?check` or `?stats`.']]
         await ctx.send(embed=components.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
         lprint(ctx, 'Fetched autosave information')
 
-    @tasks.loop(seconds=slime_vars.autosave_interval * 60)
+    @tasks.loop(seconds=slime_vars.autosave_min_interval * 60)
     async def autosave_loop(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await send_command('save-all', discord_msg=False):
-            lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_interval}m)")
+            lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_min_interval}m)")
 
     @autosave_loop.before_loop
     async def before_autosaveall_loop(self):
@@ -324,8 +324,8 @@ class Server(commands.Cog):
 
         fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
 Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
-                  ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
-                  ['Address', f"IP: ||`{backend.get_public_ip()}`||\nURL: ||`{slime_vars.server_address}`|| ({backend.ping_url()})"],
+                  ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_min_interval}min)"],
+                  ['Address', f"URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))

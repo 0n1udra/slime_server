@@ -6,13 +6,6 @@ import bot_files.components as components
 from bot_files.components import buttons_dict
 import slime_vars as slime_vars
 
-__version__ = "7.1"
-__date__ = '2022/10/19'
-__author__ = "DT"
-__email__ = "dt01@pm.me"
-__license__ = "GPL 3"
-__status__ = "Development"
-
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
@@ -404,11 +397,12 @@ class Discord_Components_Funcs(commands.Cog):
         """Shows all the buttons!"""
 
         global buttons_dict
-        print('panel', buttons_dict)
         for k, v in buttons_dict.items():
-
-            await ctx.send(content=k.capitalize(), view=components.new_buttons(v[1]))
-            await ctx.send(content='', view=components.new_buttons(v[0]))
+            if slime_vars.server_files_access is False and 'backups' in k: continue
+            try:
+                await ctx.send(content=k.capitalize(), view=components.new_buttons(v[0]))
+                await ctx.send(content='', view=components.new_buttons(v[1]))
+            except: pass
 
     @commands.command(hidden=True)
     async def _close_panel(self, ctx): await components.clear()
@@ -484,18 +478,4 @@ async def setup(bot):
     await bot.add_cog(Slime_Bot_Commands(bot))
     await bot.add_cog(Discord_Components_Funcs(bot))
 
-# Disable certain commands depending on if using Tmux, RCON, or subprocess.
-if_no_tmux = ['serverstart', 'serverrestart']
-if_using_rcon = ['oplist', 'properties', 'rcon', 'onelinemode', 'worldbackupslist', 'worldbackupnew', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
-                 'serverbackupslist', 'serverbackupnew', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
-
-# Removes certain commands depending on your setup.
-if slime_vars.server_files_access is False and slime_vars.use_rcon is True:
-    for command in if_no_tmux: bot.remove_command(command)
-
-if slime_vars.use_tmux is False:
-    for command in if_no_tmux: bot.remove_command(command)
-
-
-for k, v in buttons_dict.items():
-    buttons_dict[k] = [sublist for sublist in v[0] if sublist[1] not in if_no_tmux + if_using_rcon]
+for command in slime_vars.if_no_file_access: bot.remove_command(command)

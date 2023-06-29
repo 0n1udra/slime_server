@@ -2,13 +2,15 @@ import discord, platform, csv, os
 from os.path import join
 
 home_dir = os.path.expanduser('~')
+windows_cmdline_start = False
 
-use_cmdline_start = False
 # Get the operating system name
 if platform.system() == 'Windows':
     on_windows = True
-    use_cmdline_start = True  # Enable to use the 'start' command in windows cmd to start java server.
+    windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
 
+# Needs user's name for setting directory paths
+user = ''
 try: user = os.getlogin()
 except:
     import getpass
@@ -38,7 +40,11 @@ server_port = 25565
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
 server_files_access = True
 
-# Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
+# Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
+server_use_screen = False
+screen_session_name = 'server'  # Make sure your screen session is named if starting server outside of bot.
+
+# Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also. Useful if can't use Tmux.
 use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
@@ -60,53 +66,23 @@ mc_path = join(home_dir, 'Games', 'Minecraft')
 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
 default_wait_time = 30
 
-# Server profiles, allows you to have different servers and each with their own .jar, backups/restores, and launch command.
-# Create new server profile with ?panel command, do NOT edit 'servers' dictionary or servers.csv file directly.
-# ?update command downloads papermc or vanilla depending on if 'papermc' or 'vanilla' is IN the name.
-# E.g. 'my vanilla server', 'custom_papermc', etc... or just 'papermc', 'vanilla' works too. (Case insensitive)
-# You can implement your own downloader in the download_latest() func in backend_functions.py
-java_params = '-server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2'
-servers = {'papermc': ['papermc', 'Description of server', f'java {java_params} -jar server.jar nogui', default_wait_time]}
-
-# ===== Do NOT edit, unless you want to ofc =====
-# Create servers.csv file if not exist.
-with open(join('bot_files', 'servers.csv'), "a") as f: pass
-with open(join('bot_files', 'servers.csv'), 'r') as f:
-    csv_data = csv.reader(f, skipinitialspace=True)
-    for i in csv_data:
-        if not i: continue
-        i[2] = i[2].replace('PARAMS', java_params)  # Replaces 'PARAMS' with java_params string.
-        servers[i[0]] = i
-server_selected = list(servers.values())[0]  # Currently selected server
-servers_path = join(mc_path, 'servers')  # Path to all servers
-server_path = join(servers_path, server_selected[0])  # Path to currently selected server
-world_backups_path = join(mc_path, 'world_backups', server_selected[0])
-server_backups_path = join(mc_path, 'server_backups', server_selected[0])
-server_log_path = join(server_path, 'logs')
-server_log_file = join(server_log_path, 'latest.log')
+# Default server launch command to start Minecraft java server.
+server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
 # ========== Bot Config
-bot_src_path = os.path.dirname(os.path.abspath(__file__))
-bot_files_path = join(bot_src_path, 'bot_files')
-slime_vars_file = join(bot_src_path, 'slime_vars.py')
-bot_log_file = join(bot_src_path, 'slime_bot.log')
-
 # The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
 
-# Max number of log lines to read. Increase if server is really busy (has a lot ouf console logging)
+# Max number of log lines to read. Increase if server is really busy.
 log_lines_limit = 500
 
 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
 command_buffer_time = 1
 
-# Autosave functionality. interval is in minutes.
+# Send 'save-all' to MC server every X minutes (default 60 minutes).
 autosave_status = True
-autosave_interval = 60
-
-mc_active_status = False  # If Minecraft server is running.
-mc_subprocess = None  # If using subprocess, this is will be the Minecraft server.
+autosave_min_interval = 60
 
 # For '?links' command. Shows helpful websites.
 useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
@@ -117,8 +93,49 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
                    }
 
-# ========== Misc
+
+# ========== Don't need to edit.
+bot_src_path = os.path.dirname(os.path.abspath(__file__))
+bot_files_path = join(bot_src_path, 'bot_files')
+slime_vars_file = join(bot_src_path, 'slime_vars.py')
+bot_log_file = join(bot_src_path, 'slime_bot.log')
+
+# Create servers.csv file if not exist.
+# Server profiles, allows you to have different servers and each with their own backups/restores.
+# {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
+# No spaces allowed in server name. Always put optional_wait_time at tail of list.
+servers = {'example': ['Example Entry', 'Description of server', server_launch_command, 30]}
+# TODO add to csv if foler exist
+with open(join('bot_files', 'servers.csv'), "a") as f: pass  # Create file if not exist.
+with open(join('bot_files', 'servers.csv'), 'r') as f:
+    csv_data = csv.reader(f, skipinitialspace=True)
+    for i in csv_data:
+        if not i: continue
+        if 'Example Entry' == i[0]: continue
+        i[2] = i[2].replace('PARAMS', server_launch_command)  # Replaces 'PARAMS' with server_launch_command string.
+        servers[i[0]] = i
+server_selected = list(servers.values())[0]  # Currently selected server
+servers_path = join(mc_path, 'servers')  # Path to all servers
+server_path = join(servers_path, server_selected[0])  # Path to currently selected server
+world_backups_path = join(mc_path, 'world_backups', server_selected[0])
+server_backups_path = join(mc_path, 'server_backups', server_selected[0])
+server_log_path = join(server_path, 'logs')
+server_log_file = join(server_log_path, 'latest.log')
+
+exact_foldername = False  # Set to True to backup 'world' folder only.
 server_ip = server_address  # Will be updated by get_ip() function in backend_functions.py on bot startup.
+mc_active_status = False  # If Minecraft server is running.
+mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
+if not server_address: server_url = 'N/A'
+
+# Disable certain commands depending on if have local server file access.
+if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff', 'chatlog',
+                     'motd', 'oplist', 'properties', 'propertiesall', 'rcon', 'onlinemode', 'serverconnections',
+                     'restoreworldpanel', 'worldbackupslist', 'worldbackupnew', 'worldbackupdate', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
+                     'restoreserverpanel', 'serverbackupslist', 'serverbackupnew', 'serverbackupdate', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog'
+                     ]
+
+if server_files_access: if_no_file_access = []

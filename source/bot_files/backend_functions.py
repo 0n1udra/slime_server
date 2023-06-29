@@ -1,11 +1,11 @@
-import discord, requests, asyncio, random
+import discord, requests, asyncio, psutil, random
 from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from bot_files.extra import *
 from os.path import join
 import slime_vars
 if slime_vars.use_rcon: import mctools
-if slime_vars.use_cmdline_start: import subprocess
+if slime_vars.windows_cmdline_start: import subprocess
 
 # Remove ANSI escape characters
 import re
@@ -18,6 +18,8 @@ server_active = False
 discord_channel = None
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 
+
+# ========== Discord Bot
 def set_slime_proc(proc, pid):
     global slime_proc, slime_pid
     slime_proc, slime_pid = proc, pid
@@ -138,16 +140,20 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
             await inactive_msg()
             return False
 
-    elif slime_vars.use_tmux is True:
+    elif slime_vars.use_tmux is True or slime_vars.server_use_screen:
         if not skip_check:  # Check if server reachable before sending command.
             # Checks if server is active in the first place by sending random number to be matched in server log.
-            os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
+            if slime_vars.server_use_screen:  # Using screen to run/send commands to MC server.
+                os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{status_checker}\n"')
+            else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
             await asyncio.sleep(slime_vars.command_buffer_time)
             if not server_log(random_number):
                 await inactive_msg()
                 return False
 
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
+        if slime_vars.server_use_screen:
+            os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{command}\n"')
+        else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
 
     else:
         await inactive_msg()
@@ -266,7 +272,11 @@ def server_start():
 
     global mc_subprocess
 
-    if slime_vars.use_subprocess is True:
+    if slime_vars.server_use_screen is True:
+        os.chdir(slime_vars.server_path)
+        os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_selected[2]}')
+
+    elif slime_vars.use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             mc_subprocess = subprocess.Popen(slime_vars.server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -275,10 +285,9 @@ def server_start():
         if type(mc_subprocess) == subprocess.Popen: return True
 
     # Start java server using subprocess and cmd's start command.
-    elif slime_vars.use_cmdline_start is True:
+    elif slime_vars.windows_cmdline_start:
         os.chdir(slime_vars.server_path)
-        command = 'start "Minecraft server" java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
-        subprocess.Popen(command, shell=True)
+        subprocess.Popen(slime_vars.windows_cmdline_start + slime_vars.server_launch_command, shell=True)
 
     elif slime_vars.use_tmux is True:
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "cd {slime_vars.server_path}" ENTER')
@@ -405,6 +414,7 @@ def download_latest():
 
     return False
 
+
 # ========== Servers and backups
 def new_server(name):
     """
@@ -420,7 +430,7 @@ def new_server(name):
     os.mkdir(new_folder)
     return new_folder
 
-def new_backup(new_name, src, dst):
+def new_backup(new_name, src, dst, exact=slime_vars.exact_foldername):
     """
     Create a new world or server backup, by copying and renaming folder.
 
@@ -431,7 +441,8 @@ def new_backup(new_name, src, dst):
     """
 
     if not os.path.isdir(dst): os.makedirs(dst)
-
+    # TODO add multiple world folders backup
+    # folder name: version tag if known, date, optional name
     version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
     new_name = f"({get_datetime()}) {version}{new_name}"
     new_backup_path = join(dst, new_name.strip())
