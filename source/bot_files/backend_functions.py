@@ -225,52 +225,6 @@ async def server_status(discord_msg=False, ctx=None):
         lprint(ctx, "Server Status: Inactive")
         server_active = False
 
-async def get_players():
-    """Extracts wanted data from output of 'list' command."""
-
-    response = await send_command("list")
-    if not response: return False
-
-    # Gets data from RCON response or reads server log for line containing player names.
-    if slime_vars.use_rcon is True: log_data = response[0]
-    else:
-        await asyncio.sleep(1)
-        log_data = server_log('players online')
-
-    if not log_data: return False
-
-    # Use regular expression to extract player names
-    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-    text = log_data[-2]  # There are 2 of a max of 20 players online
-    text = reaesc.sub('', text)
-    player_names = log_data[-1]  # R3diculous, MysticFrogo
-    # If there's no players active, player_names will still contain some anso escape characters.
-    if len(player_names.strip()) < 5: return None
-    else:
-
-        player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
-        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-        new = []
-        for i in player_names:
-            x = reaesc.sub('', i).strip().replace('[3', '')
-            x = x.split(' ')[-1]
-            x = x.replace('\\x1b', '').strip()
-            new.append(x)
-        player_names = new
-        return player_names, text
-
-async def get_coords(player=''):
-    """Gets player's location coordinates."""
-
-    if response := await send_command(f"data get entity {player} Pos", skip_check=True):
-        log_data = server_log('entity data', stopgap_str=response[1])
-        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
-        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-        if log_data:
-            location = log_data.split('[')[-1][:-3].replace('d', '')
-            return location
-
 def server_start():
     """
     Start Minecraft server depending on whether you're using Tmux subprocess method.
@@ -285,7 +239,9 @@ def server_start():
 
     if slime_vars.server_use_screen is True:
         os.chdir(slime_vars.server_path)
-        os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_selected[2]}')
+        if not os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_selected[2]}'):
+            return True
+        else: return False
 
     elif slime_vars.use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
@@ -424,6 +380,52 @@ def download_latest():
     else: return version_info, jar_download_url
 
     return False
+
+async def get_players():
+    """Extracts wanted data from output of 'list' command."""
+
+    response = await send_command("list")
+    if not response: return False
+
+    # Gets data from RCON response or reads server log for line containing player names.
+    if slime_vars.use_rcon is True: log_data = response[0]
+    else:
+        await asyncio.sleep(1)
+        log_data = server_log('players online')
+
+    if not log_data: return False
+
+    # Use regular expression to extract player names
+    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+    text = log_data[-2]  # There are 2 of a max of 20 players online
+    text = reaesc.sub('', text)
+    player_names = log_data[-1]  # R3diculous, MysticFrogo
+    # If there's no players active, player_names will still contain some anso escape characters.
+    if len(player_names.strip()) < 5: return None
+    else:
+
+        player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+        new = []
+        for i in player_names:
+            x = reaesc.sub('', i).strip().replace('[3', '')
+            x = x.split(' ')[-1]
+            x = x.replace('\\x1b', '').strip()
+            new.append(x)
+        player_names = new
+        return player_names, text
+
+async def get_coords(player=''):
+    """Gets player's location coordinates."""
+
+    if response := await send_command(f"data get entity {player} Pos", skip_check=True):
+        log_data = server_log('entity data', stopgap_str=response[1])
+        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+        if log_data:
+            location = log_data.split('[')[-1][:-3].replace('d', '')
+            return location
 
 
 # ========== Servers and backups
