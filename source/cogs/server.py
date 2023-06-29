@@ -209,10 +209,11 @@ class Server(commands.Cog):
                 new_server['name'] = folder
                 update_servers(new_server)
                 # Need the for loop because not all dict values are strings.
-                await ctx.send(f"**added:**\n`{', '.join(str(value) for value in new_server.values())}`")
+                await ctx.send(f"**added:** `{folder}`")
                 new_servers_found = True
 
         if not new_servers_found: await ctx.send("No new servers found.")
+        else: await ctx.invoke(self.bot.get_command('serverlist'))
 
 
     # ===== Version
@@ -353,7 +354,7 @@ class Server(commands.Cog):
         fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
 Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
                   ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_min_interval}min)"],
-                  ['Address', f"URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+                  ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))

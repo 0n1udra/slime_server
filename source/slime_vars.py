@@ -139,7 +139,7 @@ mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
 
 if use_rcon is True: import mctools, re
 if server_files_access is True: import shutil, fileinput, json
-if not server_address: server_url = 'N/A'
+if not server_address: server_address = 'N/A'
 
 # Disable certain commands depending on if have local server file access.
 if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff', 'chatlog',
