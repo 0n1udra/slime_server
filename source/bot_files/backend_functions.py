@@ -151,16 +151,20 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
             await inactive_msg()
             return False
 
-    elif slime_vars.use_tmux is True:
+    elif slime_vars.use_tmux is True or slime_vars.server_use_screen:
         if not skip_check:  # Check if server reachable before sending command.
             # Checks if server is active in the first place by sending random number to be matched in server log.
-            os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
+            if slime_vars.server_use_screen:  # Using screen to run/send commands to MC server.
+                os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{status_checker}\n"')
+            else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
             await asyncio.sleep(slime_vars.command_buffer_time)
             if not server_log(random_number):
                 await inactive_msg()
                 return False
 
-        os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
+        if slime_vars.server_use_screen:
+            os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{command}\n"')
+        else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
 
     else:
         await inactive_msg()
@@ -279,7 +283,11 @@ def server_start():
 
     global mc_subprocess
 
-    if slime_vars.use_subprocess is True:
+    if slime_vars.server_use_screen is True:
+        os.chdir(slime_vars.server_path)
+        os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_selected[2]}')
+
+    elif slime_vars.use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             mc_subprocess = subprocess.Popen(slime_vars.server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)

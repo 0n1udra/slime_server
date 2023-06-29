@@ -41,9 +41,13 @@ server_url = 'arcpy.asuscomm.com'
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = True
+server_files_access = False
 
-# Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halts also. Useful if can't use Tmux.
+# Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
+server_use_screen = True
+screen_session_name = 'server'  # Make sure your screen session is named if starting server outside of bot.
+
+# Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also. Useful if can't use Tmux.
 use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
@@ -104,6 +108,7 @@ bot_log_file = join(bot_src_path, 'slime_bot.log')
 # {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
 servers = {'example': ['Example Entry', 'Description of server', server_launch_command, 30]}
+# TODO add to csv if foler exist
 with open(join('bot_files', 'servers.csv'), "a") as f: pass  # Create file if not exist.
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)
@@ -119,7 +124,6 @@ world_backups_path = join(mc_path, 'world_backups', server_selected[0])
 server_backups_path = join(mc_path, 'server_backups', server_selected[0])
 server_log_path = join(server_path, 'logs')
 server_log_file = join(server_log_path, 'latest.log')
-
 
 exact_foldername = False  # Set to True to backup 'world' folder only.
 server_ip = server_url  # Will be updated by get_ip() function in backend_functions.py on bot startup.
