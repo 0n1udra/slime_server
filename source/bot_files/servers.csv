@@ -1,2 +1,1 @@
-papermc,Description of server,java PARAMS -jar server.jar nogui,30
-papermc test,Description of server,java PARAMS -jar server.jar nogui,30
+example,Description of server,java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui,30

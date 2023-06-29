@@ -1,14 +1,19 @@
 import discord, platform, csv, os
 from os.path import join
 
+# ========== Don't need to edit.
+__version__ = "7.2"
+__date__ = '29/06/2023'
+__author__ = "github.com/0n1udra"
+__license__ = "GPL 3"
+__status__ = "Development"
+
 home_dir = os.path.expanduser('~')
 windows_cmdline_start = False
-
 # Get the operating system name
 if platform.system() == 'Windows':
     on_windows = True
     windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
-
 # Needs user's name for setting directory paths
 user = ''
 try: user = os.getlogin()
@@ -17,10 +22,12 @@ except:
     user = getpass.getuser()
 if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 
+
+# ========== Edit configuration here.
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
-# ========== Discord
+# ===== Discord
 # Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
 bot_token_file = join(home_dir, 'keys', 'slime_bot.token')
 command_prefex = '?'
@@ -32,7 +39,7 @@ intents.message_content = True
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = None  # Default: None
 
-# ========== Minecraft Interfacing Options
+# ===== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
 server_address = ''
 server_port = 25565
@@ -58,7 +65,6 @@ use_rcon = False
 rcon_pass = ''
 rcon_port = 25575
 
-# ========== Minecraft Server Config
 # Location for Minecraft servers and backups, make sure is full path and is where you want it.
 # Use os.path.join. e.g. join(home_dir, 'Games', 'Minecraft) is ~/Games/Minecraft/
 mc_path = join(home_dir, 'Games', 'Minecraft')
@@ -69,7 +75,7 @@ default_wait_time = 30
 # Default server launch command to start Minecraft java server.
 server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
-# ========== Bot Config
+# ===== Bot Config
 # The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
 
