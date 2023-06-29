@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
     if not os.path.isfile(slime_vars.user_config_file):
         lprint(ctx, "No 'user_config.py' file detected.")
-        try: shutil.copy2(slime_vars.user_config_template_file, slime_vars.bot_src_path + '/user_config.py')
+        try: shutil.copy2(slime_vars.slime_vars_file, slime_vars.bot_src_path + '/user_config.py')
         except:
             lprint(ctx, "ERROR: Unable to create 'user_config.py' file.")
             exit()

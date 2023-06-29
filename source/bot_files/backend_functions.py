@@ -111,6 +111,9 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
     """
 
     global mc_subprocess, server_active
+    if slime_vars.enable_status_checker is False:
+        skip_check = True
+        force_check = False
 
     async def inactive_msg():
         msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."

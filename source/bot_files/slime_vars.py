@@ -76,8 +76,10 @@ default_wait_time = 30
 server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
 # ===== Bot Config
-# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
+# This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
+# Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
+enable_status_checker = True
 
 # Max number of log lines to read. Increase if server is really busy.
 log_lines_limit = 500
@@ -101,11 +103,6 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
 
 
 # ========== Don't need to edit.
-bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-user_config_file = join(bot_src_path, 'user_config.py')
-user_config_template_file = join(bot_src_path, 'bot_files', 'user_config_template.py')
-bot_files_path = join(bot_src_path, 'bot_files')
-bot_log_file = join(bot_src_path, 'slime_bot.log')
 
 # Create servers.csv file if not exist.
 # Server profiles, allows you to have different servers and each with their own backups/restores.
@@ -153,4 +150,10 @@ if server_files_access: if_no_file_access = []
 
 # Import user's configs
 try: from user_config import *
-except ImportError: pass
+except: pass
+
+bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+user_config_file = join(bot_src_path, 'user_config.py')
+slime_vars_file = join(bot_src_path, 'bot_files', 'slime_vars.py')
+bot_files_path = join(bot_src_path, 'bot_files')
+bot_log_file = join(bot_src_path, 'slime_bot.log')
