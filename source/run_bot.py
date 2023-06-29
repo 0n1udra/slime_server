@@ -55,6 +55,8 @@ def setup_directories():
     # Creates Server folder, folder for world backups, and folder for server backups.
     os.makedirs(slime_vars.servers_path)
     lprint(ctx, "INFO: Created: " + slime_vars.servers_path)
+    os.makedirs(slime_vars.server_path)
+    lprint(ctx, "INFO: Created: " + slime_vars.server_path)
     os.makedirs(slime_vars.world_backups_path)
     lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
     os.makedirs(slime_vars.server_backups_path)
@@ -122,6 +124,7 @@ def script_help():
 
 vars_msg = f"""
 Bot:
+    Version             {slime_vars.__version__} - {slime_vars.__date__}
     User                {slime_vars.user}
     Python Env          {slime_vars.pyenv_activate_command}
     Subprocess          {slime_vars.use_subprocess}
@@ -140,8 +143,8 @@ Server:
     Minecraft Folder    {slime_vars.mc_path}
     File Access         {slime_vars.server_files_access}
     Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_min_interval}
-    Server Selected     {slime_vars.server_selected}
-    Server URL          {slime_vars.server_url}
+    Server Selected     {', '.join(slime_vars.server_selected)}
+    Server URL          {slime_vars.server_address}
     Server Port         {slime_vars.server_port}
 """
 if slime_vars.use_tmux:
@@ -150,6 +153,12 @@ Tmux:
     Session Name        {slime_vars.tmux_session_name}
     Bot Pane            {slime_vars.tmux_bot_pane}
     Server Pane         {slime_vars.tmux_minecraft_pane}
+"""
+
+if slime_vars.server_use_screen:
+    vars_msg += f"""
+Screen:
+    Session Name        {slime_vars.screen_session_name}
 """
 
 if slime_vars.use_rcon:

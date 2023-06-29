@@ -6,25 +6,19 @@ import bot_files.components as components
 from bot_files.components import buttons_dict
 import slime_vars as slime_vars
 
-__version__ = "7.1"
-__date__ = '2022/10/19'
-__author__ = "DT"
-__email__ = "dt01@pm.me"
-__license__ = "GPL 3"
-__status__ = "Development"
-
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
 bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
 backend.bot = components.bot = bot
 
+
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
     await setup(bot)
 
-    lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
+    lprint(ctx, f"Bot PRIMED (v{slime_vars.__version__})")  # Logs event to bot_log.txt.
     await backend.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
@@ -32,7 +26,7 @@ async def on_ready():
         channel = bot.get_channel(slime_vars.channel_id)
         backend.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
 
-        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await channel.send(f':white_check_mark: v{slime_vars.__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
         # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
         on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
@@ -45,7 +39,7 @@ class Slime_Bot_Commands(commands.Cog):
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
-        await ctx.send(f"Bot Version: `{__version__}`")
+        await ctx.send(f"Bot Version: v{slime_vars.__version__} - {slime_vars.__date__}\nAuthor: {slime_vars.__author__}")
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botreboot'])
     async def botrestart(self, ctx):
@@ -171,7 +165,7 @@ class Slime_Bot_Commands(commands.Cog):
         """
 
         await ctx.send(f"Server IP: ||`{backend.get_public_ip()}`||")
-        await ctx.send(f"Alternative Address: ||`{slime_vars.server_url}`|| ({backend.ping_url()})")
+        await ctx.send(f"Alternative Address: ||`{slime_vars.server_address}`|| ({backend.ping_url()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])

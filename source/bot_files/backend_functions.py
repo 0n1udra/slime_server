@@ -189,7 +189,7 @@ async def server_rcon(command=''):
 
     global server_active
 
-    server_rcon_client = mctools.RCONClient(slime_vars.server_ip, port=slime_vars.rcon_port)
+    server_rcon_client = mctools.RCONClient(slime_vars.server_address, port=slime_vars.rcon_port)
     try: server_rcon_client.login(slime_vars.rcon_pass)
     except ConnectionError:
         lprint(ctx, f"Error Connecting to RCON: {slime_vars.server_ip} : {slime_vars.rcon_port}")
@@ -306,7 +306,7 @@ def server_start():
         # Starts server in tmux pane.
         if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{slime_vars.server_selected[2]}" ENTER'):
             return True
-    else: return "Error starting server."
+    else: return False
 
 def server_version():
     """
@@ -349,7 +349,7 @@ def server_ping():
     global server_active
 
     try:
-        ping = mctools.PINGClient(slime_vars.server_url, slime_vars.server_port)
+        ping = mctools.PINGClient(slime_vars.server_address, slime_vars.server_port)
         stats = ping.get_stats()
         ping.stop()
     except ConnectionRefusedError:
@@ -368,7 +368,7 @@ def check_latest():
         str: Latest version number.
     """
 
-    soup = BeautifulSoup(requests.get(slime_vars.new_server_url).text, 'html.parser')
+    soup = BeautifulSoup(requests.get(slime_vars.new_server_address).text, 'html.parser')
     for i in soup.findAll('a'):
         if i.string and 'minecraft_server' in i.string:
             return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
@@ -384,7 +384,7 @@ def download_latest():
     os.chdir(slime_vars.mc_path)
     jar_download_url = version_info = ''
 
-    if 'vanilla' in slime_vars.server_selected[0]:
+    if 'vanilla' in slime_vars.server_selected[0].lower():
         def request_json(url): return json.loads(requests.get(url).text)
 
         # Finds latest release from manifest and gets required data.
@@ -395,7 +395,7 @@ def download_latest():
                 jar_download_url = request_json(i['url'])['downloads']['server']['url']
                 break  # Breaks loop on firest release found (should be latest).
 
-    if 'papermc' in slime_vars.server_selected[0]:
+    if 'papermc' in slime_vars.server_selected[0].lower():
         base_url = 'https://papermc.io/api/v2/projects/paper'
 
         # Extracts required data for download URL. PaperMC API: https://papermc.io/api/docs/swagger-ui/index.html?configUrl=/api/openapi/swagger-config
@@ -421,7 +421,7 @@ def download_latest():
     try:  # Saves file as server.jar.
         with open(slime_vars.server_path + '/server.jar', 'wb+') as f: f.write(new_jar_data)
     except IOError: lprint(ctx, f"ERROR: Saving new jar file: {slime_vars.server_path}")
-    else: return version_info
+    else: return version_info, jar_download_url
 
     return False
 

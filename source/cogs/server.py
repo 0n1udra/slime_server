@@ -18,7 +18,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_min_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
+    @commands.command(aliases=['select', 'sselect', 'serverselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -47,7 +47,7 @@ class Server(commands.Cog):
         elif name in slime_vars.servers:
             backend.server_selected = slime_vars.servers[name]
             backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
-            backend.edit_file('server_selected', f" servers['{name}']", slime_vars.slime_vars_file)
+            backend.edit_file('_server_selected', f" '{name}'", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
 
@@ -187,6 +187,35 @@ class Server(commands.Cog):
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
 
+    @commands.command(aliases=['sscan'])
+    async def serverscan(self, ctx, *name):
+        """
+        Check if new serer folder has been added.
+
+        Usage:
+            ?serverscan
+            ?sscan
+        """
+
+        servers = slime_vars.servers.keys()
+        example_server = slime_vars.servers['example']
+        new_server_dict = {'name': example_server[0], 'description': example_server[1], 'command': example_server[2], 'wait': example_server[3]}
+        new_servers_found = False
+
+        await ctx.send("***Scanning for new servers...***")
+        for folder in os.listdir(slime_vars.servers_path):
+            if folder not in servers:
+                new_server = new_server_dict
+                new_server['name'] = folder
+                update_servers(new_server)
+                # Need the for loop because not all dict values are strings.
+                await ctx.send(f"**added:** `{folder}`")
+                new_servers_found = True
+
+        if not new_servers_found: await ctx.send("No new servers found.")
+        else: await ctx.invoke(self.bot.get_command('serverlist'))
+
+
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])
     async def latestversion(self, ctx):
@@ -196,7 +225,7 @@ class Server(commands.Cog):
         await ctx.send(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
-    @commands.command(aliases=['updateserver', 'su'])
+    @commands.command(aliases=['updateserver', 'su', 'update'])
     async def serverupdate(self, ctx, now=''):
         """
         Updates server.jar file by downloading latest from official Minecraft website.
@@ -219,10 +248,10 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await ctx.send(f"***Downloading latest server jar***\nFrom: `{slime_vars.server_selected[3]}`")
-        server = backend.download_latest()  # Updates server.jar file.
-        if server:
-            await ctx.send(f"Downloaded latest version: `{server}`\nNext launch may take longer than usual.")
+        await ctx.send(f"***Downloading latest server jar***")
+        version, url = backend.download_latest()  # Updates server.jar file.
+        if version:
+            await ctx.send(f"Version: `{version}`\nSource: `{url}`\nNOTE: Next launch may take longer than usual.")
             await asyncio.sleep(3)
         else: await ctx.send("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
@@ -325,7 +354,7 @@ class Server(commands.Cog):
         fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
 Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
                   ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_min_interval}min)"],
-                  ['Address', f"URL: ||`{slime_vars.server_url}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+                  ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
@@ -536,7 +565,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startminecraft', 'mstart'])
+    @commands.command(aliases=['startserver', 'start'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -549,8 +578,10 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
+        if not backend.server_start():
+            await ctx.send("**Error:** Could not start Minecraft server.")
+            return False
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{slime_vars.server_selected[0]}**\nStartup time: {slime_vars.server_selected[3]}s.")
-        backend.server_start()
 
         # checks if set custom wait time in server_selected list.
         try: wait_time = int(slime_vars.server_selected[-1])
@@ -561,7 +592,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['minecraftstop', 'stopminecraft', 'mstop'])
+    @commands.command(aliases=['stopserver', 'stop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
@@ -598,7 +629,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         backend.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
-    @commands.command(aliases=['rebootserver', 'restartserver', 'serverreboot', 'mrestart'])
+    @commands.command(aliases=['restartserver', 'restart'])
     async def serverrestart(self, ctx, now=''):
         """
         Restarts server with 15s warning to players.
