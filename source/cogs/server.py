@@ -18,7 +18,7 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_min_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['select', 'sselect', 'serversselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
+    @commands.command(aliases=['select', 'sselect', 'serverselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
     async def serverlist(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
@@ -47,7 +47,7 @@ class Server(commands.Cog):
         elif name in slime_vars.servers:
             backend.server_selected = slime_vars.servers[name]
             backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
-            backend.edit_file('server_selected', f" servers['{name}']", slime_vars.slime_vars_file)
+            backend.edit_file('_server_selected', f" '{name}'", slime_vars.slime_vars_file)
             await ctx.invoke(self.bot.get_command('botrestart'))
         else: await ctx.send("**ERROR:** Server not found.")
 
@@ -186,6 +186,34 @@ class Server(commands.Cog):
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
+
+    @commands.command(aliases=['sscan'])
+    async def serverscan(self, ctx, *name):
+        """
+        Check if new serer folder has been added.
+
+        Usage:
+            ?serverscan
+            ?sscan
+        """
+
+        servers = slime_vars.servers.keys()
+        example_server = slime_vars.servers['example']
+        new_server_dict = {'name': example_server[0], 'description': example_server[1], 'command': example_server[2], 'wait': example_server[3]}
+        new_servers_found = False
+
+        await ctx.send("***Scanning for new servers...***")
+        for folder in os.listdir(slime_vars.servers_path):
+            if folder not in servers:
+                new_server = new_server_dict
+                new_server['name'] = folder
+                update_servers(new_server)
+                # Need the for loop because not all dict values are strings.
+                await ctx.send(f"**added:**\n`{', '.join(str(value) for value in new_server.values())}`")
+                new_servers_found = True
+
+        if not new_servers_found: await ctx.send("No new servers found.")
+
 
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])

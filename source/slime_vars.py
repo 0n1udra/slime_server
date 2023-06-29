@@ -110,9 +110,10 @@ bot_log_file = join(bot_src_path, 'slime_bot.log')
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
 # No spaces allowed in server name. Always put optional_wait_time at tail of list.
-servers = {'example': ['Example Entry', 'Description of server', server_launch_command, 30]}
+servers = {'example': ['example', 'Description of server', server_launch_command, 30]}
 # TODO add to csv if foler exist
 with open(join('bot_files', 'servers.csv'), "a") as f: pass  # Create file if not exist.
+# Add servers from csv file.
 with open(join('bot_files', 'servers.csv'), 'r') as f:
     csv_data = csv.reader(f, skipinitialspace=True)
     for i in csv_data:
@@ -120,7 +121,10 @@ with open(join('bot_files', 'servers.csv'), 'r') as f:
         if 'Example Entry' == i[0]: continue
         i[2] = i[2].replace('PARAMS', server_launch_command)  # Replaces 'PARAMS' with server_launch_command string.
         servers[i[0]] = i
-server_selected = list(servers.values())[0]  # Currently selected server
+_server_selected = 'papermc'
+if _server_selected in servers.keys():
+    server_selected = servers[_server_selected]
+else: server_selected = servers['example']
 servers_path = join(mc_path, 'servers')  # Path to all servers
 server_path = join(servers_path, server_selected[0])  # Path to currently selected server
 world_backups_path = join(mc_path, 'world_backups', server_selected[0])
