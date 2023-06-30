@@ -1,4 +1,4 @@
-import discord, platform, csv, os
+import discord, getpass, platform, csv, os
 from os.path import join
 
 # ========== Don't need to edit.
@@ -7,26 +7,9 @@ __date__ = '29/06/2023'
 __author__ = "github.com/0n1udra"
 __license__ = "GPL 3"
 __status__ = "Development"
-
 home_dir = os.path.expanduser('~')
-windows_cmdline_start = False
-# Get the operating system name
-if platform.system() == 'Windows':
-    on_windows = True
-    windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
-# Needs user's name for setting directory paths
-user = ''
-try: user = os.getlogin()
-except:
-    import getpass
-    user = getpass.getuser()
-if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
-
 
 # ========== Edit configuration here.
-# Set as None if not using a python virtual env.
-pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
-
 # ===== Discord
 # Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
 bot_token_file = join(home_dir, 'keys', 'slime_bot.token')
@@ -91,6 +74,21 @@ command_buffer_time = 1
 # Send 'save-all' to MC server every X minutes (default 60 minutes).
 autosave_status = True
 autosave_min_interval = 60
+
+# Can clear all this and set pyenv command manually -----
+user = ''
+try: user = os.getlogin()
+except: user = getpass.getuser()
+if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
+# -------------------------------------------------------
+# Set as None if not using a python virtual env.
+pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
+
+# Get the operating system. Makes server launch command compataible with windows CMD.
+windows_cmdline_start = False
+if platform.system() == 'Windows':
+    on_windows = True
+    windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
 
 # For '?links' command. Shows helpful websites.
 useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
