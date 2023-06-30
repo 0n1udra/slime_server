@@ -369,7 +369,7 @@ class Server(commands.Cog):
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log', 'mlog'])
-    async def serverlog(self, ctx, lines=5, match=None):
+    async def serverlog(self, ctx, lines=10, match=None):
         """
         Show server log.
 

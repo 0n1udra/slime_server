@@ -9,7 +9,7 @@ buttons_dict = {
                   ['Reboot Server', 'serverrestart', '\U0001F501']],
                  [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
                   ['Properties File', 'propertiesall', '\U0001F527'],
-                  ['Server Log', 'get_log_file', '\U0001F4C3'],
+                  ['Server Log', 'serverlog', '\U0001F4C3'],
                   ['Connections Log', 'serverconnections', '\U0001F4E1']]],
     'backups':  [[['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504']],
                  [['Backup World', 'worldbackupdate', '\U0001F195'],

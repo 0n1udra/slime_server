@@ -7,5 +7,5 @@ test.py
 *.pyc
 *.bak
 *.log
-source/bot_files/servers.csv
 source/user_config.py
+source/bot_files/servers.csv

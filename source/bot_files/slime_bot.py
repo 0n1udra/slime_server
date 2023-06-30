@@ -430,7 +430,7 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _update_select_page(self, ctx, mode):
-        """Updates get_log_file() select component with next or previous 25 items, since it can only show 25 at a time."""
+        """Discord select component with next or previous 25 items, since it can only show 25 at a time."""
 
         # Gets next 25 items or previous depending on mode parameter.
         spc = components.data('server_panel_components')
