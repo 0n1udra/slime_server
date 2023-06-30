@@ -170,7 +170,7 @@ class World_Backups(commands.Cog):
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
-        if await server_status():
+        if await server_status() is False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         try: shutil.rmtree(join(slime_vars.server_path, 'world'))
@@ -276,7 +276,7 @@ class Server_Backups(commands.Cog):
         fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
-        if await server_status():
+        if await server_status() is False:
             await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)

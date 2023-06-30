@@ -244,7 +244,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
-        if await server_status():
+        if await server_status() is False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
@@ -345,21 +345,25 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        await server_status(discord_msg=True, ctx=ctx)
+        if await server_status(discord_msg=True, ctx=ctx) is None:
+            await ctx.send("Unable to check server status.")
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        fields = [['Current Server', f"Status: {'**ACTIVE** :green_circle:' if await server_status() is True else '**INACTIVE** :red_circle:'}\n\
-Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+        sstatus = server_status()
+        if sstatus is True: status = '**ACTIVE** :green_circle:'
+        elif sstatus is False: status = '**INACTIVE** :red_circle:'
+        else: status = 'N/A'
+        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
                   ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_min_interval}min)"],
                   ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
 
-        if await server_status():  # Only fetches players list if server online.
+        if await server_status() is False:  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
@@ -574,7 +578,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
         """
 
         # Exits function if server already online.
-        if await server_status():
+        if await server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
@@ -605,7 +609,7 @@ Server: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selecte
             ?stop now
         """
 
-        if not await server_status():
+        if await server_status() is False:
             await ctx.send("Already Offline")
             return
 
