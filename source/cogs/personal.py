@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import format_args, lprint
 import bot_files.backend_functions as backend
 from bot_files.components import new_buttons
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 # ========== System commands
 async def get_log_lines(ctx, game_name, lines, file_path, **kwargs):
