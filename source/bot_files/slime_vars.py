@@ -99,6 +99,8 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
                    }
 
+# ========== Other Games
+steam_path = f'/home/{user}/.steam/steam/steamapps/common'
 
 # ========== Don't need to edit.
 
