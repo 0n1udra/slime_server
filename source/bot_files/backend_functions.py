@@ -3,7 +3,7 @@ from file_read_backwards import FileReadBackwards
 from bs4 import BeautifulSoup
 from bot_files.extra import *
 from os.path import join
-import slime_vars
+import bot_files.slime_vars as slime_vars
 if slime_vars.use_rcon: import mctools
 if slime_vars.windows_cmdline_start: import subprocess
 
@@ -14,7 +14,7 @@ reaesc = re.compile(r'\x1b[^m]*m')
 
 ctx = 'backend_functions.py'
 bot = None
-server_active = False
+server_active = None
 discord_channel = None
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 
@@ -123,56 +123,56 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
 
     global mc_subprocess, server_active
 
-    async def inactive_msg():
-        msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."
-        if discord_msg:
-            try: await ctx.send(msg)
-            except: await channel_send(msg)
+    status = None
 
     # This is so user can't keep sending commands to RCON if server is unreachable. Use ?stat or ?check to actually check if able to send command to server.
     # Without this, the user might try sending multiple commands to an unreachable RCON server which will hold up the bot.
-    if not force_check and not server_active:
-        await inactive_msg()
-        return False
+    if force_check is False and server_active is False: status = False
 
+    # Create random number to send to server to be checked in logs.
     status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
     status_checker = status_checker_command + random_number
 
     if slime_vars.use_rcon is True:
         if server_ping():
             return [await server_rcon(command), None]
-        else: return False
+        else: status = False
 
     elif slime_vars.use_subprocess is True:
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
-        else:
-            await inactive_msg()
-            return False
+        else: status = False
 
     elif slime_vars.use_tmux is True or slime_vars.server_use_screen:
+        if slime_vars.enable_status_checker is False: skip_check = True  # Don't send the 'xp' command.
+
         if not skip_check:  # Check if server reachable before sending command.
             # Checks if server is active in the first place by sending random number to be matched in server log.
             if slime_vars.server_use_screen:  # Using screen to run/send commands to MC server.
                 os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{status_checker}\n"')
             else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
             await asyncio.sleep(slime_vars.command_buffer_time)
-            if not server_log(random_number):
-                await inactive_msg()
-                return False
+            if not server_log(random_number): status = False
 
         if slime_vars.server_use_screen:
             os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{command}\n"')
         else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{command}" ENTER')
 
-    else:
-        await inactive_msg()
-        return False
+    else: status = False
+
+    if slime_vars.enable_status_checker is False: return None
+    if status is False:
+        msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."
+        if discord_msg:
+            try: await ctx.send(msg)
+            except: await channel_send(msg)
+            return False
 
     await asyncio.sleep(slime_vars.command_buffer_time)
     # Returns log line that matches command.
     return_data = [server_log(command), random_number]
+    # needs to return None because bot can't accurately get feedback.
     return return_data
 
 async def server_rcon(command=''):
@@ -220,6 +220,10 @@ async def server_status(discord_msg=False, ctx=None):
         lprint(ctx, "Server Status: Active")
         server_active = True
         return True
+    elif response is None:
+        # Means server status is unreachable but still want to be able to send commands.
+        server_active = None
+        return None
     else:
         # send_command will send a discord message if server is inactive, so it's unneeded here.
         lprint(ctx, "Server Status: Inactive")

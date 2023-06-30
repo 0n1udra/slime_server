@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -429,8 +429,8 @@ class Permissions(commands.Cog):
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if server online.
-        if not await server_status():
-            ctx.send("**ERROR:** Server offline.")
+        if await server_status() is False:
+            await ctx.send("**ERROR:** Server offline.")
             return
 
         # Enable/disable whitelisting.
@@ -594,7 +594,7 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if not await server_status(): return
+        if await server_status() is False: return
 
         if not player:
             await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")

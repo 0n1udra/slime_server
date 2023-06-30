@@ -37,14 +37,11 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 # Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = 860361620492255292  # Default: None
+channel_id = None  # Default: None
 
-# ========== Other Games
-steam_path = f'/home/{user}/.steam/steam/steamapps/common'
-
-# ========== Minecraft Interfacing Options
+# ===== Minecraft Interfacing Options
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-server_address = 'arcpy.asuscomm.com'
+server_address = ''
 server_port = 25565
 
 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
@@ -60,8 +57,8 @@ use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
-tmux_bot_pane = '0.6'  # tmux pane for slime_bot. Default: 0.0
-tmux_minecraft_pane = '0.0'  # tmux pane for Miencraft server. Default: 0.1
+tmux_bot_pane = '0.0'  # tmux pane for slime_bot. Default: 0.0
+tmux_minecraft_pane = '0.1'  # tmux pane for Miencraft server. Default: 0.1
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
@@ -79,8 +76,10 @@ default_wait_time = 30
 server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
 # ===== Bot Config
-# The command to use in server to use to check status. send_command() will send something like 'xp 0.64356...'.
+# This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp '
+# Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
+enable_status_checker = True
 
 # Max number of log lines to read. Increase if server is really busy.
 log_lines_limit = 500
@@ -104,10 +103,6 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
 
 
 # ========== Don't need to edit.
-bot_src_path = os.path.dirname(os.path.abspath(__file__))
-bot_files_path = join(bot_src_path, 'bot_files')
-slime_vars_file = join(bot_src_path, 'slime_vars.py')
-bot_log_file = join(bot_src_path, 'slime_bot.log')
 
 # Create servers.csv file if not exist.
 # Server profiles, allows you to have different servers and each with their own backups/restores.
@@ -152,3 +147,13 @@ if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff'
                      ]
 
 if server_files_access: if_no_file_access = []
+
+# Import user's configs
+try: from user_config import *
+except: pass
+
+bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+user_config_file = join(bot_src_path, 'user_config.py')
+slime_vars_file = join(bot_src_path, 'bot_files', 'slime_vars.py')
+bot_files_path = join(bot_src_path, 'bot_files')
+bot_log_file = join(bot_src_path, 'slime_bot.log')

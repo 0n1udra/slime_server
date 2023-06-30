@@ -1,34 +1,33 @@
 import discord
-import slime_vars
+import bot_files.slime_vars as slime_vars
 
 bot = None
 
 buttons_dict = {
-    'server': [[['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
-                ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'],
-                ['Reboot Server', 'serverrestart', '\U0001F501']],
-               [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
-                ['Properties File', 'propertiesall', '\U0001F527'],
-                ['Server Log', 'get_log_file', '\U0001F4C3'],
-                ['Connections Log', 'serverconnections', '\U0001F4E1']]],
-    'backups': [[['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504']],
-                [['Backup World', 'worldbackupdate', '\U0001F195'],
-                 ['Backup Server', 'serverbackupdate', '\U0001F195'],
-                 ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
-                 ['Server Backups', 'restoreserverpanel', '\U0001F4C1']],
-                ],
-    'players': [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
-                 ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
-                 ['OP List', 'oplist', '\U0001F4DC']],
-                [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]],
-    'world': [[['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
-               ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
-              [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
-               ['Enable Weather', 'weatheron', '\U0001F7E2'],
-               ['Disable Weather', 'weatheroff', '\U0001F534']]],
-    'extra': [[['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'],
-               ['Bot Log', 'botlog', '\U0001F4C3']],
-              [['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]]}
+    'server':   [[['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
+                  ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'],
+                  ['Reboot Server', 'serverrestart', '\U0001F501']],
+                 [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
+                  ['Properties File', 'propertiesall', '\U0001F527'],
+                  ['Server Log', 'serverlog', '\U0001F4C3'],
+                  ['Connections Log', 'serverconnections', '\U0001F4E1']]],
+    'backups':  [[['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504']],
+                 [['Backup World', 'worldbackupdate', '\U0001F195'],
+                  ['Backup Server', 'serverbackupdate', '\U0001F195'],
+                  ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
+                  ['Server Backups', 'restoreserverpanel', '\U0001F4C1']]],
+    'players':  [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
+                  ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
+                  ['OP List', 'oplist', '\U0001F4DC']],
+                 [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]],
+    'world':    [[['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
+                  ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
+                 [['Clear', 'weatherclear', '\U00002600'], ['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
+                  ['Enable Weather', 'weatheron', '\U0001F7E2'],
+                  ['Disable Weather', 'weatheroff', '\U0001F534']]],
+    'extra':    [[['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'],
+                  ['Bot Log', 'botlog', '\U0001F4C3']],
+                 [['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]]}
 
 # _data dictionary stores active components and relating data. Saved components in dict can be edited later on.
 _data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
@@ -185,7 +184,7 @@ def new_embed(fields, title):
         embed.add_field(name=i[0], value=i[1], inline=i[2])
     return embed
 
-def server_modal_fields(server='example'):
+def server_modal_fields(server=slime_vars.server_selected[0]):
     data = slime_vars.servers[server]
 
     return [['text', 'Server Name', 'name', 'Name of new server', data[0], False, True, 50], # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length

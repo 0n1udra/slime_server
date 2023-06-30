@@ -127,16 +127,16 @@ class World(commands.Cog):
 
     # ===== Weather
     @commands.command(aliases=['weather', 'setweather'])
-    async def weatherset(self, ctx, state='', duration=0):
+    async def weatherset(self, ctx, state='', duration=300):
         """
         Set weather.
 
         Args:
             state: <clear/rain/thunder>: Weather to change to.
-            duration optional default(0): Duration in seconds. 0 means random duration.
+            duration optional default(0): Duration in seconds. Defaults to 300 (5min).
 
         Usage:
-            ?weatherset rain - Rain for random duration.
+            ?weatherset rain - Rain for 300s.
             ?weather thunder 60
         """
 

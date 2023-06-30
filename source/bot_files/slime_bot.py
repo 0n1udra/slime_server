@@ -4,7 +4,7 @@ from bot_files.backend_functions import send_command, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
 from bot_files.components import buttons_dict
-import slime_vars as slime_vars
+import bot_files.slime_vars as slime_vars
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
@@ -191,14 +191,14 @@ class Slime_Bot_Commands(commands.Cog):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        backend.edit_file('channel_id', ' ' + str(ctx.channel.id), slime_vars.slime_vars_file)
+        backend.edit_file('channel_id', ' ' + str(ctx.channel.id), slime_vars.user_config_file)
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
         """Resets channel_id variable to None."""
 
         await ctx.send("Cleared `channel_id`")
-        backend.edit_file('channel_id', ' None', slime_vars.slime_vars_file)
+        backend.edit_file('channel_id', ' None', slime_vars.user_config_file)
 
 class Discord_Components_Funcs(commands.Cog):
     def __init__(self, bot): self.bot = bot
@@ -430,7 +430,7 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _update_select_page(self, ctx, mode):
-        """Updates get_log_file() select component with next or previous 25 items, since it can only show 25 at a time."""
+        """Discord select component with next or previous 25 items, since it can only show 25 at a time."""
 
         # Gets next 25 items or previous depending on mode parameter.
         spc = components.data('server_panel_components')

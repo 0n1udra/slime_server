@@ -1,5 +1,5 @@
 import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re
-import slime_vars
+import bot_files.slime_vars as slime_vars
 import bot_files.components as components
 
 ctx = 'backend_functions.py'
@@ -8,10 +8,8 @@ disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
 def lprint(ctx, msg):
     """Prints and Logs events in file."""
-    try:
-        user = ctx.message.author
-    except:
-        user = ctx
+    try: user = ctx.message.author
+    except: user = ctx
 
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
     print(output)
