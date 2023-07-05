@@ -6,7 +6,7 @@ import bot_files.backend_functions as backend
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['mcommand', 'm/'])
+    @commands.command(aliases=['command', 'mcommand', 'm/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
