@@ -156,7 +156,7 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
         if discord_msg:
             try: await ctx.send(msg)
             except: await channel_send(msg)
-            return False
+        return False
 
     await asyncio.sleep(slime_vars.command_buffer_time)
     # Returns log line that matches command.
