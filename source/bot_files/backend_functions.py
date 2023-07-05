@@ -131,7 +131,7 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
 
     # Create random number to send to server to be checked in logs.
     status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
-    status_checker = status_checker_command + random_number
+    status_checker = status_checker_command + ' ' + random_number
 
     if slime_vars.use_rcon is True:
         if server_ping():
@@ -167,7 +167,7 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
         if discord_msg:
             try: await ctx.send(msg)
             except: await channel_send(msg)
-            return False
+        return False
 
     await asyncio.sleep(slime_vars.command_buffer_time)
     # Returns log line that matches command.
