@@ -60,7 +60,7 @@ server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseM
 
 # ===== Bot Config
 # This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
-status_checker_command = 'xp '
+status_checker_command = 'xp'  # Default: 'xp'
 # Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
 enable_status_checker = True
 
