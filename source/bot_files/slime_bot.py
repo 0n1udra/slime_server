@@ -348,7 +348,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         if mode in 'buttons':
             select_options = buttons_select_options
-            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504'], buttons_dict[buttons_mode][0]], buttons_dict[buttons_mode][1]
+            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504']] + buttons_dict[buttons_mode][0], buttons_dict[buttons_mode][1]
             params = ["**Buttons**", 'update_server_panel', 'Choose what buttons to show']
 
         elif mode == 'servers':
@@ -389,7 +389,7 @@ class Discord_Components_Funcs(commands.Cog):
         except: failed = True
 
         if failed:
-            await ctx.send("**Error:** Something went wrong with panel.")
+            await ctx.send("**Error:** Panel malfunction.")
             await ctx.invoke(self.bot.get_command('controlpanel'))
         else: lprint(ctx, f'Updated server panel {mode}')
 

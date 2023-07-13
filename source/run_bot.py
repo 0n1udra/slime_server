@@ -122,6 +122,10 @@ def script_help():
     """
     print(help)
 
+# Hides sensitive info from output.
+nono = slime_vars.show_sensitive_info  # what? got a problem with the naming? it works.
+no = '**********'  # 2bad. change it!
+
 vars_msg = f"""
 Bot:
     Version             {slime_vars.__version__} - {slime_vars.__date__}
@@ -133,19 +137,19 @@ Bot:
     Bot Log             {slime_vars.bot_log_file}
     
 Discord:
-    Discord Token       {slime_vars.bot_token_file}
+    Discord Token       {slime_vars.bot_token_file if nono else no}
     Command Prefix      {slime_vars.command_prefex}
     Case Insensitive    {slime_vars.case_insensitive}
     Intents             {slime_vars.intents}
-    Channel ID          {slime_vars.channel_id}
+    Channel ID          {slime_vars.channel_id if nono else no}
 
 Server:
     Minecraft Folder    {slime_vars.mc_path}
     File Access         {slime_vars.server_files_access}
     Autosave            {slime_vars.autosave_status} - {slime_vars.autosave_min_interval}min
     Server Selected     {', '.join(str(value) for value in slime_vars.server_selected)}
-    Server URL          {slime_vars.server_address}
-    Server Port         {slime_vars.server_port}
+    Server URL          {slime_vars.server_address if nono else no}
+    Server Port         {slime_vars.server_port if nono else no}
 """
 if slime_vars.use_tmux:
     vars_msg += f"""
@@ -164,8 +168,8 @@ Screen:
 if slime_vars.use_rcon:
     vars_msg += f"""
 RCON:
-    Pass                {slime_vars.rcon_pass}
-    Port                {slime_vars.rcon_port}
+    Pass                {slime_vars.rcon_pass if nono else no}
+    Port                {slime_vars.rcon_port if nono else no}
     """
 
 if slime_vars.server_files_access:

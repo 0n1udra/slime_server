@@ -201,7 +201,7 @@ async def server_rcon(command=''):
         server_rcon_client.stop()
         return return_data
 
-async def server_status(discord_msg=False, ctx=None):
+async def server_status(ctx=None):
     """
     Gets server active status, by sending command to server and checking server log.
 
@@ -214,20 +214,20 @@ async def server_status(discord_msg=False, ctx=None):
     lprint(ctx, "Checking Minecraft server status...")
 
     # send_command() will send random number, server is online if match is found in log.
-    response = await send_command(' ', force_check=True, discord_msg=discord_msg, ctx=ctx)
+    response = await send_command(' ', force_check=True, ctx=ctx)
     if response:
-        if discord_msg: await ctx.send("**Server ACTIVE** :green_circle:")
-        lprint(ctx, "Server Status: Active")
         server_active = True
+        lprint(ctx, "Server Status: Active")
         return True
     elif response is None:
         # Means server status is unreachable but still want to be able to send commands.
         server_active = None
+        lprint(ctx, "Server Status: N/A")
         return None
     else:
-        # send_command will send a discord message if server is inactive, so it's unneeded here.
-        lprint(ctx, "Server Status: Inactive")
         server_active = False
+        lprint(ctx, "Server Status: Inactive")
+        return False
 
 def server_start():
     """

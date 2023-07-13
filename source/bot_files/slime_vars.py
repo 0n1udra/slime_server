@@ -2,11 +2,12 @@ import discord, getpass, platform, csv, os
 from os.path import join
 
 # ========== Don't need to edit.
-__version__ = "7.2"
-__date__ = '29/06/2023'
+__version__ = "7.2.1"
+__date__ = '12/07/2023'
 __author__ = "github.com/0n1udra"
 __license__ = "GPL 3"
 __status__ = "Development"
+__discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
 home_dir = os.path.expanduser('~')
 
 # ========== Edit configuration here.
@@ -59,6 +60,9 @@ default_wait_time = 30
 server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
 # ===== Bot Config
+# Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
+show_sensitive_info = False
+
 # This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp'  # Default: 'xp'
 # Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
