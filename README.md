@@ -1,7 +1,7 @@
 ## Control Minecraft server with Discord bot.  
 Scroll down for requirements, setup instructions and screenshots.  
 
-
+- Join Discord server for bot help: https://discord.gg/s58XgzhE3U
 - See releases: https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
 

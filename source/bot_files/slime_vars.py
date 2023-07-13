@@ -2,11 +2,12 @@ import discord, getpass, platform, csv, os
 from os.path import join
 
 # ========== Don't need to edit.
-__version__ = "7.2"
-__date__ = '29/06/2023'
+__version__ = "7.2.1"
+__date__ = '12/07/2023'
 __author__ = "github.com/0n1udra"
 __license__ = "GPL 3"
 __status__ = "Development"
+__discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
 home_dir = os.path.expanduser('~')
 
 # ========== Edit configuration here.
