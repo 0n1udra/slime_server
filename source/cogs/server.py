@@ -346,7 +346,6 @@ class Server(commands.Cog):
 
         await ctx.send('***Checking Server Status...***')
         response = await send_command(' ', force_check=True, discord_msg=False, ctx=ctx)
-        print('wtf', response)
         if response:
             await ctx.send("**Server ACTIVE** :green_circle:")
         elif response is None:
