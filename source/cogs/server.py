@@ -317,7 +317,7 @@ class Server(commands.Cog):
             lprint(ctx, 'Autosave: Disabled')
 
         status_msg = ':red_circle: **DISABLED** '
-        if not await server_status(discord_msg=False): status_msg = ":pause_button: **PAUSED**"
+        if not await server_status(): status_msg = ":pause_button: **PAUSED**"
         elif slime_vars.autosave_status: status_msg = ':green_circle: **ENABLED**'
 
         fields = [['Status', f"{status_msg} | **{slime_vars.autosave_min_interval}**min"],
@@ -345,14 +345,20 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        if await server_status(discord_msg=True, ctx=ctx) is None:
-            await ctx.send("Unable to check server status.")
+        response = await send_command(' ', force_check=True, discord_msg=False, ctx=ctx)
+        print('wtf', response)
+        if response:
+            await ctx.send("**Server ACTIVE** :green_circle:")
+        elif response is None:
+            await ctx.send("**ERROR:** Unable to check server status.")
+        else: await ctx.send("**Server INACTIVE** :red_circle:")
+
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        sstatus = server_status()
+        sstatus = await server_status()
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
