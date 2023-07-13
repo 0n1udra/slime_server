@@ -595,7 +595,9 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if await server_status() is False: return
+        if await server_status() is False:
+            await ctx.send("Server is unreachable.")
+            return
 
         if not player:
             await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
