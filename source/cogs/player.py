@@ -13,6 +13,7 @@ class Player(commands.Cog):
     async def players(self, ctx, *args):
         """Show list of online players."""
 
+        await ctx.send("***Fetching Player List...***")
         player_list = await backend.get_players()
         if player_list is False:
             await ctx.send("**Error:** Unable to fetch player list.")
