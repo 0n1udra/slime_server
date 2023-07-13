@@ -122,7 +122,8 @@ class Player(commands.Cog):
             ?tp Steve Jesse I wanted to see him - Teleports and shows message.
         """
 
-        target = target.strip()
+        try: target = target.strip()
+        except: await ctx.send("**ERROR:** Issue getting player list.")
 
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)
@@ -594,7 +595,9 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if await server_status() is False: return
+        if await server_status() is False:
+            await ctx.send("Server is unreachable.")
+            return
 
         if not player:
             await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")

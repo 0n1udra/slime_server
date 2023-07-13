@@ -72,7 +72,7 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
     if file_path is None: file_path = slime_vars.server_log_file
     if not os.path.isfile(file_path): return False
 
-    log_data = ''
+    log_data = ''  # TODO: Possibly change return data to list for each newline
 
     # Gets file line number
     line_count = sum(1 for line in open(file_path))
@@ -201,7 +201,7 @@ async def server_rcon(command=''):
         server_rcon_client.stop()
         return return_data
 
-async def server_status(ctx=None):
+async def server_status(discord_msg=False):
     """
     Gets server active status, by sending command to server and checking server log.
 
@@ -214,7 +214,7 @@ async def server_status(ctx=None):
     lprint(ctx, "Checking Minecraft server status...")
 
     # send_command() will send random number, server is online if match is found in log.
-    response = await send_command(' ', force_check=True, ctx=ctx)
+    response = await send_command(' ', discord_msg=discord_msg, force_check=True, ctx=ctx)
     if response:
         server_active = True
         lprint(ctx, "Server Status: Active")
@@ -276,6 +276,9 @@ def server_version():
         str: Server version number.
     """
 
+    # Manual override of server version.
+    if version := slime_vars.server_version: return version
+
     if slime_vars.use_rcon is True:
         try: return server_ping()['version']['name']
         except: return 'N/A'
@@ -293,7 +296,8 @@ def server_motd():
     """
 
     if slime_vars.server_files_access is True:
-        return edit_file('motd')[1]
+        data = edit_file('motd')
+        if data: return data[1]
     elif slime_vars.use_rcon is True:
         return remove_ansi(server_ping()['description'])
     else: return "N/A"
@@ -388,37 +392,56 @@ def download_latest():
 async def get_players():
     """Extracts wanted data from output of 'list' command."""
 
-    response = await send_command("list")
-    if not response: return False
-
-    # Gets data from RCON response or reads server log for line containing player names.
-    if slime_vars.use_rcon is True: log_data = response[0]
-    else:
-        await asyncio.sleep(1)
-        log_data = server_log('players online')
-
-    if not log_data: return False
-
-    # Use regular expression to extract player names
-    log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-    text = log_data[-2]  # There are 2 of a max of 20 players online
-    text = reaesc.sub('', text)
-    player_names = log_data[-1]  # R3diculous, MysticFrogo
-    # If there's no players active, player_names will still contain some anso escape characters.
-    if len(player_names.strip()) < 5: return None
-    else:
-
-        player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
-        # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-        # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-        new = []
-        for i in player_names:
-            x = reaesc.sub('', i).strip().replace('[3', '')
-            x = x.split(' ')[-1]
-            x = x.replace('\\x1b', '').strip()
-            new.append(x)
-        player_names = new
+    # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
+    try: version = int(server_version().split('.')[1])
+    except: version = 20
+    # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
+    if version <= 12:
+        response = await send_command("list", discord_msg=False)
+        # Need to use server_log here because I need to get multiple line outputs.
+        log_data = server_log(log_mode=True, stopgap_str=response[1])
+        # Parses and returns info from log lines.
+        output = []
+        for i in log_data.split('\n'):
+            output.append(i)
+            if 'There are' in i: break
+        output = output[:2]
+        if not output: return False
+        text = output[1].split(':')[-2].strip()
+        player_names = output[0].split(':')[-1].split(',')
         return player_names, text
+    else:
+        response = await send_command("list", discord_msg=False)
+        if not response: return False
+
+        # Gets data from RCON response or reads server log for line containing player names.
+        if slime_vars.use_rcon is True: log_data = response[0]
+        else:
+            await asyncio.sleep(1)
+            log_data = server_log('players online')
+
+        if not log_data: return False
+
+        # Use regular expression to extract player names
+        log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+        text = log_data[-2]  # There are 2 of a max of 20 players online
+        text = reaesc.sub('', text)  # Remove unwanted escape characters
+        player_names = log_data[-1]  # R3diculous, MysticFrogo
+        # If there's no players active, player_names will still contain some anso escape characters.
+        if len(player_names.strip()) < 5: return None
+        else:
+
+            player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+            # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+            # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+            new = []
+            for i in player_names:
+                x = reaesc.sub('', i).strip().replace('[3', '')
+                x = x.split(' ')[-1]
+                x = x.replace('\\x1b', '').strip()
+                new.append(x)
+            player_names = new
+            return player_names, text
 
 async def get_coords(player=''):
     """Gets player's location coordinates."""

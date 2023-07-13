@@ -23,7 +23,14 @@ intents.message_content = True
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = None  # Default: None
 
+
 # ===== Minecraft Interfacing Options
+# Manually set server version for compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...
+# NOTE: The bot will try to detect the server version itself. Setting this variable yourself will manually override that and effect all servers.
+#       So don't set this if you are planning on switching between different server versions.
+#       You can leave it None if you're using the latest version.
+server_version = None  # Default: None
+
 # Server URL or IP address. Used for server_ping(), ping_url(), etc, .
 server_address = ''
 server_port = 25565
@@ -41,8 +48,8 @@ use_subprocess = False  # Prioritizes use_subprocess over Tmux option.
 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
 use_tmux = True
 tmux_session_name = 'sess'
-tmux_bot_pane = '0.0'  # tmux pane for slime_bot. Default: 0.0
-tmux_minecraft_pane = '0.1'  # tmux pane for Miencraft server. Default: 0.1
+tmux_bot_pane = '0.0'  # tmux pane for slime_bot. Default: '0.0'
+tmux_minecraft_pane = '0.1'  # tmux pane for Miencraft server. Default: '0.1'
 
 # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
 use_rcon = False
@@ -59,9 +66,13 @@ default_wait_time = 30
 # Default server launch command to start Minecraft java server.
 server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
 
+
 # ===== Bot Config
 # Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
 show_sensitive_info = False
+
+# Set to True to backup 'world' folder only, exclude folders like 'world_nether', etc...
+exact_foldername = False
 
 # This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
 status_checker_command = 'xp'  # Default: 'xp'
@@ -85,6 +96,7 @@ try: user = os.getlogin()
 except: user = getpass.getuser()
 if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 # -------------------------------------------------------
+
 # Set as None if not using a python virtual env.
 pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
 
@@ -100,14 +112,12 @@ useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/downlo
                    'CurseForge Download': 'https://curseforge.overwolf.com/',
                    'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
                    'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
-                   }
+                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',}
 
 # ========== Other Games
 steam_path = f'/home/{user}/.steam/steam/steamapps/common'
 
 # ========== Don't need to edit.
-
 # Create servers.csv file if not exist.
 # Server profiles, allows you to have different servers and each with their own backups/restores.
 # {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
@@ -134,25 +144,8 @@ server_backups_path = join(mc_path, 'server_backups', server_selected[0])
 server_log_path = join(server_path, 'logs')
 server_log_file = join(server_log_path, 'latest.log')
 
-exact_foldername = False  # Set to True to backup 'world' folder only.
-server_ip = server_address  # Will be updated by get_ip() function in backend_functions.py on bot startup.
-mc_active_status = False  # If Minecraft server is running.
-mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
-
-if use_rcon is True: import mctools, re
-if server_files_access is True: import shutil, fileinput, json
-if not server_address: server_address = 'N/A'
-
-# Disable certain commands depending on if have local server file access.
-if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff', 'chatlog',
-                     'motd', 'oplist', 'properties', 'propertiesall', 'rcon', 'onlinemode', 'serverconnections',
-                     'restoreworldpanel', 'worldbackupslist', 'worldbackupnew', 'worldbackupdate', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
-                     'restoreserverpanel', 'serverbackupslist', 'serverbackupnew', 'serverbackupdate', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog'
-                     ]
-
-if server_files_access: if_no_file_access = []
-
-# Import user's configs
+# Don't edit this point onwards unless you know what you're doing.
+# ===== Import user's configs
 try: from user_config import *
 except: pass
 
@@ -161,3 +154,19 @@ user_config_file = join(bot_src_path, 'user_config.py')
 slime_vars_file = join(bot_src_path, 'bot_files', 'slime_vars.py')
 bot_files_path = join(bot_src_path, 'bot_files')
 bot_log_file = join(bot_src_path, 'slime_bot.log')
+
+if not server_address: server_address = 'N/A'
+server_ip = server_address  # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
+mc_active_status = False  # If Minecraft server is running.
+mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
+
+if use_rcon is True: import mctools, re
+if server_files_access is True: import shutil, fileinput, json
+
+# Disable certain commands depending on if you have local server file access.
+if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff', 'chatlog',
+                     'motd', 'oplist', 'properties', 'propertiesall', 'rcon', 'onlinemode', 'serverconnections',
+                     'restoreworldpanel', 'worldbackupslist', 'worldbackupnew', 'worldbackupdate', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
+                     'restoreserverpanel', 'serverbackupslist', 'serverbackupnew', 'serverbackupdate', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
+if server_files_access: if_no_file_access = []  # Clearing the list means the bot won't disable the commands.
+

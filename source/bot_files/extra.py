@@ -142,6 +142,7 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
 
     try: os.chdir(slime_vars.server_path)
     except: pass
+    if not os.path.isfile(file_path): return False
     return_line = ''
 
     # print() writes to file while using it in FileInput() with inplace=True

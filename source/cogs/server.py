@@ -368,7 +368,7 @@ class Server(commands.Cog):
                   ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
 
-        if await server_status() is False:  # Only fetches players list if server online.
+        if status is not False:  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('_control_panel_msg'))
         lprint(ctx, "Fetched server status")
