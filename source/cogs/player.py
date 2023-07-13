@@ -122,7 +122,8 @@ class Player(commands.Cog):
             ?tp Steve Jesse I wanted to see him - Teleports and shows message.
         """
 
-        target = target.strip()
+        try: target = target.strip()
+        except: await ctx.send("**ERROR:** Issue getting player list.")
 
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)

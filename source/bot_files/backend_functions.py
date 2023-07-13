@@ -190,7 +190,7 @@ async def server_rcon(command=''):
         server_rcon_client.stop()
         return return_data
 
-async def server_status(ctx=None):
+async def server_status(discord_msg=False):
     """
     Gets server active status, by sending command to server and checking server log.
 
@@ -203,7 +203,7 @@ async def server_status(ctx=None):
     lprint(ctx, "Checking Minecraft server status...")
 
     # send_command() will send random number, server is online if match is found in log.
-    response = await send_command(' ', force_check=True, ctx=ctx)
+    response = await send_command(' ', discord_msg=discord_msg, force_check=True, ctx=ctx)
     if response:
         server_active = True
         lprint(ctx, "Server Status: Active")
@@ -282,7 +282,8 @@ def server_motd():
     """
 
     if slime_vars.server_files_access is True:
-        return edit_file('motd')[1]
+        data = edit_file('motd')
+        if data: return data[1]
     elif slime_vars.use_rcon is True:
         return remove_ansi(server_ping()['description'])
     else: return "N/A"
@@ -377,7 +378,7 @@ def download_latest():
 async def get_players():
     """Extracts wanted data from output of 'list' command."""
 
-    response = await send_command("list")
+    response = await send_command("list", discord_msg=False)
     if not response: return False
 
     # Gets data from RCON response or reads server log for line containing player names.
