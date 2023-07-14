@@ -98,7 +98,7 @@ if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 # -------------------------------------------------------
 
 # Set as None if not using a python virtual env.
-pyenv_activate_command = f'source /home/{user}/pyenvs/discord2/bin/activate'
+pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
 
 # Get the operating system. Makes server launch command compataible with windows CMD.
 windows_cmdline_start = False

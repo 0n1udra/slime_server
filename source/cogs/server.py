@@ -244,7 +244,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
-        if await server_status() is False:
+        if await server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 

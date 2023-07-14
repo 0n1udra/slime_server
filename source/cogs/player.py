@@ -19,7 +19,6 @@ class Player(commands.Cog):
             await ctx.send("**Error:** Unable to fetch player list.")
             return
 
-        await ctx.send("***Fetching Player List...***")
         if not player_list:
             await ctx.send(f"No players online. ¯\_(ツ)_/¯")
         else:
