@@ -332,10 +332,9 @@ class Discord_Components_Funcs(commands.Cog):
 
     @commands.command(hidden=True)
     async def _update_control_panel(self, ctx, mode, buttons_mode='server'):
-        global buttons_dict
         """Show select menu of server log files available to download."""
 
-        failed = False  # if failed to update the components
+        failed = False  # if failed to update the components, will try to reload components.
         components.data('second_selected', None)
         spc = components.data('server_panel_components')  # [select options, select msg, bmode msg, current page, total pages]
         total_pages = 1
@@ -348,7 +347,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         if mode in 'buttons':
             select_options = buttons_select_options
-            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504']] + buttons_dict[buttons_mode][0], buttons_dict[buttons_mode][1]
+            buttons1, buttons2, = [['Reload Panel', 'controlpanel', '\U0001F504']], buttons_dict[buttons_mode]
             params = ["**Buttons**", 'update_server_panel', 'Choose what buttons to show']
 
         elif mode == 'servers':
@@ -393,16 +392,15 @@ class Discord_Components_Funcs(commands.Cog):
             await ctx.invoke(self.bot.get_command('controlpanel'))
         else: lprint(ctx, f'Updated server panel {mode}')
 
-    @commands.command(aliases=['cp2', 'buttons', 'b'])
+    @commands.command(aliases=['buttons', 'b'])
     async def buttonspanel(self, ctx):
         """Shows all the buttons!"""
 
-        global buttons_dict
-        for k, v in buttons_dict.items():
+        for k, v in components.buttons_dict.items():
+            # Hides server/world backup commands if there's no local file access.
             if slime_vars.server_files_access is False and 'backups' in k: continue
-            try:
-                await ctx.send(content=k.capitalize(), view=components.new_buttons(v[0]))
-                await ctx.send(content='', view=components.new_buttons(v[1]))
+
+            try: await ctx.send(content=k.capitalize(), view=components.new_buttons(v))
             except: pass
 
     @commands.command(hidden=True)
