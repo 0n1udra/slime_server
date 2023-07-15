@@ -306,7 +306,6 @@ def server_ping():
         stats = ping.get_stats()
         ping.stop()
     except ConnectionRefusedError:
-        lprint(ctx, "Ping Error")
         server_active = False
         return False
     else:
