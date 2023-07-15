@@ -366,6 +366,7 @@ class Discord_Components_Funcs(commands.Cog):
                                    ['Player Actions', '_update_control_panel buttons players', False, 'Player panel, players list, teleport, chat, banlist/whitelisti, OP, etc'],
                                    ['World Actions', '_update_control_panel buttons world', False, 'Weather, time, etc'],
                                    ['Bot/Extra Actions', '_update_control_panel buttons extra', False, 'Bot log, restart bot, set channel, website links, etc']]]
+        buttons_select_options = [[sublist[:2] + [True] + sublist[3:] if sublist[1].endswith(buttons_mode) else sublist for sublist in buttons_select_options[0]]]
 
         if mode in 'buttons':
             select_options = buttons_select_options
