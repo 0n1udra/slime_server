@@ -14,7 +14,7 @@ class Server(commands.Cog):
         self.bot = bot
 
         if slime_vars.autosave_status is True:
-            self.autosave_loop.start()
+            self.autosave_task.start()
             lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_min_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
@@ -215,7 +215,6 @@ class Server(commands.Cog):
         if not new_servers_found: await ctx.send("No new servers found.")
         else: await ctx.invoke(self.bot.get_command('serverlist'))
 
-
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])
     async def latestversion(self, ctx):
@@ -306,12 +305,12 @@ class Server(commands.Cog):
         arg = str(arg)
         if arg.lower() in backend.enable_inputs:
             # Starts loop, updates autosave_status, edits slime_vars.py, output to log
-            self.autosave_loop.start()
+            self.autosave_task.start()
             slime_vars.autosave_status = True
             backend.edit_file('autosave_status', ' True', slime_vars.user_config_file)
             lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_min_interval}m)')
         elif arg.lower() in backend.disable_inputs:
-            self.autosave_loop.cancel()
+            self.autosave_task.cancel()
             slime_vars.autosave_status = False
             backend.edit_file('autosave_status', ' False', slime_vars.user_config_file)
             lprint(ctx, 'Autosave: Disabled')
@@ -326,18 +325,13 @@ class Server(commands.Cog):
         lprint(ctx, 'Fetched autosave information')
 
     @tasks.loop(seconds=slime_vars.autosave_min_interval * 60)
-    async def autosave_loop(self):
+    async def autosave_task(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
+        await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await send_command('save-all', discord_msg=False):
             lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_min_interval}m)")
-
-    @autosave_loop.before_loop
-    async def before_autosaveall_loop(self):
-        """Makes sure bot is ready before autosave_loop can be used."""
-
-        await self.bot.wait_until_ready()
 
     # ===== Status/Info
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
@@ -351,7 +345,6 @@ class Server(commands.Cog):
         elif response is None:
             await ctx.send("**ERROR:** Unable to check server status.")
         else: await ctx.send("**Server INACTIVE** :red_circle:")
-
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
