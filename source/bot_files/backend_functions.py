@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from bot_files.extra import *
 from os.path import join
 import bot_files.slime_vars as slime_vars
-if slime_vars.use_rcon: import mctools
+if slime_vars.use_rcon or slime_vars.enable_custom_status: import mctools
 if slime_vars.windows_cmdline_start: import subprocess
 
 # Remove ANSI escape characters

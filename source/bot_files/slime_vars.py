@@ -24,6 +24,10 @@ intents.message_content = True  # Default: True
 # Optionally add channel ID, send message indicating bot is ready on startup.
 channel_id = None  # Default: None
 
+# Every X minutes, updates bot's custom status showing player's online and server ping. E.g. Playing - 3 | Ping - 10
+# NOTE: Need to set 'enable-query=true' in server.properties for this to work.
+enable_custom_status = True  # Default: True
+custom_status_interval = 1  # Default: 1
 
 # ===== Minecraft Interfacing Options
 # Manually set server version for compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...

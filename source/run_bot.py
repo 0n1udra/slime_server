@@ -142,6 +142,7 @@ Discord:
     Case Insensitive    {slime_vars.case_insensitive}
     Intents             {slime_vars.intents}
     Channel ID          {slime_vars.channel_id if nono else no}
+    Show Custom Status  {slime_vars.enable_status_checker} - {slime_vars.custom_status_interval}min
 
 Server:
     Minecraft Folder    {slime_vars.mc_path}
@@ -183,6 +184,7 @@ if __name__ == '__main__':
     # The order of the if statements is important.
     print(vars_msg)
 
+    # Creates user_config.py file if there isn't one.
     if not os.path.isfile(slime_vars.user_config_file):
         lprint(ctx, "No 'user_config.py' file detected.")
         try: shutil.copy2(slime_vars.slime_vars_file, slime_vars.bot_src_path + '/user_config.py')

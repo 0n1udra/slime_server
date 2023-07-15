@@ -33,13 +33,35 @@ async def on_ready():
         await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
 class Slime_Bot_Commands(commands.Cog):
-    def __init__(self, bot): self.bot = bot
+    def __init__(self, bot):
+        self.bot = bot
+
+        # Shows player's online and ping info in bot's custom status text.
+        if slime_vars.enable_custom_status is True:
+            self.custom_status_task.start()
+            lprint(ctx, f"Custom status task started (interval: {slime_vars.custom_status_interval}m)")
+
+    @tasks.loop(seconds=slime_vars.custom_status_interval * 60)
+    async def custom_status_task(self):
+        """
+        Updates bot's custom status text with online players and ping
+        NOTE: Need to set 'enable-query=true' in server.properties for this to work.
+        """
+
+        await self.bot.wait_until_ready()
+        data = backend.server_ping()
+        if not data: return
+        # Will show: Playing - X | Ping - X
+        await bot.change_presence(activity=discord.Activity(name=f"- {data['players']['online']} | Ping - {int(data['time'])}", type=1))
 
     @commands.command()
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
+
+
         await ctx.send(f"Bot Version: v{slime_vars.__version__} - {slime_vars.__date__}\nAuthor: {slime_vars.__author__}")
+
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botreboot'])
     async def botrestart(self, ctx):
