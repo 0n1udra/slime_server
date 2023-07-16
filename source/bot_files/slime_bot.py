@@ -9,7 +9,7 @@ import bot_files.slime_vars as slime_vars
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
-bot = commands.Bot(command_prefix=slime_vars.command_prefex, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
+bot = commands.Bot(command_prefix=slime_vars.command_prefix, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
 backend.bot = components.bot = bot
 
 
@@ -28,7 +28,7 @@ async def on_ready():
 
         await channel.send(f':white_check_mark: v{slime_vars.__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
-        # Shows Start/Stop game control panel, Control Panel, and Minecraft status page buttons.
+        # Shows some useful buttons
         on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
         await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
@@ -236,12 +236,12 @@ class Discord_Components_Funcs(commands.Cog):
 
         lprint(ctx, 'Opened secret panel')
 
-    @commands.command(hidden=True)
-    async def _control_panel_msg(self, ctx):
-        """Shows message and bmode to open the control panel."""
+    @commands.command(hidden=True, aliases=['startupmsg'])
+    async def bannermsg(self, ctx):
+        """Shows useful buttons"""
 
-        cp_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Status Page', 'serverstatus', '\U00002139']]
-        await ctx.send(content='Use `?cp` for Control Panel. `?stats` Server Status page. `?help` for all commands.', view=components.new_buttons(cp_buttons))
+        on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+        await ctx.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
     @commands.command(aliases=['player', 'ppanel', 'pp'])
     async def playerpanel(self, ctx, player=''):
@@ -272,18 +272,18 @@ class Discord_Components_Funcs(commands.Cog):
         player_selection_panel = await ctx.send("**Player Panel**", view=components.new_selection(select_options, 'player_selected', "Select Player"))
 
         player_buttons = [['Kill', 'kill player', '\U0001F52A'], ['Clear Inventory', 'clearinventory player', '\U0001F4A5'],
-                          ['Location', 'playerlocate player', '\U0001F4CD'], ['Teleport', '_teleport_selected player', '\U000026A1']]
+                          ['Location', 'playerlocate player', '\U0001F4CD'], ['Teleport', '_teleport_selected player', '\U000026A1'],
+                          ['Survival', 'gamemode player survival', '\U0001F5E1'], ['Adventure', 'gamemode player adventure', '\U0001F5FA'],
+                          ['Creative', 'gamemode player creative', '\U0001F528'], ['Spectator', 'gamemode player spectator', '\U0001F441'],
+                          ['Kick', 'kick player', '\U0000274C'], ['Ban', 'ban player', '\U0001F6AB'],
+                          ['OP', 'opadd player', '\U000023EB'], ['DEOP', 'opremove player', '\U000023EC'],
+                          ['Reload', 'playerpanel', '\U0001F504']]
+
+
         b1 = await ctx.send('', view=components.new_buttons(player_buttons))
 
-        player_buttons2 = [['Survival', 'gamemode player survival', '\U0001F5E1'], ['Adventure', 'gamemode player adventure', '\U0001F5FA'],
-                           ['Creative', 'gamemode player creative', '\U0001F528'], ['Spectator', 'gamemode player spectator', '\U0001F441']]
-        b2 = await ctx.send('', view=components.new_buttons(player_buttons2))
 
-        player_buttons3 = [['Reload', 'playerpanel', '\U0001F504'], ['OP', 'opadd player', '\U000023EB'], ['DEOP', 'opremove player', '\U000023EC'],
-                          ['Kick', 'kick player', '\U0000274C'], ['Ban', 'ban player', '\U0001F6AB']]
-        b3 = await ctx.send('', view=components.new_buttons(player_buttons3))
-
-        components.data('current_components', [*components.data('current_components'), player_selection_panel, b1, b2, b3])
+        components.data('current_components', [*components.data('current_components'), player_selection_panel, b1])
         lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['tpp', 'tpanel', 'tppanel'])
