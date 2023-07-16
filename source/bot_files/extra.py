@@ -2,7 +2,7 @@ import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, cs
 import bot_files.slime_vars as slime_vars
 import bot_files.components as components
 
-ctx = 'backend_functions.py'
+ctx = 'extra.py'
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 
@@ -240,7 +240,6 @@ def enum_dir(path, mode, index_mode=False):
             if os.path.isdir(os.path.join(path, item)): flag = True
 
         if flag:
-            index += 1
             if index_mode:
                 return_list.append([item, index, False, index])  # Need this for world/server commands
                 continue
@@ -248,6 +247,7 @@ def enum_dir(path, mode, index_mode=False):
                 return_list.append([item, item, False, slime_vars.servers[item][1]])  # For server mode for ?controlpanel command component
                 continue
             return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
+            index += 1
         else: continue
     return return_list
 
