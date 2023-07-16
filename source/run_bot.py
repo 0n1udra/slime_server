@@ -194,6 +194,10 @@ if __name__ == '__main__':
         else:
             lprint(ctx, "Please set variables in the newly created user_config.py file.")
             exit()
+    if 'hidebanner' not in sys.argv: print(vars_msg)
+
+    if not slime_vars.channel_id:
+        lprint(ctx, "INFO: To enable startup message banner in discord, use '?setchannel' in the channel you want it in.")
 
     if 'setup' in sys.argv:
         if slime_vars.server_files_access is True:
