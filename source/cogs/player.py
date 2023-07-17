@@ -11,7 +11,20 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['p', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx, *args):
-        """Show list of online players."""
+        """
+        Show list of online players.
+        NOTE: If getting player locations might take awhile if a lot of online players. Needs to use /data get entity command to get coords.
+
+        Args:
+            args optional: Just used to catch possible 'location' arg.
+
+        Discord Args:
+            location optional: Uses '/get entity data' command to get xyz coords.
+
+        Usage:
+            ?players
+            ?p location
+        """
 
         await ctx.send("***Fetching Player List...***")
         player_list = await backend.get_players()
@@ -26,14 +39,13 @@ class Player(commands.Cog):
             for i in player_list[0]:
                 if 'location' in args:
                     player_location = await backend.get_coords(i)
-                    _player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`\n')
+                    _player_list.append(f'{i.strip()} {player_location if player_location else "Location N/A"}\n')
                 else: _player_list.append(f'{i.strip()}, ')
 
             # Combines 'There are X of a max of X players online' text with player names.
-            output = player_list[1] + '\n' + ''.join(_player_list)
+            output = player_list[1].strip() + '\n' + ''.join(_player_list)
             if 'location' in args:
-                await ctx.send(output)
-                await ctx.send("-----END-----")
+                await ctx.send(file=discord.File(convert_to_bytes(output), 'online_player_locations.txt'))
             else:
                 output = output[:-2]  # Removes trailing ','.
                 await ctx.send(output)
@@ -42,7 +54,10 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['pl', 'playercoords', 'playerscoords'])
     async def playerlocations(self, ctx):
-        """Shows all online player's xyz location."""
+        """
+        Shows all online player's xyz location.
+        NOTE: Might take awhile if a lot of online players. Needs to use '/data get entity' command to get coords.
+        """
 
         await ctx.invoke(self.bot.get_command('players'), 'location')
 

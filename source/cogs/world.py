@@ -1,6 +1,8 @@
-from discord.ext import commands, tasks
+import discord
+from discord.ext import commands
 from bot_files.backend_functions import send_command, format_args, lprint
 import bot_files.backend_functions as backend
+from bot_files.extra import convert_to_bytes
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):
@@ -103,22 +105,10 @@ class Basics(commands.Cog):
             await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
             return False
 
+        # TODO: Possibly able to remove this and use match= in server_log
         # optionally filter out chat lines only with certain keywords.
-        log_data = [i for i in log_data if keyword.lower() in i.lower()]
-
-        i = lines
-        for line in log_data:
-            # Only show specified number of lines from 'lines' parameter.
-            if i <= 0: break
-            i -= 1
-
-            # Extracts wanted data from log line and formats it in Discord markdown.
-            # '[15:26:49 INFO]: <R3diculous> test' > '(15:26:49) R3diculous: test' (With Discord markdown)
-            timestamp = line.split(']', 1)[0][1:]
-            line = line.split(']: <', 1)[-1].split('>', 1)
-            await ctx.send(f"_({timestamp})_ **{line[0]}**: {line[-1][1:]}")
-
-        await ctx.send("-----END-----")
+        log_data = '\n'.join([i for i in log_data if keyword.lower() in i.lower()])
+        await ctx.send(file=discord.File(convert_to_bytes(log_data), 'chat_log.log'))
         lprint(ctx, f"Fetched Chat Log: {lines}")
 
 # ========== World: weather, time.

@@ -363,7 +363,7 @@ class Server(commands.Cog):
 
         if status is not False:  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
-        await ctx.invoke(self.bot.get_command('_control_panel_msg'))
+        await ctx.invoke(self.bot.get_command('bannermsg'))
         lprint(ctx, "Fetched server status")
 
     @commands.command(aliases=['log', 'mlog'])
@@ -389,12 +389,9 @@ class Server(commands.Cog):
         if match: filter_mode, log_mode = True, False
 
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
-        log_data = backend.server_log(match=match, file_path=slime_vars.server_log_file, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
+        log_data = backend.server_log(match=match, file_path=slime_vars.server_log_filepath, lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
-            i = 0
-            for line in log_data.split('\n'):
-                await ctx.send(f">`{line}`")
-            await ctx.send("-----END-----")
+            await ctx.send(file=discord.File(convert_to_bytes(log_data), 'server.log'))
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data.")
@@ -418,29 +415,14 @@ class Server(commands.Cog):
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
         log_data = backend.server_log(match_list=match_list, lines=lines, filter_mode=True, return_reversed=True)
-        try: log_data = log_data.strip().split('\n')
-        except:
-            await ctx.send("**ERROR:** Problem fetching connection logs, there may be nothing to fetch.")
-            return False
+        if not log_data:
+            await ctx.send("**ERROR:** Could not get chat log.")
+            return
 
-        i = lines
-        # Prints out log lines with Discord markdown.
-        for line in log_data:
-            if i <= 0: break
-            i -= 1
-
-            # Gets timestamp from start of line.
-            timestamp = line.split(']', 1)[0][1:]
-            # '[15:51:31 INFO]: R3diculous left the game' > ['R3diculous', 'left the game'] > '(16:30:36) R3diculous: joined the gameA'
-            line = line.split(']:', 1)[-1][1:].split(' ', 1)
-            # Extracts wanted data and formats it into a Discord message with markdown.
-            line = f"_({timestamp})_ **{line[0]}**: {line[1]}"
-            await ctx.send(f'{line}')
-
-        await ctx.send("-----END-----")
+        await ctx.send(file=discord.File(convert_to_bytes(log_data), 'connections_log.log'))
         lprint(ctx, f"Fetched Connection Log: {lines}")
 
-    @commands.command(aliases=['minecraftversion', 'mversion'])
+    @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
@@ -460,15 +442,19 @@ class Server(commands.Cog):
 
         Usage:
             ?property motd - Shows current value for 'motd'
-            ?property spawn-protection 2 - Updates 'spawn-protection' value to 2
-            ?property all - Shows all properties.
+            ?pr spawn-protection 2 - Updates 'spawn-protection' value to 2
+            ?property all, ?pa - Shows all properties.
 
         Note: Passing in 'all' for target property argument (with nothing for value argument) will show all the properties.
         """
 
         if not target_property:
-            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`")
+            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`\n"
+                           "Show all properties using `?properties all` or `?pa`")
             return False
+
+        if 'all' in target_property:
+            await ctx.invoke(self.bot.get_command('propertiesall'))
 
         if value:
             await ctx.send("Property Updated  :memo:")
@@ -486,11 +472,18 @@ class Server(commands.Cog):
             await ctx.send(f"**ERROR:** 404 Property not found.")
             lprint(ctx, f"Server property not found: {target_property}")
 
-    @commands.command()
+    @commands.command(aliases=['pa', 'prall'])
     async def propertiesall(self, ctx):
         """Shows full server properties file."""
+        global slime_vars
 
-        await ctx.invoke(self.bot.get_command('properties'), target_property='all')
+        if not os.path.isfile(slime_vars.server_properties_filepath):
+            await ctx.send('**ERROR:** Could not get server properties file')
+            return
+        with open(slime_vars.server_properties_filepath, 'rb') as f:
+            await ctx.send(file=discord.File(f, slime_vars.server_properties_filepath))
+
+        #await ctx.invoke(self.bot.get_command('properties'), target_property='all')
 
     @commands.command(aliases=['serveronlinemode', 'omode', 'om'])
     async def onlinemode(self, ctx, mode=''):
