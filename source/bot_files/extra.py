@@ -1,4 +1,4 @@
-import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re
+import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re, io
 import bot_files.slime_vars as slime_vars
 import bot_files.components as components
 
@@ -17,10 +17,8 @@ def lprint(ctx, msg):
     print(output)
 
     # Logs output.
-    with open(slime_vars.bot_log_file, 'a') as file:
+    with open(slime_vars.bot_log_filepath, 'a') as file:
         file.write(output + '\n')
-
-lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
 
 def get_parameter(arg, nrg_msg=False, key='second_selected', **kwargs):
     """
@@ -117,17 +115,17 @@ def get_public_ip():
     except: return None
     return server_ip
 
-def ping_url():
+def ping_address():
     """Checks if server_address address works by pinging it twice."""
 
     ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ping_out, ping_error = ping.communicate()
-    if slime_vars.server_ip in str(ping_out):
-        return 'working'
-    return 'inactive'
+    if slime_vars.server_ip in str(ping_out) and ping_out.strip():
+        return 'Success'
+    return 'Unreachable'
 
 # ========== File/folder editing/manipulation
-def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
+def edit_file(target_property=None, value='', file_path=None):
     """
     Edits server.properties file if received target_property and value. Edits inplace with fileinput
     If receive no value, will return current set value if property exists.
@@ -142,6 +140,7 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
         tuple: First item is line from file that matched target_property. Second item is just the current value.
     """
 
+    if not file_path: file_path = f"{slime_vars.server_path}/server.properties"
     try: os.chdir(slime_vars.server_path)
     except: pass
     if not os.path.isfile(file_path): return False
@@ -153,12 +152,8 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
         for line in file:
             split_line = line.split('=', 1)
 
-            if target_property == 'all':  # Return all lines of file.
-                return_line += line.strip() + '\n'
-                print(line, end='')
-
             # If found match, and user passed in new value to update it.
-            elif target_property in split_line[0] and len(split_line) > 1:
+            if target_property in split_line[0] and len(split_line) > 1:
                 if value:
                     split_line[1] = value  # edits value section of line
                     new_line = return_line = '='.join(split_line)
@@ -169,6 +164,7 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
                     print(line, end='')
             else: print(line, end='')
 
+    # Returns value, and complete line
     if return_line:
         return return_line, return_line.split('=')[1].strip()
     else: return "Match not found.", 'Match not found.'
@@ -180,22 +176,21 @@ def read_json(json_file):
 
 def read_csv(csv_file):
     """Read .csv files in bot_files directory."""
-    os.chdir(slime_vars.bot_files_path)
+    os.chdir(slime_vars.bot_filepath)
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 def update_csv(csv_file, new_data=None):
     """Updates csv files in bot_files directory."""
 
-    os.chdir(slime_vars.bot_files_path)
+    os.chdir(slime_vars.bot_filepath)
 
     with open(csv_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerows(new_data)
 
-def update_servers(new_data=None):
-    if new_data:
-        slime_vars.servers[new_data['name']] = [new_data['name'], new_data['description'], new_data['command'], new_data['wait']]
+def convert_to_bytes(data): return io.BytesIO(data.encode())
+
 def status_slime_proc():
     """Get bot process name and pid."""
 
@@ -259,7 +254,7 @@ def enum_dir(path, mode, index_mode=False):
                 index += 1
                 continue
             if 's' in mode and item in slime_vars.servers:
-                return_list.append([item, item, False, slime_vars.servers[item]['description']])  # For server mode for ?controlpanel command component
+                return_list.append([item, item, False, slime_vars.servers[item]['server_description']])  # For server mode for ?controlpanel command component
                 index += 1
                 continue
             return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
@@ -276,3 +271,36 @@ def delete_dir(backup):
 
     shutil.rmtree(backup)
 
+def update_server_paths(server, server_name):
+    """
+    Replaces 'SELECTED_SERVER' in server dict values if key has 'path' in it.
+    """
+    server['server_name'] = server_name
+    for k, v in server.items():
+        if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+            server[k] = v.replace('SELECTED_SERVER', server_name)
+
+    return server
+
+def update_servers_vars():
+    """Checks if there's new configs in 'example' and updates the other servers with defaults."""
+    global slime_vars
+    for name, data in slime_vars.servers.items():
+        if 'example' in name: continue  # Skip example template
+        server = slime_vars.servers['example'].copy()
+        server.update(data)  # Updates example template values with user set ones, fallback on 'example' defaults
+        server = update_server_paths(server, name)  # Updates paths (substitutes SELECTED_SERVER)
+        # Updates slime_vars then writes to file.
+        slime_vars.servers.update({name: server})
+        slime_vars.update_vars(slime_vars.config)
+
+def update_from_user_config(config):
+    # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
+    with open(slime_vars.user_config_filepath, 'r') as openfile:
+        def deep_update(original_dict, update_dict):
+            for key, value in update_dict.items():  # Updates nested dictionaries.
+                if isinstance(value, dict) and key in original_dict and isinstance(original_dict[key], dict):
+                    deep_update(original_dict[key], value)
+                else: original_dict[key] = value
+        deep_update(config, json.load(openfile))
+    return config

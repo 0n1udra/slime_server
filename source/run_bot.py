@@ -7,8 +7,6 @@ from bot_files.extra import lprint, update_from_user_config
 import bot_files.backend_functions as backend
 
 ctx = 'run_bot.py'  # So you know which log lines come from which file.
-slime_proc = slime_pid = None  # If using nohup to run bot in background.
-slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
 
@@ -170,57 +168,53 @@ def show_banner():
     no = '**********'  # 2bad. change it!
 
     vars_msg = f"""
-                   Bot:
-                   Version             {slime_vars.__version__} - {slime_vars.__date__}
-                   User                {slime_vars.user}
-                   Python Env          {slime_vars.pyenv_activate_command if slime_vars.use_pyenv else 'None'}
-                   Subprocess          {slime_vars.server_use_subprocess}
-                   Tmux                {slime_vars.use_tmux}
-                   RCON                {slime_vars.server_use_rcon}
-                   Bot Log             {slime_vars.bot_log_filepath}
-                   
-                   Discord:
-                   Discord Token       {slime_vars.bot_token_filepath if nono else no}
-                   Command Prefix      {slime_vars.command_prefix}
-                   Case Insensitive    {slime_vars.case_insensitive}
-                   Intents             {slime_vars.intents}
-                   Channel ID          {slime_vars.channel_id if nono else no}
-                   Show Custom Status  {slime_vars.enable_status_checker} - {slime_vars.custom_status_interval}min
-                   
-                   Server:
-                   Minecraft Folder    {slime_vars.mc_path}
-                   File Access         {slime_vars.server_files_access}
-                   Autosave            {slime_vars.enable_autosave} - {slime_vars.autosave_interval}min
-                   Server URL          {slime_vars.server_address if nono else no}
-                   Server Port         {slime_vars.server_port if nono else no}
-                   """
-    if slime_vars.use_tmux:
-                               vars_msg += f"""
-                               Tmux:
-                               Session Name        {slime_vars.tmux_session_name}
-                               Bot Pane            {slime_vars.tmux_bot_pane}
-                               Server Pane         {slime_vars.tmux_minecraft_pane}
-                               """
+Bot:
+Version             {slime_vars.__version__} - {slime_vars.__date__}
+User                {slime_vars.user}
+Python Env          {slime_vars.pyenv_activate_command if slime_vars.use_pyenv else 'None'}
+Subprocess          {slime_vars.server_use_subprocess}
+Tmux                {slime_vars.use_tmux}
+RCON                {slime_vars.server_use_rcon}
+Bot Log             {slime_vars.bot_log_filepath}
 
-    if slime_vars.server_use_screen:
-                                        vars_msg += f"""
-                                        Screen:
-                                        Session Name        {slime_vars.screen_session_name}
-                                        """
+Discord:
+Discord Token       {slime_vars.bot_token_filepath if nono else no}
+Command Prefix      {slime_vars.command_prefix}
+Case Insensitive    {slime_vars.case_insensitive}
+Intents             {slime_vars.intents}
+Channel ID          {slime_vars.channel_id if nono else no}
+Show Custom Status  {slime_vars.enable_status_checker} - {slime_vars.custom_status_interval}min
 
-    if slime_vars.server_use_rcon:
-                                      vars_msg += f"""
-                                      RCON:
-                                      Pass                {slime_vars.rcon_pass if nono else no}
-                                      Port                {slime_vars.rcon_port if nono else no}
-                                      """
+Server:
+Minecraft Folder    {slime_vars.mc_path}
+File Access         {slime_vars.server_files_access}
+Autosave            {slime_vars.enable_autosave} - {slime_vars.autosave_interval}min
+Server URL          {slime_vars.server_address if nono else no}
+Server Port         {slime_vars.server_port if nono else no}
+"""
+    if slime_vars.use_tmux: vars_msg += f"""
+Tmux:
+Session Name        {slime_vars.tmux_session_name}
+Bot Pane            {slime_vars.tmux_bot_pane}
+Server Pane         {slime_vars.tmux_minecraft_pane}
+"""
 
-    if slime_vars.server_files_access:
-                                          vars_msg += f"""
-                                          Local Server:
-                                          Minecraft Path      {slime_vars.mc_path}
-                                          Server Path         {slime_vars.server_path}
-                                          """
+    if slime_vars.server_use_screen: vars_msg += f"""
+Screen:
+Session Name        {slime_vars.screen_session_name}
+"""
+
+    if slime_vars.server_use_rcon: vars_msg += f"""
+RCON:
+Pass                {slime_vars.rcon_pass if nono else no}
+Port                {slime_vars.rcon_port if nono else no}
+"""
+
+    if slime_vars.server_files_access: vars_msg += f"""
+Local Server:
+Minecraft Path      {slime_vars.mc_path}
+Server Path         {slime_vars.server_path}
+"""
 
     print(vars_msg)
 
@@ -263,9 +257,9 @@ if __name__ == '__main__':
 
     # Background process method (using nohup)
     if 'stopbot' in sys.argv:
-        kill_slime_proc()
+        backend.kill_slime_proc()
 
-    if 'statusbot' in sys.argv: status_slime_proc()
+    if 'statusbot' in sys.argv: backend.status_slime_proc()
 
     if 'startserver' in sys.argv: server_start()
 

@@ -11,7 +11,7 @@ Whisper, `?tell <player> <message>` `?t`, Whispers message to player.
 Chat Log, `?chatlog [lines] [filter]` `?chat 10` `?chat wubba lubba`, User chat logs, not include whispers. Can also filter for specific keyword(s).
 Server Status, `?check`, Checks if server is active or not. The `?check` and `?stats` commands are the only ones that will actually check server status.
 Server Command, `?command <command>` `?c`, Send command directly to server, use `?log` to get more server output lines. e.g.: `?/ time set day`
-Server List, `?serverlist`, List server, Each has their own server backups, start command, etc..
+Server List, `?serverlist`, List server, Each has their own server backups, Launch Command, etc..
 Server Select, `?serverselect <server>` `?ss papermc`, Change what server to use.
 Server Status, `?status`, Shows server's running status, version, motd, and online players.
 Server Start, `?start`, Starts Minecraft server up.

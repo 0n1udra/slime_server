@@ -155,7 +155,6 @@ def new_buttons(buttons_list):
 
     view = discord.ui.View(timeout=None)
     for bmode in buttons_list:
-        if bmode[1] in slime_vars.if_no_file_access: continue  # Disable certain buttons if no local server file access.
         if len(bmode) == 2: bmode.append(None)  # For buttons with no emoji.
         view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
     return view
@@ -184,10 +183,16 @@ def new_embed(fields, title):
         embed.add_field(name=i[0], value=i[1], inline=i[2])
     return embed
 
-def server_modal_fields(server=slime_vars.server_selected[0]):
+def server_modal_fields(server=None):
+    global slime_vars
+    if not server: server = slime_vars.selected_server['server_name']
+    print(server)
     data = slime_vars.servers[server]
 
-    return [['text', 'Server Name', 'name', 'Name of new server', data[0], False, True, 50], # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
-            ['text', 'Description', 'description', 'Add description', data[1], True, True, 500],
-            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', data[2], True, True, 500],
-            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data[3], True, True, 10]]
+    # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
+    # Limited to 5 components in modal
+    return [['text', 'Server Name', 'Server Name', 'Name of new server', data['server_name'], False, True, 50],
+            ['text', 'Description', 'description', 'Add description', data['server_description'], True, True, 500],
+            ['text', 'Server Domain/IP', 'server_address', 'Server domain or IP address', data['server_address'], False, True, 500],
+            ['text', 'Launch Command', 'command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
+            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]

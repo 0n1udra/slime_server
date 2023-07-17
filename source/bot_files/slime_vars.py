@@ -1,175 +1,164 @@
-import discord, getpass, platform, csv, os
+import discord, getpass, os, json
 from os.path import join
 
-__version__ = "7.2.1"
+__version__ = "8.0"
 __date__ = '12/07/2023'
 __author__ = "github.com/0n1udra"
 __license__ = "GPL 3"
 __status__ = "Development"
 __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
 
-home_dir = os.path.expanduser('~')  # Default: os.path.expanduser('~')
+user = ''
+try: user = os.getlogin()
+except: user = getpass.getuser()
+if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
 
-# ===== Discord
-# Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
-bot_token_file = join(home_dir, 'keys', 'slime_bot.token')  # Default: join(home_dir, 'keys', 'slime_bot.token')
-command_prefex = '?'  # Default: '?'
-# Case insensitivity for discord commands. e.g. ?players, ?Players, ?pLaYers will be the same.
-case_insensitive = True  # Default: True
+bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+home_dir = os.path.expanduser('~')  # Default: os.path.expanduser('~')
+# Use os.path.join. e.g. join(home_dir, 'Games', 'Minecraft) is ~/Games/Minecraft/
+# Inside mc_path will be: servers, world_backups, server_backups folder
+mc_path = join(home_dir, 'Games', 'Minecraft')
 
 # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
 intents = discord.Intents.default()  # Default: discord.Intents.default()
 intents.message_content = True  # Default: True
 
-# Optionally add channel ID, send message indicating bot is ready on startup.
-channel_id = None  # Default: None
+selected_server = 'example'  # Just a placeholder don't touch.
+config = {
+    'bot_config': {
+        # Use python virtual environment
+        'use_pyenv': True,
+        'pyenv_activate_command': f'source /home/{user}/pyenvs/slime_server/bin/activate',
+        # Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
+        'show_sensitive_info': False,
 
-# Every X minutes, updates bot's custom status showing player's online and server ping. E.g. Playing - 3 | Ping - 10
-# NOTE: Need to set 'enable-query=true' in server.properties for this to work.
-enable_custom_status = True  # Default: True
-custom_status_interval = 1  # Default: 1
+        # ===== Discord config
+        # Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
+        # Get Discord bot token at: https://discord.com/developers/applications
+        'bot_token_filepath': join(home_dir, 'keys', 'slime_bot.token'),
+        'command_prefix': '?',
+        # Case insensitivity for discord commands. e.g. ?players, ?Players, ?pLaYers will be the same.
+        'case_insensitive': True,
+        # Can use ?setchannel command or set here, it's to send a startup message in Discord.
+        'channel_id': 0,
+        # Every X minutes, updates bot's custom status showing player's online and server ping. E.g. Playing - 3 | Ping - 10
+        # NOTE: Need to set 'enable-query=true' in server.properties for this to work. Tip: '?property enable-query true'
+        'enable_players_custom_status': True,
+        'custom_status_interval': 1,
 
-# ===== Minecraft Interfacing Options
-# Manually set server version for compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...
-# NOTE: The bot will try to detect the server version itself. Setting this variable yourself will manually override that and effect all servers.
-#       So don't set this if you are planning on switching between different server versions.
-#       You can leave it None if you're using the latest version.
-server_version = None  # Default: None
+        # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
+        'use_tmux': True,
+        'tmux_session_name': 'slime_server',
+        'tmux_bot_pane': '0.0',
+        'tmux_minecraft_pane': '0.1',
 
-# Server URL or IP address. Used for server_ping(), ping_url(), etc, .
-server_address = 'N/A'  # Default: 'N/A'
-server_port = 25565  # Default: 25565
+        # If editing these paths, make sure the 'example' server defaults are updated aswell.
+        'mc_path': mc_path,
+        'servers_path': join(mc_path, 'servers'),
+        'user_config_filepath': join(bot_src_path, 'user_config.json'),
+        'bot_filepath': join(bot_src_path, 'bot_files'),
+        'bot_log_filepath': join(bot_src_path, 'slime_bot.log'),
 
-# Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-server_files_access = True  # Default: True
+        # Use cmd 'start' command when starting a server only if platform.systems() == 'Windows'.
+        'windows_compatibility': True,
+        # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
+        'windows_cmdline_start': 'start "Minecraft server"',
 
-# Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
-server_use_screen = False  # Default: False
-screen_session_name = 'server'  # Make sure your screen session is named if starting server outside of bot.
+        'selected_server': selected_server,
+    },
+    'servers': {
+        'example': {  # has to be the same as the server_name key within.
+            'server_name': 'example',
+            'server_description': 'example server used as template',
 
-# Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also.
-# Useful if you can't use Tmux. Prioritizes use_subprocess over Tmux option for commands like ?serverstart.
-use_subprocess = False  # Default: False
+            # For compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...
+            'server_version': None,
 
-# Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-use_tmux = True  # Default: True
-tmux_session_name = 'slime_server'  # Default: slime_server
-tmux_bot_pane = '0.0'  # tmux pane for slime_bot. Default: '0.0'
-tmux_minecraft_pane = '0.1'  # tmux pane for Minecraft server. Default: '0.1'
+            # Server domain or IP address. Used for server_ping(), ping_address(), etc,.
+            'server_address': 'localhost',  # Leave '' for blank instead of None or False
+            'server_port': 25565,
+            # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
+            'server_ip': 'localhost',
 
-# Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-use_rcon = False  # Default: False
-rcon_pass = ''  # Default: ''
-rcon_port = 25575  # Default: 25575
+            # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
+            'server_files_access': True,
+            # Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
+            'server_use_screen': False,
+            'screen_session_name': 'minecraft_server',
+            # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also.
+            # Useful if you can't use Tmux. Prioritizes server_use_subprocess over Tmux option for commands like ?serverstart.
+            'server_use_subprocess': False,
+            # Launch command to start Minecraft java server.
+            'server_launch_command': 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui',
 
-# Location for Minecraft servers and backups, make sure is full path and is where you want it.
-# Use os.path.join. e.g. join(home_dir, 'Games', 'Minecraft) is ~/Games/Minecraft/
-mc_path = join(home_dir, 'Games', 'Minecraft')  # # Default: join(home_dir, 'Games', 'Minecraft')
+            # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
+            'server_use_rcon': False,
+            'rcon_pass': 'pass',
+            'rcon_port': 25575,
+            
+            # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
+            'startup_wait_time': 30,
 
-# Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
-default_wait_time = 30  # Default: 30
+            # Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
+            'enable_status_checker': True,
+            # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
+            'status_checker_command': 'xp',
+            # Wait time (in seconds) between sending command to MC server and reading server logs for output.
+            # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
+            'command_buffer_time': 1,
 
-# Default server launch command to start Minecraft java server.
-# Default: 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
-server_launch_command = 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui'
+            # TODO Fix
+            # Send 'save-all' to MC server every X minutes.
+            'enable_autosave': False,
+            'autosave_interval': 60,
 
+            # Max number of log lines to read. Increase if server is really busy.
+            'log_lines_limit': 500,
 
-# ===== Bot Config
-# Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
-show_sensitive_info = False  # Default: False
+            # Set to True to backup 'world' folder only, exclude folders like 'world_nether', etc...
+            'exact_world_foldername': False,
 
-# Set to True to backup 'world' folder only, exclude folders like 'world_nether', etc...
-exact_foldername = False  # Default:
+            # SELECTED_SERVER will be substituted with server name.
+            'server_path': join(mc_path, 'servers', 'SELECTED_SERVER'),
+            "world_backups_path": join(mc_path, 'world_backups', 'SELECTED_SERVER'),
+            "server_backups_path": join(mc_path, 'server_backups', 'SELECTED_SERVER'),
+            "server_logs_path": join(mc_path, 'servers', 'SELECTED_SERVER', 'logs'),
+            "server_log_filepath": join(mc_path, 'servers', 'SELECTED_SERVER', 'logs', 'latest.log'),
+            "server_properties_filepath": join(mc_path, 'servers', 'SELECTED_SERVER', 'server.properties'),
 
-# This command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
-status_checker_command = 'xp'  # Default: 'xp'
-# Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
-enable_status_checker = True  # Default: True
-
-# Max number of log lines to read. Increase if server is really busy.
-log_lines_limit = 500  # Default: 500
-
-# Wait time (in seconds) between sending command to MC server and reading server logs for output.
-# Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
-command_buffer_time = 1  # Default: 1
-
-# Send 'save-all' to MC server every X minutes.
-autosave_status = True  # Default True
-autosave_min_interval = 60  # Default 60
-
-# Can clear all this and set pyenv command manually -----
-user = ''
-try: user = os.getlogin()
-except: user = getpass.getuser()
-if not user: print("ERROR: Need to set 'user' variable in slime_vars.py")
-# -------------------------------------------------------
-
-# Set as None if not using a python virtual env.
-# Default: f'source /home/{user}/pyenvs/slime_server/bin/activate'
-pyenv_activate_command = f'source /home/{user}/pyenvs/slime_server/bin/activate'
-
-# Get the operating system. Makes server launch command compataible with windows CMD.
-windows_cmdline_start = False  # Default: False
-if platform.system() == 'Windows':
-    on_windows = True
-    windows_cmdline_start = 'start "Minecraft server"'  # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
-
-# For '?links' command. Shows helpful websites.
-useful_websites = {'Minecraft Downlaod': 'https://www.minecraft.net/en-us/download',
-                   'Forge Installer': 'https://files.minecraftforge.net/',
-                   'CurseForge Download': 'https://curseforge.overwolf.com/',
-                   'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
-                   'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                   'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',}
+            # For '?links' command. Shows useful websites.
+            'useful_websites': {
+                'Minecraft Download': 'https://www.minecraft.net/en-us/download',
+                'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
+                'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
+                'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
+            }
+        }
+    }
+}
 
 
 # ========== Don't need to edit.
-# Create servers.csv file if not exist.
-# Server profiles, allows you to have different servers and each with their own backups/restores.
-# {'server_name': ['server_name', 'description', 'start_Command', optional_startup_wait_time]}
-# No spaces allowed in server name. Always put optional_wait_time at tail of list.
-servers = {'example': ['example', 'Description of server', server_launch_command, 30]}
-# TODO add to csv if foler exist
-with open(join('bot_files', 'servers.csv'), "a") as f: pass  # Create file if not exist.
-# Add servers from csv file.
-with open(join('bot_files', 'servers.csv'), 'r') as f:
-    csv_data = csv.reader(f, skipinitialspace=True)
-    for i in csv_data:
-        if not i: continue
-        if 'Example Entry' == i[0]: continue
-        i[2] = i[2].replace('PARAMS', server_launch_command)  # Replaces 'PARAMS' with server_launch_command string.
-        servers[i[0]] = i
-_server_selected = 'papermc'
-if _server_selected in servers.keys():
-    server_selected = servers[_server_selected]
-else: server_selected = servers['example']
-servers_path = join(mc_path, 'servers')  # Path to all servers
-server_path = join(servers_path, server_selected[0])  # Path to currently selected server
-world_backups_path = join(mc_path, 'world_backups', server_selected[0])
-server_backups_path = join(mc_path, 'server_backups', server_selected[0])
-server_log_path = join(server_path, 'logs')
-server_log_file = join(server_log_path, 'latest.log')
+user_config_filepath = config['bot_config']['user_config_filepath']
+bot_config = config['bot_config']
+# ===== Import user set configs and updates config dictionary values.
+def update_vars(updated_config, update_json=True):
+    """Updates slime_vars global vars so other modules using currently selected server correctly."""
+    global selected_server, servers, config
+    config.update(updated_config)
+    for k, v in updated_config['bot_config'].items(): globals()[k] = v  # Makes them into global variables.
+    # Sets last set server selected, else falls back to example default.
+    try: selected_server = updated_config['servers'][selected_server]
+    except: selected_server = updated_config['servers']['example']
+    for k, v in selected_server.items(): globals()[k] = v
+    servers = updated_config['servers']
 
-# Don't edit this point onwards unless you know what you're doing.
-# ===== Import user's configs
-try: from user_config import *
-except: pass
+    if update_json:
+        with open(user_config_filepath, "w") as outfile: outfile.write(json.dumps(updated_config, indent=4))  # Updates json.
 
-bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-user_config_file = join(bot_src_path, 'user_config.py')
-slime_vars_file = join(bot_src_path, 'bot_files', 'slime_vars.py')
-bot_files_path = join(bot_src_path, 'bot_files')
-bot_log_file = join(bot_src_path, 'slime_bot.log')
 
-server_ip = server_address  # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
-mc_active_status = False  # If Minecraft server is running.
-mc_subprocess = None  # If using subprocess, this will be the Minecraft server.
+def update_bot_config(config_name, new_value):
+    config['bot_config'].update({config_name: new_value})
+    update_vars(config)
 
-if server_files_access is True: import shutil, fileinput, json
-
-# Disable certain commands depending on if you have local server file access.
-if_no_file_access = ['serverstart', 'serverrestart', 'autosaveon', 'autosaveoff', 'chatlog',
-                     'motd', 'oplist', 'properties', 'propertiesall', 'rcon', 'onlinemode', 'serverconnections',
-                     'restoreworldpanel', 'worldbackupslist', 'worldbackupnew', 'worldbackupdate', 'worldbackuprestore', 'worldbackupdelete', 'worldreset',
-                     'restoreserverpanel', 'serverbackupslist', 'serverbackupnew', 'serverbackupdate', 'serverbackupdelete', 'serverbackuprestore', 'serverreset', 'serverupdate', 'serverlog']
-if server_files_access: if_no_file_access = []  # Clearing the list means the bot won't disable the commands.
+update_vars(config, update_json=False)

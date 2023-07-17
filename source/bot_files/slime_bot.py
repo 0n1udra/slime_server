@@ -4,6 +4,7 @@ from bot_files.backend_functions import send_command, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
 from bot_files.components import buttons_dict
+from bot_files.extra import convert_to_bytes, update_from_user_config
 import bot_files.slime_vars as slime_vars
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
@@ -23,21 +24,24 @@ async def on_ready():
 
     # Will send startup messages to specified channel if given channel_id.
     if slime_vars.channel_id:
-        channel = bot.get_channel(slime_vars.channel_id)
+        try: channel_id = int(slime_vars.channel_id)
+        except: lprint(ctx, "ERROR: Invalid Channel ID")
+        channel = bot.get_channel(channel_id)
         backend.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
 
         await channel.send(f':white_check_mark: v{slime_vars.__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
-        await channel.send(f'Server: `{slime_vars.server_selected[0]}`')
-        # Shows some useful buttons
-        on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-        await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
+        if 'hidebanner' not in sys.argv:
+            await channel.send(f"Server: `{slime_vars.selected_server['server_name']}`")
+            # Shows some useful buttons
+            on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+            await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
 class Slime_Bot_Commands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
         # Shows player's online and ping info in bot's custom status text.
-        if slime_vars.enable_custom_status is True:
+        if slime_vars.enable_players_custom_status:
             self.custom_status_task.start()
             lprint(ctx, f"Custom status task started (interval: {slime_vars.custom_status_interval}m)")
 
@@ -62,16 +66,16 @@ class Slime_Bot_Commands(commands.Cog):
 
         await ctx.send(f"Bot Version: v{slime_vars.__version__} - {slime_vars.__date__}\nAuthor: {slime_vars.__author__}")
 
-
     @commands.command(aliases=['rbot', 'rebootbot', 'botreboot'])
     async def botrestart(self, ctx):
         """Restart this bot."""
+        global slime_vars
 
         await components.clear()
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
-        if slime_vars.use_subprocess:
+        if slime_vars.server_use_subprocess:
             if await server_status():
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
@@ -98,15 +102,10 @@ class Slime_Bot_Commands(commands.Cog):
             ?blog 15
         """
 
-        log_data = backend.server_log(file_path=slime_vars.bot_log_file, lines=lines, log_mode=True, return_reversed=True)
+        log_data = backend.server_log(file_path=slime_vars.bot_log_filepath, lines=lines, log_mode=True, return_reversed=True)
         await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
-            # Shows server log line by line.
-            i = 1
-            for line in log_data.split('\n'):
-                i += 1
-                await ctx.send(f"_({line.split(']', 1)[0][1:]})_ **{line.split(']', 1)[1].split('):', 1)[0][2:]}**: {line.split(']', 1)[1].split('):', 1)[1][1:]}")
-            await ctx.send("-----END-----")
+            await ctx.send(file=discord.File(convert_to_bytes(log_data), 'bot.log'))
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
@@ -187,7 +186,7 @@ class Slime_Bot_Commands(commands.Cog):
         """
 
         await ctx.send(f"Server IP: ||`{backend.get_public_ip()}`||")
-        await ctx.send(f"Alternative Address: ||`{slime_vars.server_address}`|| ({backend.ping_url()})")
+        await ctx.send(f"Alternative Address: ||`{slime_vars.server_address}`|| ({backend.ping_address()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
@@ -279,9 +278,7 @@ class Discord_Components_Funcs(commands.Cog):
                           ['OP', 'opadd player', '\U000023EB'], ['DEOP', 'opremove player', '\U000023EC'],
                           ['Reload', 'playerpanel', '\U0001F504']]
 
-
         b1 = await ctx.send('', view=components.new_buttons(player_buttons))
-
 
         components.data('current_components', [*components.data('current_components'), player_selection_panel, b1])
         lprint(ctx, 'Opened player panel')
@@ -325,7 +322,10 @@ class Discord_Components_Funcs(commands.Cog):
         if not target_player: target_player = components.data('teleport_target')  # if not provided player param
         await ctx.invoke(self.bot.get_command('teleport'), target_player, components.data('teleport_destination'))
 
-    # ===== Server panel, change server, download logs, restore/delete server and world backups
+    # ===== Bot/server settings, panels, change server, download logs, restore/delete server and world backups
+    @commands.command(aliases=['botsettings'])
+    async def botconfig(self, ctx): pass
+
     @commands.command(aliases=['cp', 'controls', 'panel'])
     async def controlpanel(self, ctx):
         """
@@ -334,7 +334,8 @@ class Discord_Components_Funcs(commands.Cog):
 
         await components.clear()
 
-        mode_select_options = [['Buttons', '_update_control_panel buttons', False, 'Show buttons for common actions'],  # label, value, is default, description
+        # label, value, is default, description
+        mode_select_options = [['Buttons', '_update_control_panel buttons', False, 'Show buttons for common actions'],
                                ['Servers', '_update_control_panel servers', False, 'Change server'],
                                ['Log Files', '_update_control_panel log_files', False, 'Download server log files'],
                                ['World Backups', '_update_control_panel world_backups', False, 'Backups of world folder'],
@@ -376,9 +377,9 @@ class Discord_Components_Funcs(commands.Cog):
         elif mode == 'servers':
             select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.servers_path, 'ds'))
             if not select_options: select_options, total_pages = [[['No Servers', '_', True]]], 1
-            buttons2 = [['Select', 'serverlist bmode', '\U0001F446'], ['Info', 'serverinfo bmode', '\U00002139'], ['Edit', 'serveredit interaction', '\U0000270F'],
-                       ['Copy', 'servercopy interaction', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete bmode', '\U0001F5D1']]
-                        #['Download latest .jar', '']]
+            buttons2 = [['Select', 'serverselect bmode', '\U0001F446'], ['Info', 'serverinfo bmode', '\U00002139'], ['Edit', 'serveredit interaction', '\U0000270F'],
+                       ['Copy', 'servercopy interaction', '\U0001F1E8'], ['New', 'servernew interaction', '\U0001F195'], ['Delete', 'serverdelete bmode', '\U0001F5D1'],
+                       ['Update', 'serverupdate', '\U0001F504']]
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
@@ -394,9 +395,9 @@ class Discord_Components_Funcs(commands.Cog):
             params = ["**Server Backups**", 'second_selected', 'Select Server Backup']
 
         elif mode == 'log_files':
-            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_log_path, 'f'))
+            select_options, total_pages = backend.group_items(backend.enum_dir(slime_vars.server_logs_path, 'f'))
             if not select_options: select_options = [[['No log files', '_', True]]]
-            buttons2 = [['Download', '_get_log_file', '\U0001F4BE']]
+            buttons2 = [['Download', '_get_log_filepath', '\U0001F4BE']]
             params = ["**Log Files**", 'second_selected', 'Select File']
 
         try:
@@ -422,7 +423,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         await components.clear()
         sserver = slime_vars.selected_server
-        select_options = [[sserver['server_name'], sserver['server_name'], True, sserver['description']]] + [[k, k, False, data['description']] for k, data in slime_vars.servers.items() if k not in sserver['server_name']]
+        select_options = [[sserver['server_name'], sserver['server_name'], True, sserver['server_description']]] + [[k, k, False, data['server_description']] for k, data in slime_vars.servers.items() if k not in sserver['server_name']]
         server_selection = await ctx.send("**Select Server**", view=components.new_selection(select_options, '_select_server', "Select Server"))
 
         buttons_components = []
@@ -444,7 +445,7 @@ class Discord_Components_Funcs(commands.Cog):
         if not log_selected: return  # If not log is selected from Discord selection component
         # Unzips file if it's a .gz file. Will delete file afterwards.
         if log_selected.endswith('.gz'):
-            with gzip.open(f'{slime_vars.server_log_path}/{log_selected}', 'rb') as f_in:
+            with gzip.open(f'{slime_vars.server_logs_path}/{log_selected}', 'rb') as f_in:
                 # Writes it in the bot source folder, doesn't matter because it'll be deleted.
                 with open(log_selected[:-3], 'wb') as f_out: f_out.write(f_in.read())
 
@@ -453,7 +454,7 @@ class Discord_Components_Funcs(commands.Cog):
                 else: os.remove(log_selected[:-3])
 
         else:
-            await ctx.send('', file=discord.File(f'{slime_vars.server_log_path}/{log_selected}'))
+            await ctx.send('', file=discord.File(f'{slime_vars.server_logs_path}/{log_selected}'))
             lprint(ctx, f"Fetched log file: {log_selected}")
 
     @commands.command(hidden=True)

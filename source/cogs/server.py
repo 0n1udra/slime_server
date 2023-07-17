@@ -2,24 +2,24 @@ import discord, asyncio, shutil, os
 from discord.ext import commands, tasks
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
-from bot_files.extra import get_parameter, update_csv, update_servers
+from bot_files.extra import get_parameter, update_csv, convert_to_bytes
 from os.path import join
 import bot_files.components as components
 import bot_files.slime_vars as slime_vars
 
-ctx = 'slime_bot.py'
+ctx = 'server.py'
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        if slime_vars.autosave_status is True:
+        if slime_vars.enable_autosave is True:
             self.autosave_task.start()
-            lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_min_interval}m)")
+            lprint(ctx, f"Autosave task started (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Servers, new, delete, editing, etc
-    @commands.command(aliases=['select', 'sselect', 'serverselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
-    async def serverlist(self, ctx, *name):
+    @commands.command(aliases=['select', 'sselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
+    async def serverselect(self, ctx, *name):
         """
         Select server to use all other commands on. Each server has their own world_backups and server_restore folders.
         This command is also used to list available servers.
@@ -31,24 +31,31 @@ class Server(commands.Cog):
             ?selectserver list
             ?selectserver papermc
         """
+        global slime_vars
 
         if 'bmode' in name:
             name = components.data('second_selected')
             if not name: return
         else: name = format_args(name)
-        if not name or 'list' in name:
+
+        if not name and 'list' not in name:
+            await ctx.send(f"**Current Server:** `{slime_vars.selected_server['server_name']}`")
+            await ctx.send(f"Use `?serverselect list` or `?ss list` to list servers, and `?ss server_name` to switch.")
+        elif 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
-            for server in slime_vars.servers.values():
-                # Shows server name, description, location, and start command.
-                embed.add_field(name=server[0], value=f"Description: {server[1]}\nLocation: `{slime_vars.mc_path}/{slime_vars.server_selected[0]}`\nStart Command: `{server[2]}`", inline=False)
+            for server, sdata in slime_vars.servers.items():
+                # Shows server name, description, location, and Launch Command.
+                embed.add_field(name=sdata['server_name'], value=f"Description: {sdata['server_description']}\nLocation: `{sdata['server_path']}`\nLaunch Command: `{sdata['server_launch_command']}`", inline=False)
             await ctx.send(embed=embed)
-            await ctx.send(f"**Current Server:** `{slime_vars.server_selected[0]}`")
+            await ctx.send(f"**Current Server:** `{slime_vars.selected_server['server_name']}`")
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in slime_vars.servers:
-            backend.server_selected = slime_vars.servers[name]
-            backend.server_path = join(slime_vars.mc_path, slime_vars.server_selected[0])
-            backend.edit_file('_server_selected', f" '{name}'", slime_vars.user_config_file)
-            await ctx.invoke(self.bot.get_command('botrestart'))
+            if not slime_vars.enable_players_custom_status:
+                await self.bot.change_presence(activity=discord.Activity(name=f"- {slime_vars.selected_server['server_name']}", type=1))
+            slime_vars.selected_server = slime_vars.servers[name]
+            slime_vars.config['bot_config']['selected_server'] = name
+            slime_vars.update_vars(slime_vars.config)
+            await ctx.send(f"**Selected Server:** {name}")
         else: await ctx.send("**ERROR:** Server not found.")
 
     @commands.command(aliases=['si'])
@@ -57,7 +64,7 @@ class Server(commands.Cog):
 
         server = get_parameter(name)
         data = slime_vars.servers[server]
-        fields = [['Name', data[0]], ['Description', data[1]], ['Start Command', f"`{data[2]}`"], ['Wait Time', data[3]]]
+        fields = [['Name', data['server_name']], ['server_description', data['server_description']], ['Launch Command', f"`{data['server_launch_command']}`"], ['Wait Time', data['startup_wait_time']]]
         await ctx.send(embed=components.new_embed(fields, 'Server Info'))
         await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
 
@@ -69,18 +76,22 @@ class Server(commands.Cog):
             await ctx.send("***Creating New Server...***")
 
             server_data = components.data('servernew')
-            server_name = server_data['name']
+            server_name = server_data['server_name']
+
             if server_name in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
 
-            try: backend.new_server(server_name)
+            # Tries to create new folder.
+            try: backend.new_server('server_name')
             except:
                 await ctx.send("**Error**: Issue creating server.")
                 lprint(ctx, f"ERROR: Creating server: {server_name}")
                 return
 
-            update_servers(server_data)
+            # Adds new server to servers dict.
+            new_server = slime_vars.config['servers']['example']
+            slime_vars.config['servers']['server_name'] = new_server
             await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
@@ -94,31 +105,35 @@ class Server(commands.Cog):
     async def serveredit(self, ctx, interaction):
         """Edit server information. Updates servers.csv file."""
 
+        # This only works with control panel right. This gets selected server's name.
         server_name = components.data('second_selected')
+        # Creates new server dict entry if selecting a folder with associated dict entry.
         if not server_name in slime_vars.servers:
-            slime_vars.servers[server_name] = [server_name, 'Description of server', slime_vars.server_launch_command, 30]
+            slime_vars.config['servers']['server_name'] = slime_vars.config['servers']['example']
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
+            old_server_data = slime_vars.config['servers'].pop('server_name')
+            # Renames folder if renamed.
             server_path = join(slime_vars.servers_path, server_name)
-            new_path = join(slime_vars.servers_path, new_data['name'])
+            new_path = join(slime_vars.servers_path, new_data['server_name'])
             await ctx.send("***Updating Server Info...***")
-            try: os.rename(server_path, new_path)
+            try:
+                os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
                 lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
                 return
 
-            slime_vars.servers.pop(server_name)
-            update_servers(new_data)
+            slime_vars.config['servers']['server_name'] = old_server_data.update(new_data)
 
-            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['name'])
+            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
             lprint(f"Edited server info {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
-        else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
+        else:  # Sends modal dialog to input info
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('server_name'), 'New Server', 'serveredit'))
 
     @commands.command(hidden=True)
     async def servercopy(self, ctx, interaction):
@@ -130,28 +145,27 @@ class Server(commands.Cog):
 
             await ctx.send("***Copying Server...***")
             # If server name already in use
-            if new_data['name'] in slime_vars.servers:
+            if new_data['server_name'] in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
 
             server_path = join(slime_vars.servers_path, server_name)
-            new_path = join(slime_vars.servers_path, new_data['name'])
+            new_path = join(slime_vars.servers_path, new_data['server_name'])
             try: shutil.copytree(server_path, new_path)
             except:
                 await ctx.send("**Error:** Issue copying server.")
                 lprint(f"ERROR: Issue copying server: {server_path} > {new_path}")
                 return
 
-            slime_vars.servers.pop(server_name)
-            update_servers(new_data)
+            slime_vars.config['servers'][new_data['server_name']] = new_data
 
-            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['name'])
+            await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
             lprint(f"ERROR: Copied server: {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('server_name'), 'Copy Server', 'servercopy'))
 
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
@@ -176,12 +190,12 @@ class Server(commands.Cog):
             await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
             return False
 
-        try: slime_vars.servers.pop(server_name)
+        try: slime_vars.servers.pop('server_name')
         except: pass
 
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server: " + to_delete)
-        update_servers()
+        slime_vars.config['servers']['server_name'].pop()
 
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
@@ -197,23 +211,24 @@ class Server(commands.Cog):
             ?sscan
         """
 
-        servers = slime_vars.servers.keys()
-        example_server = slime_vars.servers['example']
-        new_server_dict = {'name': example_server[0], 'description': example_server[1], 'command': example_server[2], 'wait': example_server[3]}
+        global slime_vars
         new_servers_found = False
+        example_server = slime_vars.config['servers']['example'].copy()
 
         await ctx.send("***Scanning for new servers...***")
         for folder in os.listdir(slime_vars.servers_path):
-            if folder not in servers:
-                new_server = new_server_dict
-                new_server['name'] = folder
-                update_servers(new_server)
-                # Need the for loop because not all dict values are strings.
+            if folder not in slime_vars.servers.keys():
+                # Will update server server_name and file paths.
+                slime_vars.config['servers'][folder] = backend.update_server_paths(example_server.copy(), folder)
+
                 await ctx.send(f"**added:** `{folder}`")
+                lprint(ctx, f"INFO: Added server: {folder}")
                 new_servers_found = True
 
         if not new_servers_found: await ctx.send("No new servers found.")
-        else: await ctx.invoke(self.bot.get_command('serverlist'))
+        else:
+            await ctx.invoke(self.bot.get_command('serverlist'))
+            slime_vars.update_vars(slime_vars.config)
 
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])
@@ -239,8 +254,8 @@ class Server(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
 
-        lprint(ctx, f"Updating {slime_vars.server_selected[0]}...")
-        await ctx.send(f"***Updating {slime_vars.server_selected[0]}...*** :arrows_counterclockwise:")
+        lprint(ctx, f"Updating {slime_vars.selected_server['server_name']}...")
+        await ctx.send(f"***Updating {slime_vars.selected_server['server_name']}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
         if await server_status() is not False:
@@ -298,48 +313,54 @@ class Server(commands.Cog):
         try: arg = int(arg)
         except: pass
         else:
-            slime_vars.autosave_min_interval = arg
-            backend.edit_file('autosave_min_interval', f" {arg}", slime_vars.user_config_file)
+            slime_vars.autosave_interval = arg
 
         # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
         if arg.lower() in backend.enable_inputs:
-            # Starts loop, updates autosave_status, edits slime_vars.py, output to log
+            # Starts loop, updates enable_autosave, edits slime_vars.py, output to log
             self.autosave_task.start()
-            slime_vars.autosave_status = True
-            backend.edit_file('autosave_status', ' True', slime_vars.user_config_file)
-            lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_min_interval}m)')
+            slime_vars.enable_autosave = True
+            lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_interval}m)')
         elif arg.lower() in backend.disable_inputs:
             self.autosave_task.cancel()
-            slime_vars.autosave_status = False
-            backend.edit_file('autosave_status', ' False', slime_vars.user_config_file)
+            slime_vars.enable_autosave = False
             lprint(ctx, 'Autosave: Disabled')
 
+        slime_vars.update_vars(slime_vars.config)
         status_msg = ':red_circle: **DISABLED** '
         if not await server_status(): status_msg = ":pause_button: **PAUSED**"
-        elif slime_vars.autosave_status: status_msg = ':green_circle: **ENABLED**'
+        elif slime_vars.enable_autosave: status_msg = ':green_circle: **ENABLED**'
 
-        fields = [['Status', f"{status_msg} | **{slime_vars.autosave_min_interval}**min"],
+        fields = [['Status', f"{status_msg} | **{slime_vars.autosave_interval}**min"],
                   ['Note', 'Auto save pauses if server unreachable (not same as disabled). Update server status with `?check` or `?stats`.']]
         await ctx.send(embed=components.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
         lprint(ctx, 'Fetched autosave information')
 
-    @tasks.loop(seconds=slime_vars.autosave_min_interval * 60)
+    @tasks.loop(seconds=slime_vars.autosave_interval * 60)
     async def autosave_task(self):
         """Automatically sends save-all command to server at interval of x minutes."""
 
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if await send_command('save-all', discord_msg=False):
-            lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_min_interval}m)")
+            lprint(ctx, f"Autosaved (interval: {slime_vars.autosave_interval}m)")
 
     # ===== Status/Info
+    @commands.command(aliases=['pingserver', 'ping'])
+    async def serverping(self, ctx):
+        """Uses ping command to see if server_address is reachable."""
+
+        await ctx.send('***Pinging Server...***')
+        response = backend.ping_address()
+        await ctx.send(response)
+
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
     async def servercheck(self, ctx):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        response = await send_command(' ', force_check=True, discord_msg=False, ctx=ctx)
+        response = await backend.server_status()
         if response:
             await ctx.send("**Server ACTIVE** :green_circle:")
         elif response is None:
@@ -354,11 +375,11 @@ class Server(commands.Cog):
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
-        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.server_selected[0]}\nDescription: {slime_vars.server_selected[1]}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
-                  ['Autosave', f"{'Enabled' if slime_vars.autosave_status is True else 'Disabled'} ({slime_vars.autosave_min_interval}min)"],
-                  ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_url()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.name}\nDescription: {slime_vars.description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+                  ['Autosave', f"{'Enabled' if slime_vars.enable_autosave is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
+                  ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_address()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
-                  ['Start Command', f"`{slime_vars.server_selected[2]}`"]]
+                  ['Launch Command', f"`{slime_vars.server_launch_command}`"]]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
 
         if status is not False:  # Only fetches players list if server online.
@@ -525,20 +546,24 @@ class Server(commands.Cog):
         """
 
         message = format_args(message)
-
-        if slime_vars.use_rcon:
+        motd_property = None
+        if slime_vars.server_use_rcon:
             motd_property = backend.server_motd()
         elif slime_vars.server_files_access:
-            backend.edit_file('motd', message)
+            backend.edit_file('motd', message)  # Doesn't edit message if message is blank
             motd_property = backend.edit_file('motd')
-        else: motd_property = '**ERROR:** Fetching server motd failed.'
+            if motd_property: motd_property = motd_property[1].strip()
+
+        if not motd_property:
+            await ctx.send('**Error:** Fetching server motd failed.')
+            return
 
         if message:
-            await ctx.send(f"Updated MOTD: `{motd_property[0].strip()}`")
-            lprint(ctx, "Updated MOTD: " + motd_property[1].strip())
+            await ctx.send(f"Updated MOTD: `{motd_property}`")
+            lprint(ctx, "Updated MOTD: " + motd_property)
         else:
-            await ctx.send(f"Current MOTD: `{motd_property[1]}`")
-            lprint(ctx, "Fetched MOTD: " + motd_property[1].strip())
+            await ctx.send(f"Current MOTD: `{motd_property}`")
+            lprint(ctx, "Fetched MOTD: " + motd_property)
 
     @commands.command(aliases=['serverrcon'])
     async def rcon(self, ctx, state=''):
@@ -576,11 +601,11 @@ class Server(commands.Cog):
         if not backend.server_start():
             await ctx.send("**Error:** Could not start Minecraft server.")
             return False
-        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{slime_vars.server_selected[0]}**\nStartup time: {slime_vars.server_selected[3]}s.")
+        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{slime_vars.selected_server['server_name']}**\nStartup time: {slime_vars.startup_wait_time}s.")
 
-        # checks if set custom wait time in server_selected list.
-        try: wait_time = int(slime_vars.server_selected[-1])
-        except: wait_time = slime_vars.default_wait_time
+        # checks if set custom wait time in selected_server list.
+        try: wait_time = int(slime_vars.selected_server['startup_wait_time'])
+        except: wait_time = slime_vars.startup_wait_time
         await ctx.send(f"***Fetching Status in {wait_time}s...***")
         await asyncio.sleep(wait_time)
 

@@ -1,11 +1,12 @@
-import discord, requests, asyncio, psutil, random
+import discord, json, platform, requests, asyncio, psutil, random, os
 from file_read_backwards import FileReadBackwards
+import bot_files.slime_vars as slime_vars
 from bs4 import BeautifulSoup
 from bot_files.extra import *
 from os.path import join
-import bot_files.slime_vars as slime_vars
-if slime_vars.use_rcon or slime_vars.enable_custom_status: import mctools
-if slime_vars.windows_cmdline_start: import subprocess
+import bot_files.components
+if slime_vars.server_use_rcon or slime_vars.enable_players_custom_status: import mctools
+if slime_vars.windows_cmdline_start or slime_vars.server_use_subprocess: import subprocess
 
 # Remove ANSI escape characters
 import re
@@ -17,6 +18,7 @@ bot = None
 server_active = None
 discord_channel = None
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
+update_servers_vars()
 
 
 # ========== Discord Bot
@@ -52,13 +54,14 @@ def server_log(match=None, match_list=[], file_path=None, lines=15, normal_read=
     Returns:
         log_data (str): Returns found match log line or multiple lines from log.
     """
+    global slime_vars
 
     # Parameter setups.
     if match is None: match = 'placeholder_match'
     match = match.lower()
     if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
     # Defaults file to server log.
-    if file_path is None: file_path = slime_vars.server_log_file
+    if file_path is None: file_path = slime_vars.server_log_filepath
     if not os.path.isfile(file_path): return False
 
     log_data = ''  # TODO: Possibly change return data to list for each newline
@@ -122,12 +125,12 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
     status_checker_command, random_number = slime_vars.status_checker_command, str(random.random())
     status_checker = status_checker_command + ' ' + random_number
 
-    if slime_vars.use_rcon is True:
+    if slime_vars.server_use_rcon is True:
         if server_ping():
             return [await server_rcon(command), None]
         else: status = False
 
-    elif slime_vars.use_subprocess is True:
+    elif slime_vars.server_use_subprocess is True:
         if mc_subprocess is not None:
             mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             mc_subprocess.stdin.flush()
@@ -140,7 +143,8 @@ async def send_command(command, force_check=False, skip_check=False, discord_msg
             # Checks if server is active in the first place by sending random number to be matched in server log.
             if slime_vars.server_use_screen:  # Using screen to run/send commands to MC server.
                 os.system(f'screen -S {slime_vars.screen_session_name} -X stuff "{status_checker}\n"')
-            else: os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
+            else:  # Send to Tmux pane.
+                os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{status_checker}" ENTER')
             await asyncio.sleep(slime_vars.command_buffer_time)
             if not server_log(random_number): status = False
 
@@ -232,20 +236,20 @@ def server_start():
 
     if slime_vars.server_use_screen is True:
         os.chdir(slime_vars.server_path)
-        if not os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_selected[2]}'):
+        if not os.system(f'screen -dmS "{slime_vars.screen_session_name}" {slime_vars.server_launch_command}'):
             return True
         else: return False
 
-    elif slime_vars.use_subprocess is True:
+    elif slime_vars.server_use_subprocess is True:
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            mc_subprocess = subprocess.Popen(slime_vars.server_selected[2].split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            mc_subprocess = subprocess.Popen(slime_vars.server_launch_command.split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         except: lprint(ctx, "Error server starting subprocess")
 
         if type(mc_subprocess) == subprocess.Popen: return True
 
-    # Start java server using subprocess and cmd's start command.
-    elif slime_vars.windows_cmdline_start:
+    # Start java server using subprocess and cmd's Launch Command.
+    elif slime_vars.windows_compatibility is True and platform.system() == 'Windows':
         os.chdir(slime_vars.server_path)
         subprocess.Popen(slime_vars.windows_cmdline_start + slime_vars.server_launch_command, shell=True)
 
@@ -253,7 +257,7 @@ def server_start():
         os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "cd {slime_vars.server_path}" ENTER')
 
         # Starts server in tmux pane.
-        if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{slime_vars.server_selected[2]}" ENTER'):
+        if not os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_minecraft_pane} "{slime_vars.server_launch_command}" ENTER'):
             return True
     else: return False
 
@@ -268,8 +272,8 @@ def server_version():
     # Manual override of server version.
     if version := slime_vars.server_version: return version
 
-    if slime_vars.use_rcon is True:
-        try: return server_ping()['version']['name']
+    if slime_vars.server_use_rcon is True:
+        try: return server_ping()['version']['server_name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
         try: return server_log('server version').split('version')[1].strip()
@@ -287,8 +291,8 @@ def server_motd():
     if slime_vars.server_files_access is True:
         data = edit_file('motd')
         if data: return data[1]
-    elif slime_vars.use_rcon is True:
-        return remove_ansi(server_ping()['description'])
+    elif slime_vars.server_use_rcon is True:
+        return remove_ansi(server_ping()['server_description'])
     else: return "N/A"
 
 def server_ping():
@@ -301,6 +305,7 @@ def server_ping():
 
     global server_active
 
+    if not slime_vars.server_address: return False
     try:
         ping = mctools.PINGClient(slime_vars.server_address, slime_vars.server_port)
         stats = ping.get_stats()
@@ -336,7 +341,7 @@ def download_latest():
     os.chdir(slime_vars.mc_path)
     jar_download_url = version_info = ''
 
-    if 'vanilla' in slime_vars.server_selected[0].lower():
+    if 'vanilla' in slime_vars.selected_server['server_name'].lower():
         def request_json(url): return json.loads(requests.get(url).text)
 
         # Finds latest release from manifest and gets required data.
@@ -347,7 +352,7 @@ def download_latest():
                 jar_download_url = request_json(i['url'])['downloads']['server']['url']
                 break  # Breaks loop on firest release found (should be latest).
 
-    if 'papermc' in slime_vars.server_selected[0].lower():
+    if 'papermc' in slime_vars.selected_server['server_name'].lower():
         base_url = 'https://papermc.io/api/v2/projects/paper'
 
         # Extracts required data for download URL. PaperMC API: https://papermc.io/api/docs/swagger-ui/index.html?configUrl=/api/openapi/swagger-config
@@ -355,7 +360,7 @@ def download_latest():
         latest_version = get_data('versions')[-1]  # Gets latest Minecraft version (e.g. 1.18.2).
         latest_build = get_data('builds', f'/versions/{latest_version}')[-1]  # Get PaperMC Paper latest build (277).
         # Get file name to download (paper-1.18.2-277.jar).
-        latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['name']
+        latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['server_name']
         # Full download URL: https://papermc.io/api/v2/projects/paper/versions/1.18.2/builds/277/downloads/paper-1.18.2-277.jar
         jar_download_url = f'{base_url}/versions/{latest_version}/builds/{latest_build}/downloads/{latest_jar}'
 
@@ -395,15 +400,17 @@ async def get_players():
             if 'There are' in i: break
         output = output[:2]
         if not output: return False
-        text = output[1].split(':')[-2].strip()
-        player_names = output[0].split(':')[-1].split(',')
+        # Parses data from log output. Ex: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+        text = output[1].split(':')[-2].strip()  
+        player_names = output[0].split(':')[-1].split(',')  
         return player_names, text
     else:
         response = await send_command("list", discord_msg=False)
         if not response: return False
 
         # Gets data from RCON response or reads server log for line containing player names.
-        if slime_vars.use_rcon is True: log_data = response[0]
+        if slime_vars.server_use_rcon is True: log_data = response[0]
+
         else:
             await asyncio.sleep(1)
             log_data = server_log('players online')
@@ -419,9 +426,9 @@ async def get_players():
         if len(player_names.strip()) < 5: return None
         else:
 
-            player_names = [f"{i.strip()[:-4]}\n" if slime_vars.use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+            player_names = [f"{i.strip()[:-4]}\n" if slime_vars.server_use_rcon else f"{i.strip()}" for i in (log_data[-1]).split(',')]
             # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-            # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+            # player_names_discord = [f"`{i.strip()[:-4]}`\n" if server_use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
             new = []
             for i in player_names:
                 x = reaesc.sub('', i).strip().replace('[3', '')
@@ -458,7 +465,7 @@ def new_server(name):
     os.mkdir(new_folder)
     return new_folder
 
-def new_backup(new_name, src, dst, exact=slime_vars.exact_foldername):
+def new_backup(new_name, src, dst, exact=slime_vars.exact_world_foldername):
     """
     Create a new world or server backup, by copying and renaming folder.
 
