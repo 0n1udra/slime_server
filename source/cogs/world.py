@@ -72,7 +72,7 @@ class Basics(commands.Cog):
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
-    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat'])
+    @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat', 'clog'])
     async def chatlog(self, ctx, *args):
         """
         Shows chat log. Does not include whispers.
