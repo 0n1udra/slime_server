@@ -5,6 +5,8 @@ import bot_files.components as components
 ctx = 'extra.py'
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
+slime_proc = slime_pid = None  # If using nohup to run bot in background.
+slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
 def lprint(ctx, msg):
     """Prints and Logs events in file."""
@@ -194,8 +196,19 @@ def update_csv(csv_file, new_data=None):
 def update_servers(new_data=None):
     if new_data:
         slime_vars.servers[new_data['name']] = [new_data['name'], new_data['description'], new_data['command'], new_data['wait']]
+def status_slime_proc():
+    """Get bot process name and pid."""
 
-    update_csv('servers.csv', [i for i in slime_vars.servers.values()])
+    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
+        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
+
+def kill_slime_proc():
+    """Kills bot process."""
+
+    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
+        proc.kill()
+        lprint(ctx, "INFO: Bot process killed")
+    else: lprint(ctx, "ERROR: Bot process not found")
 
 def get_from_index(path, index, mode):
     """
