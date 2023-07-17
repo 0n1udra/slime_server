@@ -186,13 +186,12 @@ def new_embed(fields, title):
 def server_modal_fields(server=None):
     global slime_vars
     if not server: server = slime_vars.selected_server['server_name']
-    print(server)
     data = slime_vars.servers[server]
 
     # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
     # Limited to 5 components in modal
-    return [['text', 'Server Name', 'Server Name', 'Name of new server', data['server_name'], False, True, 50],
-            ['text', 'Description', 'description', 'Add description', data['server_description'], True, True, 500],
+    return [['text', 'Server Name', 'server_name', 'Name of new server', data['server_name'], False, True, 50],
+            ['text', 'Description', 'server_description', 'Add description', data['server_description'], True, True, 500],
             ['text', 'Server Domain/IP', 'server_address', 'Server domain or IP address', data['server_address'], False, True, 500],
-            ['text', 'Launch Command', 'command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
-            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]
+            ['text', 'Launch Command', 'server_launch_command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
+            ['text', 'Wait Time (server startup in seconds)', 'startup_wait_time', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]

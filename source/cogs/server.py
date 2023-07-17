@@ -61,6 +61,7 @@ class Server(commands.Cog):
     @commands.command(aliases=['si'])
     async def serverinfo(self, ctx, *name):
         """Embed of server information."""
+        global slime_vars
 
         server = get_parameter(name)
         data = slime_vars.servers[server]
@@ -83,15 +84,17 @@ class Server(commands.Cog):
                 return
 
             # Tries to create new folder.
-            try: backend.new_server('server_name')
+            try: backend.new_server(server_name)
             except:
                 await ctx.send("**Error**: Issue creating server.")
                 lprint(ctx, f"ERROR: Creating server: {server_name}")
                 return
 
             # Adds new server to servers dict.
-            new_server = slime_vars.config['servers']['example']
-            slime_vars.config['servers']['server_name'] = new_server
+            new_server = slime_vars.config['servers']['example'].copy()
+            new_server.update(server_data)
+            slime_vars.config['servers'][server_name] = new_server
+            slime_vars.update_vars(slime_vars.config)
             await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
@@ -99,7 +102,7 @@ class Server(commands.Cog):
             await ctx.send("Use `?selectserver` to use bot commands on new server.")
 
         else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(), 'New Server', 'servernew'))
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('example'), 'New Server', 'servernew'))
 
     @commands.command(hidden=True)
     async def serveredit(self, ctx, interaction):
@@ -113,9 +116,11 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            old_server_data = slime_vars.config['servers'].pop('server_name')
+            server_data = slime_vars.config['servers'].pop('server_name')
             # Renames folder if renamed.
             server_path = join(slime_vars.servers_path, server_name)
+            slime_vars.config['servers'].update(server_data)
+            slime_vars.update_vars(slime_vars.config)
             new_path = join(slime_vars.servers_path, new_data['server_name'])
             await ctx.send("***Updating Server Info...***")
             try:
@@ -125,15 +130,13 @@ class Server(commands.Cog):
                 lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
                 return
 
-            slime_vars.config['servers']['server_name'] = old_server_data.update(new_data)
-
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
             lprint(f"Edited server info {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:  # Sends modal dialog to input info
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('server_name'), 'New Server', 'serveredit'))
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
 
     @commands.command(hidden=True)
     async def servercopy(self, ctx, interaction):
@@ -157,15 +160,18 @@ class Server(commands.Cog):
                 lprint(f"ERROR: Issue copying server: {server_path} > {new_path}")
                 return
 
+            server_data = slime_vars.servers['example'].copy()
+            server_data.update(new_data)
             slime_vars.config['servers'][new_data['server_name']] = new_data
+            slime_vars.update_vars(slime_vars.config)
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
-            lprint(f"ERROR: Copied server: {server_path} > {new_path}")
+            lprint(ctx, f"ERROR: Copied server: {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('server_name'), 'Copy Server', 'servercopy'))
+            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
 
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
@@ -195,7 +201,10 @@ class Server(commands.Cog):
 
         await ctx.send(f"**Server Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server: " + to_delete)
-        slime_vars.config['servers']['server_name'].pop()
+        if server_name in slime_vars.servers:
+            slime_vars.config['servers'].pop(server_name)
+            slime_vars.update_vars(slime_vars.config)
+
 
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
