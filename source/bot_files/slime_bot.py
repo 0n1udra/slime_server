@@ -202,7 +202,7 @@ class Slime_Bot_Commands(commands.Cog):
         embed = discord.Embed(title='Useful Websites :computer:')
 
         # Creates embed of links from useful_websites dictionary from slime_vars.py.
-        for name, url in slime_vars.useful_websites.items():
+        for name, url in slime_vars.selected_server['useful_websites'].items():
             embed.add_field(name=name, value=url, inline=False)
 
         await ctx.send(embed=embed)
@@ -211,15 +211,24 @@ class Slime_Bot_Commands(commands.Cog):
     async def setchannel(self, ctx):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
+        slime_vars.update_bot_config('channel_id', ctx.channel.id)
         await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        backend.edit_file('channel_id', ' ' + str(ctx.channel.id), slime_vars.user_config_file)
+        lprint(ctx, f"Set Channel ID: {ctx.channel.id}")
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
         """Resets channel_id variable to None."""
 
-        await ctx.send("Cleared `channel_id`")
-        backend.edit_file('channel_id', ' None', slime_vars.user_config_file)
+        slime_vars.update_bot_config('channel_id', None)
+        await ctx.send("Cleared Channel ID")
+        lprint(ctx, "Cleared Channel ID")
+
+    @commands.command(aliases=['config', 'reloadconfig'])
+    async def updateconfig(self, ctx):
+        global slime_vars
+        update_from_user_config(slime_vars.config)
+        slime_vars.update_vars(slime_vars.config)
+        await ctx.send(f"Updated configs from: `{slime_vars.user_config_filepath}`\nMay have to reboot bot for some changes to take effect.")
 
 class Discord_Components_Funcs(commands.Cog):
     def __init__(self, bot): self.bot = bot
