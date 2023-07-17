@@ -496,8 +496,16 @@ class Discord_Components_Funcs(commands.Cog):
 async def setup(bot):
     for i in os.listdir('./cogs'):
         if i.endswith('.py'):
-            await bot.load_extension(f"cogs.{i[:-3]}")
+            try: await bot.load_extension(f"cogs.{i[:-3]}")
+            except commands.ExtensionAlreadyLoaded: pass
+            except commands.ExtensionNotFound:
+                lprint(ctx, f"ERROR: Unable to load cog: {i}")
+                exit()
+            except:
+                lprint(ctx, "ERROR: Error with loading cogs.")
+                exit()
+
     await bot.add_cog(Slime_Bot_Commands(bot))
     await bot.add_cog(Discord_Components_Funcs(bot))
 
-for command in slime_vars.if_no_file_access: bot.remove_command(command)
+
