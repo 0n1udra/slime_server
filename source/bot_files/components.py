@@ -100,6 +100,12 @@ class Discord_Select(discord.ui.Select):
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
             await ctx.invoke(bot.get_command(command), *params)
 
+        # This is for ?buttonspanel select server component.
+        if custom_id == '_select_server':
+            slime_vars.selected_server = slime_vars.servers[value]
+            slime_vars.config['bot_config']['selected_server'] = value
+            slime_vars.update_vars(slime_vars.config)
+
 class Discord_Button(discord.ui.Button):
     """
     Create bmode from received list containing label, custom_id, and emoji.

@@ -418,13 +418,20 @@ class Discord_Components_Funcs(commands.Cog):
     @commands.command(aliases=['buttons', 'b'])
     async def buttonspanel(self, ctx):
         """Shows all the buttons!"""
+        global slime_vars
 
+        await components.clear()
+        sserver = slime_vars.selected_server
+        select_options = [[sserver['server_name'], sserver['server_name'], True, sserver['description']]] + [[k, k, False, data['description']] for k, data in slime_vars.servers.items() if k not in sserver['server_name']]
+        server_selection = await ctx.send("**Select Server**", view=components.new_selection(select_options, '_select_server', "Select Server"))
+
+        buttons_components = []
         for k, v in components.buttons_dict.items():
             # Hides server/world backup commands if there's no local file access.
             if slime_vars.server_files_access is False and 'backups' in k: continue
-
-            try: await ctx.send(content=k.capitalize(), view=components.new_buttons(v))
+            try: buttons_components.append(await ctx.send(content=k.capitalize(), view=components.new_buttons(v)))
             except: pass
+        components.data('current_components', [server_selection, buttons_components])
 
     @commands.command(hidden=True)
     async def _close_panel(self, ctx): await components.clear()
