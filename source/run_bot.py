@@ -61,13 +61,14 @@ def setup_config():
 
     slime_vars.update_vars({'bot_config': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs}})
     try: open(user_config_filepath, 'a').close()
-    except: lprint("ERROR: Unable to create 'user_config.json' file.")
+    except: lprint(ctx, "ERROR: Unable to create 'user_config.json' file.")
     else:  # Creates new json
         with open(user_config_filepath, "w") as outfile: outfile.write(json.dumps(slime_vars.config, indent=4))
         lprint(ctx, "INFO: New user_config.json created.")
 
 
 def _start_bot():
+    """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
     if os.path.isfile(slime_vars.bot_token_filepath):
         with open(slime_vars.bot_token_filepath, 'r') as file:
             TOKEN = file.readline()
@@ -79,6 +80,7 @@ def _start_bot():
     bot.run(TOKEN)
 
 def start_bot():
+    """Uses different methods of launching Discord bot depending on config"""
     if slime_vars.use_tmux is True:
         no_tmux = False
         # Sources pyenv if set in slime_vars.
@@ -96,12 +98,12 @@ def start_bot():
                 lprint(ctx, f"ERROR: {slime_vars.pyenv_activate_command}")
             else: lprint(ctx, f"INFO: Activated pyenv")
 
-        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} 'python3 run_bot.py _startbot {beta_mode}' ENTER"):
+        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} '{slime_vars.bot_launch_command} {beta_mode}' ENTER"):
             lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
             _start_bot()
         else: lprint(ctx, "INFO: Started slime_bot.py")
 
-    else: _start_bot()
+    else: _start_bot()  # Starts inline if not using tmux.
 
 def setup_directories():
     """Create necessary directories."""
