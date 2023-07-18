@@ -1,10 +1,9 @@
-import discord, json, platform, requests, asyncio, psutil, random, os
+import json, platform, requests, asyncio, random, os
+from os.path import join
 from file_read_backwards import FileReadBackwards
 import bot_files.slime_vars as slime_vars
 from bs4 import BeautifulSoup
 from bot_files.extra import *
-from os.path import join
-import bot_files.components
 if slime_vars.server_use_rcon or slime_vars.enable_players_custom_status: import mctools
 if slime_vars.windows_cmdline_start or slime_vars.server_use_subprocess: import subprocess
 
@@ -273,7 +272,7 @@ def server_version():
     if version := slime_vars.server_version: return version
 
     if slime_vars.server_use_rcon is True:
-        try: return server_ping()['version']['server_name']
+        try: return server_ping()['version']['name']
         except: return 'N/A'
     elif slime_vars.server_files_access is True:
         try: return server_log('server version').split('version')[1].strip()
@@ -360,7 +359,7 @@ def download_latest():
         latest_version = get_data('versions')[-1]  # Gets latest Minecraft version (e.g. 1.18.2).
         latest_build = get_data('builds', f'/versions/{latest_version}')[-1]  # Get PaperMC Paper latest build (277).
         # Get file name to download (paper-1.18.2-277.jar).
-        latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['server_name']
+        latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['name']
         # Full download URL: https://papermc.io/api/v2/projects/paper/versions/1.18.2/builds/277/downloads/paper-1.18.2-277.jar
         jar_download_url = f'{base_url}/versions/{latest_version}/builds/{latest_build}/downloads/{latest_jar}'
 
