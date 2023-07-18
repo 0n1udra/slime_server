@@ -22,7 +22,11 @@ def setup_config():
             config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if result := str(config_input).lower() in ['y', 'yes']:
                 config[variable] = result
-            else: config[variable] = input_type(config_input) if input_type else config_input  # Converts to needed type.
+            else:
+                try: config[variable] = input_type(config_input) if input_type else config_input  # Converts to needed type.
+                except:
+                    config[variable] = default_value
+                    print("Using default:", default_value)
         return config
 
     bot_config_prompts = {
@@ -56,10 +60,12 @@ def setup_config():
     # Updates dictionaries and returns new dictionary to update slime_vars.config
     updated_bot_configs = slime_vars.config['bot_config']
     updated_bot_configs.update(bot_configs)
-    updated_server_configs = slime_vars.config['servers']['example'].copy()
+    example_server_configs = slime_vars.config['servers']['example'].copy()
+    updated_server_configs = example_server_configs.copy()
     updated_server_configs.update(server_configs)
 
-    slime_vars.update_vars({'bot_config': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs}})
+    slime_vars.update_vars({'bot_config': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs,
+                                                                           'example': example_server_configs}})
     try: open(user_config_filepath, 'a').close()
     except: lprint(ctx, "ERROR: Unable to create 'user_config.json' file.")
     else:  # Creates new json
