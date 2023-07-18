@@ -271,16 +271,17 @@ def delete_dir(backup):
 
     shutil.rmtree(backup)
 
-def update_server_paths(server, server_name):
+def update_server_paths(server_dict, server_name, text_to_replace=None):
     """
     Replaces 'SELECTED_SERVER' in server dict values if key has 'path' in it.
     """
-    server['server_name'] = server_name
-    for k, v in server.items():
+    text_to_replace = 'SELECTED_SERVER'
+    server_dict['server_name'] = server_name
+    for k, v in server_dict.items():
         if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
-            server[k] = v.replace('SELECTED_SERVER', server_name)
+            server_dict[k] = v.replace(text_to_replace, server_name)
 
-    return server
+    return server_dict
 
 def update_servers_vars():
     """Checks if there's new configs in 'example' and updates the other servers with defaults."""
