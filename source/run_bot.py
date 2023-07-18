@@ -19,7 +19,7 @@ def setup_config():
         for variable, prompt in config_prompts.items():
             default_value = default_configs.get(variable, "''")
             input_type = type(default_value)
-            config_input = input(f"{prompt} [{default_value}]: ") or default_value  # Uses default value if enter nothing.
+            config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if result := str(config_input).lower() in ['y', 'yes']:
                 config[variable] = result
             else: config[variable] = input_type(config_input) if input_type else config_input  # Converts to needed type.
