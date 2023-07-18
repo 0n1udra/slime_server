@@ -340,7 +340,12 @@ def download_latest():
     os.chdir(slime_vars.mc_path)
     jar_download_url = version_info = ''
 
-    if 'vanilla' in slime_vars.selected_server['server_name'].lower():
+    def check(type):
+        """Checks if specific keywords in server name and description."""
+        sserver = slime_vars.selected_server
+        return True if type in (sserver['name'].lower(), sserver['description'].lower()) else False
+
+    if check('vanilla'):
         def request_json(url): return json.loads(requests.get(url).text)
 
         # Finds latest release from manifest and gets required data.
@@ -351,7 +356,7 @@ def download_latest():
                 jar_download_url = request_json(i['url'])['downloads']['server']['url']
                 break  # Breaks loop on firest release found (should be latest).
 
-    if 'papermc' in slime_vars.selected_server['server_name'].lower():
+    if check('papermc'):
         base_url = 'https://papermc.io/api/v2/projects/paper'
 
         # Extracts required data for download URL. PaperMC API: https://papermc.io/api/docs/swagger-ui/index.html?configUrl=/api/openapi/swagger-config
