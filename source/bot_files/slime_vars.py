@@ -1,8 +1,8 @@
 import discord, getpass, os, json
 from os.path import join
 
-__version__ = "8.0"
-__date__ = '12/07/2023'
+__version__ = "8.0.1"
+__date__ = '17/07/2023'
 __author__ = "github.com/0n1udra"
 __license__ = "GPL 3"
 __status__ = "Development"

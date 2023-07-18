@@ -1,9 +1,9 @@
 import discord, asyncio, shutil, os
-from discord.ext import commands, tasks
-from bot_files.backend_functions import send_command, format_args, server_status, lprint
-import bot_files.backend_functions as backend
-from bot_files.extra import get_parameter, update_csv, convert_to_bytes
 from os.path import join
+from discord.ext import commands, tasks
+import bot_files.backend_functions as backend
+from bot_files.backend_functions import send_command, format_args, server_status, lprint
+from bot_files.extra import get_parameter, convert_to_bytes
 import bot_files.components as components
 import bot_files.slime_vars as slime_vars
 
@@ -63,8 +63,19 @@ class Server(commands.Cog):
         """Embed of server information."""
         global slime_vars
 
-        server = get_parameter(name)
-        data = slime_vars.servers[server]
+        server_name = get_parameter(name)
+
+        # if get_parameter() returning bmode tuple, means no server was selected or server name given
+        if 'bmode' in server_name:
+            await ctx.send("No info to get.")
+            return
+
+        if server_name not in slime_vars.servers:
+            # TODO simplify os isdir and join into function
+            if os.path.isdir(join(slime_vars.servers_path, server_name)):
+                await ctx.send("Server folder found, but no server configs.\nUse the Edit button to create a new config entry for it.")
+                return
+        data = slime_vars.servers[server_name]
         fields = [['Name', data['server_name']], ['server_description', data['server_description']], ['Launch Command', f"`{data['server_launch_command']}`"], ['Wait Time', data['startup_wait_time']]]
         await ctx.send(embed=components.new_embed(fields, 'Server Info'))
         await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
@@ -76,26 +87,32 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             await ctx.send("***Creating New Server...***")
 
-            server_data = components.data('servernew')
-            server_name = server_data['server_name']
+            data_from_modal = components.data('servernew')
+            new_server_name = data_from_modal['server_name']
 
-            if server_name in slime_vars.servers:
+            if new_server_name in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
 
             # Tries to create new folder.
-            try: backend.new_server(server_name)
-            except:
-                await ctx.send("**Error**: Issue creating server.")
-                lprint(ctx, f"ERROR: Creating server: {server_name}")
-                return
+            if os.path.isdir(join(slime_vars.servers_path, new_server_name)):
+                await ctx.send(f"Folder `{new_server_name}` already exists. Will create new servers entry in config.")
+            else:
+                try: backend.new_server(new_server_name)
+                except:
+                    await ctx.send("**Error**: Issue creating server.")
+                    lprint(ctx, f"ERROR: Creating server: {new_server_name}")
+                    return
 
             # Adds new server to servers dict.
             new_server = slime_vars.config['servers']['example'].copy()
-            new_server.update(server_data)
-            slime_vars.config['servers'][server_name] = new_server
+            new_server.update(data_from_modal)
+            # Updates server paths, replaces SELECTED_SERVER section in the paths with server name.
+            new_server = backend.update_server_paths(new_server, new_server_name)
+            # Adds server to config, then updates slime_vars globals so bot can use them without restart, then updates json.
+            slime_vars.config['servers'][new_server_name] = new_server
             slime_vars.update_vars(slime_vars.config)
-            await ctx.invoke(self.bot.get_command('serverinfo'), server_name)
+            await ctx.invoke(self.bot.get_command('serverinfo'), new_server_name)
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
@@ -110,32 +127,50 @@ class Server(commands.Cog):
 
         # This only works with control panel right. This gets selected server's name.
         server_name = components.data('second_selected')
-        # Creates new server dict entry if selecting a folder with associated dict entry.
-        if not server_name in slime_vars.servers:
-            slime_vars.config['servers']['server_name'] = slime_vars.config['servers']['example']
+        if not server_name:
+            await ctx.send("No server selected.")
+            return
         if interaction == 'submitted':
             new_data = components.data('serveredit')
 
-            server_data = slime_vars.config['servers'].pop('server_name')
-            # Renames folder if renamed.
             server_path = join(slime_vars.servers_path, server_name)
-            slime_vars.config['servers'].update(server_data)
-            slime_vars.update_vars(slime_vars.config)
             new_path = join(slime_vars.servers_path, new_data['server_name'])
-            await ctx.send("***Updating Server Info...***")
-            try:
-                os.rename(server_path, new_path)
+            # Renames folder if name changed
+            try: os.rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
                 lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
                 return
+            await ctx.send("***Updating Server Info...***")
+
+            example_server = slime_vars.servers['example'].copy()
+            # Pops current server data, then updates it with new data.
+            # Using .pop() so it effectively acts like deleting a server and then adding a new one.
+            # Because if user changes the server name, it will create a new server but won't delete the old.
+            to_replace = server_name  # Part of server paths to replace with new name
+            if server_name in slime_vars.servers:
+                server_data = slime_vars.config['servers'].pop(server_name)
+            else:
+                server_data = example_server
+                to_replace = None  # If using example server, will replace SELECTED_SERVER text with server name
+            server_data.update(new_data)
+            # Updates old paths by finding and replacing server name in path
+            server_data = backend.update_server_paths(server_data, server_name, to_replace)
+            # Adds server and updates slime_vars globals and json file
+            slime_vars.config['servers'][server_name] = server_data
+            slime_vars.update_vars(slime_vars.config)
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
-            lprint(f"Edited server info {server_path} > {new_path}")
+            lprint(ctx, f"Edited server info {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:  # Sends modal dialog to input info
+            # Creates server config if not exist. NOTE: Does not update json file unless modal is submitted and accepted.
+            if server_name not in slime_vars.servers:
+                slime_vars.servers[server_name] = slime_vars.servers['example'].copy()
+                slime_vars.servers[server_name]['server_name'] = server_name
+
             modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
 
     @commands.command(hidden=True)
@@ -143,25 +178,32 @@ class Server(commands.Cog):
         """Copy server. Only works from control panel for now."""
 
         server_name = components.data('second_selected')
+
+        if not server_name:
+            await ctx.send("No server selected.")
+            return
+
         if interaction == 'submitted':
             new_data = components.data('servercopy')
 
-            await ctx.send("***Copying Server...***")
             # If server name already in use
             if new_data['server_name'] in slime_vars.servers:
                 await ctx.send("Server name already used.")
                 return
 
+            await ctx.send("***Copying Server...***")
             server_path = join(slime_vars.servers_path, server_name)
             new_path = join(slime_vars.servers_path, new_data['server_name'])
             try: shutil.copytree(server_path, new_path)
             except:
                 await ctx.send("**Error:** Issue copying server.")
-                lprint(f"ERROR: Issue copying server: {server_path} > {new_path}")
+                lprint(ctx, f"ERROR: Issue copying server: {server_path} > {new_path}")
                 return
 
+            # Makes a copy of default configs, then updates them with user input
             server_data = slime_vars.servers['example'].copy()
             server_data.update(new_data)
+            # Adds new server then updates slime_vars globals and json file.
             slime_vars.config['servers'][new_data['server_name']] = new_data
             slime_vars.update_vars(slime_vars.config)
 
@@ -187,6 +229,9 @@ class Server(commands.Cog):
         """
 
         server_name = get_parameter(name)
+        if not server_name:
+            await ctx.send("No server selected.")
+            return
         to_delete = join(slime_vars.servers_path, server_name)
 
         await ctx.send("***Deleting Server...***")
@@ -204,8 +249,6 @@ class Server(commands.Cog):
         if server_name in slime_vars.servers:
             slime_vars.config['servers'].pop(server_name)
             slime_vars.update_vars(slime_vars.config)
-
-
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
@@ -226,9 +269,11 @@ class Server(commands.Cog):
 
         await ctx.send("***Scanning for new servers...***")
         for folder in os.listdir(slime_vars.servers_path):
-            if folder not in slime_vars.servers.keys():
+            # Checks if server already in 'slime_vars.servers' dict, and if 'folder' is actually a folder.
+            if folder not in slime_vars.servers.keys() and os.path.isdir(join(slime_vars.servers_path, folder)):
                 # Will update server server_name and file paths.
                 slime_vars.config['servers'][folder] = backend.update_server_paths(example_server.copy(), folder)
+                slime_vars.update_vars(slime_vars.config)  # Updates global vars and json file
 
                 await ctx.send(f"**added:** `{folder}`")
                 lprint(ctx, f"INFO: Added server: {folder}")
@@ -236,7 +281,7 @@ class Server(commands.Cog):
 
         if not new_servers_found: await ctx.send("No new servers found.")
         else:
-            await ctx.invoke(self.bot.get_command('serverlist'))
+            await ctx.invoke(self.bot.get_command('serverselect'))  # Shows all servers in Discord embed
             slime_vars.update_vars(slime_vars.config)
 
     # ===== Version
@@ -384,7 +429,7 @@ class Server(commands.Cog):
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
-        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.name}\nDescription: {slime_vars.description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.server_name}\nDescription: {slime_vars.server_description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
                   ['Autosave', f"{'Enabled' if slime_vars.enable_autosave is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
                   ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_address()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
                   ['Location', f"`{slime_vars.server_path}`"],
