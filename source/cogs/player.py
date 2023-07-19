@@ -1,9 +1,10 @@
 import asyncio, discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
 import bot_files.slime_vars as slime_vars
+from bot_files.extra import convert_to_bytes
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -11,14 +12,27 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['p', 'playerlist', 'listplayers', 'list'])
     async def players(self, ctx, *args):
-        """Show list of online players."""
+        """
+        Show list of online players.
+        NOTE: If getting player locations might take awhile if a lot of online players. Needs to use /data get entity command to get coords.
 
+        Args:
+            args optional: Just used to catch possible 'location' arg.
+
+        Discord Args:
+            location optional: Uses '/get entity data' command to get xyz coords.
+
+        Usage:
+            ?players
+            ?p location
+        """
+
+        await ctx.send("***Fetching Player List...***")
         player_list = await backend.get_players()
         if player_list is False:
             await ctx.send("**Error:** Unable to fetch player list.")
             return
 
-        await ctx.send("***Fetching Player List...***")
         if not player_list:
             await ctx.send(f"No players online. ¯\_(ツ)_/¯")
         else:
@@ -26,14 +40,13 @@ class Player(commands.Cog):
             for i in player_list[0]:
                 if 'location' in args:
                     player_location = await backend.get_coords(i)
-                    _player_list.append(f'**{i.strip()}** `{player_location if player_location else "Location N/A"}`\n')
+                    _player_list.append(f'{i.strip()} {player_location if player_location else "Location N/A"}\n')
                 else: _player_list.append(f'{i.strip()}, ')
 
             # Combines 'There are X of a max of X players online' text with player names.
-            output = player_list[1] + '\n' + ''.join(_player_list)
+            output = player_list[1].strip() + '\n' + ''.join(_player_list)
             if 'location' in args:
-                await ctx.send(output)
-                await ctx.send("-----END-----")
+                await ctx.send(file=discord.File(convert_to_bytes(output), 'online_player_locations.txt'))
             else:
                 output = output[:-2]  # Removes trailing ','.
                 await ctx.send(output)
@@ -42,7 +55,10 @@ class Player(commands.Cog):
 
     @commands.command(aliases=['pl', 'playercoords', 'playerscoords'])
     async def playerlocations(self, ctx):
-        """Shows all online player's xyz location."""
+        """
+        Shows all online player's xyz location.
+        NOTE: Might take awhile if a lot of online players. Needs to use '/data get entity' command to get coords.
+        """
 
         await ctx.invoke(self.bot.get_command('players'), 'location')
 
@@ -360,7 +376,7 @@ class Permissions(commands.Cog):
         if not response: return
         log_data = backend.server_log(log_mode=True, stopgap_str=response[1])
 
-        if slime_vars.use_rcon is True:
+        if slime_vars.server_use_rcon is True:
             if 'There are no bans' in log_data:
                 banned_players = 'No exiles!'
             else:
@@ -471,26 +487,23 @@ class Permissions(commands.Cog):
 
         # List whitelisted.
         elif not arg or arg == 'list':
-            if slime_vars.use_rcon:
+            if slime_vars.server_use_rcon:
                 log_data = await send_command('whitelist list')
                 log_data = log_data[1]
                 log_data = backend.remove_ansi(log_data).split(':')
             else:
-                await send_command('whitelist list')
+                _, rnumber = await send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
-                log_data = backend.server_log('whitelisted:')
+                match_list = ['whitelisted:', 'whitelisted player(s):']  # Varies depending on server version/type.
+                log_data = backend.server_log(match_list=match_list, filter_mode=True, stopgap_str=rnumber)
                 if not log_data:
                     await ctx.send('No whitelisted')
                     return
-                await asyncio.sleep(1)
                 log_data = log_data.split(':')[-2:]
 
+            # TODO: Make into file output
             await ctx.send('**Whitelisted** :page_with_curl:')
-            # Then, formats player names in Discord `player` markdown.
-            players = [f"`{player.strip()}`" for player in log_data[1].split(', ')]
-            await ctx.send(f"{log_data[0].strip()}\n{', '.join(players)}")
-            lprint(ctx, f"Showing whitelist: {log_data[1]}")
-            await ctx.send("-----END-----")
+            await ctx.send(log_data[-1].strip())
             await ctx.send("Note: Players with OP will bypass whitelisting.")
             return False
         else: await ctx.send("**ERROR:** Something went wrong.")
@@ -499,7 +512,7 @@ class Permissions(commands.Cog):
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['name']}`" for i in backend.read_json(slime_vars.server_path + '/' + 'ops.json')]
+        op_players = [f"`{i['server_name']}`" for i in backend.read_json(slime_vars.server_path + '/' + 'ops.json')]
         if op_players:
             await ctx.send(f"**OP List** :scroll:")
             await ctx.send('\n'.join(op_players))
@@ -529,7 +542,7 @@ class Permissions(commands.Cog):
         reason = format_args(reason, return_no_reason=True)
         if not reason: return
 
-        if slime_vars.use_rcon:
+        if slime_vars.server_use_rcon:
             command_success = await send_command(f"op {player}")
             command_success = command_success[0]
         else:
@@ -564,7 +577,7 @@ class Permissions(commands.Cog):
         reason = format_args(reason, return_no_reason=True)
         command_success = False
 
-        if slime_vars.use_rcon:
+        if slime_vars.server_use_rcon:
             command_success = await send_command(f"deop {player}")
             command_success = command_success[0]
         else:

@@ -68,8 +68,8 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + name)
 
-        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
-        except: pass
+        if components.data('server_panel_components'):
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
 
     @commands.command(aliases=['wbdate'])
     async def worldbackupdate(self, ctx):
@@ -148,8 +148,8 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
-        except: pass
+        if components.data('server_panel_components'):
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
     async def worldreset(self, ctx, now=''):
@@ -242,8 +242,8 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
-        except: pass
+        if components.data('server_panel_components'):
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
 
     @commands.command(aliases=['sbdate'])
     async def serverbackupdate(self, ctx):
@@ -322,8 +322,8 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
-        try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
-        except: pass
+        if components.data('server_panel_components'):
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
 
 async def setup(bot):
     await bot.add_cog(World_Backups(bot))

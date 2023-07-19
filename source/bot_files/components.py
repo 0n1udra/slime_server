@@ -3,35 +3,29 @@ import bot_files.slime_vars as slime_vars
 
 bot = None
 
-buttons_dict = {
-    'server':   [[['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
-                  ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'],
-                  ['Reboot Server', 'serverrestart', '\U0001F501']],
-                 [['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
-                  ['Properties File', 'propertiesall', '\U0001F527'],
-                  ['Server Log', 'serverlog', '\U0001F4C3'],
-                  ['Connections Log', 'connectionslog', '\U0001F4E1']]],
-    'backups':  [[['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504']],
-                 [['Backup World', 'worldbackupdate', '\U0001F195'],
-                  ['Backup Server', 'serverbackupdate', '\U0001F195'],
-                  ['World Backups', 'restoreworldpanel', '\U0001F4C1'],
-                  ['Server Backups', 'restoreserverpanel', '\U0001F4C1']]],
-    'players':  [[['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
-                  ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
-                  ['OP List', 'oplist', '\U0001F4DC']],
-                 [['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']]],
-    'world':    [[['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
-                  ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
-                 [['Clear', 'weatherclear', '\U00002600'], ['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'],
-                  ['Enable Weather', 'weatheron', '\U0001F7E2'],
-                  ['Disable Weather', 'weatheroff', '\U0001F534']]],
-    'extra':    [[['Restart Bot', 'botrestart', '\U0001F501'], ['Set Channel ID', 'setchannelid', '\U0001FA9B'],
-                  ['Bot Log', 'botlog', '\U0001F4C3']],
-                 [['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]]}
-
 # _data dictionary stores active components and relating data. Saved components in dict can be edited later on.
 _data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
          'log_select_options': [], 'log_select_page': 0}
+
+buttons_dict = {
+    'server':   [['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
+                 ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'], ['Reboot Server', 'serverrestart', '\U0001F501'],
+                 ['Server Version', 'serverversion', '\U00002139'], ['MotD', 'motd', '\U0001F4E2'],
+                 ['Properties File', 'propertiesall', '\U0001F527'], ['Server Log', 'serverlog', '\U0001F4C3'],
+                 ['Connections Log', 'connectionslog', '\U0001F4E1']],
+    'backups':  [['Disable Autosave', 'autosaveoff', '\U0001F504'], ['Enable Autosave', 'autosaveon', '\U0001F504'],
+                 ['Backup World', 'worldbackupdate', '\U0001F195'], ['Backup Server', 'serverbackupdate', '\U0001F195'],
+                 ['World Backups', 'worldbackups', '\U0001F4C1'], ['Server Backups', 'serverbackups', '\U0001F4C1']],
+    'players':  [['Player List', 'playerlist', '\U0001F5B1'], ['Chat Log', 'chatlog', '\U0001F5E8'],
+                 ['Banned list', 'banlist', '\U0001F6AB'], ['Whitelist', 'whitelist', '\U0001F4C3'],
+                 ['OP List', 'oplist', '\U0001F4DC'], ['Player Panel', 'playerpanel', '\U0001F39B'], ['Teleport', 'teleport', '\U000026A1']],
+    'world':    [['Rain', 'weatherrain', '\U0001F327'], ['Thunder', 'weatherthunder', '\U000026C8'], ['Clear', 'weatherclear', '\U00002600'],
+                 ['Enable Weather', 'weatheron', '\U0001F7E2'], ['Disable Weather', 'weatheroff', '\U0001F534'],
+                 ['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
+                 ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
+    'extra':    [['Restart Bot', 'botrestart', '\U0001F501'], ['Bot Log', 'botlog', '\U0001F4C3'],
+                 ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
+                }
 
 def data(var, new_value=None, reset=False):
     """
@@ -106,6 +100,12 @@ class Discord_Select(discord.ui.Select):
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
             await ctx.invoke(bot.get_command(command), *params)
 
+        # This is for ?buttonspanel select server component.
+        if custom_id == '_select_server':
+            slime_vars.selected_server = slime_vars.servers[value]
+            slime_vars.config['bot_config']['selected_server'] = value
+            slime_vars.update_vars(slime_vars.config)
+
 class Discord_Button(discord.ui.Button):
     """
     Create bmode from received list containing label, custom_id, and emoji.
@@ -155,7 +155,6 @@ def new_buttons(buttons_list):
 
     view = discord.ui.View(timeout=None)
     for bmode in buttons_list:
-        if bmode[1] in slime_vars.if_no_file_access: continue  # Disable certain buttons if no local server file access.
         if len(bmode) == 2: bmode.append(None)  # For buttons with no emoji.
         view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
     return view
@@ -184,10 +183,15 @@ def new_embed(fields, title):
         embed.add_field(name=i[0], value=i[1], inline=i[2])
     return embed
 
-def server_modal_fields(server=slime_vars.server_selected[0]):
+def server_modal_fields(server=None):
+    global slime_vars
+    if not server: server = slime_vars.selected_server['server_name']
     data = slime_vars.servers[server]
 
-    return [['text', 'Server Name', 'name', 'Name of new server', data[0], False, True, 50], # type (text, select), label, custom_id, placeholder, default, style(True=long), required, max length
-            ['text', 'Description', 'description', 'Add description', data[1], True, True, 500],
-            ['text', 'Start Command', 'command', 'Runtime start command for .jar file', data[2], True, True, 500],
-            ['text', 'Wait Time (server startup in seconds)', 'wait', 'After starting server, bot will wait before fetching server status and other info.', data[3], True, True, 10]]
+    # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
+    # Limited to 5 components in modal
+    return [['text', 'Server Name', 'server_name', 'Name of new server', data['server_name'], False, True, 50],
+            ['text', 'Description', 'server_description', 'Add description', data['server_description'], True, True, 500],
+            ['text', 'Server Domain/IP', 'server_address', 'Server domain or IP address', data['server_address'], False, True, 500],
+            ['text', 'Launch Command', 'server_launch_command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
+            ['text', 'Wait Time (server startup in seconds)', 'startup_wait_time', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]

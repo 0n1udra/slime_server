@@ -1,10 +1,12 @@
-import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re
+import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re, io
 import bot_files.slime_vars as slime_vars
 import bot_files.components as components
 
-ctx = 'backend_functions.py'
+ctx = 'extra.py'
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
+slime_proc = slime_pid = None  # If using nohup to run bot in background.
+slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
 def lprint(ctx, msg):
     """Prints and Logs events in file."""
@@ -15,10 +17,8 @@ def lprint(ctx, msg):
     print(output)
 
     # Logs output.
-    with open(slime_vars.bot_log_file, 'a') as file:
+    with open(slime_vars.bot_log_filepath, 'a') as file:
         file.write(output + '\n')
-
-lprint(ctx, "Server selected: " + slime_vars.server_selected[0])
 
 def get_parameter(arg, nrg_msg=False, key='second_selected', **kwargs):
     """
@@ -115,17 +115,17 @@ def get_public_ip():
     except: return None
     return server_ip
 
-def ping_url():
+def ping_address():
     """Checks if server_address address works by pinging it twice."""
 
     ping = subprocess.Popen(['ping', '-c', '2', slime_vars.server_address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ping_out, ping_error = ping.communicate()
-    if slime_vars.server_ip in str(ping_out):
-        return 'working'
-    return 'inactive'
+    if slime_vars.server_ip in str(ping_out) and ping_out.strip():
+        return 'Success'
+    return 'Unreachable'
 
 # ========== File/folder editing/manipulation
-def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_path}/server.properties"):
+def edit_file(target_property=None, value='', file_path=None):
     """
     Edits server.properties file if received target_property and value. Edits inplace with fileinput
     If receive no value, will return current set value if property exists.
@@ -140,6 +140,7 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
         tuple: First item is line from file that matched target_property. Second item is just the current value.
     """
 
+    if not file_path: file_path = f"{slime_vars.server_path}/server.properties"
     try: os.chdir(slime_vars.server_path)
     except: pass
     if not os.path.isfile(file_path): return False
@@ -151,12 +152,8 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
         for line in file:
             split_line = line.split('=', 1)
 
-            if target_property == 'all':  # Return all lines of file.
-                return_line += line.strip() + '\n'
-                print(line, end='')
-
             # If found match, and user passed in new value to update it.
-            elif target_property in split_line[0] and len(split_line) > 1:
+            if target_property in split_line[0] and len(split_line) > 1:
                 if value:
                     split_line[1] = value  # edits value section of line
                     new_line = return_line = '='.join(split_line)
@@ -167,6 +164,7 @@ def edit_file(target_property=None, value='', file_path=f"{slime_vars.server_pat
                     print(line, end='')
             else: print(line, end='')
 
+    # Returns value, and complete line
     if return_line:
         return return_line, return_line.split('=')[1].strip()
     else: return "Match not found.", 'Match not found.'
@@ -178,24 +176,34 @@ def read_json(json_file):
 
 def read_csv(csv_file):
     """Read .csv files in bot_files directory."""
-    os.chdir(slime_vars.bot_files_path)
+    os.chdir(slime_vars.bot_filepath)
     with open(csv_file) as file:
         return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
 def update_csv(csv_file, new_data=None):
     """Updates csv files in bot_files directory."""
 
-    os.chdir(slime_vars.bot_files_path)
+    os.chdir(slime_vars.bot_filepath)
 
     with open(csv_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerows(new_data)
 
-def update_servers(new_data=None):
-    if new_data:
-        slime_vars.servers[new_data['name']] = [new_data['name'], new_data['description'], new_data['command'], new_data['wait']]
+def convert_to_bytes(data): return io.BytesIO(data.encode())
 
-    update_csv('servers.csv', [i for i in slime_vars.servers.values()])
+def status_slime_proc():
+    """Get bot process name and pid."""
+
+    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
+        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
+
+def kill_slime_proc():
+    """Kills bot process."""
+
+    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
+        proc.kill()
+        lprint(ctx, "INFO: Bot process killed")
+    else: lprint(ctx, "ERROR: Bot process not found")
 
 def get_from_index(path, index, mode):
     """
@@ -240,12 +248,14 @@ def enum_dir(path, mode, index_mode=False):
             if os.path.isdir(os.path.join(path, item)): flag = True
 
         if flag:
-            index += 1
             if index_mode:
+                # label, value, is default, description
                 return_list.append([item, index, False, index])  # Need this for world/server commands
+                index += 1
                 continue
             if 's' in mode and item in slime_vars.servers:
-                return_list.append([item, item, False, slime_vars.servers[item][1]])  # For server mode for ?controlpanel command component
+                return_list.append([item, item, False, slime_vars.servers[item]['server_description']])  # For server mode for ?controlpanel command component
+                index += 1
                 continue
             return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
         else: continue
@@ -261,3 +271,37 @@ def delete_dir(backup):
 
     shutil.rmtree(backup)
 
+def update_server_paths(server_dict, server_name, text_to_replace=None):
+    """
+    Replaces 'SELECTED_SERVER' in server dict values if key has 'path' in it.
+    """
+    text_to_replace = 'SELECTED_SERVER'
+    server_dict['server_name'] = server_name
+    for k, v in server_dict.items():
+        if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+            server_dict[k] = v.replace(text_to_replace, server_name)
+
+    return server_dict
+
+def update_servers_vars():
+    """Checks if there's new configs in 'example' and updates the other servers with defaults."""
+    global slime_vars
+    for name, data in slime_vars.servers.items():
+        if 'example' in name: continue  # Skip example template
+        server = slime_vars.servers['example'].copy()
+        server.update(data)  # Updates example template values with user set ones, fallback on 'example' defaults
+        server = update_server_paths(server, name)  # Updates paths (substitutes SELECTED_SERVER)
+        # Updates slime_vars then writes to file.
+        slime_vars.servers.update({name: server})
+        slime_vars.update_vars(slime_vars.config)
+
+def update_from_user_config(config):
+    # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
+    with open(slime_vars.user_config_filepath, 'r') as openfile:
+        def deep_update(original_dict, update_dict):
+            for key, value in update_dict.items():  # Updates nested dictionaries.
+                if isinstance(value, dict) and key in original_dict and isinstance(original_dict[key], dict):
+                    deep_update(original_dict[key], value)
+                else: original_dict[key] = value
+        deep_update(config, json.load(openfile))
+    return config
