@@ -53,7 +53,7 @@ class Server(commands.Cog):
             if not slime_vars.enable_players_custom_status:
                 await self.bot.change_presence(activity=discord.Activity(name=f"- {slime_vars.selected_server['server_name']}", type=1))
             slime_vars.selected_server = slime_vars.servers[name]
-            slime_vars.config['bot_config']['selected_server'] = name
+            slime_vars.config['bot_configs']['selected_server'] = name
             slime_vars.update_vars(slime_vars.config)
             await ctx.send(f"**Selected Server:** {name}")
         else: await ctx.send("**ERROR:** Server not found.")

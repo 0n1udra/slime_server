@@ -10,10 +10,10 @@ ctx = 'run_bot.py'  # So you know which log lines come from which file.
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
 
-def setup_config():
+def setup_configs():
     global slime_vars
     # Creates flatten dict to make it easier to find items to use as defaults
-    default_configs = {**slime_vars.config['bot_config'].copy(), **slime_vars.config['servers']['example'].copy()}
+    default_configs = {**slime_vars.config['bot_configs'].copy(), **slime_vars.config['servers']['example'].copy()}
     def get_input(config_prompts):
         config = {}
         for variable, prompt in config_prompts.items():
@@ -33,6 +33,8 @@ def setup_config():
         return config
 
     bot_config_prompts = {
+        "home_path": "Manually set home path. Leave blank to use default.",
+        "pyenv_path": "Set path for python env. Leave blank if not using or want to use default.",
         "use_pyenv": "Use Python env (y/n)",
         'bot_token_filepath': "Discord bot token filepath",
         'command_prefix': "Discord command prefix",
@@ -61,13 +63,13 @@ def setup_config():
     if ask_input in ['y', 'yes']: server_configs = get_input(server_config_prompts)
 
     # Updates dictionaries and returns new dictionary to update slime_vars.config
-    updated_bot_configs = slime_vars.config['bot_config']
+    updated_bot_configs = slime_vars.config['bot_configs']
     updated_bot_configs.update(bot_configs)
     example_server_configs = slime_vars.config['servers']['example'].copy()
     updated_server_configs = example_server_configs.copy()
     updated_server_configs.update(server_configs)
 
-    slime_vars.update_vars({'bot_config': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs,
+    slime_vars.update_vars({'bot_configs': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs,
                                                                            'example': example_server_configs}})
     try: open(user_config_filepath, 'a').close()
     except: lprint(ctx, "ERROR: Unable to create 'user_config.json' file.")
@@ -237,7 +239,7 @@ if __name__ == '__main__':
         lprint(ctx, "INFO: Loaded user_config.json.")
     else:
         lprint(ctx, "INFO: No 'user_config.json' file detected.")
-        setup_config()
+        setup_configs()
 
     # The order of the if statements is important.
     if 'hidebanner' not in sys.argv: show_banner()

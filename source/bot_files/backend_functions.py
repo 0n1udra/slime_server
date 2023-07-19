@@ -1,11 +1,12 @@
 import json, platform, requests, asyncio, random, os
 from os.path import join
 from file_read_backwards import FileReadBackwards
-import bot_files.slime_vars as slime_vars
+from bot_files.slime_vars import configs
 from bs4 import BeautifulSoup
 from bot_files.extra import *
-if slime_vars.server_use_rcon or slime_vars.enable_players_custom_status: import mctools
+if configs.server['erver_use_rcon'] or configs.server['enable_players_custom_status']: import mctools
 if slime_vars.windows_cmdline_start or slime_vars.server_use_subprocess: import subprocess
+
 
 # Remove ANSI escape characters
 import re

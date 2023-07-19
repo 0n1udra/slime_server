@@ -1,5 +1,5 @@
 import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re, io
-import bot_files.slime_vars as slime_vars
+from bot_files.slime_vars import slime_vars
 import bot_files.components as components
 
 ctx = 'extra.py'
@@ -12,7 +12,10 @@ def lprint(ctx, msg):
     """Prints and Logs events in file."""
     try: user = ctx.message.author
     except: user = ctx
-
+    ping = mctools.PINGClient('address', 25565)
+    stats = ping.get_stats()
+    print(stats)
+    ping.stop()
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
     print(output)
 

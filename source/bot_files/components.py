@@ -103,7 +103,7 @@ class Discord_Select(discord.ui.Select):
         # This is for ?buttonspanel select server component.
         if custom_id == '_select_server':
             slime_vars.selected_server = slime_vars.servers[value]
-            slime_vars.config['bot_config']['selected_server'] = value
+            slime_vars.config['bot_configs']['selected_server'] = value
             slime_vars.update_vars(slime_vars.config)
 
 class Discord_Button(discord.ui.Button):
