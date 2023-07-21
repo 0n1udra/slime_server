@@ -1,4 +1,5 @@
 import discord
+from bot_files.backend_functions import backend
 import bot_files.slime_vars as slime_vars
 
 bot = None
@@ -100,11 +101,9 @@ class Discord_Select(discord.ui.Select):
             ctx = await bot.get_context(interaction.message)  # Get ctx from message.
             await ctx.invoke(bot.get_command(command), *params)
 
-        # This is for ?buttonspanel select server component.
+        # Updates selected currently selected server, this is for ?buttonspanel select server component.
         if custom_id == '_select_server':
-            slime_vars.selected_server = slime_vars.servers[value]
-            slime_vars.config['bot_configs']['selected_server'] = value
-            slime_vars.update_vars(slime_vars.config)
+            config.select_server(value)
 
 class Discord_Button(discord.ui.Button):
     """
@@ -183,10 +182,10 @@ def new_embed(fields, title):
         embed.add_field(name=i[0], value=i[1], inline=i[2])
     return embed
 
-def server_modal_fields(server=None):
-    global slime_vars
-    if not server: server = slime_vars.selected_server['server_name']
-    data = slime_vars.servers[server]
+def server_modal_fields(server_name):
+    # Uses example server as fallback
+    _server = backend.get_server(server_name)
+    data = _server if _server else backend.get_server('example')
 
     # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
     # Limited to 5 components in modal

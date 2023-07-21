@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from bot_files.backend_functions import send_command, format_args, lprint
+from bot_files.backend_functions import send_command, lprint
 import bot_files.backend_functions as backend
 from bot_files.extra import convert_to_bytes
 

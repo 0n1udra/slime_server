@@ -8,7 +8,7 @@ __license__ = 'GPL 3'
 __status__ = 'Development'
 __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
 
-class Configs():
+class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
     intents = discord.Intents.default()  # Default: discord.Intents.default()
@@ -124,6 +124,9 @@ class Configs():
                     'enable_status_checker': True,
                     # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
                     'status_checker_command': 'xp',
+                    # Enabling this sends a ping to server before sending command to see if active.
+                    # NOTE: This will disable and override 'enable_status_checker'. You can use this if you can't use that.
+                    'enable_ping_before_command': False,
                     # Wait time (in seconds) between sending command to MC server and reading server logs for output.
                     # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
                     'command_buffer_time': 1,
@@ -177,11 +180,46 @@ class Configs():
             #slime_vars.servers.update({name: server})
             #slime_vars.update_vars(slime_vars.config)
 
+    def update_server_paths(server_dict, server_name, text_to_replace=None):
+        """
+        Replaces 'SELECTED_SERVER' in server dict values if key has 'path' in it.
+        """
+        text_to_replace = 'SELECTED_SERVER'
+        server_dict['server_name'] = server_name
+        for k, v in server_dict.items():
+            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+                server_dict[k] = v.replace(text_to_replace, server_name)
+
+        return server_dict
+
+
+    def update_servers_vars():
+        """Checks if there's new configs in 'example' and updates the other servers with defaults."""
+        global slime_vars
+        for name, data in config.servers.items():
+            if 'example' in name: continue  # Skip example template
+            server = config.servers['example'].copy()
+            server.update(data)  # Updates example template values with user set ones, fallback on 'example' defaults
+            server = update_server_paths(server, name)  # Updates paths (substitutes SELECTED_SERVER)
+            # Updates slime_vars then writes to file.
+            slime_vars.servers.update({name: server})
+            slime_vars.update_vars(slime_vars.config)
+
+    def update_from_user_config(config):
+        # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
+        with open(slime_vars.user_config_filepath, 'r') as openfile:
+            def deep_update(original_dict, update_dict):
+                for key, value in update_dict.items():  # Updates nested dictionaries.
+                    if isinstance(value, dict) and key in original_dict and isinstance(original_dict[key], dict):
+                        deep_update(original_dict[key], value)
+                    else: original_dict[key] = value
+            deep_update(config, json.load(openfile))
+        return config
 
 
 print("OK")
-configs = Configs()
+config = Config()
 print("OK")
-configs.initialize_configs()
+config.initialize_configs()
 print("OK")
-print(configs.configs)
+print(config.configs)

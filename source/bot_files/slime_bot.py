@@ -4,8 +4,8 @@ from bot_files.backend_functions import send_command, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
 from bot_files.components import buttons_dict
-from bot_files.extra import convert_to_bytes, update_from_user_config
-import bot_files.slime_vars as slime_vars
+#import bot_files.slime_vars as slime_vars
+from bot_files.extra import convert_to_bytes
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
@@ -35,6 +35,41 @@ async def on_ready():
             # Shows some useful buttons
             on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
             await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
+
+# TODO fix
+role_requirements = {
+    "my_command1": ["Admin", "Moderator"],
+    "my_command2": ["Admin"],
+}
+
+@bot.event
+async def on_command(ctx):
+    def has_custom_role(role_names):
+        async def predicate(ctx):
+            if any(role.name in role_names for role in ctx.author.roles):
+                return True
+            raise commands.MissingRole(", ".join(role_names))
+
+        return commands.check(predicate)
+
+    command_name = ctx.command.name
+    if command_name in role_requirements:
+        required_roles = role_requirements[command_name]
+        await has_custom_role(required_roles).predicate(ctx)
+
+
+bot.run("YOUR_BOT_TOKEN")
+
+
+@bot.event
+async def on_command(ctx):
+    # List of commands that require the role "Admin" to execute
+    admin_commands = ["my_command1", "my_command2"]
+
+    if ctx.command.name in admin_commands:
+        has_role = await has_custom_role("Admin").predicate(ctx)
+        if not has_role:
+            raise commands.MissingRole("Admin")
 
 class Slime_Bot_Commands(commands.Cog):
     def __init__(self, bot):
@@ -105,7 +140,7 @@ class Slime_Bot_Commands(commands.Cog):
         log_data = backend.server_log(file_path=slime_vars.bot_log_filepath, lines=lines, log_mode=True, return_reversed=True)
         await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
-            await ctx.send(file=discord.File(convert_to_bytes(log_data), 'bot.log'))
+            await ctx.send(file=discord.File(extra.convert_to_bytes(log_data), 'bot.log'))
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")
@@ -223,12 +258,10 @@ class Slime_Bot_Commands(commands.Cog):
         await ctx.send("Cleared Channel ID")
         lprint(ctx, "Cleared Channel ID")
 
-    @commands.command(aliases=['config', 'reloadconfig'])
-    async def updateconfig(self, ctx):
-        global slime_vars
-        update_from_user_config(slime_vars.config)
-        slime_vars.update_vars(slime_vars.config)
-        await ctx.send(f"Updated configs from: `{slime_vars.user_config_filepath}`\nMay have to reboot bot for some changes to take effect.")
+    @commands.command(aliases=['reloadconfigs'])
+    async def loadconfigs(self, ctx):
+        """Loads configs from user_config.json"""
+        # TODO fix
 
 class Discord_Components_Funcs(commands.Cog):
     def __init__(self, bot): self.bot = bot

@@ -204,6 +204,8 @@ File Access         {slime_vars.server_files_access}
 Autosave            {slime_vars.enable_autosave} - {slime_vars.autosave_interval}min
 Server URL          {slime_vars.server_address if nono else no}
 Server Port         {slime_vars.server_port if nono else no}
+
+NOTE: More info on the configs in README.md or use the comments in slime_vars.py file in bot_files.
 """
     if slime_vars.use_tmux: vars_msg += f"""
 Tmux:
