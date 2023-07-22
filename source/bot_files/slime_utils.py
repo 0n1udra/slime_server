@@ -44,6 +44,29 @@ def kill_slime_proc(self):
 
 
 class File_Utils:
+    def read_file(self, file_path):
+        """Generator function to read log file lines one by one."""
+        with open(file_path, 'r') as file:
+            for line in file:
+                yield line
+
+    def read_file_bottom_up(self, file_path):
+        """Generator function to read log file lines one by one in reverse order."""
+        with open(file_path, 'r') as file:
+            file.seek(0, os.SEEK_END)  # Move the file pointer to the end of the file.
+            file_size = file.tell()  # Get the current file pointer position (end of the file).
+
+            # Start reading the file in reverse line by line.
+            while file.tell() > 0:
+                file.seek(-1, os.SEEK_CUR)  # Move one character back from the current position.
+                current_char = file.read(1)  # Read the character at the current position.
+
+                # If we find a newline character or reach the beginning of the file, yield the line.
+                if current_char == '\n' or file.tell() == 0:
+                    line = file.readline().rstrip('\n')
+                    yield line[::-1]  # Reverse the line before yielding.
+                else: file.seek(-1, os.SEEK_CUR)  # Move one character back to include the newline character in the line.
+
     def read_json(self, json_file):
         """Read .json files."""
         with open(json_file) as file:
@@ -133,7 +156,7 @@ class File_Utils:
         shutil.rmtree(backup)
 
 
-class Utils(File_Utils, Proc_Utils):
+class Utils:
 
     def new_server(self, name):
         """
@@ -276,18 +299,33 @@ class Utils(File_Utils, Proc_Utils):
         except: return None
         return server_ip
 
-    def ping_address(self):
-        """Checks if server_address address works by pinging it twice."""
+    def ping_address(self, address):
+        """
+        Checks if server_address address works by pinging it twice.
 
-        ping = subprocess.Popen(['ping', '-c', '2', config.get('server_address')], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        ping_out, ping_error = ping.communicate()
-        if config.get('server_ip') in str(ping_out) and ping_out.strip():
-            return 'Success'
-        return 'Unreachable'
+        Args:
+            address str: Address to ping.
 
-    # ========== File/folder editing/manipulation
+        Returns:
+            bool: If successful.
+        """
 
+        if config.get('windows_compatibility') is True:  # If on windows.
+            try:
+                if 'TTL=' in subprocess.run(["ping", "-n", "1", address], capture_output=True, text=True, timeout=10).stdout:
+                    return True
+            except: return False
+        else:
+            # TODO: FIX
+            ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ping_out, ping_error = ping.communicate()
+            if ping_out.strip():
+                print('te', ping_out)
+                return True
+            return False
 
     def convert_to_bytes(data): return io.BytesIO(data.encode())
 
 
+utils = Utils()
+file_utils = File_Utils()

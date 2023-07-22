@@ -76,7 +76,7 @@ class Slime_Bot_Commands(commands.Cog):
         self.bot = bot
 
         # Shows player's online and ping info in bot's custom status text.
-        if slime_vars.enable_players_custom_status:
+        if slime_vars.players_custom_status:
             self.custom_status_task.start()
             lprint(ctx, f"Custom status task started (interval: {slime_vars.custom_status_interval}m)")
 

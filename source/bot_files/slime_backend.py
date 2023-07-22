@@ -1,11 +1,12 @@
 import subprocess, platform, requests, asyncio, shutil, random, json, os, re
 import mctools
+from collections import deque
 from os.path import join
 from file_read_backwards import FileReadBackwards
 from bot_files.slime_vars import config
 from bot_files.extra import lprint
 from bot_files.server_api import Server_Screen_API, Server_Subprocess_API, Server_Rcon_API, Server_Tmux_API
-import bot_files.extra as extra
+from bot_files.slime_utils import utils, file_utils
 from bs4 import BeautifulSoup
 #from bot_files.extra import *
 
@@ -17,6 +18,7 @@ ctx = 'backend_functions.py'
 
 class Backend:
     server_api_types = {'use_rcon': Server_Rcon_API, 'use_tmux': Server_Tmux_API, 'use_screen': Server_Screen_API}
+    subprocess_servers = {}
 
     def __init__(self, bot=None):
         self.server_active = False
@@ -82,7 +84,7 @@ class Backend:
 
         pass
 
-    def _update_server_api(self):
+    def _change_server_api(self):
         """
         Updates the server_api object depending on server configs.
 
@@ -124,9 +126,58 @@ class Backend:
             return config.servers[server_name]
         else: return False
 
+    import os
+    from collections import deque
+
+    def read_server_log(self, search=None, file_path=None, lines=15, find_all=False, stopgap_str=None, top_down_mode=False):
+        """
+        Read the latest.log file under server/logs folder. Can also find a match.
+
+        Args:
+            search (str or list, optional): Check for a matching string or a list of matching strings.
+                                            If None, it will return all log data without matching.
+            file_path (str, optional): File to read. Defaults to the server's latest.log.
+            lines (int, optional): Number of most recent lines to return.
+            match_mode (str, optional): Matching mode. Options: 'any' (default), 'all', 'none'.
+            stopgap_str (str, optional): Stops the search when this string is found in the log line.
+            top_down_mode (bool, optional): If True, search from the top of the log file.
+                                            If False (default), search from the bottom of the log file.
+
+        Returns:
+            str: Matched lines in reverse order, joined by '\n'.
+        """
+        # Convert the search strings to lowercase for case-insensitive matching.
+        if type(search) is str:
+            search = [search.lower()]
+        elif type(search) is list:
+            search = [s.lower() for s in search]
+        else: search = None
+
+        file_path = file_path or config.get('server_log_filepath')  # server.properties file as default file.
+        if not file_path or not os.path.exists(file_path): return False  # If file not exist.
+
+        # Create a deque, which will efficiently store the most recent matched log lines.
+        matched_lines = deque(maxlen=lines) if top_down_mode else []
+
+        # Changes function to read file if reading bottom up or top down.
+        read_log_lines = file_utils.read_file_bottom_up if not top_down_mode  else file_utils.read_file
+        with read_log_lines(file_path, top_down_mode) as log_lines:
+            for line in log_lines:
+                # Check if each element in 'search' is found in 'line_lower'.
+                found_matches = [s in line.lower() for s in search]
+                # Determine if the line matches the specified criteria (search and match_mode).
+                # The conditions use 'found_matches', which is a list of booleans indicating the match status.
+                if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
+                    # Append the matched line to the deque or list depending on the search mode.
+                    matched_lines.append(line)
+
+                    # Stops if found stopgap_str in line or at the limit user specified.
+                    if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
+
+        return '\n'.join(matched_lines)
 
     # File reading and writing
-    def read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
+    def _read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
         """
         Read latest.log file under server/logs folder. Can also find match.
         What a fat ugly function you are :(
@@ -267,6 +318,46 @@ class Backend:
             else: return 'N/A'
 
 
+    def server_start():
+        """
+        Start Minecraft server depending on whether you're using Tmux subprocess method.
+
+        Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
+
+        Returns:
+            bool: If successful boot.
+        """
+
+        global mc_subprocess
+
+        if config.get('server_use_screen') is True:
+            os.chdir(config.get('server_path'))
+            if not os.system(f"screen -dmS '{config.get('screen_session_name')}' {config.get('server_launch_command')}"):
+                return True
+            else: return False
+
+        elif config.get('server_use_subprocess') is True:
+            # Runs MC server as subprocess. Note, If this script stops, the server will stop.
+            try:
+                mc_subprocess = subprocess.Popen(config.get('server_launch_command').split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            except: lprint(ctx, "Error server starting subprocess")
+
+            if type(mc_subprocess) == subprocess.Popen: return True
+
+        # Start java server using subprocess and cmd's Launch Command.
+        elif config.get('windows_compatibility') is True:
+            os.chdir(config.get('server_path'))
+            subprocess.Popen(config.get('windows_cmdline_start') + config.get('server_launch_command'), shell=True)
+
+        elif config.get('use_tmux') is True:
+            os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} 'cd {config.get('server_path')}' ENTER")
+
+            # Starts server in tmux pane.
+            if not os.system(f'tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} "{config.get('server_launch_command')}" ENTER'):
+                return True
+        else: return False
+
+
     def download_latest():
         """
         Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
@@ -323,6 +414,53 @@ class Backend:
         else: return version_info, jar_download_url
 
         return False
+    
+
+    def server_ping(self):
+        """
+        Uses ping command to check if server reachable.
+
+        Returns:
+            bool: If ping was successful.
+        """
+
+    def server_ping_query(self):
+        """
+        Gets server information using mctools.PINGClient()
+
+        Returns:
+            dict: Dictionary containing 'version', and 'description' (motd).
+        """
+
+        global server_active
+
+        if not config.get('server_address'): return False
+        try:
+            ping = mctools.PINGClient(config.get('server_address'), config.get('server_port'))
+            stats = ping.get_stats()
+            ping.stop()
+        except ConnectionRefusedError:
+            return False
+        else: return stats
+
+    async def server_status(self, discord_msg=False):
+        """
+        Gets server active status, by sending command to server and checking server log.
+
+        Returns:
+            bool: returns True if server is online.
+        """
+
+        # Uses ping to check if server is online.
+        if config.get('ping_before_command') is True:
+            response = utils.ping_address(config.get('server_address'))
+        else:
+            # send_command() will send random number, server is online if match is found in log.
+            response = await self.send_command(' ', discord_msg=discord_msg, force_check=True, ctx=ctx)
+
+        self.server_active = response
+        return response
+
 
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
@@ -390,87 +528,6 @@ class Backend:
             if log_data:
                 location = log_data.split('[')[-1][:-3].replace('d', '')
                 return location
-
-
-    def server_start():
-        """
-        Start Minecraft server depending on whether you're using Tmux subprocess method.
-
-        Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
-
-        Returns:
-            bool: If successful boot.
-        """
-
-        global mc_subprocess
-
-        if config.get('server_use_screen') is True:
-            os.chdir(config.get('server_path'))
-            if not os.system(f"screen -dmS '{config.get('screen_session_name')}' {config.get('server_launch_command')}"):
-                return True
-            else: return False
-
-        elif config.get('server_use_subprocess') is True:
-            # Runs MC server as subprocess. Note, If this script stops, the server will stop.
-            try:
-                mc_subprocess = subprocess.Popen(config.get('server_launch_command').split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            except: lprint(ctx, "Error server starting subprocess")
-
-            if type(mc_subprocess) == subprocess.Popen: return True
-
-        # Start java server using subprocess and cmd's Launch Command.
-        elif config.get('windows_compatibility') is True and platform.system() == 'Windows':
-            os.chdir(config.get('server_path'))
-            subprocess.Popen(config.get('windows_cmdline_start') + config.get('server_launch_command'), shell=True)
-
-        elif config.get('use_tmux') is True:
-            os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} 'cd {config.get('server_path')}' ENTER")
-
-            # Starts server in tmux pane.
-            if not os.system(f'tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} "{config.get('server_launch_command')}" ENTER'):
-                return True
-        else: return False
-
-    def check_latest():
-        """
-        Gets latest Minecraft server version number from official website using bs4.
-
-        Returns:
-            str: Latest version number.
-        """
-
-        soup = BeautifulSoup(requests.get(config.get('new_server_address')).text, 'html.parser')
-        for i in soup.findAll('a'):
-            if i.string and 'minecraft_server' in i.string:
-                return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
-
-
-    async def server_status(discord_msg=False):
-        """
-        Gets server active status, by sending command to server and checking server log.
-
-        Returns:
-            bool: returns True if server is online.
-        """
-
-        global server_active
-
-        lprint(ctx, "Checking Minecraft server status...")
-
-        # send_command() will send random number, server is online if match is found in log.
-        response = await send_command(' ', discord_msg=discord_msg, force_check=True, ctx=ctx)
-        if response:
-            server_active = True
-            lprint(ctx, "Server Status: Active")
-            return True
-        elif response is None:
-            # Means server status is unreachable but still want to be able to send commands.
-            server_active = None
-            lprint(ctx, "Server Status: N/A")
-            return None
-        else:
-            server_active = False
-            lprint(ctx, "Server Status: Inactive")
 
 
 backend = Backend()

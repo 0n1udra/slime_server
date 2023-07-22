@@ -1,6 +1,50 @@
 from bot_files.extra import lprint
 from bot_files.slime_vars import config
-class Server_API():
+
+
+class Server_Versioning:
+    def server_version(self):
+        """
+        Gets server version, either by reading server log or using PINGClient.
+
+        Returns:
+            str: Server version number.
+        """
+
+        # Manual override of server version.
+        if version := config.get('server_version'): return version
+
+        if config.get('server_use_rcon') is True:
+            try: return server_ping()['version']['name']
+            except: return 'N/A'
+        elif config.get('server_files_access') is True:
+            try: return server_log('server version').split('version')[1].strip()
+            except: return 'N/A'
+        return 'N/A'
+
+
+    def download_official(self): pass
+
+    def download_papermc(self): pass
+
+    def downlaod_bukkit(self): pass
+
+    def server_update(self): pass
+    def server_update_check(self):
+        """
+        Gets latest Minecraft server version number from official website using bs4.
+
+        Returns:
+            str: Latest version number.
+        """
+
+        soup = BeautifulSoup(requests.get(config.get('new_server_address')).text, 'html.parser')
+        for i in soup.findAll('a'):
+            if i.string and 'minecraft_server' in i.string:
+                return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
+
+
+class Server_API(Server_Versioning):
     def __init__(self):
         pass
 
@@ -44,7 +88,7 @@ class Server_API():
 
 
         elif config.get('use_tmux') is True or config.get('server_use_screen'):
-            if config.get('enable_status_checker') is False: skip_check = True  # Don't send the 'xp' command.
+            if config.get('check_before_command') is False: skip_check = True  # Don't send the 'xp' command.
 
             if not skip_check:  # Check if server reachable before sending command.
                 # Checks if server is active in the first place by sending random number to be matched in server log.
@@ -63,7 +107,7 @@ class Server_API():
                 os.system(
                     f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} '{command}' ENTER")
 
-        if config.get('enable_status_checker') is True:
+        if config.get('check_before_command') is True:
             _send_command()
         if status is False:
             msg = "**Server INACTIVE** :red_circle:\nUse `?check` to update server status."
@@ -82,51 +126,7 @@ class Server_API():
 
     def get_status(self): pass
 
-    def get_ping(self): pass
-
     def read_log(self): pass
-
-    def server_version():
-        """
-        Gets server version, either by reading server log or using PINGClient.
-
-        Returns:
-            str: Server version number.
-        """
-
-        # Manual override of server version.
-        if version := config.get('server_version'): return version
-
-        if config.get('server_use_rcon') is True:
-            try: return server_ping()['version']['name']
-            except: return 'N/A'
-        elif config.get('server_files_access') is True:
-            try: return server_log('server version').split('version')[1].strip()
-            except: return 'N/A'
-        return 'N/A'
-
-    def server_ping():
-        """
-        Gets server information using mctools.PINGClient()
-
-        Returns:
-            dict: Dictionary containing 'version', and 'description' (motd).
-        """
-
-        global server_active
-
-        if not config.get('server_address'): return False
-        try:
-            ping = mctools.PINGClient(config.get('server_address'), config.get('server_port'))
-            stats = ping.get_stats()
-            ping.stop()
-        except ConnectionRefusedError:
-            server_active = False
-            return False
-        else:
-            server_active = True
-            return stats
-
 
 class Server_Rcon_API(Server_API):
     def send_command(self, command): pass
@@ -160,6 +160,7 @@ class Server_Rcon_API(Server_API):
 
 
 class Server_Tmux_API(Server_API):
+
 
 class Server_Screen_API(Server_API):
 

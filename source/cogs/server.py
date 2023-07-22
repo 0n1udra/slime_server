@@ -50,7 +50,7 @@ class Server(commands.Cog):
             await ctx.send(f"**Current Server:** `{slime_vars.selected_server['server_name']}`")
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in slime_vars.servers:
-            if not slime_vars.enable_players_custom_status:
+            if not slime_vars.players_custom_status:
                 await self.bot.change_presence(activity=discord.Activity(name=f"- {slime_vars.selected_server['server_name']}", type=1))
             slime_vars.selected_server = slime_vars.servers[name]
             slime_vars.config['bot_configs']['selected_server'] = name
@@ -289,7 +289,7 @@ class Server(commands.Cog):
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = backend.check_latest()
+        response = backend.check_latest_mc_versiont()
         await ctx.send(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 

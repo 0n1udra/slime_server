@@ -196,7 +196,7 @@ Command Prefix      {slime_vars.command_prefix}
 Case Insensitive    {slime_vars.case_insensitive}
 Intents             {slime_vars.intents}
 Channel ID          {slime_vars.channel_id if nono else no}
-Show Custom Status  {slime_vars.enable_status_checker} - {slime_vars.custom_status_interval}min
+Show Custom Status  {slime_vars.check_before_command} - {slime_vars.custom_status_interval}min
 
 Server:
 Minecraft Folder    {slime_vars.mc_path}

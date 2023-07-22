@@ -1,4 +1,4 @@
-import discord, getpass, os, json
+import discord, platform, getpass, os, json
 from os.path import join
 
 __version__ = '9.0'
@@ -64,7 +64,7 @@ class Config():
                 'channel_id': 0,
                 # Every X minutes, updates bot's custom status showing player's online and server ping. E.g. Playing - 3 | Ping - 10
                 # NOTE: Need to set 'enable-query=true' in server.properties for this to work. Tip: '?property enable-query true'
-                'enable_players_custom_status': True,
+                'players_custom_status': True,
                 'custom_status_interval': 1,
 
                 # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
@@ -80,8 +80,8 @@ class Config():
                 'bot_filepath': join(self.bot_src_path, 'bot_files'),
                 'bot_log_filepath': join(self.bot_src_path, 'slime_bot.log'),
 
-                # Use cmd 'start' command when starting a server only if platform.systems() == 'Windows'.
-                'windows_compatibility': True,
+                # Use cmd commands. E.g. 'start' command when starting a server only if platform.systems() == 'Windows'.
+                'windows_compatibility': True if platform.system() else False,
                 # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
                 'windows_cmdline_start': 'start "Minecraft server"',
 
@@ -121,12 +121,12 @@ class Config():
                     'startup_wait_time': 30,
 
                     # Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
-                    'enable_status_checker': True,
+                    'check_before_command': True,
                     # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
                     'status_checker_command': 'xp',
                     # Enabling this sends a ping to server before sending command to see if active.
-                    # NOTE: This will disable and override 'enable_status_checker'. You can use this if you can't use that.
-                    'enable_ping_before_command': False,
+                    # NOTE: This will disable and override 'check_before_command'. You can use this if you can't use that.
+                    'ping_before_command': False,
                     # Wait time (in seconds) between sending command to MC server and reading server logs for output.
                     # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
                     'command_buffer_time': 1,
