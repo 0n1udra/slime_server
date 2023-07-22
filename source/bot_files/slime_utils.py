@@ -1,24 +1,51 @@
-import subprocess, fileinput, requests, datetime, shutil, psutil, json, math, csv, os, re, io
+"""
+Some utilities that don't exactly belong in any other module.
+"""
+
+import re
+import io
+import os
+import csv
+import json
+import shutil
+import psutil
+import inspect
+import requests
+import datetime
+import subprocess
+from os import listdir
+from os.path import isdir, isfile, join, exists
+
+from typing import Any, Union, List, Dict, Generator
 import mctools
+from discord.ext.commands import Context
+
 from bot_files.slime_vars import config
 from bot_files.backend_functions import backend
 import bot_files.components as components
 
-ctx = 'extra.py'
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
-def lprint(ctx, msg):
-    """Prints and Logs events in file."""
-    try: user = ctx.message.author
-    except: user = ctx
-    ping = mctools.PINGClient('address', 25565)
-    stats = ping.get_stats()
-    print(stats)
-    ping.stop()
-    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({user}): {msg}"
+def lprint(msg: str, ctx: Context = None) -> None:
+    """
+    Prints and Logs events in file.
+
+    Args:
+        msg (str): Message.
+        ctx (Discord Context): Log who or what did the action.
+    """
+
+    # Get Discord username if provided Context else gets filename of where lprint() is being called from.
+    if isinstance(ctx, Context):
+        ctx = ctx.message.author
+    else:
+        ctx = lambda: inspect.currentframe().f_back.f_globals["__file__"]
+
+    # Format date and print log message.
+    output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({ctx}): {msg}"
     print(output)
 
     # Logs output.
@@ -44,14 +71,54 @@ def kill_slime_proc(self):
 
 
 class File_Utils:
-    def read_file(self, file_path):
-        """Generator function to read log file lines one by one."""
+    def test_file(self, file_path: str, check_writable: bool = False) -> bool:
+        """
+        Test if a file exists, if it's readable, and if it's writable.
+        Will fail if file not readable (even if exists and writable).
+
+        Args:
+            file_path (str): The path of the file to test.
+            mode (str): What to test for, 'rw', readable, writable.
+
+        Returns:
+            bool: If file passed testing based on the mode.
+        """
+
+        if not exists(file_path) or not os.access(file_path, os.R_OK):
+            lprint(f"ERROR: File not found or not readable: {file_path}")
+            return False
+        if check_writable and not os.access(file_path, os.W_OK):
+            return False
+        return True
+
+    def read_file_generator(self, file_path: str) -> Generator[str]:
+        """
+        Yield file lines (top to bottom).
+
+        Args:
+            file_path (str): File path to yield lines.
+
+        Returns:
+            str: Yields a line from file
+        """
+
+        if not self.test_file(file_path): return False
         with open(file_path, 'r') as file:
             for line in file:
                 yield line
 
-    def read_file_bottom_up(self, file_path):
-        """Generator function to read log file lines one by one in reverse order."""
+    def read_file_reverse_generator(self, file_path: str) -> Generator[str]:
+        """
+        Yield file lines (bottom to top).
+
+        Args:
+            file_path (str): File to yield line starting from bottom.
+
+       Returns:
+            str: A line from file.
+        """
+
+        if not self.test_file(file_path): return False
         with open(file_path, 'r') as file:
             file.seek(0, os.SEEK_END)  # Move the file pointer to the end of the file.
             file_size = file.tell()  # Get the current file pointer position (end of the file).
@@ -67,93 +134,158 @@ class File_Utils:
                     yield line[::-1]  # Reverse the line before yielding.
                 else: file.seek(-1, os.SEEK_CUR)  # Move one character back to include the newline character in the line.
 
-    def read_json(self, json_file):
-        """Read .json files."""
-        with open(json_file) as file:
-            return [i for i in json.load(file)]
+    def read_json(self, file_path: str) -> Union[List[Dict[str, Any]], bool]:
+        """
+        Returns list of data from .json files.
 
-    def update_json(self, data): pass
+        Args:
+            file_path str: File to read.
 
-    def read_csv(self, csv_file):
-        """Read .csv files in bot_files directory."""
-        os.chdir(config.get('bot_filepath'))
-        with open(csv_file) as file:
+        Returns:
+            list, bool: Returns a list of json dict data, or a False if anything failed.
+        """
+
+
+        if not self.test_file(file_path): return False
+        try:
+            with open(file_path) as file:
+                return [i for i in json.load(file)]
+        except: return False
+
+    def write_json(self, file_path: str, data: dict) -> bool:
+        """
+        Write data to json file.
+
+        Args:
+            file_path str: File path to write json data to.
+            data dict: Dictionary data to write to file.
+
+        Returns:
+            bool: Whether if succesful or not.
+        """
+
+        if not self.test_file(file_path): return False
+        try:
+            with open(file_path, "w") as outfile:
+                outfile.write(json.dumps(data, indent=4))
+        except:
+            lprint(f"ERROR: Problem writing to json file: {file_path}")
+            return False
+        return True
+
+    def read_csv(self, file_path: str) -> Union[List, bool]:
+        """
+        Get data from csv file.
+
+        Args:
+            file_path str: Path of file.
+
+        Returns:
+            list, bool: List of csv data or False if failed.
+        """
+
+        if not self.test_file(file_path): return False
+        with open(file_path) as file:
             return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
-    def update_csv(self, csv_file, new_data=None):
-        """Updates csv files in bot_files directory."""
+    def write_csv(self, file_path: str, data: list) -> bool:
+        """
+        Write datat o csv file.
 
-        os.chdir(config.get('bot_filepath'))
+        Args:
+            file_path str: Path of file.
+            data list: data to write to csv.
 
-        with open(csv_file, 'w') as file:
-            writer = csv.writer(file)
-            writer.writerows(new_data)
+        Returns:
+            bool: If successful.
+        """
 
-    def get_from_index(self, path, index, mode):
+        if not self.test_file(file_path): return False
+        try:
+            with open(file_path, 'w') as file:
+                csv.writer(file).writerows(data)
+        except: return False
+
+        return True
+
+    def get_from_index(self, path: str, index: int, mode: str) -> str:
         """
         Get server or world backup folder name from passed in index number
 
         Args:
-            path str: Location to find world or server backups.
-            index int: Select specific folder, get index from other functions like ?worldbackupslist, ?serverbackupslist
+            path str: Path to search through.
+            index int: Select specific folder/file by index, get index from commands like ?worldbackupslist, ?serverbackupslist
+            mode str: Only get files or folders.
 
         Returns:
-                str: file path of selected folder.
+                str: Path of selected.
         """
 
         items = ['placeholder']  # Listed items in Discord (select menus, embeds) start at 1 (for user convients). But python is 0, soooo, yeah. need this.
-        for i in reversed(sorted(os.listdir(path))):
-            if mode == 'f': items.append(i)
-            elif mode == 'd': items.append(i)
+        for i in reversed(sorted(listdir(path))):
+            if 'f' in mode and isfile(join(path, i)):
+                items.append(i)
+            elif 'd' in mode and isdir(join(path, i)):
+                items.append(i)
             else: continue
+        try:
+            return f'{path}/{items[index]}'
+        except: return ''
 
-        return f'{path}/{items[index]}'
-
-    def enum_dir(self, path, mode, index_mode=False):
+    # TODO Test (everything)
+    def enum_dirs_for_discord(self, path: str, mode: str, index_mode: bool = False):
         """
-        Returns enumerated list of directories in path.
+        Returns a list containing index for folder/file in a path with variables for Discord select component.
 
         Args:
             path str: Path of world or server backups location.
             mode str: Aggregate only files or only directories.
             index_mode bool: Put index as second item in list.
+
+        Returns:
+            list: Data for Discord select component.
         """
 
         return_list = []
-        if not os.path.isdir(path): return False
+        if not isdir(path): return []
 
         index = 1
-        for item in reversed(sorted(os.listdir(path))):
+        for item in reversed(sorted(listdir(path))):
             # Appends only either file or directory to items list.
             flag = False
-            if 'f' in mode:
-                if os.path.isfile(os.path.join(path, item)): flag = True
-            elif 'd' in mode:
-                if os.path.isdir(os.path.join(path, item)): flag = True
+            if 'f' in mode and isfile(join(path, item)): flag = True
+            elif 'd' in mode and isdir(join(path, item)): flag = True
 
             if flag:
+                component_data = [item, index, False, index]
                 if index_mode:
                     # label, value, is default, description
-                    return_list.append([item, index, False, index])  # Need this for world/server commands
+                    return_list.append(component_data)  # Need this for world/server commands
                     index += 1
                     continue
                 if 's' in mode and item in config.get('servers'):
-                    return_list.append([item, item, False, backend.get_server(item)['server_description']])  # For server mode for ?controlpanel command component
+                    component_data[-1] = backend.get_server(item)['server_description']
+                    return_list.appen(component_data)  # For server mode for ?controlpanel command component
                     index += 1
                     continue
-                return_list.append([item, item, False, index])  # Last 2 list items is for new_selection.
+                return_list.append(component_data)  # Last 2 list items is for new_selection.
             else: continue
         return return_list
 
-    def delete_dir(self, backup):
+    def delete_dir(self, path: str) -> bool:
         """
-        Delete world or server backup.
+        Delete directory.
 
         Args:
-            backup str: Path of backup to delete.
+            backup str: Path direcotry to delete.
+
+        Returns:
+            bool: If successful.
         """
 
-        shutil.rmtree(backup)
+        try: shutil.rmtree(path)
+        except: return False
+        return True
 
 
 class Utils:
@@ -182,7 +314,7 @@ class Utils:
             dst str: Destination for backup.
         """
 
-        if not os.path.isdir(dst): os.makedirs(dst)
+        if not isdir(dst): os.makedirs(dst)
         # TODO add multiple world folders backup
         # folder name: version tag if known, date, optional name
         version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
@@ -299,12 +431,12 @@ class Utils:
         except: return None
         return server_ip
 
-    def ping_address(self, address):
+    def ping_address(self, address: str) -> bool:
         """
         Checks if server_address address works by pinging it twice.
 
         Args:
-            address str: Address to ping.
+            address (str): Address to ping.
 
         Returns:
             bool: If successful.

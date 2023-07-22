@@ -1,4 +1,4 @@
-import subprocess, platform, requests, asyncio, shutil, random, json, os, re
+import subprocess, fileinput, requests, asyncio, json, os, re
 import mctools
 from collections import deque
 from os.path import join
@@ -125,9 +125,6 @@ class Backend:
         if server_name in config.servers:
             return config.servers[server_name]
         else: return False
-
-    import os
-    from collections import deque
 
     def read_server_log(self, search=None, file_path=None, lines=15, find_all=False, stopgap_str=None, top_down_mode=False):
         """
@@ -265,7 +262,7 @@ class Backend:
                 split_line = line.split('=', 1)
 
                 # If found match, and user passed in new value to update it.
-                if target_property in split_line[0] and len(split_line) > 1:
+                if property_name in split_line[0] and len(split_line) > 1:
                     if value:
                         split_line[1] = value  # edits value section of line
                         new_line = return_line = '='.join(split_line)
@@ -423,6 +420,7 @@ class Backend:
         Returns:
             bool: If ping was successful.
         """
+        utils.ping_address()
 
     def server_ping_query(self):
         """
@@ -435,6 +433,7 @@ class Backend:
         global server_active
 
         if not config.get('server_address'): return False
+
         try:
             ping = mctools.PINGClient(config.get('server_address'), config.get('server_port'))
             stats = ping.get_stats()

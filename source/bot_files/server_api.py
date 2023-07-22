@@ -1,9 +1,9 @@
 from bot_files.extra import lprint
 from bot_files.slime_vars import config
 
-
 class Server_Versioning:
-    def server_version(self):
+
+    def get_server_version(self):
         """
         Gets server version, either by reading server log or using PINGClient.
 
@@ -14,14 +14,10 @@ class Server_Versioning:
         # Manual override of server version.
         if version := config.get('server_version'): return version
 
-        if config.get('server_use_rcon') is True:
-            try: return server_ping()['version']['name']
-            except: return 'N/A'
         elif config.get('server_files_access') is True:
             try: return server_log('server version').split('version')[1].strip()
             except: return 'N/A'
         return 'N/A'
-
 
     def download_official(self): pass
 
@@ -131,6 +127,13 @@ class Server_API(Server_Versioning):
 class Server_Rcon_API(Server_API):
     def send_command(self, command): pass
     def get_status(self): pass
+
+    def _get_server_version(self): pass
+
+            try:
+                return server_ping()['version']['name']
+            except:
+                return 'N/A'
 
     async def _send_command(self, command):
         """
