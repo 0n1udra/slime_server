@@ -1,12 +1,14 @@
+from typing import Union, Any, Dict
+
 import discord
+from discord.ext.commands import Context
+
 from bot_files.backend_functions import backend
-import bot_files.slime_vars as slime_vars
+from bot_files.slime_config import config
 
 bot = None
 
 # _data dictionary stores active components and relating data. Saved components in dict can be edited later on.
-_data = {'current_components': [], 'files_panel_component': [], 'teleport_destination': '',
-         'log_select_options': [], 'log_select_page': 0}
 
 buttons_dict = {
     'server':   [['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
@@ -28,7 +30,85 @@ buttons_dict = {
                  ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
                 }
 
-def data(var, new_value=None, reset=False):
+class Comps:
+    def __init__(self):
+        # Stores active Discord component message objects, select, buttons, embeds, etc
+        self.active_comps = {}
+        #  and associating data to make it all work.
+        self.comp_data = {'files_panel_component': [], 'teleport_destination': '',
+                          'log_select_options': [], 'log_select_page': 0}
+
+    def add_comp(self, key: str, value: Context) -> Dict:
+        """
+        Adds Discord message with component to dict, so they can be deleted later.
+
+        Args:
+            key (str): Relevant name for component message(s)
+            value (Context): Discord ctx.send() context.
+
+        Returns:
+            dict: Returns updated comp_data dictionary.
+        """
+
+        self.active_comps.update({key, value})
+        return self.active_comps
+
+    def delete_comp(self, comp_name: str) -> Dict:
+        """
+        Deletes a message containing componetns.
+
+        Args:
+            comp_name (str): The components to delete.
+
+        Returns:
+            dict: Updated active_comps dict.
+        """
+
+        self.active_comps.pop(comp_name)
+        return self.active_comps
+
+    def get_comp(self, key) -> Union[Context, None]:
+        """
+        Get Discord context message of component.
+
+        Args:
+            key:
+
+        Returns:
+            Context, None: Discord message context or None.
+        """
+        return self.active_comps.get(key, None)
+
+    def set_data(self, key: str, value: Any) -> Dict:
+        """
+        Set data needed for associating discord components.
+
+        Args:
+            key: Key.
+            value: Value.
+
+        Returns:
+            dict: Updated comp_data dict.
+        """
+
+        self.comp_data.update({key, value})
+        return self.comp_data
+
+    def get_data(self, key: str) -> Union[Any, None]:
+        """
+        Returns value from comp_data dict.
+
+        Args:
+            key: Item to get.
+
+        Returns:
+            Value of key.
+        """
+
+        return self.comp_data.get(key, None)
+
+
+def data(var: str, new_value: Any=None, reset=False):
     """
     Discord components dictionary value reader/setter function.
 

@@ -1,18 +1,20 @@
-import subprocess, fileinput, requests, asyncio, json, os, re
-import mctools
-from collections import deque
+import os
+import re
+import asyncio
+import requests
+import fileinput
 from os.path import join
+from collections import deque
+
+import mctools
 from file_read_backwards import FileReadBackwards
-from bot_files.slime_vars import config
-from bot_files.extra import lprint
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint
 from bot_files.server_api import Server_Screen_API, Server_Subprocess_API, Server_Rcon_API, Server_Tmux_API
 from bot_files.slime_utils import utils, file_utils
-from bs4 import BeautifulSoup
-#from bot_files.extra import *
 
 
 # Used for removing ANSI escape characters
-find_ansi = re.compile(r'\x1b[^m]*m')
 ctx = 'backend_functions.py'
 
 
@@ -112,19 +114,6 @@ class Backend:
         """
         return config.server_configs
 
-    def get_server(self, server_name):
-        """
-        Get configs dictionary of specific server by name.
-
-        Args:
-            server_name str: Name of server to get configs of.
-
-        Returns:
-            dict: Configs dict of specified server.
-        """
-        if server_name in config.servers:
-            return config.servers[server_name]
-        else: return False
 
     def read_server_log(self, search=None, file_path=None, lines=15, find_all=False, stopgap_str=None, top_down_mode=False):
         """
@@ -355,63 +344,6 @@ class Backend:
         else: return False
 
 
-    def download_latest():
-        """
-        Downloads latest server.jar file from Minecraft website. Also updates eula.txt.
-
-        Returns:
-            bool: If download was successful.
-        """
-
-        os.chdir(config.get('mc_path'))
-        jar_download_url = version_info = ''
-
-        def check(type):
-            """Checks if specific keywords in server name and description."""
-            sserver = config.get('selected_server')
-            return True if type in (sserver['name'].lower(), sserver['description'].lower()) else False
-
-        if check('vanilla'):
-            def request_json(url): return json.loads(requests.get(url).text)
-
-            # Finds latest release from manifest and gets required data.
-            manifest = request_json('https://launchermeta.mojang.com/mc/game/version_manifest.json')
-            for i in manifest['versions']:
-                if i['type'] == 'release':
-                    version_info = f"{i['id']} ({i['time']})"
-                    jar_download_url = request_json(i['url'])['downloads']['server']['url']
-                    break  # Breaks loop on firest release found (should be latest).
-
-        if check('papermc'):
-            base_url = 'https://papermc.io/api/v2/projects/paper'
-
-            # Extracts required data for download URL. PaperMC API: https://papermc.io/api/docs/swagger-ui/index.html?configUrl=/api/openapi/swagger-config
-            def get_data(find, url=''): return json.loads(requests.get(f'{base_url}{url}').text)[find]
-            latest_version = get_data('versions')[-1]  # Gets latest Minecraft version (e.g. 1.18.2).
-            latest_build = get_data('builds', f'/versions/{latest_version}')[-1]  # Get PaperMC Paper latest build (277).
-            # Get file name to download (paper-1.18.2-277.jar).
-            latest_jar = version_info = get_data('downloads', f'/versions/{latest_version}/builds/{latest_build}')['application']['name']
-            # Full download URL: https://papermc.io/api/v2/projects/paper/versions/1.18.2/builds/277/downloads/paper-1.18.2-277.jar
-            jar_download_url = f'{base_url}/versions/{latest_version}/builds/{latest_build}/downloads/{latest_jar}'
-
-        if not jar_download_url:
-            lprint(ctx, "ERROR: Issue downloading new jar")
-            return False
-
-        # Saves new server.jar in current server.
-        new_jar_data = requests.get(jar_download_url).content
-
-        try:  # Sets eula.txt file.
-            with open(config.get('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')
-        except IOError: lprint(ctx, f"Errorr: Updating eula.txt file: {config.get('server_path')}")
-
-        try:  # Saves file as server.jar.
-            with open(config.get('server_path') + '/server.jar', 'wb+') as f: f.write(new_jar_data)
-        except IOError: lprint(ctx, f"ERROR: Saving new jar file: {config.get('server_path')}")
-        else: return version_info, jar_download_url
-
-        return False
-    
 
     def server_ping(self):
         """
@@ -496,6 +428,7 @@ class Backend:
 
             if not log_data: return False
 
+            find_ansi = re.compile(r'\x1b[^m]*m')
             # Use regular expression to extract player names
             log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
             text = log_data[-2]  # There are 2 of a max of 20 players online
@@ -527,6 +460,52 @@ class Backend:
             if log_data:
                 location = log_data.split('[')[-1][:-3].replace('d', '')
                 return location
+
+
+    def new_server(self, name):
+        """
+        Create a new world or server backup, by copying and renaming folder.
+
+        Args:
+            new_name str: Name of new copy. Final name will have date and time prefixed.
+            src str: Folder to backup, whether it's a world folder or a entire server folder.
+            dst str: Destination for backup.
+        """
+
+        new_folder = join(config.get('servers_path'), name.strip())
+        os.mkdir(new_folder)
+        return new_folder
+
+    def new_backup(self, new_name, src, dst):
+        """
+        Create a new world or server backup, by copying and renaming folder.
+
+        Args:
+            new_name str: Name of new copy. Final name will have date and time prefixed.
+            src str: Folder to backup, whether it's a world folder or a entire server folder.
+            dst str: Destination for backup.
+        """
+
+        if not isdir(dst): os.makedirs(dst)
+        # TODO add multiple world folders backup
+        # folder name: version tag if known, date, optional name
+        version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
+        new_name = f"({extra.get_datetime()}) {version}{new_name}"
+        new_backup_path = join(dst, new_name.strip())
+        shutil.copytree(src, new_backup_path)
+        return new_backup_path
+
+    def restore_backup(self, src, dst):
+        """
+        Restores world or server backup. Overwrites existing files.
+
+        Args:
+            src str: Backed up folder to copy to current server.
+            dst str: Location to copy backup to.
+        """
+
+        shutil.rmtree(dst)
+        shutil.copytree(src, dst)
 
 
 backend = Backend()

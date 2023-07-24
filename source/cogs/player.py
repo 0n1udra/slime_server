@@ -3,7 +3,7 @@ from discord.ext import commands
 from bot_files.backend_functions import send_command, format_args, server_status, lprint
 import bot_files.backend_functions as backend
 import bot_files.components as components
-import bot_files.slime_vars as slime_vars
+import bot_files.slime_config as slime_vars
 from bot_files.extra import convert_to_bytes
 
 # ========== Player: gamemode, kill, tp, etc

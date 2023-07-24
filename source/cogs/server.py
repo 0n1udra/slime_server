@@ -1,11 +1,16 @@
-import discord, asyncio, shutil, os
-from os.path import join
+import shutil
+import asyncio
+from os import listdir, rename
+from os.path import join, isdir, isfile
+
+import discord
 from discord.ext import commands, tasks
-import bot_files.backend_functions as backend
-from bot_files.backend_functions import send_command, format_args, server_status, lprint
+
+import bot_files.slime_backend as backend
+from bot_files.slime_backend import send_command, format_args, server_status, lprint
 from bot_files.extra import get_parameter, convert_to_bytes
 import bot_files.components as components
-import bot_files.slime_vars as slime_vars
+import bot_files.slime_config as slime_vars
 
 ctx = 'server.py'
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
@@ -72,7 +77,7 @@ class Server(commands.Cog):
 
         if server_name not in slime_vars.servers:
             # TODO simplify os isdir and join into function
-            if os.path.isdir(join(slime_vars.servers_path, server_name)):
+            if isdir(join(slime_vars.servers_path, server_name)):
                 await ctx.send("Server folder found, but no server configs.\nUse the Edit button to create a new config entry for it.")
                 return
         data = slime_vars.servers[server_name]
@@ -95,7 +100,7 @@ class Server(commands.Cog):
                 return
 
             # Tries to create new folder.
-            if os.path.isdir(join(slime_vars.servers_path, new_server_name)):
+            if isdir(join(slime_vars.servers_path, new_server_name)):
                 await ctx.send(f"Folder `{new_server_name}` already exists. Will create new servers entry in config.")
             else:
                 try: backend.new_server(new_server_name)
@@ -136,7 +141,7 @@ class Server(commands.Cog):
             server_path = join(slime_vars.servers_path, server_name)
             new_path = join(slime_vars.servers_path, new_data['server_name'])
             # Renames folder if name changed
-            try: os.rename(server_path, new_path)
+            try: rename(server_path, new_path)
             except:
                 await ctx.send("Server name already in use.")
                 lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
@@ -268,9 +273,9 @@ class Server(commands.Cog):
         example_server = slime_vars.config['servers']['example'].copy()
 
         await ctx.send("***Scanning for new servers...***")
-        for folder in os.listdir(slime_vars.servers_path):
+        for folder in listdir(slime_vars.servers_path):
             # Checks if server already in 'slime_vars.servers' dict, and if 'folder' is actually a folder.
-            if folder not in slime_vars.servers.keys() and os.path.isdir(join(slime_vars.servers_path, folder)):
+            if folder not in slime_vars.servers.keys() and isdir(join(slime_vars.servers_path, folder)):
                 # Will update server server_name and file paths.
                 slime_vars.config['servers'][folder] = backend.update_server_paths(example_server.copy(), folder)
                 slime_vars.update_vars(slime_vars.config)  # Updates global vars and json file
@@ -329,7 +334,7 @@ class Server(commands.Cog):
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
-        if not await send_command('save-all'): return
+        if not await backend.send_command('save-all'): return
 
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
@@ -369,10 +374,10 @@ class Server(commands.Cog):
         else:
             slime_vars.autosave_interval = arg
 
-        # Enables/disables autosave tasks.loop(). Also edits slime_vars.py file, so autosave state can be saved on bot restarts.
+        # Enables/disables autosave tasks.loop(). Also edits slime_config.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
         if arg.lower() in backend.enable_inputs:
-            # Starts loop, updates enable_autosave, edits slime_vars.py, output to log
+            # Starts loop, updates enable_autosave, edits slime_config.py, output to log
             self.autosave_task.start()
             slime_vars.enable_autosave = True
             lprint(ctx, f'Autosave: Enabled (interval: {slime_vars.autosave_interval}m)')
@@ -429,11 +434,13 @@ class Server(commands.Cog):
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
-        fields = [['Current Server', f"Status: {status}\nServer: {slime_vars.server_name}\nDescription: {slime_vars.server_description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
-                  ['Autosave', f"{'Enabled' if slime_vars.enable_autosave is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
-                  ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_address()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
-                  ['Location', f"`{slime_vars.server_path}`"],
-                  ['Launch Command', f"`{slime_vars.server_launch_command}`"]]
+        fields = [
+            ['Current Server', f"Status: {status}\nServer: {slime_vars.server_name}\nDescription: {slime_vars.server_description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+            ['Autosave', f"{'Enabled' if slime_vars.enable_autosave is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
+            ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_address()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+            ['Location', f"`{slime_vars.server_path}`"],
+            ['Launch Command', f"`{slime_vars.server_launch_command}`"]
+        ]
         await ctx.send(embed=components.new_embed(fields, 'Server Status'))
 
         if status is not False:  # Only fetches players list if server online.
@@ -552,7 +559,7 @@ class Server(commands.Cog):
         """Shows full server properties file."""
         global slime_vars
 
-        if not os.path.isfile(slime_vars.server_properties_filepath):
+        if not isfile(slime_vars.server_properties_filepath):
             await ctx.send('**ERROR:** Could not get server properties file')
             return
         with open(slime_vars.server_properties_filepath, 'rb') as f:

@@ -9,6 +9,7 @@ import csv
 import json
 import shutil
 import psutil
+import random
 import inspect
 import requests
 import datetime
@@ -16,11 +17,11 @@ import subprocess
 from os import listdir
 from os.path import isdir, isfile, join, exists
 
-from typing import Any, Union, List, Dict, Generator
+from typing import Union, Any, Tuple, List, Dict, Generator
 import mctools
 from discord.ext.commands import Context
 
-from bot_files.slime_vars import config
+from bot_files.slime_config import config
 from bot_files.backend_functions import backend
 import bot_files.components as components
 
@@ -287,54 +288,70 @@ class File_Utils:
         except: return False
         return True
 
+    def new_dir(self, path: str) -> bool:
+        """
+        Create a new world or server backup, by copying and renaming folder.
+
+        Args:
+            path str: Path to create new directory.
+
+        Returns:
+            bool: If successfully created new dir at path.
+        """
+
+        try:
+            os.mkdir(path)
+        except:
+            return False
+        return True
+
+    def copy_dir(self, path: str, new_path: str) -> bool:
+        """
+
+        Args:
+            path:
+            new_path:
+
+        Returns:
+
+        """
+
+        try:
+            shutil.copytree(path, new_path)
+        except:
+            return False
+        return True
+
+    def move_dir(self, path: str, new_path: str) -> bool:
+        """
+        Copies then delete original.
+
+        Args:
+            path: Directory to move.
+            new_path: Where to move to.
+
+        Returns:
+            bool: If successfully copied and deleted original.
+        """
+
+        if not self.copy_dir(path, new_path) and not self.delete_dir(path):
+            return False
+        return True
+
 
 class Utils:
 
-    def new_server(self, name):
-        """
-        Create a new world or server backup, by copying and renaming folder.
-
-        Args:
-            new_name str: Name of new copy. Final name will have date and time prefixed.
-            src str: Folder to backup, whether it's a world folder or a entire server folder.
-            dst str: Destination for backup.
+    # Get command and unique number used to check if server console reachable.
+    def get_check_command(self) -> Tuple:
         """
 
-        new_folder = join(config.get('servers_path'), name.strip())
-        os.mkdir(new_folder)
-        return new_folder
+        Returns:
 
-    def new_backup(self, new_name, src, dst):
-        """
-        Create a new world or server backup, by copying and renaming folder.
-
-        Args:
-            new_name str: Name of new copy. Final name will have date and time prefixed.
-            src str: Folder to backup, whether it's a world folder or a entire server folder.
-            dst str: Destination for backup.
         """
 
-        if not isdir(dst): os.makedirs(dst)
-        # TODO add multiple world folders backup
-        # folder name: version tag if known, date, optional name
-        version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
-        new_name = f"({extra.get_datetime()}) {version}{new_name}"
-        new_backup_path = join(dst, new_name.strip())
-        shutil.copytree(src, new_backup_path)
-        return new_backup_path
-
-    def restore_backup(self, src, dst):
-        """
-        Restores world or server backup. Overwrites existing files.
-
-        Args:
-            src str: Backed up folder to copy to current server.
-            dst str: Location to copy backup to.
-        """
-
-        shutil.rmtree(dst)
-        shutil.copytree(src, dst)
-
+        random_number = str(random.random())
+        status_check_command = config.get('status_checker_command') + ' ' + random_number
+        return status_check_command, random_number
 
     def get_parameter(self, arg, nrg_msg=False, key='second_selected', **kwargs):
         """

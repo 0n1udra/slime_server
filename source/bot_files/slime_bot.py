@@ -236,7 +236,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         embed = discord.Embed(title='Useful Websites :computer:')
 
-        # Creates embed of links from useful_websites dictionary from slime_vars.py.
+        # Creates embed of links from useful_websites dictionary from slime_config.py.
         for name, url in slime_vars.selected_server['useful_websites'].items():
             embed.add_field(name=name, value=url, inline=False)
 
@@ -312,13 +312,15 @@ class Discord_Components_Funcs(commands.Cog):
 
         player_selection_panel = await ctx.send("**Player Panel**", view=components.new_selection(select_options, 'player_selected', "Select Player"))
 
-        player_buttons = [['Kill', 'kill player', '\U0001F52A'], ['Clear Inventory', 'clearinventory player', '\U0001F4A5'],
-                          ['Location', 'playerlocate player', '\U0001F4CD'], ['Teleport', '_teleport_selected player', '\U000026A1'],
-                          ['Survival', 'gamemode player survival', '\U0001F5E1'], ['Adventure', 'gamemode player adventure', '\U0001F5FA'],
-                          ['Creative', 'gamemode player creative', '\U0001F528'], ['Spectator', 'gamemode player spectator', '\U0001F441'],
-                          ['Kick', 'kick player', '\U0000274C'], ['Ban', 'ban player', '\U0001F6AB'],
-                          ['OP', 'opadd player', '\U000023EB'], ['DEOP', 'opremove player', '\U000023EC'],
-                          ['Reload', 'playerpanel', '\U0001F504']]
+        player_buttons = [
+            ['Kill', 'kill player', '\U0001F52A'], ['Clear Inventory', 'clearinventory player', '\U0001F4A5'],
+            ['Location', 'playerlocate player', '\U0001F4CD'], ['Teleport', '_teleport_selected player', '\U000026A1'],
+            ['Survival', 'gamemode player survival', '\U0001F5E1'], ['Adventure', 'gamemode player adventure', '\U0001F5FA'],
+            ['Creative', 'gamemode player creative', '\U0001F528'], ['Spectator', 'gamemode player spectator', '\U0001F441'],
+            ['Kick', 'kick player', '\U0000274C'], ['Ban', 'ban player', '\U0001F6AB'],
+            ['OP', 'opadd player', '\U000023EB'], ['DEOP', 'opremove player', '\U000023EC'],
+            ['Reload', 'playerpanel', '\U0001F504']
+        ]
 
         b1 = await ctx.send('', view=components.new_buttons(player_buttons))
 
@@ -377,11 +379,13 @@ class Discord_Components_Funcs(commands.Cog):
         await components.clear()
 
         # label, value, is default, description
-        mode_select_options = [['Buttons', '_update_control_panel buttons', False, 'Show buttons for common actions'],
-                               ['Servers', '_update_control_panel servers', False, 'Change server'],
-                               ['Log Files', '_update_control_panel log_files', False, 'Download server log files'],
-                               ['World Backups', '_update_control_panel world_backups', False, 'Backups of world folder'],
-                               ['Server Backups', '_update_control_panel server_backups', False, 'Backups of server folder']]
+        mode_select_options = [
+            ['Buttons', '_update_control_panel buttons', False, 'Show buttons for common actions'],
+            ['Servers', '_update_control_panel servers', False, 'Change server'],
+            ['Log Files', '_update_control_panel log_files', False, 'Download server log files'],
+            ['World Backups', '_update_control_panel world_backups', False, 'Backups of world folder'],
+            ['Server Backups', '_update_control_panel server_backups', False, 'Backups of server folder']
+        ]
         selection_msg = await ctx.send("**Mode**", view=components.new_selection(mode_select_options, 'update_server_panel', 'Select Mode'))
 
         # Second select menu, world backups, server backups, log files.

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import json, time, sys, os
-import bot_files.slime_vars as slime_vars
+import bot_files.slime_config as slime_vars
 from bot_files.slime_bot import bot
 from bot_files.extra import lprint, update_from_user_config
 import bot_files.backend_functions as backend
@@ -143,7 +143,7 @@ def start_tmux_session():
     time.sleep(1)
 
 def server_start():
-    """Start Minecraft server, method varies depending on variables set in slime_vars.py."""
+    """Start Minecraft server, method varies depending on variables set in slime_config.py."""
 
     if slime_vars.use_tmux is True:
         backend.server_start()
@@ -205,7 +205,7 @@ Autosave            {slime_vars.enable_autosave} - {slime_vars.autosave_interval
 Server URL          {slime_vars.server_address if nono else no}
 Server Port         {slime_vars.server_port if nono else no}
 
-NOTE: More info on the configs in README.md or use the comments in slime_vars.py file in bot_files.
+NOTE: More info on the configs in README.md or use the comments in slime_config.py file in bot_files.
 """
     if slime_vars.use_tmux: vars_msg += f"""
 Tmux:

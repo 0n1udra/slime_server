@@ -1,12 +1,18 @@
-import discord, platform, getpass, os, json
-from os.path import join
-
 __version__ = '9.0'
 __date__ = '19/07/2023'
 __author__ = 'github.com/0n1udra'
 __license__ = 'GPL 3'
 __status__ = 'Development'
 __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
+
+import os
+import json
+import getpass
+import platform
+from os.path import join
+from typing import Union, Dict
+
+import discord
 
 class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +38,7 @@ class Config():
         try: self.user = os.getlogin()
         except: self.user = getpass.getuser()
         if not self.user:
-            print("ERROR: Need to set 'user' variable in slime_vars.py")
+            print("ERROR: Need to set 'user' variable in slime_config.py")
             exit()
 
         # Get configs from run_bot.py setup_configs()
@@ -111,6 +117,8 @@ class Config():
                     'server_use_subprocess': False,
                     # Launch command to start Minecraft java server.
                     'server_launch_command': 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui',
+                    # Set a custom path where to launch server. Set to None to use default.
+                    'server_launch_path': None,
 
                     # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
                     'server_use_rcon': False,
@@ -192,7 +200,6 @@ class Config():
 
         return server_dict
 
-
     def update_servers_vars():
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         global slime_vars
@@ -216,6 +223,18 @@ class Config():
             deep_update(config, json.load(openfile))
         return config
 
+    def get_server_config(self, server_name: str) -> Union[Dict, None]:
+        """
+        Get configs dictionary of specific server by name.
+
+        Args:
+            server_name str: Name of server to get configs of.
+
+        Returns:
+            dict, None: Configs dict of specified server or None.
+        """
+
+        return config.servers.get(server_name, None)
 
 print("OK")
 config = Config()
