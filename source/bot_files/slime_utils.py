@@ -22,28 +22,32 @@ import mctools
 from discord.ext.commands import Context
 
 from bot_files.slime_config import config
-from bot_files.backend_functions import backend
-import bot_files.components as components
+from bot_files.slime_backend import backend
+import bot_files.discord_components as components
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
-def lprint(msg: str, ctx: Context = None) -> None:
+def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
     """
     Prints and Logs events in file.
+    Logs who or where function/command was called.
+    If received a ctx object, this will extract a username; else it'll get the filename of where the function originates.
 
     Args:
-        msg (str): Message.
-        ctx (Discord Context): Log who or what did the action.
+        arg1 (Discord Context, str): Either Discord context or a message.
+        arg2 (Discord Context): Message if recieved Discord context also.
     """
 
     # Get Discord username if provided Context else gets filename of where lprint() is being called from.
-    if isinstance(ctx, Context):
-        ctx = ctx.message.author
+    if isinstance(arg1, Context):
+        ctx = arg1.message.author
+        msg = arg2
     else:
         ctx = lambda: inspect.currentframe().f_back.f_globals["__file__"]
+        msg = arg1
 
     # Format date and print log message.
     output = f"[{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ({ctx}): {msg}"
@@ -444,7 +448,7 @@ class Utils:
         global server_ip
         try:
             server_ip = json.loads(requests.get('http://jsonip.com').text)['ip']
-            config.get('server_ip') = server_ip
+            config.set_config('server_ip', server_ip)
         except: return None
         return server_ip
 
@@ -461,7 +465,7 @@ class Utils:
 
         if config.get('windows_compatibility') is True:  # If on windows.
             try:
-                if 'TTL=' in subprocess.run(["ping", "-n", "1", address], capture_output=True, text=True, timeout=10).stdout:
+                if 'TTL=' in subprocess.run(["ping", "-n", "2", address], capture_output=True, text=True, timeout=10).stdout:
                     return True
             except: return False
         else:
@@ -474,6 +478,59 @@ class Utils:
             return False
 
     def convert_to_bytes(data): return io.BytesIO(data.encode())
+
+    def parse_get_player_info(self, data: str) -> Any:
+
+        """Extracts wanted data from output of 'list' command."""
+
+        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
+        try:
+            version = int(server_version().split('.')[1])
+        except:
+            version = 20
+        # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
+        if version <= 12:
+            response = await send_command("list", discord_msg=False)
+            # Need to use server_log here because I need to get multiple line outputs.
+            log_data = server_log(log_mode=True, stopgap_str=response[1])
+            # Parses and returns info from log lines.
+            output = []
+            for i in log_data.split('\n'):
+                output.append(i)
+                if 'There are' in i: break
+            output = output[:2]
+            if not output: return False
+            # Parses data from log output. Ex: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+            text = output[1].split(':')[-2].strip()
+            player_names = output[0].split(':')[-1].split(',')
+            return player_names, text
+        else:
+
+            find_ansi = re.compile(r'\x1b[^m]*m')
+            # Use regular expression to extract player names
+            log_data = log_data.split(
+                ':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+            text = log_data[-2]  # There are 2 of a max of 20 players online
+            text = find_ansi.sub('', text)  # Remove unwanted escape characters
+            player_names = log_data[-1]  # R3diculous, MysticFrogo
+            # If there's no players active, player_names will still contain some anso escape characters.
+            if len(player_names.strip()) < 5:
+                return None
+            else:
+
+                player_names = [f"{i.strip()[:-4]}\n" if config.get('server_use_rcon') else f"{i.strip()}" for i in
+                                (log_data[-1]).split(',')]
+                # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+                # player_names_discord = [f"`{i.strip()[:-4]}`\n" if server_use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+                new = []
+                for i in player_names:
+                    x = find_ansi.sub('', i).strip().replace('[3', '')
+                    x = x.split(' ')[-1]
+                    x = x.replace('\\x1b', '').strip()
+                    new.append(x)
+                player_names = new
+                return player_names, text
+    return False
 
 
 utils = Utils()

@@ -1,4 +1,4 @@
-from typing import Union, Any, Dict
+from typing import Union, Any, List, Dict
 
 import discord
 from discord.ext.commands import Context
@@ -6,10 +6,8 @@ from discord.ext.commands import Context
 from bot_files.backend_functions import backend
 from bot_files.slime_config import config
 
+
 bot = None
-
-# _data dictionary stores active components and relating data. Saved components in dict can be edited later on.
-
 buttons_dict = {
     'server':   [['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
                  ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'], ['Reboot Server', 'serverrestart', '\U0001F501'],
@@ -53,7 +51,7 @@ class Comps:
         self.active_comps.update({key, value})
         return self.active_comps
 
-    def delete_comp(self, comp_name: str) -> Dict:
+    async def delete_comp(self, comp_name: str) -> Dict:
         """
         Deletes a message containing componetns.
 
@@ -65,6 +63,8 @@ class Comps:
         """
 
         self.active_comps.pop(comp_name)
+        try: await self.active_comps[comp_name].delete()
+        except: pass
         return self.active_comps
 
     def get_comp(self, key) -> Union[Context, None]:
@@ -107,39 +107,81 @@ class Comps:
 
         return self.comp_data.get(key, None)
 
+    async def clear_current_comps(self) -> None:
+        """
+        Deletes old components to prevent conflicts.
+        When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
+        When new panel is opened the old one is deleted.
 
-def data(var: str, new_value: Any=None, reset=False):
-    """
-    Discord components dictionary value reader/setter function.
+        Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
+        e.g. Deleting a listing in a selection box.
+        """
 
+        for k, v in self.active_comps.items():
+            try: await v.delete()
+            except: pass
+            self.active_comps[k] = []
 
-    """
+    def new_modal(self, field_args: List, title: str, custom_id: str) -> discord.ui.Modal:
+        modal = Discord_Modal(title=title, custom_id=custom_id)
 
-    global _data
+        for field in field_args:
+            if field[0] == 'text':
+                style = discord.TextStyle.short
+                if field[5]: style = discord.TextStyle.long  # If long, default is short
+                modal.add_item(discord.ui.TextInput(label=field[1], custom_id=field[2], placeholder=field[3], default=field[4], style=style, required=field[6], max_length=field[7]))
+            elif field[0] == 'select':
+                pass
+            else: continue
+        return modal
 
-    # To set clear out the value use 0 instead of None. e.g. data('player_selected', 0)
-    if new_value is not None: _data[var] = new_value
+    def new_buttons(self, buttons_list: List) -> discord.ui.View:
+        """Create new discord.ui.View and add buttons, then return said view."""
 
-    if var in _data:
-        return_data = _data[var]
-        if reset: _data.pop(var)
-        return return_data
-    else: return False
+        view = discord.ui.View(timeout=None)
+        for bmode in buttons_list:
+            if len(bmode) == 2: bmode.append(None)  # For buttons with no emoji.
+            view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
+        return view
 
-async def clear():
-    """
-    Deletes old components to prevent conflicts.
-    When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
-    When new panel is opened the old one is deleted.
+    def new_selection(self, select_options_args: List, custom_id: str, placeholder: str) -> discord.ui.View:
+        """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
 
-    Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
-    e.g. Deleting a listing in a selection box.
-    """
+        view = discord.ui.View(timeout=None)
+        select_options = []
 
-    for i in data('current_components'):
-        try: await i.delete()
-        except: pass
-    data('current_components', [])
+        # Create options for select menu.
+        for option in select_options_args:
+            if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
+            elif len(option) == 3: option.append(None)
+            select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
+        view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
+        return view
+
+    def new_embed(self, fields: List, title: str) -> discord.Embed:
+        """Create new Embed, adds fields, returns embed."""
+
+        embed = discord.Embed(title=title)
+
+        for i in fields:
+            if len(i) == 2: i.append(False)
+            embed.add_field(name=i[0], value=i[1], inline=i[2])
+        return embed
+
+    def server_modal_fields(self, server_name: str) -> List[List]:
+        # Uses example server as fallback
+        _server = backend.get_server(server_name)
+        data = _server if _server else backend.get_server('example')
+
+        # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
+        # Limited to 5 components in modal
+        return [['text', 'Server Name', 'server_name', 'Name of new server', data['server_name'], False, True, 50],
+                ['text', 'Description', 'server_description', 'Add description', data['server_description'], True, True, 500],
+                ['text', 'Server Domain/IP', 'server_address', 'Server domain or IP address', data['server_address'], False, True, 500],
+                ['text', 'Launch Command', 'server_launch_command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
+                ['text', 'Wait Time (server startup in seconds)', 'startup_wait_time', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]
+
+comps = Comps()
 
 class Discord_Modal(discord.ui.Modal):
     def __init__(self, title, custom_id):
@@ -156,7 +198,7 @@ class Discord_Modal(discord.ui.Modal):
             submitted_data[i['custom_id']] = i['value']
 
         # Saves data, so it can be retrieved later by other functions, and calls corresponding function using modal's custom_id.
-        data(custom_id, submitted_data)
+        comps.set_data(custom_id, submitted_data)
         ctx = await bot.get_context(interaction.message)  # Get ctx from message.
         await ctx.invoke(bot.get_command(custom_id), 'submitted')
 
@@ -216,61 +258,3 @@ class Discord_Button(discord.ui.Button):
             await interaction.response.defer()
             await ctx.invoke(bot.get_command(custom_id))
 
-def new_modal(field_args, title, custom_id):
-    modal = Discord_Modal(title=title, custom_id=custom_id)
-
-    for field in field_args:
-        if field[0] == 'text':
-            style = discord.TextStyle.short
-            if field[5]: style = discord.TextStyle.long  # If long, default is short
-            modal.add_item(discord.ui.TextInput(label=field[1], custom_id=field[2], placeholder=field[3], default=field[4], style=style, required=field[6], max_length=field[7]))
-        elif field[0] == 'select':
-            pass
-        else: continue
-    return modal
-
-def new_buttons(buttons_list):
-    """Create new discord.ui.View and add buttons, then return said view."""
-
-    view = discord.ui.View(timeout=None)
-    for bmode in buttons_list:
-        if len(bmode) == 2: bmode.append(None)  # For buttons with no emoji.
-        view.add_item(Discord_Button(label=bmode[0], custom_id=bmode[1], emoji=bmode[2]))
-    return view
-
-def new_selection(select_options_args, custom_id, placeholder):
-    """Create new discord.ui.View, add Discord_Select and populates options, then return said view."""
-
-    view = discord.ui.View(timeout=None)
-    select_options = []
-
-    # Create options for select menu.
-    for option in select_options_args:
-        if len(option) == 2: option += False, None  # Sets default for 'Default' arg for SelectOption.
-        elif len(option) == 3: option.append(None)
-        select_options.append(discord.SelectOption(label=option[0], value=option[1], default=option[2], description=option[3]))
-    view.add_item(Discord_Select(options=select_options, custom_id=custom_id, placeholder=placeholder))
-    return view
-
-def new_embed(fields, title):
-    """Create new Embed, adds fields, returns embed."""
-
-    embed = discord.Embed(title=title)
-
-    for i in fields:
-        if len(i) == 2: i.append(False)
-        embed.add_field(name=i[0], value=i[1], inline=i[2])
-    return embed
-
-def server_modal_fields(server_name):
-    # Uses example server as fallback
-    _server = backend.get_server(server_name)
-    data = _server if _server else backend.get_server('example')
-
-    # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
-    # Limited to 5 components in modal
-    return [['text', 'Server Name', 'server_name', 'Name of new server', data['server_name'], False, True, 50],
-            ['text', 'Description', 'server_description', 'Add description', data['server_description'], True, True, 500],
-            ['text', 'Server Domain/IP', 'server_address', 'Server domain or IP address', data['server_address'], False, True, 500],
-            ['text', 'Launch Command', 'server_launch_command', 'Runtime Launch Command for .jar file', data['server_launch_command'], True, True, 500],
-            ['text', 'Wait Time (server startup in seconds)', 'startup_wait_time', 'After starting server, bot will wait before fetching server status and other info.', data['startup_wait_time'], False, True, 10]]

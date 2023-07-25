@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import requests
+import subprocess
 from typing import Union, Any, Callable, Tuple, List
 
 import mctools
@@ -39,6 +40,15 @@ class Server_Files:
 
 
 class Server_Versioning(Server_Files):
+    """
+    This class handles finding the latest direct download link for different server types.
+    For each server type (vanilla, PaperMC, Bukkit, etc) you need to have a get_X_url() function.
+    These URL getter functions need to find a way to get the latest server (usually .jar) file direct download link.
+    Which getter function to use is based on if keywords were found in selected server's name and description.
+    Structure of url_builder_functions dict:
+        Dict keys is a list of keywords to find in name and description of currently selected server.
+        Dict values is a callable function used to build direct download URL for latest server.
+    """
 
     def __init__(self):
         self.url_builder_functions = {
@@ -46,7 +56,6 @@ class Server_Versioning(Server_Files):
             ['paper']: self.get_papermc_url,
             ['bukkit']: self.get_bukkit_url,
         }
-        self.download_link = ''
 
     def _get_server_version(self) -> str:
         """
@@ -71,15 +80,18 @@ class Server_Versioning(Server_Files):
         if data := config.get('server_version'):
             version = data
         elif config.get('server_files_access') is True:
+            # Tries to find versio info from latest.log.
             if data := self.server_log('server version'):
                 version = data.split('version')[1].strip()
+            # Tries to find info in server.properties next.
             elif data := self.get_property('version'):
                 version = data
         else:
+            # Get version info from server console.
             version = self._get_server_version()
         return version
 
-    def check_latest_version(self):
+    def _check_latest_version(self):
         """
         Gets latest Minecraft server version number from official website using bs4.
 
@@ -100,24 +112,24 @@ class Server_Versioning(Server_Files):
         """
 
         # Picks what url builder function to use based on name and description of selected server.
-        if not self.pick_url_builder(): return False
+        url_getter = self.get_url_func()
+        if not url_getter: return False
 
-        version_info, download_url = self.downloader()
-        requests.get(download_url).content
-        def check(type):
+        version_info, download_url = url_getter()
+        download_data = requests.get(download_url).content
 
         try:  # Sets eula.txt file.
             with open(config.get('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')
         except IOError: lprint(f"ERROR: Updating eula.txt file: {config.get('server_path')}")
 
         try:  # Saves file as server.jar.
-            with open(config.get('server_path') + '/server.jar', 'wb+') as f: f.write(new_jar_data)
+            with open(config.get('server_path') + '/server.jar', 'wb+') as f: f.write(download_data)
         except IOError: lprint(f"ERROR: Saving new jar file: {config.get('server_path')}")
         else:
             return download_url, version_info
         return False
 
-    def pick_url_builder(self) -> Union[Callable, None]:
+    def get_url_func(self) -> Union[Callable, None]:
         """
         Picks what get_x_url() function to use based on name/description of selected server.
 
@@ -133,7 +145,7 @@ class Server_Versioning(Server_Files):
                 return function
         return None
 
-    def get_vanilla_url(self) -> Tuple[str]:
+    def get_vanilla_url(self) -> Tuple[str, str]:
         """
         Get direct download URL for vanilla Minecraft server.
 
@@ -152,7 +164,7 @@ class Server_Versioning(Server_Files):
                 break  # Breaks loop on firest release found (should be latest).
         return download_url, version_info
 
-    def get_papermc_url(self) -> Tuple[str]:
+    def get_papermc_url(self) -> Tuple[str, str]:
         """
         Get direct download URL for latest PaperMC server.
 
@@ -173,6 +185,7 @@ class Server_Versioning(Server_Files):
 
     def get_bukkit_url(self): pass
 
+
 class Server_API(Server_Versioning, Server_Files):
     """
     Depending on configs, using class inheritance relevant functions will be updated.
@@ -184,10 +197,31 @@ class Server_API(Server_Versioning, Server_Files):
     """
 
     def __init__(self):
+        super().__init__()
+
+        self.last_check_number = ''
+        self.last_command_sent = ''
+        self.last_command_output = ''
+
+        # Set server launch path depending on config.
+        self.launch_path = config.get('server_path')
+        if custom_path := config.get('server_launch_path'):
+            self.launch_path = custom_path
+
+        if config.get('windows_compatibility') is True:
+            self.launch_command = config.get('windows_cmdline_start') + config.get('server_launch_command')
+
+    def get_command_output(self) -> str:
+        """
+        Gets response from last command.
+
+        Returns:
+            str: Response from last command issued.
+        """
         pass
 
     # Check if server console is reachable.
-    async def server_console_reachable(self) -> bool:
+    def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -197,37 +231,26 @@ class Server_API(Server_Versioning, Server_Files):
 
         if config.get('server_file_access') is True:
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
-            if await self.send_command(check_command) is True:
+            if self.send_command(check_command) is True:
                 if self.read_log(unique_number) is True:  # Check logs for unique number.
                     return True
         return False
 
     # This will be updated with correct code to send command to server console based on configs.
-    def _send_command(self, command: str) -> bool:
-        """Placeholder function for sending command to Minecraft server."""
-
-        return False
-
-    # Send command to server console.
-    async def send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
-        Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
-        Sends command to server, then reads from latest.log file for output.
-        If using RCON, will only return RCON returned data, can't read from server log.
+        Placeholder function for sending command to Minecraft server.
 
         Args:
-            command str: Command to send.
+            command str: Command to send to server.
 
         Returns:
-            bool: If successfully sent command to console.
+            bool: If successfully sent command, not the same as if command accepted by server.
         """
 
-        if self._send_command(command) is True:
-            await asyncio.sleep(config.get('command_buffer_time'))
-            return True
         return False
 
-    def _get_status(self) -> bool:
+    def get_status(self) -> bool:
         """
         Check server active status by sending unique number, then checking log for it.
 
@@ -236,67 +259,13 @@ class Server_API(Server_Versioning, Server_Files):
         """
         pass
 
-    async def get_status(self, force_check: bool = False) -> bool:
-        """
-        Returns boolean if server is active.
-        Depending on configs, prioritizes ping_server(), server_console_reachable(), _get_status()
+    # ===== Get Data
 
-        Returns:
-            bool: If server is active (not same as MC console is reachable).
-        """
+class Server_API_Tmux(Server_API):
+    def __init__(self):
+        super().__init__()
 
-        if config.get('ping_before_command') is True:
-            return self.ping_server()
-        # Can force check even if configs disable it.
-        elif config.get('check_before_command') is True or force_check is True:
-            return await self.server_console_reachable()
-        else:
-            return self._get_status()
-
-    def read_log(self):
-        if not config.get('server_file_access'):
-            return False
-
-
-
-class Server_Rcon_API(Server_API):
-    def server_console_reachable(self) -> bool:
-        """
-        Check if server console is reachable by sending a unique number.
-
-        Returns:
-            bool: Console reachable.
-        """
-
-        check_command, unique_number = utils.get_check_command()
-        if response := await self.send_command(check_command):
-            if unique_number in response:
-                return True
-
-    def _send_command(self, command: str) -> Union[str, bool]:
-        """
-        Send command to server with RCON.
-
-        Args:
-            command str: Minecraft server command.
-
-        Returns:
-            str, bool: Output from RCON or False if error.
-        """
-
-        server_rcon_client = mctools.RCONClient(config.get('server_address'), port=config.get('rcon_port'))
-        try: server_rcon_client.login(config.get('rcon_pass'))
-        except ConnectionError:
-            lprint(f"Error Connecting to RCON: {config.get('server_ip')} : {config.get('rcon_port')}")
-            return False
-        else:
-            return_data = server_rcon_client.command(command)
-            server_rcon_client.stop()
-            return return_data
-
-
-class Server_Tmux_API(Server_API):
-    def _send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Tmux session.
 
@@ -311,9 +280,32 @@ class Server_Tmux_API(Server_API):
             return False
         return True
 
+    def start_server(self) -> bool:
+        """
+        Start server in specified Tmux pane.
 
-class Server_Screen_API(Server_API):
-    def _send_command(self, command: str) -> bool:
+        Returns:
+            bool: If os.system() was successful.
+        """
+
+        os.chdir(self.launch_path)
+
+        # If failed to change current working directory.
+        if os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} 'cd {config.get('server_path')}' ENTER"):
+            return False
+
+        # Starts server in tmux pane.
+        if os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} '{self.launch_command}"):
+            return False
+
+        return False
+
+
+class Server_API_Screen(Server_API):
+    def __init__(self):
+        super().__init__()
+
+    def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
 
@@ -328,9 +320,85 @@ class Server_Screen_API(Server_API):
             return False
         return True
 
+    def start_server(self) -> bool:
+        """
+        Start server in specified screen session.
 
-class Server_Subprocess_API(Server_API):
+        Returns:
+            bool: If os.system() was successful.
+        """
+
+        os.chdir(self.launch_path)
+        if not os.system(f"screen -dmS '{config.get('screen_session_name')}' {self.launch_command}"):
+            return True
+        else: return False
+
+
+class Server_API_Rcon(Server_API):
+    def __init__(self):
+        super().__init__()
+
+    def server_console_reachable(self) -> bool:
+        """
+        Check if server console is reachable by sending a unique number.
+
+        Returns:
+            bool: Console reachable.
+        """
+
+        check_command, unique_number = utils.get_check_command()
+        if response := await self.send_command(check_command):
+            if unique_number in response:
+                return True
+
+    def send_command(self, command: str) -> Union[str, bool]:
+        """
+        Send command to server with RCON.
+
+        Args:
+            command str: Minecraft server command.
+
+        Returns:
+            str, bool: Output from RCON or False if error.
+        """
+
+        server_rcon_client = mctools.RCONClient(config.get('server_address'), port=config.get('rcon_port'))
+        try:
+            server_rcon_client.login(config.get('rcon_pass'))
+        except ConnectionError:
+            lprint(f"Error Connecting to RCON: {config.get('server_ip')} : {config.get('rcon_port')}")
+            return False
+        else:
+            return_data = server_rcon_client.command(command)
+            server_rcon_client.stop()
+            return return_data
+
+
+class Server_API_Subprocess(Server_API):
+    def __init__(self):
+        super().__init__()
+
+
     # TODO be able to have multiple subprocess servers running and switch between them
-    def _send_command(self, command):
+    def send_command(self, command):
         mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
         mc_subprocess.stdin.flush()
+
+    def start_server(self) -> bool:
+        """
+
+        Returns:
+
+        """
+
+        os.chdir(self.launch_path)
+        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
+        try:
+            mc_subprocess = subprocess.Popen(config.get('server_launch_command').split(), stdin=asyncio.subprocess.PIPE,
+                                             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        except: lprint("ERROR: Problem starting server subprocess")
+
+        if isinstance(mc_subprocess, subprocess.Popen): return True
+        return False
+        # TODO TEST for windows compatibility
+        #subprocess.Popen(config.get('windows_cmdline_start') + config.get('server_launch_command'), shell=True)

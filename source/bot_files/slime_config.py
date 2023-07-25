@@ -10,7 +10,7 @@ import json
 import getpass
 import platform
 from os.path import join
-from typing import Union, Dict
+from typing import Union, Any, Dict
 
 import discord
 
@@ -30,6 +30,40 @@ class Config():
         self.servers = self.configs['servers']
         self.example_server_configs = self.servers['example']
         self.server_configs = self.example_server_configs  # Will be updated with currently selected server
+
+    def get_config(self, config_key: str) -> Union[Any, None]:
+        """
+        Get config from bot configs or selected server configs.
+
+        Args:
+            config_key:
+
+        Returns:
+            Any, bool: Returns config value or None if not found.
+        """
+
+        return self.bot_configs.get(config_key) or self.server_configs.get(config_key)
+
+    def set_config(self, key: str, value: Any) -> bool:
+        """
+        Updates bot or server config. Only if config already exists.
+
+        Args:
+            key: Config to edit.
+            value: New value.
+
+        Returns:
+            bool: If update successful.
+        """
+
+        if self.bot_configs.get(key, None):
+            self.bot_configs[key] = value
+            return True
+        elif self.server_configs.get(key, None):
+            self.server_configs[key] = value
+            return True
+        return False
+
 
     def initialize_configs(self, configs_from_setup=None):
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
@@ -236,9 +270,21 @@ class Config():
 
         return config.servers.get(server_name, None)
 
-print("OK")
+    def switch_server_configs(self, server_name: str) -> bool:
+        """
+        Switches server_configs with correct configs.
+
+        Args:
+            server_name: Name of server to select.
+
+        Returns:
+            bool: True if server config found and set. False if no server configs found.
+        """
+
+        if server_configs := self.servers.get(server_name, None):
+            self.server_configs = server_configs
+            return True
+        return False
+
 config = Config()
-print("OK")
 config.initialize_configs()
-print("OK")
-print(config.configs)

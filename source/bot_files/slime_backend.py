@@ -5,12 +5,15 @@ import requests
 import fileinput
 from os.path import join
 from collections import deque
+from typing import Dict
 
+from discord.ext.commands import Bot
 import mctools
 from file_read_backwards import FileReadBackwards
+
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint
-from bot_files.server_api import Server_Screen_API, Server_Subprocess_API, Server_Rcon_API, Server_Tmux_API
+from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
 from bot_files.slime_utils import utils, file_utils
 
 
@@ -19,14 +22,41 @@ ctx = 'backend_functions.py'
 
 
 class Backend:
-    server_api_types = {'use_rcon': Server_Rcon_API, 'use_tmux': Server_Tmux_API, 'use_screen': Server_Screen_API}
-    subprocess_servers = {}
+    # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
+    server_api_types = {
+        'use_rcon': Server_API_Rcon,
+        'use_tmux': Server_API_Tmux,
+        'use_screen': Server_API_Screen
+    }
 
-    def __init__(self, bot=None):
+    def __init__(self):
+        # Specific API for server interaction depending on server type (vanilla, PaperMC, etc) .
+        self.bot = None
+        self.server_api = Server_API()
+        self.subprocess_servers = {}
+        self.discord_channel = None
         self.server_active = False
-        self.discord_channel = self.update_discord_chennel(bot)
+        #self.discord_channel = self.update_discord_chennel(bot)
 
-    def update_discord_channel(self, bot=None):
+    # ===== Discord
+    def update_bot_object(self, bot: Bot) -> bool:
+        """
+        Update's Discord bot object in Backend, also tries updating discord_channel.
+
+        Args:
+            bot: Discord bot object.
+
+        Returns:
+            bool: If successful.
+        """
+
+        if bot:
+            self.bot = bot
+            self.update_discord_channel()
+            return True
+        return False
+
+    def update_discord_channel(self) -> bool:
         """
         Updates discord_channel with Discord channel object wtih channel_id config, so you can use send_channel_msg func.
 
@@ -37,16 +67,16 @@ class Backend:
             bool: Successfully found Discord chanel by set channel_id config.
         """
 
-        if channel_id := config.get('channel_id'):
+        if channel_id := config.get_config('channel_id'):
             try: channel_id = int(channel_id)  # Basic check if valid ID.
             except:
-                lprint(ctx, "ERROR: Invalid Channel ID")
+                lprint("ERROR: Invalid Channel ID")
                 return False
             else:
-                self.discord_channel = bot.get_channel(channel_id)
+                self.discord_channel = self.bot.get_channel(channel_id)
                 return True
 
-    async def send_channel_msg(self, msg):
+    async def send_channel_msg(self, msg: str) -> bool:
         """
         Send message to set channel from channel_id config.
 
@@ -63,7 +93,8 @@ class Backend:
             return True
         else: return False
 
-    def select_server(self, server_name):
+    # ===== Server API
+    def select_server(self, server_name: str) -> bool:
         """
         Updates relevant server command functions and configs.
 
@@ -74,19 +105,31 @@ class Backend:
             bool: Successful switch.
         """
 
-        pass
+        if config.switch_server_configs(server_name) is True:
+            if self._change_server_api() is True:
+                return True
+        return False
 
-    def _update_subprocess_api(self):
+    def _update_subprocess_api(self) -> Server_API_Subprocess:
         """
         Using subprocess needs special handling to preserve possible running Minecraft subprocesses process.
 
         Returns:
-            dict: Dictionary containing configs and server subprocess object.
+            Server_API_Subprocess: A server subprocess API object.
         """
 
-        pass
+        server_name = config.selected_server['name']
 
-    def _change_server_api(self):
+        # Checks if a subprocess API instance for selected server already exists.
+        if config.selected_server['name'] in self.subprocess_servers:
+            return self.subprocess_servers[config.selected_server['name']]
+        else:
+            # Create new subprocess API
+            new_subprocess_server = Server_API_Subprocess()
+            self.subprocess_servers[server_name] = new_subprocess_server
+            return new_subprocess_server
+
+    def _change_server_api(self) -> bool:
         """
         Updates the server_api object depending on server configs.
 
@@ -97,14 +140,16 @@ class Backend:
 
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
-        if config.get('use_subprocess') is True:
+        if config.get_config('use_subprocess') is True:
             self.server_api = self._update_subprocess_api()
         for config_name, api in self.server_api_types.items():
-            if config.get(config_name) is True:
+            # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
+            if config.get_config(config_name) is True:
                 self.server_api = api()
                 return True
         else: return True
 
+    # Need?
     def get_selected_server(self):
         """
         Returns configs dictionary of currently selected server.
@@ -114,7 +159,146 @@ class Backend:
         """
         return config.server_configs
 
+    # Send command to server console.
+    async def send_command(self, command: str) -> bool:
+        """
+        Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
+        Sends command to server, then reads from latest.log file for output.
+        If using RCON, will only return RCON returned data, can't read from server log.
 
+        Args:
+            command str: Command to send.
+
+        Returns:
+            bool: If successfully sent command to console.
+        """
+
+        if self.server_api.send_command(command) is True:
+            await asyncio.sleep(config.get_config('command_buffer_time'))
+            return True
+        return False
+
+    # Check if server console is reachable.
+    async def console_reachable(self) -> bool:
+        """
+        Check if server console is reachable by sending a unique number to be checked in logs.
+
+        Returns:
+            bool: Console reachable.
+        """
+
+        return self.server_api.server_console_reachable()
+
+    # ===== Server Functions
+    async def get_status(self, force_check: bool = False) -> bool:
+        """
+        Returns boolean if server is active.
+        Depending on configs, prioritizes ping_server(), server_console_reachable(), _get_status()
+
+        Returns:
+            bool: If server is active (not same as MC console is reachable).
+        """
+
+        if config.get_config('ping_before_command') is True:
+            return self.ping_server()
+        # Can force check even if configs disable it.
+        elif config.get_config('check_before_command') is True or force_check is True:
+            return await self.server_console_reachable()
+
+        return False
+    
+    def server_start(self) -> bool:
+        """
+        Start Minecraft server depending on whether you're using Tmux subprocess method.
+        Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
+
+        Returns:
+            bool: If successful server launch.
+        """
+
+        return self.server_api._start_server()
+
+    def server_ping(self) -> bool:
+        """
+        Uses ping command to check if server reachable.
+
+        Returns:
+            bool: If ping was successful.
+        """
+
+        if address := config.get_config('server_address'):
+            return utils.ping_address(address)
+        return False
+
+    def server_ping_query(self) -> bool:
+        """
+        Gets server information using mctools.PINGClient()
+
+        Returns:
+            dict: Dictionary containing 'version', and 'description' (motd).
+        """
+
+
+        if not config.get_config('server_address'): return False
+
+        try:
+            ping = mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port'))
+            stats = ping.get_stats()
+            ping.stop()
+        except ConnectionRefusedError:
+            return False
+        else: return stats
+
+    async def server_status(self, discord_msg=False):
+        """
+        Gets server active status, by sending command to server and checking server log.
+
+        Returns:
+            bool: returns True if server is online.
+        """
+
+        # Uses ping to check if server is online.
+        if config.get_config('ping_before_command') is True:
+            response = self.ping_server()
+        else:
+            # send_command() will send random number, server is online if match is found in log.
+            if response := self.server_console_reachable() is not None:
+                response = response
+            else: response = self.ping_server()  # Fallback on using ping for server status.
+
+        #self.server_active = response
+        return response
+
+    async def get_players(self):
+        """Extracts wanted data from output of 'list' command."""
+
+        response = await send_command("list", discord_msg=False)
+        if not response: return False
+
+        # Gets data from RCON response or reads server log for line containing player names.
+        if config.get_config('server_use_rcon') is True:
+            log_data = response[0]
+
+        else:
+            await asyncio.sleep(1)
+            log_data = server_log('players online')
+
+        if data := utils.parse_get_player_info(log_data):
+            return data
+        return False
+
+    async def get_coords(self, player=''):
+        """Gets player's location coordinates."""
+
+        if response := await send_command(f"data get entity {player} Pos", skip_check=True):
+            log_data = server_log('entity data', stopgap_str=response[1])
+            # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+            # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+            if log_data:
+                location = log_data.split('[')[-1][:-3].replace('d', '')
+                return location
+
+    # ===== Server Files
     def read_server_log(self, search=None, file_path=None, lines=15, find_all=False, stopgap_str=None, top_down_mode=False):
         """
         Read the latest.log file under server/logs folder. Can also find a match.
@@ -139,7 +323,7 @@ class Backend:
             search = [s.lower() for s in search]
         else: search = None
 
-        file_path = file_path or config.get('server_log_filepath')  # server.properties file as default file.
+        file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
         if not file_path or not os.path.exists(file_path): return False  # If file not exist.
 
         # Create a deque, which will efficiently store the most recent matched log lines.
@@ -188,7 +372,7 @@ class Backend:
         match = match.lower()
         if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
         # Defaults file to server log.
-        if file_path is None: file_path = config.get('server_log_filepath')
+        if file_path is None: file_path = config.get_config('server_log_filepath')
         if not os.path.isfile(file_path): return False
 
         log_data = ''  # TODO: Possibly change return data to list for each newline
@@ -205,7 +389,7 @@ class Backend:
             with FileReadBackwards(file_path) as file:
                 i = total = 0
                 # Stops loop at user set limit, if file has no more lines, or at hard limit (don't let user ask for 999 lines of log).
-                while i < lines and total < line_count and total <= config.get('log_lines_limit'):
+                while i < lines and total < line_count and total <= config.get_config('log_lines_limit'):
                     total += 1
                     line = file.readline()
                     if not line.strip(): continue  # Skip blank/newlines.
@@ -238,9 +422,9 @@ class Backend:
             tuple: First item is line from file that matched target_property. Second item is just the current value.
         """
 
-        if config.get('server_files_access') is False: return False
+        if config.get_config('server_files_access') is False: return False
         # TODO add property file config
-        if not file_path: file_path = f"{config.get('server_path')}/server.properties"
+        if not file_path: file_path = f"{config.get_config('server_path')}/server.properties"
         if not os.path.isfile(file_path): return False
         return_line = ''
 
@@ -279,13 +463,10 @@ class Backend:
             bool: If value not found or if not able to access file.
         """
 
-        if config.get('server_files_access') is True:
+        if config.get_config('server_files_access') is True:
             if data := self.update_property(property_name):
                 return data[1]
         return False
-
-
-    def _get_motd(self): pass
 
     def get_motd(self):
         """
@@ -299,169 +480,9 @@ class Backend:
         if data := self.get_property('motd'):
             return data
         else:
-            if data := self._get_motd():
-                return data
-            else: return 'N/A'
+            pass
 
-
-    def server_start():
-        """
-        Start Minecraft server depending on whether you're using Tmux subprocess method.
-
-        Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
-
-        Returns:
-            bool: If successful boot.
-        """
-
-        global mc_subprocess
-
-        if config.get('server_use_screen') is True:
-            os.chdir(config.get('server_path'))
-            if not os.system(f"screen -dmS '{config.get('screen_session_name')}' {config.get('server_launch_command')}"):
-                return True
-            else: return False
-
-        elif config.get('server_use_subprocess') is True:
-            # Runs MC server as subprocess. Note, If this script stops, the server will stop.
-            try:
-                mc_subprocess = subprocess.Popen(config.get('server_launch_command').split(), stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            except: lprint(ctx, "Error server starting subprocess")
-
-            if type(mc_subprocess) == subprocess.Popen: return True
-
-        # Start java server using subprocess and cmd's Launch Command.
-        elif config.get('windows_compatibility') is True:
-            os.chdir(config.get('server_path'))
-            subprocess.Popen(config.get('windows_cmdline_start') + config.get('server_launch_command'), shell=True)
-
-        elif config.get('use_tmux') is True:
-            os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} 'cd {config.get('server_path')}' ENTER")
-
-            # Starts server in tmux pane.
-            if not os.system(f'tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} "{config.get('server_launch_command')}" ENTER'):
-                return True
-        else: return False
-
-
-
-    def server_ping(self):
-        """
-        Uses ping command to check if server reachable.
-
-        Returns:
-            bool: If ping was successful.
-        """
-        utils.ping_address()
-
-    def server_ping_query(self):
-        """
-        Gets server information using mctools.PINGClient()
-
-        Returns:
-            dict: Dictionary containing 'version', and 'description' (motd).
-        """
-
-        global server_active
-
-        if not config.get('server_address'): return False
-
-        try:
-            ping = mctools.PINGClient(config.get('server_address'), config.get('server_port'))
-            stats = ping.get_stats()
-            ping.stop()
-        except ConnectionRefusedError:
-            return False
-        else: return stats
-
-    async def server_status(self, discord_msg=False):
-        """
-        Gets server active status, by sending command to server and checking server log.
-
-        Returns:
-            bool: returns True if server is online.
-        """
-
-        # Uses ping to check if server is online.
-        if config.get('ping_before_command') is True:
-            response = utils.ping_address(config.get('server_address'))
-        else:
-            # send_command() will send random number, server is online if match is found in log.
-            response = await self.send_command(' ', discord_msg=discord_msg, force_check=True, ctx=ctx)
-
-        self.server_active = response
-        return response
-
-
-    async def get_players(self):
-        """Extracts wanted data from output of 'list' command."""
-
-        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
-        try: version = int(server_version().split('.')[1])
-        except: version = 20
-        # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
-        if version <= 12:
-            response = await send_command("list", discord_msg=False)
-            # Need to use server_log here because I need to get multiple line outputs.
-            log_data = server_log(log_mode=True, stopgap_str=response[1])
-            # Parses and returns info from log lines.
-            output = []
-            for i in log_data.split('\n'):
-                output.append(i)
-                if 'There are' in i: break
-            output = output[:2]
-            if not output: return False
-            # Parses data from log output. Ex: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-            text = output[1].split(':')[-2].strip()
-            player_names = output[0].split(':')[-1].split(',')
-            return player_names, text
-        else:
-            response = await send_command("list", discord_msg=False)
-            if not response: return False
-
-            # Gets data from RCON response or reads server log for line containing player names.
-            if config.get('server_use_rcon') is True: log_data = response[0]
-
-            else:
-                await asyncio.sleep(1)
-                log_data = server_log('players online')
-
-            if not log_data: return False
-
-            find_ansi = re.compile(r'\x1b[^m]*m')
-            # Use regular expression to extract player names
-            log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-            text = log_data[-2]  # There are 2 of a max of 20 players online
-            text = find_ansi.sub('', text)  # Remove unwanted escape characters
-            player_names = log_data[-1]  # R3diculous, MysticFrogo
-            # If there's no players active, player_names will still contain some anso escape characters.
-            if len(player_names.strip()) < 5: return None
-            else:
-
-                player_names = [f"{i.strip()[:-4]}\n" if config.get('server_use_rcon') else f"{i.strip()}" for i in (log_data[-1]).split(',')]
-                # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-                # player_names_discord = [f"`{i.strip()[:-4]}`\n" if server_use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-                new = []
-                for i in player_names:
-                    x = find_ansi.sub('', i).strip().replace('[3', '')
-                    x = x.split(' ')[-1]
-                    x = x.replace('\\x1b', '').strip()
-                    new.append(x)
-                player_names = new
-                return player_names, text
-
-    async def get_coords(self, player=''):
-        """Gets player's location coordinates."""
-
-        if response := await send_command(f"data get entity {player} Pos", skip_check=True):
-            log_data = server_log('entity data', stopgap_str=response[1])
-            # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
-            # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-            if log_data:
-                location = log_data.split('[')[-1][:-3].replace('d', '')
-                return location
-
-
+    # ===== Backups
     def new_server(self, name):
         """
         Create a new world or server backup, by copying and renaming folder.
@@ -472,7 +493,7 @@ class Backend:
             dst str: Destination for backup.
         """
 
-        new_folder = join(config.get('servers_path'), name.strip())
+        new_folder = join(config.get_config('servers_path'), name.strip())
         os.mkdir(new_folder)
         return new_folder
 

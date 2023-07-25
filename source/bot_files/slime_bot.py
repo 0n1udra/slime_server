@@ -1,18 +1,25 @@
-import datetime, asyncio, discord, gzip, sys, os
+import os
+import sys
+import gzip
+import asyncio
+import datetime
+
+import discord
 from discord.ext import commands, tasks
-from bot_files.backend_functions import send_command, server_status, lprint
-import bot_files.backend_functions as backend
-import bot_files.components as components
-from bot_files.components import buttons_dict
-#import bot_files.slime_vars as slime_vars
-from bot_files.extra import convert_to_bytes
+
+import bot_files.discord_components as components
+from bot_files.slime_backend import backend
+from bot_files.slime_utils import utils, lprint
+from bot_files.discord_components import comps, buttons_dict
+from bot_files.slime_config import config
+
 
 ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
-bot = commands.Bot(command_prefix=slime_vars.command_prefix, case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
-backend.bot = components.bot = bot
-
+bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=slime_vars.case_insensitive, intents=slime_vars.intents, help_command=help_cmd)
+backend.update_bot_object(bot)
+components.bot = bot # Updates bot object for discord components module
 
 @bot.event
 async def on_ready():
@@ -140,7 +147,7 @@ class Slime_Bot_Commands(commands.Cog):
         log_data = backend.server_log(file_path=slime_vars.bot_log_filepath, lines=lines, log_mode=True, return_reversed=True)
         await ctx.send(f"***Fetching {lines} Bot Log...*** :tools:")
         if log_data:
-            await ctx.send(file=discord.File(extra.convert_to_bytes(log_data), 'bot.log'))
+            await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'bot.log'))
             lprint(ctx, f"Fetched Bot Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data. File may be empty or not exist")

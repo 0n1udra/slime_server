@@ -6,7 +6,7 @@ from os.path import join, isdir, isfile
 import discord
 from discord.ext import commands, tasks
 
-import bot_files.slime_backend as backend
+from bot_files.slime_backend import backend
 from bot_files.slime_backend import send_command, format_args, server_status, lprint
 from bot_files.extra import get_parameter, convert_to_bytes
 import bot_files.components as components
@@ -437,7 +437,7 @@ class Server(commands.Cog):
         fields = [
             ['Current Server', f"Status: {status}\nServer: {slime_vars.server_name}\nDescription: {slime_vars.server_description}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
             ['Autosave', f"{'Enabled' if slime_vars.enable_autosave is True else 'Disabled'} ({slime_vars.autosave_interval}min)"],
-            ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.ping_address()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+            ['Address', f"URL: ||`{slime_vars.server_address}`|| ({backend.server_ping()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
             ['Location', f"`{slime_vars.server_path}`"],
             ['Launch Command', f"`{slime_vars.server_launch_command}`"]
         ]
