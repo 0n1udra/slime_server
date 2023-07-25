@@ -1,3 +1,7 @@
+"""
+Handles which server API to use depending on configs, managing world/server backups, reading and managing server files.
+"""
+
 import os
 import re
 import asyncio

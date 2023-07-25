@@ -1,3 +1,14 @@
+"""
+Handles how to interact with the Minecraft server based on the configs.
+Inside Backend object there is the _change_server_api() function,
+  which decides which Server_API_X class to set as self.server_api in the 'Backend' object.
+For example, if the 'use_tmux' config is True, _change_server_api() will use a new instance of 'Server_API_Tmux'.
+I'm using Python class inheritance, it works by override certain functions in base 'Server_API' class.
+Each Server_API_X class should have its own send_command() with its own way to interact with the server.
+For example, in Server_API_Tmux it uses os.system() to send commands to a tmux pane containing the server console,
+  and in Server_API_Rcon, it uses the mctools module to send the command using RCON.
+"""
+
 import os
 import json
 import asyncio
