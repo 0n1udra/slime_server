@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
-from bot_files.backend_functions import send_command, lprint
-import bot_files.backend_functions as backend
-from bot_files.extra import convert_to_bytes
+
+from bot_files.slime_backend import backend
+from bot_files.slime_utils import lprint, utils
 
 # ========== Basics: Say, whisper, online players, server command pass through.
 class Basics(commands.Cog):

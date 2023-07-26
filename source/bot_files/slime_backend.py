@@ -326,66 +326,6 @@ class Backend:
 
 
     # File reading and writing
-    def _read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
-        """
-        Read latest.log file under server/logs folder. Can also find match.
-        What a fat ugly function you are :(
-
-        Args:
-            match str: Check for matching string.
-            file_path str(None): File to read. Defaults to server's latest.log
-            lines int(15): Number of most recent lines to return.
-            log_mode bool(False): Return x lines from log file, skips matching.
-            normal_read bool(False): Reads file top down, defaults to bottom up using file-read-backwards module.
-            filter_mode bool(False): Don't stop at first match.
-            return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
-
-        Returns:
-            log_data (str): Returns found match log line or multiple lines from log.
-        """
-
-        global slime_vars
-
-        # Parameter setups.
-        if match is None: match = 'placeholder_match'
-        match = match.lower()
-        if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
-        # Defaults file to server log.
-        if file_path is None: file_path = config.get_config('server_log_filepath')
-        if not os.path.isfile(file_path): return False
-
-        log_data = ''  # TODO: Possibly change return data to list for each newline
-
-        # Gets file line number
-        line_count = sum(1 for line in open(file_path))
-
-        if normal_read:
-            with open(file_path, 'r') as file:
-                for line in file:
-                    if match in line: return line
-
-        else:  # Read log file bottom up, latest log outputs first.
-            with FileReadBackwards(file_path) as file:
-                i = total = 0
-                # Stops loop at user set limit, if file has no more lines, or at hard limit (don't let user ask for 999 lines of log).
-                while i < lines and total < line_count and total <= config.get_config('log_lines_limit'):
-                    total += 1
-                    line = file.readline()
-                    if not line.strip(): continue  # Skip blank/newlines.
-                    elif log_mode:
-                        log_data += line
-                        i += 1
-                    elif match in line.lower() or any(i in line for i in match_list):
-                        log_data += line
-                        i += 1
-                        if not filter_mode: break  # If filter_mode is not True, loop will stop at first match.
-                    if stopgap_str.lower() in line.lower(): break  # Stops loop if using stopgap_str variable. e.g. Using with filter_mode.
-
-        if log_data:
-            if return_reversed is True:
-                log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
-            return log_data
-
     def update_property(self, property_name=None, value='', file_path=None):
         """
         Edits server.properties file if received target_property and value. Edits inplace with fileinput
@@ -462,19 +402,24 @@ class Backend:
             pass
 
     # ===== Backups
-    def new_server(self, name):
+    def new_server(self, server_name: str) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
         Args:
-            new_name str: Name of new copy. Final name will have date and time prefixed.
-            src str: Folder to backup, whether it's a world folder or a entire server folder.
-            dst str: Destination for backup.
+            server_name str: Name of new server.
+
+        Returns:
+            dict, bool: Dictionary of new server configs or False if failed.
         """
 
-        new_folder = join(config.get_config('servers_path'), name.strip())
-        os.mkdir(new_folder)
-        return new_folder
+        new_folder = join(config.get_config('servers_path'), server_name.strip())
+        try: os.mkdir(new_folder)
+        except:
+            lprint("ERROR: Problem creating new server folder")
+            return False
+        else: return config.update_server_configs(server_name)
+
 
     def new_backup(self, new_name, src, dst):
         """

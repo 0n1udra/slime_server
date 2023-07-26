@@ -205,7 +205,7 @@ class Config():
             }
         }
 
-    def update_server_configs(self, new_data: Dict) -> Dict:
+    def update_all_server_configs(self) -> None:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
             if 'example' in server_name: continue  # Skip example template
@@ -223,17 +223,25 @@ class Config():
             #slime_vars.servers.update({name: server})
             #slime_vars.update_vars(slime_vars.config)
 
-    def update_server_paths(server_dict, server_name, text_to_replace=None):
+    def update_server_configs(self, server_name: str, new_data: Dict) -> Dict:
         """
-        Replaces 'SELECTED_SERVER' in server dict values if key has 'path' in it.
-        """
-        text_to_replace = 'SELECTED_SERVER'
-        server_dict['server_name'] = server_name
-        for k, v in server_dict.items():
-            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
-                server_dict[k] = v.replace(text_to_replace, server_name)
 
-        return server_dict
+        Args:
+            server_name:
+            new_data:
+
+        Returns:
+            dict: Updated server configs dict.
+        """
+
+        server_configs = self.example_server_configs.copy()
+        # Gets any preexisting data.
+        if server_name in self.servers:
+            server_configs.update(self.servers[server_name])
+        server_configs.update(new_data)  # Updates example template values with user set ones, fallback on 'example' defaults
+        self.servers[server_name] = server_configs
+        self.update_all_server_configs()
+        return server_configs
 
     def update_from_user_config(config):
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
