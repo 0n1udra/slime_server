@@ -22,7 +22,6 @@ import mctools
 from discord.ext.commands import Context
 
 from bot_files.slime_config import config
-from bot_files.slime_backend import backend
 import bot_files.discord_components as components
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
@@ -96,7 +95,7 @@ class File_Utils:
             return False
         return True
 
-    def read_file_generator(self, file_path: str) -> Generator[str]:
+    def read_file_generator(self, file_path: str) -> Generator[str, None, None]:
         """
         Yield file lines (top to bottom).
 
@@ -112,7 +111,7 @@ class File_Utils:
             for line in file:
                 yield line
 
-    def read_file_reverse_generator(self, file_path: str) -> Generator[str]:
+    def read_file_reverse_generator(self, file_path: str) -> Generator[str, None, None]:
         """
         Yield file lines (bottom to top).
 
@@ -269,7 +268,7 @@ class File_Utils:
                     index += 1
                     continue
                 if 's' in mode and item in config.get('servers'):
-                    component_data[-1] = backend.get_server(item)['server_description']
+                    component_data[-1] = config.get_server_configs(item)['server_description']
                     return_list.appen(component_data)  # For server mode for ?controlpanel command component
                     index += 1
                     continue
@@ -479,58 +478,6 @@ class Utils:
 
     def convert_to_bytes(data): return io.BytesIO(data.encode())
 
-    def parse_get_player_info(self, data: str) -> Any:
-
-        """Extracts wanted data from output of 'list' command."""
-
-        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
-        try:
-            version = int(server_version().split('.')[1])
-        except:
-            version = 20
-        # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
-        if version <= 12:
-            response = await send_command("list", discord_msg=False)
-            # Need to use server_log here because I need to get multiple line outputs.
-            log_data = server_log(log_mode=True, stopgap_str=response[1])
-            # Parses and returns info from log lines.
-            output = []
-            for i in log_data.split('\n'):
-                output.append(i)
-                if 'There are' in i: break
-            output = output[:2]
-            if not output: return False
-            # Parses data from log output. Ex: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-            text = output[1].split(':')[-2].strip()
-            player_names = output[0].split(':')[-1].split(',')
-            return player_names, text
-        else:
-
-            find_ansi = re.compile(r'\x1b[^m]*m')
-            # Use regular expression to extract player names
-            log_data = log_data.split(
-                ':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-            text = log_data[-2]  # There are 2 of a max of 20 players online
-            text = find_ansi.sub('', text)  # Remove unwanted escape characters
-            player_names = log_data[-1]  # R3diculous, MysticFrogo
-            # If there's no players active, player_names will still contain some anso escape characters.
-            if len(player_names.strip()) < 5:
-                return None
-            else:
-
-                player_names = [f"{i.strip()[:-4]}\n" if config.get('server_use_rcon') else f"{i.strip()}" for i in
-                                (log_data[-1]).split(',')]
-                # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
-                # player_names_discord = [f"`{i.strip()[:-4]}`\n" if server_use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
-                new = []
-                for i in player_names:
-                    x = find_ansi.sub('', i).strip().replace('[3', '')
-                    x = x.split(' ')[-1]
-                    x = x.replace('\\x1b', '').strip()
-                    new.append(x)
-                player_names = new
-                return player_names, text
-    return False
 
 
 utils = Utils()

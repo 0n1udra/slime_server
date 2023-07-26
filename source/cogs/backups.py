@@ -1,10 +1,14 @@
-import asyncio, discord, shutil
-from discord.ext import commands, tasks
-from bot_files.backend_functions import send_command, format_args, server_status, lprint
-import bot_files.backend_functions as backend
-import bot_files.components as components
+import shutil
+import asyncio
 from os.path import join
-import bot_files.slime_config as slime_vars
+
+import discord
+from discord.ext import commands, tasks
+
+from bot_files.slime_backend import backend
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint
+from bot_files.discord_components import comps
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
 
@@ -24,7 +28,7 @@ class World_Backups(commands.Cog):
             ?saves 15
         """
 
-        worlds = backend.enum_dir(slime_vars.world_backups_path, 'd')
+        worlds = backend.enum_dir(config.get_config('world_backups_path'), 'd')
         lprint(ctx, f"Fetched {amount} world saves")
         if worlds is False:
             await ctx.send("No world backups found.")
@@ -58,7 +62,7 @@ class World_Backups(commands.Cog):
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
         await send_command(f"save-all", discord_msg=False)
         await asyncio.sleep(3)
-        try: new_backup = backend.new_backup(name, slime_vars.server_path + '/world', slime_vars.world_backups_path)
+        try: new_backup = backend.new_backup(name, config.get_config('server_path') + '/world', config.get_config('world_backups_path'))
         except:
             await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
             lprint(ctx, "ERROR: New world backup: " + name)
@@ -101,13 +105,13 @@ class World_Backups(commands.Cog):
             return
         if not index: return
 
-        fetched_restore = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
+        fetched_restore = backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
         if await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: backend.restore_backup(fetched_restore, join(slime_vars.server_path, 'world'))
+        try: backend.restore_backup(fetched_restore, join(config.get_config('server_path'), 'world'))
         except:
             await ctx.send(f"**Error:** Issue restoring world: {fetched_restore}")
             lprint(ctx, "ERROR: World restore: " + fetched_restore)
@@ -138,7 +142,7 @@ class World_Backups(commands.Cog):
             return
         if not index: return
 
-        to_delete = backend.get_from_index(slime_vars.world_backups_path, index, 'd')
+        to_delete = backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
         try: backend.delete_dir(to_delete)
         except:
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")
@@ -173,7 +177,7 @@ class World_Backups(commands.Cog):
         if await server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: shutil.rmtree(join(slime_vars.server_path, 'world'))
+        try: shutil.rmtree(join(config.get_config('server_path'), 'world'))
         except:
             await ctx.send("Error trying to reset world.")
             lprint(ctx, "ERROR: Issue deleting world folder.")
@@ -198,7 +202,7 @@ class Server_Backups(commands.Cog):
             ?serversaves 15
         """
 
-        servers = backend.enum_dir(slime_vars.server_backups_path, 'd')
+        servers = backend.enum_dir(config.get_config('server_backups_path'), 'd')
         lprint(ctx, f"Fetched {amount} world backups")
         if servers is False:
             await ctx.send("No server backups found.")
@@ -232,7 +236,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
         if await send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
 
-        try: new_backup = backend.new_backup(name, slime_vars.server_path, slime_vars.server_backups_path)
+        try: new_backup = backend.new_backup(name, config.get_config('server_path'), config.get_config('server_backups_path'))
         except:
             await ctx.send("**ERROR:** Server backup failed! :interrobang:")
             lprint(ctx, "ERROR: New server backup: " + name)
@@ -273,7 +277,7 @@ class Server_Backups(commands.Cog):
             return
         if not index: return
 
-        fetched_restore = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
+        fetched_restore = backend.get_from_index(config.get_config('server_backups_path'), index, 'd')
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
         if await server_status() is not False:
@@ -281,7 +285,7 @@ class Server_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: backend.restore_backup(fetched_restore, slime_vars.server_path)
+        try: backend.restore_backup(fetched_restore, config.get_config('server_path'))
         except:
             await ctx.send("**ERROR:** Could not restore server!")
             lprint(ctx, "ERROR: Server restore: " + fetched_restore)
@@ -312,7 +316,7 @@ class Server_Backups(commands.Cog):
             return
         if not index: return
 
-        to_delete = backend.get_from_index(slime_vars.server_backups_path, index, 'd')
+        to_delete = backend.get_from_index(config.get_config('server_backups_path'), index, 'd')
         try: backend.delete_dir(to_delete)
         except:
             await ctx.send(f"**Error:** Issue deleting: `{to_delete}`")

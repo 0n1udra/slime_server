@@ -3,7 +3,7 @@ from typing import Union, Any, List, Dict
 import discord
 from discord.ext.commands import Context
 
-from bot_files.backend_functions import backend
+from bot_files.slime_backend import backend
 from bot_files.slime_config import config
 
 

@@ -1,5 +1,18 @@
 """
 Handles which server API to use depending on configs, managing world/server backups, reading and managing server files.
+
+Project Structure:
+    Objects:
+        Backend - slime_backend.py, Server start/stop, world/server backups, sending commands, reading/managing server files.
+            Server_API - slime_api.py, Sending commands and reading log output.
+        Comps - discord_components.py, Anything relating to discord component and embeds.
+        Bot - slime_bot.py, Discord bot.
+        Utils, File_utils - slime_utils.py, Useful utilities like parsing input and formatting outputs, etc.
+    Cogs:
+        backups.py, Server/world backup management
+        player.py, Common player commands and controls like: banning, whitelist, gamemode, etc
+        server.py, Server status, start/stop, editing properties, managing different servers.
+        world.py, Game related and world relating stuff, like say, chat log, weather, time, etc.
 """
 
 import os
@@ -9,16 +22,15 @@ import requests
 import fileinput
 from os.path import join
 from collections import deque
-from typing import Dict
+from typing import Union, Dict
 
 from discord.ext.commands import Bot
 import mctools
 from file_read_backwards import FileReadBackwards
 
-from bot_files.slime_config import config
-from bot_files.slime_utils import lprint
 from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
-from bot_files.slime_utils import utils, file_utils
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint, utils, file_utils
 
 
 # Used for removing ANSI escape characters
@@ -193,6 +205,15 @@ class Backend:
 
         return self.server_api.server_console_reachable()
 
+    def get_command_output(self) -> Union[str, bool]:
+        """
+
+        Returns:
+
+        """
+
+        return self.server_api.get_command_output()
+
     # ===== Server Functions
     async def get_status(self, force_check: bool = False) -> bool:
         """
@@ -204,10 +225,10 @@ class Backend:
         """
 
         if config.get_config('ping_before_command') is True:
-            return self.ping_server()
+            return self.server_ping()
         # Can force check even if configs disable it.
         elif config.get_config('check_before_command') is True or force_check is True:
-            return await self.server_console_reachable()
+            return await self.server_api.server_console_reachable()
 
         return False
     
@@ -220,7 +241,7 @@ class Backend:
             bool: If successful server launch.
         """
 
-        return self.server_api._start_server()
+        return self.server_api.start_server()
 
     def server_ping(self) -> bool:
         """
@@ -302,53 +323,7 @@ class Backend:
                 location = log_data.split('[')[-1][:-3].replace('d', '')
                 return location
 
-    # ===== Server Files
-    def read_server_log(self, search=None, file_path=None, lines=15, find_all=False, stopgap_str=None, top_down_mode=False):
-        """
-        Read the latest.log file under server/logs folder. Can also find a match.
 
-        Args:
-            search (str or list, optional): Check for a matching string or a list of matching strings.
-                                            If None, it will return all log data without matching.
-            file_path (str, optional): File to read. Defaults to the server's latest.log.
-            lines (int, optional): Number of most recent lines to return.
-            match_mode (str, optional): Matching mode. Options: 'any' (default), 'all', 'none'.
-            stopgap_str (str, optional): Stops the search when this string is found in the log line.
-            top_down_mode (bool, optional): If True, search from the top of the log file.
-                                            If False (default), search from the bottom of the log file.
-
-        Returns:
-            str: Matched lines in reverse order, joined by '\n'.
-        """
-        # Convert the search strings to lowercase for case-insensitive matching.
-        if type(search) is str:
-            search = [search.lower()]
-        elif type(search) is list:
-            search = [s.lower() for s in search]
-        else: search = None
-
-        file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
-        if not file_path or not os.path.exists(file_path): return False  # If file not exist.
-
-        # Create a deque, which will efficiently store the most recent matched log lines.
-        matched_lines = deque(maxlen=lines) if top_down_mode else []
-
-        # Changes function to read file if reading bottom up or top down.
-        read_log_lines = file_utils.read_file_bottom_up if not top_down_mode  else file_utils.read_file
-        with read_log_lines(file_path, top_down_mode) as log_lines:
-            for line in log_lines:
-                # Check if each element in 'search' is found in 'line_lower'.
-                found_matches = [s in line.lower() for s in search]
-                # Determine if the line matches the specified criteria (search and match_mode).
-                # The conditions use 'found_matches', which is a list of booleans indicating the match status.
-                if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
-                    # Append the matched line to the deque or list depending on the search mode.
-                    matched_lines.append(line)
-
-                    # Stops if found stopgap_str in line or at the limit user specified.
-                    if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
-
-        return '\n'.join(matched_lines)
 
     # File reading and writing
     def _read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):

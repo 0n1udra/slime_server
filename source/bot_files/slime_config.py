@@ -14,6 +14,8 @@ from typing import Union, Any, Dict
 
 import discord
 
+from bot_files.slime_utils import utils
+
 class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
@@ -203,10 +205,9 @@ class Config():
             }
         }
 
-    def update_server_configs(self):
+    def update_server_configs(self, new_data: Dict) -> Dict:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
-        global slime_vars
-        for server_name, server_configs in slime_vars.servers.items():
+        for server_name, server_configs in self.servers.items():
             if 'example' in server_name: continue  # Skip example template
             server_configs = self.example_server_configs.copy()
             server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
@@ -234,18 +235,6 @@ class Config():
 
         return server_dict
 
-    def update_servers_vars():
-        """Checks if there's new configs in 'example' and updates the other servers with defaults."""
-        global slime_vars
-        for name, data in config.servers.items():
-            if 'example' in name: continue  # Skip example template
-            server = config.servers['example'].copy()
-            server.update(data)  # Updates example template values with user set ones, fallback on 'example' defaults
-            server = update_server_paths(server, name)  # Updates paths (substitutes SELECTED_SERVER)
-            # Updates slime_vars then writes to file.
-            slime_vars.servers.update({name: server})
-            slime_vars.update_vars(slime_vars.config)
-
     def update_from_user_config(config):
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
         with open(slime_vars.user_config_filepath, 'r') as openfile:
@@ -257,7 +246,7 @@ class Config():
             deep_update(config, json.load(openfile))
         return config
 
-    def get_server_config(self, server_name: str) -> Union[Dict, None]:
+    def get_server_configs(self, server_name: str) -> Union[Dict, None]:
         """
         Get configs dictionary of specific server by name.
 
@@ -285,6 +274,7 @@ class Config():
             self.server_configs = server_configs
             return True
         return False
+
 
 config = Config()
 config.initialize_configs()

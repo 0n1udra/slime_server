@@ -1,10 +1,12 @@
-import asyncio, discord
+import asyncio
+
+import discord
 from discord.ext import commands
-from bot_files.backend_functions import send_command, format_args, server_status, lprint
-import bot_files.backend_functions as backend
-import bot_files.components as components
-import bot_files.slime_config as slime_vars
-from bot_files.extra import convert_to_bytes
+
+from bot_files.slime_backend import backend
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint, utils
+from bot_files.discord_components import comps
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -376,7 +378,7 @@ class Permissions(commands.Cog):
         if not response: return
         log_data = backend.server_log(log_mode=True, stopgap_str=response[1])
 
-        if slime_vars.server_use_rcon is True:
+        if config.get_config('server_use_rcon') is True:
             if 'There are no bans' in log_data:
                 banned_players = 'No exiles!'
             else:
@@ -487,7 +489,7 @@ class Permissions(commands.Cog):
 
         # List whitelisted.
         elif not arg or arg == 'list':
-            if slime_vars.server_use_rcon:
+            if config.get_config('server_use_rcon'):
                 log_data = await send_command('whitelist list')
                 log_data = log_data[1]
                 log_data = backend.remove_ansi(log_data).split(':')
@@ -512,7 +514,7 @@ class Permissions(commands.Cog):
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['server_name']}`" for i in backend.read_json(slime_vars.server_path + '/' + 'ops.json')]
+        op_players = [f"`{i['server_name']}`" for i in utils.read_json(config.get_config('server_path') + '/' + 'ops.json')]
         if op_players:
             await ctx.send(f"**OP List** :scroll:")
             await ctx.send('\n'.join(op_players))
@@ -542,7 +544,7 @@ class Permissions(commands.Cog):
         reason = format_args(reason, return_no_reason=True)
         if not reason: return
 
-        if slime_vars.server_use_rcon:
+        if config.get_config('server_use_rcon'):
             command_success = await send_command(f"op {player}")
             command_success = command_success[0]
         else:
@@ -577,7 +579,7 @@ class Permissions(commands.Cog):
         reason = format_args(reason, return_no_reason=True)
         command_success = False
 
-        if slime_vars.server_use_rcon:
+        if config.get_config('server_use_rcon'):
             command_success = await send_command(f"deop {player}")
             command_success = command_success[0]
         else:

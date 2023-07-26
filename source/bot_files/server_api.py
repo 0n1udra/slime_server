@@ -7,6 +7,15 @@ I'm using Python class inheritance, it works by override certain functions in ba
 Each Server_API_X class should have its own send_command() with its own way to interact with the server.
 For example, in Server_API_Tmux it uses os.system() to send commands to a tmux pane containing the server console,
   and in Server_API_Rcon, it uses the mctools module to send the command using RCON.
+The functions starting with '_' are expected to be overridden in the inheritance of Server_API.
+
+Following functions must be async:
+    send_command()
+    _send_command()
+    get_command_output()
+    _get_command_output()
+    start_server()
+    _start_server()
 """
 
 import os
@@ -14,14 +23,14 @@ import json
 import asyncio
 import requests
 import subprocess
+from collections import deque
 from typing import Union, Any, Callable, Tuple, List
 
 import mctools
 from bs4 import BeautifulSoup
 
-from slime_utils import utils
-from slime_utils import lprint
-from slime_config import config
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint, utils, file_utils
 
 class Server_Files:
     def get_property(self, key: str) -> Any:
@@ -63,9 +72,9 @@ class Server_Versioning(Server_Files):
 
     def __init__(self):
         self.url_builder_functions = {
-            ['vanilla']: self.get_vanilla_url,
-            ['paper']: self.get_papermc_url,
-            ['bukkit']: self.get_bukkit_url,
+            'vanilla': [self.get_vanilla_url, ['vanillla']],
+            'paper': [self.get_papermc_url, ['paper']],
+            'bukkit': [self.get_bukkit_url, ['bukkit']],
         }
 
     def _get_server_version(self) -> str:
@@ -80,7 +89,7 @@ class Server_Versioning(Server_Files):
 
     def get_server_version(self) -> str:
         """
-        Gets server version, either by reading server log or using PINGClient.
+        Gets server version number.
 
         Returns:
             str: Server version.
@@ -149,11 +158,11 @@ class Server_Versioning(Server_Files):
         """
 
         # Checks if server name and description contains keyword to determine what url builder func to use.
-        for name, function in self.url_builder_functions.items():
-            if any(i in config.selected_server['name'] for i in name):
-                return function
-            elif any(i in config.selected_server['server_description'] for i in name):
-                return function
+        for k, v in self.url_builder_functions.items():
+            if any(i in config.selected_server['name'] for i in v[1]):
+                return v[0]
+            elif any(i in config.selected_server['server_description'] for i in v[1]):
+                return v[0]
         return None
 
     def get_vanilla_url(self) -> Tuple[str, str]:
@@ -215,24 +224,15 @@ class Server_API(Server_Versioning, Server_Files):
         self.last_command_output = ''
 
         # Set server launch path depending on config.
-        self.launch_path = config.get('server_path')
-        if custom_path := config.get('server_launch_path'):
+        self.launch_path = config.get_config('server_path')
+        if custom_path := config.get_config('server_launch_path'):
             self.launch_path = custom_path
 
-        if config.get('windows_compatibility') is True:
-            self.launch_command = config.get('windows_cmdline_start') + config.get('server_launch_command')
-
-    def get_command_output(self) -> str:
-        """
-        Gets response from last command.
-
-        Returns:
-            str: Response from last command issued.
-        """
-        pass
+        if config.get_config('windows_compatibility') is True:
+            self.launch_command = config.get_config('windows_cmdline_start') + config.get_config('server_launch_command')
 
     # Check if server console is reachable.
-    def server_console_reachable(self) -> bool:
+    async def _server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -240,15 +240,25 @@ class Server_API(Server_Versioning, Server_Files):
             bool: Console reachable.
         """
 
-        if config.get('server_file_access') is True:
+        if config.get_config('server_file_access') is True:
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
-            if self.send_command(check_command) is True:
-                if self.read_log(unique_number) is True:  # Check logs for unique number.
+            if await self.send_command(check_command) is True:
+                if self.get_command_output(unique_number) is True:  # Check logs for unique number.
+                    self.last_check_number = unique_number
                     return True
         return False
 
-    # This will be updated with correct code to send command to server console based on configs.
-    def send_command(self, command: str) -> bool:
+    async def server_console_reachable(self) -> bool:
+        """
+        Check if server console is reachable by sending a unique number to be checked in logs.
+
+        Returns:
+            bool: Console reachable.
+        """
+
+        return await self._server_console_reachable()
+
+    async def _send_command(self, command: str) -> bool:
         """
         Placeholder function for sending command to Minecraft server.
 
@@ -261,22 +271,98 @@ class Server_API(Server_Versioning, Server_Files):
 
         return False
 
-    def get_status(self) -> bool:
+    # This will be updated with correct code to send command to server console based on configs.
+    async def send_command(self, command: str) -> bool:
         """
-        Check server active status by sending unique number, then checking log for it.
+        Send command to Minecraft server.
+
+        Args:
+            command str: Command to send to server.
 
         Returns:
-            bool: If server reachable.
+            bool: If successfully sent command, not the same as if command accepted by server.
         """
-        pass
 
-    # ===== Get Data
+        self.last_command_sent = command
+        return await self._send_command(command)
+
+    # Get output from the last issued command.
+    def get_command_output(self, extra_lines: int = 0) -> Union[str, bool]:
+        """
+        Gets response from last command.
+
+        Returns:
+            str: Response from last command issued.
+        """
+
+        if data := self.read_server_log(search=self.last_command_sent, extra_lines=extra_lines, stopgap_str=self.last_check_number):
+            return data
+        return False
+
+    # ===== Server Files
+    def read_server_log(self, search=None, file_path=None, lines=15, extra_lines=0, find_all=False, stopgap_str=None, top_down_mode=False):
+        """
+        Read the latest.log file under server/logs folder. Can also find a match.
+
+        Args:
+            search (str or list, optional): Check for a matching string or a list of matching strings.
+                                            If None, it will return all log data without matching.
+            file_path (str, optional): File to read. Defaults to the server's latest.log.
+            lines (int, optional): Number of most recent lines to return.
+            match_mode (str, optional): Matching mode. Options: 'any' (default), 'all', 'none'.
+            stopgap_str (str, optional): Stops the search when this string is found in the log line.
+            top_down_mode (bool, optional): If True, search from the top of the log file.
+                                            If False (default), search from the bottom of the log file.
+
+        Returns:
+            str: Matched lines in reverse order, joined by '\n'.
+        """
+        # Convert the search strings to lowercase for case-insensitive matching.
+        if type(search) is str:
+            search = [search.lower()]
+        elif type(search) is list:
+            search = [s.lower() for s in search]
+        else: search = None
+
+        file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
+        if not file_path or not os.path.exists(file_path): return False  # If file not exist.
+
+        # Create a deque, which will efficiently store the most recent matched log lines.
+        matched_lines = deque(maxlen=lines) if top_down_mode else []
+
+        # Changes function to read file if reading bottom up or top down.
+        read_log_lines = file_utils.read_file_bottom_up if not top_down_mode else file_utils.read_file
+        match_found = False
+        with read_log_lines(file_path, top_down_mode) as log_lines:
+            for line in log_lines:
+                # Gets some extra lines after the match is found, incase the command's output is multiline.
+                if match_found and extra_lines >= 0:
+                    matched_lines.append(line)
+                    extra_lines -= 1
+                    continue
+
+                # Check if each element in 'search' is found in 'line_lower'.
+                found_matches = [s in line.lower() for s in search]
+                # Determine if the line matches the specified criteria (search and match_mode).
+                # The conditions use 'found_matches', which is a list of booleans indicating the match status.
+                if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
+                    # Append the matched line to the deque or list depending on the search mode.
+                    matched_lines.append(line)
+                    match_found = True
+
+                # Stops if found stopgap_str in line or at the limit user specified.
+                if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
+
+        return '\n'.join(matched_lines)
+
+    async def _start_server(self): pass
+
 
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
 
-    def send_command(self, command: str) -> bool:
+    async def _send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Tmux session.
 
@@ -287,11 +373,11 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} '{command}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{command}' ENTER"):
             return False
         return True
 
-    def start_server(self) -> bool:
+    async def _start_server(self) -> bool:
         """
         Start server in specified Tmux pane.
 
@@ -302,11 +388,11 @@ class Server_API_Tmux(Server_API):
         os.chdir(self.launch_path)
 
         # If failed to change current working directory.
-        if os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} 'cd {config.get('server_path')}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} 'cd {config.get_config('server_path')}' ENTER"):
             return False
 
         # Starts server in tmux pane.
-        if os.system(f"tmux send-keys -t {config.get('tmux_session_name')}:{config.get('tmux_minecraft_pane')} '{self.launch_command}"):
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{self.launch_command}"):
             return False
 
         return False
@@ -316,7 +402,7 @@ class Server_API_Screen(Server_API):
     def __init__(self):
         super().__init__()
 
-    def send_command(self, command: str) -> bool:
+    async def _send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
 
@@ -327,11 +413,11 @@ class Server_API_Screen(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"screen -S {config.get('screen_session_name')} -X stuff '{command}\n'"):
+        if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}\n'"):
             return False
         return True
 
-    def start_server(self) -> bool:
+    async def _start_server(self) -> bool:
         """
         Start server in specified screen session.
 
@@ -340,7 +426,7 @@ class Server_API_Screen(Server_API):
         """
 
         os.chdir(self.launch_path)
-        if not os.system(f"screen -dmS '{config.get('screen_session_name')}' {self.launch_command}"):
+        if not os.system(f"screen -dmS '{config.get_config('screen_session_name')}' {self.launch_command}"):
             return True
         else: return False
 
@@ -349,7 +435,7 @@ class Server_API_Rcon(Server_API):
     def __init__(self):
         super().__init__()
 
-    def server_console_reachable(self) -> bool:
+    async def _server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number.
 
@@ -362,7 +448,7 @@ class Server_API_Rcon(Server_API):
             if unique_number in response:
                 return True
 
-    def send_command(self, command: str) -> Union[str, bool]:
+    async def _send_command(self, command: str) -> Union[str, bool]:
         """
         Send command to server with RCON.
 
@@ -373,11 +459,11 @@ class Server_API_Rcon(Server_API):
             str, bool: Output from RCON or False if error.
         """
 
-        server_rcon_client = mctools.RCONClient(config.get('server_address'), port=config.get('rcon_port'))
+        server_rcon_client = mctools.RCONClient(config.get_config('server_address'), port=config.get_config('rcon_port'))
         try:
-            server_rcon_client.login(config.get('rcon_pass'))
+            server_rcon_client.login(config.get_config('rcon_pass'))
         except ConnectionError:
-            lprint(f"Error Connecting to RCON: {config.get('server_ip')} : {config.get('rcon_port')}")
+            lprint(f"Error Connecting to RCON: {config.get_config('server_ip')} : {config.get_config('rcon_port')}")
             return False
         else:
             return_data = server_rcon_client.command(command)
@@ -391,11 +477,11 @@ class Server_API_Subprocess(Server_API):
 
 
     # TODO be able to have multiple subprocess servers running and switch between them
-    def send_command(self, command):
+    async def _send_command(self, command):
         mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
         mc_subprocess.stdin.flush()
 
-    def start_server(self) -> bool:
+    def _start_server(self) -> bool:
         """
 
         Returns:
@@ -405,7 +491,7 @@ class Server_API_Subprocess(Server_API):
         os.chdir(self.launch_path)
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            mc_subprocess = subprocess.Popen(config.get('server_launch_command').split(), stdin=asyncio.subprocess.PIPE,
+            mc_subprocess = subprocess.Popen(config.get_config('server_launch_command').split(), stdin=asyncio.subprocess.PIPE,
                                              stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         except: lprint("ERROR: Problem starting server subprocess")
 
