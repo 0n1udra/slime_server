@@ -639,7 +639,7 @@ class Server(commands.Cog):
         else: await ctx.send("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
-    @commands.command(aliases=['startserver', 'start'])
+    @commands.command(aliases=['startserver', 'start', 'mstart'])
     async def serverstart(self, ctx):
         """
         Start Minecraft server.
@@ -666,7 +666,7 @@ class Server(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
-    @commands.command(aliases=['stopserver', 'stop'])
+    @commands.command(aliases=['stopserver', 'stop', 'mstop'])
     async def serverstop(self, ctx, now=''):
         """
         Stop Minecraft server, gives players 15s warning.
