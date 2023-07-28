@@ -23,8 +23,8 @@ class Basics(commands.Cog):
         Note: You will get the latest 2 lines from server output, if you need more use ?log.
         """
 
-        command = format_args(command)
-        if not await send_command(command): return False
+        command = utils.utils.format_args(command)
+        if not await backend.backend.send_command(command): return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -41,12 +41,12 @@ class Basics(commands.Cog):
             ?s Hello World!
         """
 
-        msg = format_args(msg)
+        msg = utils.format_args(msg)
 
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
-            if await send_command('say ' + msg):
+            if await backend.send_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
@@ -64,12 +64,12 @@ class Basics(commands.Cog):
             ?t Jesse Do you have diamonds?
         """
 
-        msg = format_args(msg)
+        msg = utils.format_args(msg)
         if not player or not msg:
             await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
-        if not await send_command(f"tell {player} {msg}"): return
+        if not await backend.send_command(f"tell {player} {msg}"): return
 
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
@@ -108,7 +108,7 @@ class Basics(commands.Cog):
         # TODO: Possibly able to remove this and use match= in server_log
         # optionally filter out chat lines only with certain keywords.
         log_data = '\n'.join([i for i in log_data if keyword.lower() in i.lower()])
-        await ctx.send(file=discord.File(convert_to_bytes(log_data), 'chat_log.log'))
+        await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'chat_log.log'))
         lprint(ctx, f"Fetched Chat Log: {lines}")
 
 # ========== World: weather, time.
@@ -134,7 +134,7 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if not await send_command(f'weather {state} {duration}'): return
+        if not await backend.send_command(f'weather {state} {duration}'): return
 
         await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
@@ -143,7 +143,7 @@ class World(commands.Cog):
     async def weatheron(self, ctx):
         """Enable weather cycle."""
 
-        await send_command(f'gamerule doWeatherCycle true')
+        await backend.send_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
 
@@ -151,7 +151,7 @@ class World(commands.Cog):
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
 
-        await send_command(f'gamerule doWeatherCycle false')
+        await backend.send_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
 
@@ -191,7 +191,7 @@ class World(commands.Cog):
         """
 
         if set_time:
-            if not await send_command(f"time set {set_time}"): return
+            if not await backend.send_command(f"time set {set_time}"): return
             await ctx.send(f"Time Updated ({set_time})  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
@@ -212,7 +212,7 @@ class World(commands.Cog):
     async def timeon(self, ctx):
         """Enable day light cycle."""
 
-        await send_command(f'gamerule doDaylightCycle true')
+        await backend.send_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
@@ -220,7 +220,7 @@ class World(commands.Cog):
     async def timeoff(self, ctx):
         """Disable day light cycle."""
 
-        await send_command(f'gamerule doDaylightCycle false')
+        await backend.send_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
 

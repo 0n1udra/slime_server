@@ -7,6 +7,7 @@ import io
 import os
 import csv
 import json
+import math
 import shutil
 import psutil
 import random
@@ -45,7 +46,7 @@ def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
         ctx = arg1.message.author
         msg = arg2
     else:
-        ctx = lambda: inspect.currentframe().f_back.f_globals["__file__"]
+        ctx = os.path.basename(inspect.stack()[1].filename)
         msg = arg1
 
     # Format date and print log message.
@@ -53,25 +54,25 @@ def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
     print(output)
 
     # Logs output.
-    with open(config.get('bot_log_filepath'), 'a') as file:
+    with open(config.get_config('bot_log_filepath'), 'a') as file:
         file.write(output + '\n')
 
 
 def status_slime_proc(self):
     """Get bot process name and pid."""
 
-    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
-        lprint(ctx, f"INFO: Process info: {proc.name()}, {proc.pid}")
+    if proc := utils.get_proc(slime_proc_name, slime_proc_cmdline):
+        lprint(f"INFO: Process info: {proc.name()}, {proc.pid}")
 
 
 def kill_slime_proc(self):
     """Kills bot process."""
 
-    if proc := get_proc(slime_proc_name, slime_proc_cmdline):
+    if proc := utils.get_proc(slime_proc_name, slime_proc_cmdline):
         proc.kill()
-        lprint(ctx, "INFO: Bot process killed")
+        lprint("INFO: Bot process killed")
     else:
-        lprint(ctx, "ERROR: Bot process not found")
+        lprint("ERROR: Bot process not found")
 
 
 class File_Utils:
@@ -267,7 +268,7 @@ class File_Utils:
                     return_list.append(component_data)  # Need this for world/server commands
                     index += 1
                     continue
-                if 's' in mode and item in config.get('servers'):
+                if 's' in mode and item in config.servers:
                     component_data[-1] = config.get_server_configs(item)['server_description']
                     return_list.appen(component_data)  # For server mode for ?controlpanel command component
                     index += 1
@@ -353,7 +354,7 @@ class Utils:
         """
 
         random_number = str(random.random())
-        status_check_command = config.get('status_checker_command') + ' ' + random_number
+        status_check_command = config.get_config('status_checker_command') + ' ' + random_number
         return status_check_command, random_number
 
     def get_parameter(self, arg, nrg_msg=False, key='second_selected', **kwargs):
@@ -462,7 +463,7 @@ class Utils:
             bool: If successful.
         """
 
-        if config.get('windows_compatibility') is True:  # If on windows.
+        if config.get_config('windows_compatibility') is True:  # If on windows.
             try:
                 if 'TTL=' in subprocess.run(["ping", "-n", "2", address], capture_output=True, text=True, timeout=10).stdout:
                     return True

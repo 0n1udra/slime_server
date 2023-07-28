@@ -1,23 +1,23 @@
 #!/usr/bin/python3
 
-import json, time, sys, os
-import bot_files.slime_config as slime_vars
-from bot_files.slime_bot import bot
-from bot_files.extra import lprint, update_from_user_config
-import bot_files.backend_functions as backend
+import os
+import sys
+import time
+import json
 
-ctx = 'run_bot.py'  # So you know which log lines come from which file.
+from bot_files.slime_config import config
+from bot_files.slime_bot import bot
+from bot_files.slime_utils import lprint
+from bot_files.slime_backend import backend
+
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
 
 def setup_configs():
-    global slime_vars
     # Creates flatten dict to make it easier to find items to use as defaults
-    default_configs = {**slime_vars.config['bot_configs'].copy(), **slime_vars.config['servers']['example'].copy()}
     def get_input(config_prompts):
-        config = {}
         for variable, prompt in config_prompts.items():
-            default_value = default_configs.get(variable, "''")
+            default_value = config.get_config(variable, "''")
             input_type = type(default_value)
             config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if input_type is bool:
@@ -63,40 +63,33 @@ def setup_configs():
     if ask_input in ['y', 'yes']: server_configs = get_input(server_config_prompts)
 
     # Updates dictionaries and returns new dictionary to update slime_vars.config
-    updated_bot_configs = slime_vars.config['bot_configs']
-    updated_bot_configs.update(bot_configs)
-    example_server_configs = slime_vars.config['servers']['example'].copy()
-    updated_server_configs = example_server_configs.copy()
-    updated_server_configs.update(server_configs)
 
-    slime_vars.update_vars({'bot_configs': updated_bot_configs, 'servers': {updated_server_configs['server_name']: updated_server_configs,
-                                                                           'example': example_server_configs}})
     try: open(user_config_filepath, 'a').close()
-    except: lprint(ctx, "ERROR: Unable to create 'user_config.json' file.")
+    except: lprint( "ERROR: Unable to create 'user_config.json' file.")
     else:  # Creates new json
-        with open(user_config_filepath, "w") as outfile: outfile.write(json.dumps(slime_vars.config, indent=4))
-        lprint(ctx, "INFO: New user_config.json created.")
+        with open(user_config_filepath, "w") as outfile: outfile.write(json.dumps(config.configs, indent=4))
+        lprint("INFO: New user_config.json created.")
 
 
 def _start_bot():
     """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
-    if os.path.isfile(slime_vars.bot_token_filepath):
-        with open(slime_vars.bot_token_filepath, 'r') as file:
+    if os.path.isfile(config.get_config('bot_token_filepath')):
+        with open(config.get_config('bot_token_filepath'), 'r') as file:
             TOKEN = file.readline()
-            lprint(ctx, f'INFO: Discord Token: {slime_vars.bot_token_filepath}')
+            lprint(f"INFO: Discord Token: {config.get_config('bot_token_filepath')}")
     else:
-        lprint(ctx, f"ERROR: Missing Token File: {slime_vars.bot_token_filepath}")
+        lprint(f"ERROR: Missing Token File: {config.get_config('bot_token_filepath')}")
         sys.exit()
 
     bot.run(TOKEN)
 
 def start_bot():
     """Uses different methods of launching Discord bot depending on config"""
-    if slime_vars.use_tmux is True:
+    if config.get_config('use_tmux') is True:
         no_tmux = False
         # Sources pyenv if set in slime_vars.
-        if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "cd {slime_vars.bot_src_path}" ENTER'):
-            lprint(ctx, f"ERROR: Changing directory ({slime_vars.bot_src_path})")
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_src_path')}' ENTER"):
+            lprint(f"ERROR: Changing directory ({config.get_config('bot_src_path')})")
             no_tmux = True
 
         if no_tmux:
@@ -104,15 +97,15 @@ def start_bot():
             return
 
         # Activate python env.
-        if slime_vars.use_pyenv:
-            if os.system(f'tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} "{slime_vars.pyenv_activate_command}" ENTER'):
-                lprint(ctx, f"ERROR: {slime_vars.pyenv_activate_command}")
-            else: lprint(ctx, f"INFO: Activated pyenv")
+        if config.get_config('use_pyenv'):
+            if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} '{config.get_config('pyenv_activate_command')}' ENTER"):
+                lprint(f"ERROR: {config.get_config('pyenv_activate_command')}")
+            else: lprint(f"INFO: Activated pyenv")
 
-        if os.system(f"tmux send-keys -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane} '{slime_vars.bot_launch_command} {beta_mode}' ENTER"):
-            lprint(ctx, "ERROR: Could not start bot in tmux. Will run bot here.")
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} '{config.get_config('bot_launch_command')} {beta_mode}' ENTER"):
+            lprint("ERROR: Could not start bot in tmux. Will run bot here.")
             _start_bot()
-        else: lprint(ctx, "INFO: Started slime_bot.py")
+        else: lprint("INFO: Started slime_bot.py")
 
     else: _start_bot()  # Starts inline if not using tmux.
 
@@ -120,38 +113,38 @@ def setup_directories():
     """Create necessary directories."""
 
     # Creates Server folder, folder for world backups, and folder for server backups.
-    os.makedirs(slime_vars.servers_path)
-    lprint(ctx, "INFO: Created: " + slime_vars.servers_path)
-    os.makedirs(slime_vars.server_path)
-    lprint(ctx, "INFO: Created: " + slime_vars.server_path)
-    os.makedirs(slime_vars.world_backups_path)
-    lprint(ctx, "INFO: Created: " + slime_vars.world_backups_path)
-    os.makedirs(slime_vars.server_backups_path)
-    lprint(ctx, "INFO: Created: " + slime_vars.server_backups_path)
+    os.makedirs(config.get_config('servers_path'))
+    lprint("INFO: Created: " + config.get_config('servers_path'))
+    os.makedirs(config.get_config('server_path'))
+    lprint("INFO: Created: " + config.get_config('server_path'))
+    os.makedirs(config.get_config('world_backups_path'))
+    lprint("INFO: Created: " + config.get_config('world_backups_path'))
+    os.makedirs(config.get_config('server_backups_path'))
+    lprint("INFO: Created: " + config.get_config('server_backups_path'))
 
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
 
-    if os.system(f'tmux new -d -s {slime_vars.tmux_session_name}'):
-        lprint(ctx, f"ERROR: Starting tmux session")
-    else: lprint(ctx, f"INFO: Started Tmux detached session")
+    if os.system(f"tmux new -d -s {config.get_config('tmux_session_name')}"):
+        lprint(f"ERROR: Starting tmux session")
+    else: lprint(f"INFO: Started Tmux detached session")
 
-    if os.system(f'tmux split-window -v -t {slime_vars.tmux_session_name}:{slime_vars.tmux_bot_pane}'):
-        lprint(ctx, "ERROR: Creating second tmux panes")
-    else: lprint(ctx, "INFO: Created second tmux panes")
+    if os.system(f"tmux split-window -v -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')}"):
+        lprint("ERROR: Creating second tmux panes")
+    else: lprint("INFO: Created second tmux panes")
 
     time.sleep(1)
 
 def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_config.py."""
 
-    if slime_vars.use_tmux is True:
+    if config.get_config('use_tmux') is True:
         backend.server_start()
 
 def show_log():
     """Use watch + tail command on bot log."""
 
-    os.system(f"watch -n {watch_interval} tail {slime_vars.bot_log_filepath}")
+    os.system(f"watch -n {watch_interval} tail {config.get_config('bot_log_filepath')}")
 
 def script_help():
     help = """
@@ -177,90 +170,90 @@ def script_help():
 
 def show_banner():
     # Hides sensitive info from output.
-    nono = slime_vars.show_sensitive_info  # what? got a problem with the naming? it works.
+    nono = config.get_config('show_sensitive_info')  # what? got a problem with the naming? it works.
     no = '**********'  # 2bad. change it!
 
     vars_msg = f"""
 Bot:
-Version             {slime_vars.__version__} - {slime_vars.__date__}
-User                {slime_vars.user}
-Python Env          {slime_vars.pyenv_activate_command if slime_vars.use_pyenv else 'None'}
-Subprocess          {slime_vars.server_use_subprocess}
-Tmux                {slime_vars.use_tmux}
-RCON                {slime_vars.server_use_rcon}
-Bot Log             {slime_vars.bot_log_filepath}
+Version             {__version__} - {__date__}
+User                {config.get_config('user')}
+Python Env          {config.get_config('pyenv_activate_command') if config.get_config('use_pyenv') else 'None'}
+Subprocess          {config.get_config('server_use_subprocess')}
+Tmux                {config.get_config('use_tmux')}
+RCON                {config.get_config('server_use_rcon')}
+Bot Log             {config.get_config('bot_log_filepath')}
 
 Discord:
-Discord Token       {slime_vars.bot_token_filepath if nono else no}
-Command Prefix      {slime_vars.command_prefix}
-Case Insensitive    {slime_vars.case_insensitive}
-Intents             {slime_vars.intents}
-Channel ID          {slime_vars.channel_id if nono else no}
-Show Custom Status  {slime_vars.check_before_command} - {slime_vars.custom_status_interval}min
+Discord Token       {config.get_config('bot_token_filepath') if nono else no}
+Command Prefix      {config.get_config('command_prefix')}
+Case Insensitive    {config.get_config('case_insensitive')}
+Intents             {config.intents}
+Channel ID          {config.get_config('channel_id') if nono else no}
+Show Custom Status  {config.get_config('check_before_command')} - {config.get_config('custom_status_interval')}min
 
 Server:
-Minecraft Folder    {slime_vars.mc_path}
-File Access         {slime_vars.server_files_access}
-Autosave            {slime_vars.enable_autosave} - {slime_vars.autosave_interval}min
-Server URL          {slime_vars.server_address if nono else no}
-Server Port         {slime_vars.server_port if nono else no}
+Minecraft Folder    {config.get_config('mc_path')}
+File Access         {config.get_config('server_files_access')}
+Autosave            {config.get_config('enable_autosave')} - {config.get_config('autosave_interval')}min
+Server URL          {config.get_config('server_address') if nono else no}
+Server Port         {config.get_config('server_port') if nono else no}
 
 NOTE: More info on the configs in README.md or use the comments in slime_config.py file in bot_files.
 """
-    if slime_vars.use_tmux: vars_msg += f"""
+    if config.get_config('use_tmux'): vars_msg += f"""
 Tmux:
-Session Name        {slime_vars.tmux_session_name}
-Bot Pane            {slime_vars.tmux_bot_pane}
-Server Pane         {slime_vars.tmux_minecraft_pane}
+Session Name        {config.get_config('tmux_session_name')}
+Bot Pane            {config.get_config('tmux_bot_pane')}
+Server Pane         {config.get_config('tmux_minecraft_pane')}
 """
 
-    if slime_vars.server_use_screen: vars_msg += f"""
+    if config.get_config('server_use_screen'): vars_msg += f"""
 Screen:
-Session Name        {slime_vars.screen_session_name}
+Session Name        {config.get_config('screen_session_name')}
 """
 
-    if slime_vars.server_use_rcon: vars_msg += f"""
+    if config.get_config('server_use_rcon'): vars_msg += f"""
 RCON:
-Pass                {slime_vars.rcon_pass if nono else no}
-Port                {slime_vars.rcon_port if nono else no}
+Pass                {config.get_config('rcon_pass') if nono else no}
+Port                {config.get_config('rcon_port') if nono else no}
 """
 
-    if slime_vars.server_files_access: vars_msg += f"""
+    if config.get_config('server_files_access'): vars_msg += f"""
 Local Server:
-Minecraft Path      {slime_vars.mc_path}
-Server Path         {slime_vars.server_path}
+Minecraft Path      {config.get_config('mc_path')}
+Server Path         {config.get_config('server_path')}
 """
 
     print(vars_msg)
 
 if __name__ == '__main__':
-    user_config_filepath = slime_vars.user_config_filepath
+    user_config_filepath = config.get_config('user_config_filepath')
     if os.path.isfile(user_config_filepath):  # Creates user_config.json if not exist.
-        loaded_configs = update_from_user_config(slime_vars.config)
-        slime_vars.update_vars(loaded_configs)
-        lprint(ctx, "INFO: Loaded user_config.json.")
+        #loaded_configs = update_from_user_config(slime_vars.config)
+        config.update_from_user_config()
+        lprint("INFO: Loaded user_config.json.")
     else:
-        lprint(ctx, "INFO: No 'user_config.json' file detected.")
+        lprint("INFO: No 'user_config.json' file detected.")
         setup_configs()
 
     # The order of the if statements is important.
     if 'hidebanner' not in sys.argv: show_banner()
 
-    if not slime_vars.channel_id:
-        lprint(ctx, "INFO: To enable startup message banner in discord, use '?setchannel' in the channel you want it in.")
+    if not config.get_config('channel_id'):
+        lprint("INFO: To enable startup message banner in discord, use '?setchannel' in the channel you want it in.")
 
     if 'setup' in sys.argv:
-        if slime_vars.server_files_access is True:
+        if config.get_config('server_files_access') is True:
             setup_directories()
-        if slime_vars.server_use_rcon is True:
-            lprint(ctx, "INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
+        if config.get_config('server_use_rcon') is True:
+            lprint("INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
-        slime_vars.bot_token_filepath = os.path.join(slime_vars.home_dir, 'keys', 'slime_bot_beta.token')
-        slime_vars.channel_id = '916450451061350420'
+        config.set_config('bot_token_filepath', os.path.join(config.get_config('home_dir'), 'keys', 'slime_bot_beta.token'))
+        config.set_config('channel_id', '916450451061350420')
 
-    if 'starttmux' in sys.argv and slime_vars.use_tmux:
+    if 'starttmux' in sys.argv and config.get_config('use_tmux'):
         start_tmux_session()
         time.sleep(1)
 
@@ -289,9 +282,9 @@ if __name__ == '__main__':
         start_tmux_session()
         time.sleep(1)
         start_bot()
-        os.system(f"tmux attach -t {slime_vars.tmux_session_name}")
+        os.system(f"tmux attach -t {config.get_config('tmux_session_name')}")
 
-    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {slime_vars.tmux_session_name}")
+    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {config.get_config('tmux_session_name')}")
 
     if 'help' in sys.argv: script_help()
 

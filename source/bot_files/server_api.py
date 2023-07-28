@@ -14,8 +14,8 @@ Following functions must be async:
     _send_command()
     get_command_output()
     _get_command_output()
-    start_server()
-    _start_server()
+    server_start()
+    _server_start()
 """
 
 import os
@@ -28,6 +28,7 @@ from typing import Union, Any, Callable, Tuple, List
 
 import mctools
 from bs4 import BeautifulSoup
+from file_read_backwards import FileReadBackwards
 
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
@@ -97,9 +98,9 @@ class Server_Versioning(Server_Files):
 
         # Manual override of server version.
         version = 'N/A'
-        if data := config.get('server_version'):
+        if data := config.get_config('server_version'):
             version = data
-        elif config.get('server_files_access') is True:
+        elif config.get_config('server_files_access') is True:
             # Tries to find versio info from latest.log.
             if data := self.server_log('server version'):
                 version = data.split('version')[1].strip()
@@ -119,7 +120,7 @@ class Server_Versioning(Server_Files):
             str: Latest version number.
         """
 
-        soup = BeautifulSoup(requests.get(config.get('new_server_address')).text, 'html.parser')
+        soup = BeautifulSoup(requests.get(config.get_config('new_server_address')).text, 'html.parser')
         for i in soup.findAll('a'):
             if i.string and 'minecraft_server' in i.string:
                 return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
@@ -139,12 +140,12 @@ class Server_Versioning(Server_Files):
         download_data = requests.get(download_url).content
 
         try:  # Sets eula.txt file.
-            with open(config.get('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')
-        except IOError: lprint(f"ERROR: Updating eula.txt file: {config.get('server_path')}")
+            with open(config.get_config('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')
+        except IOError: lprint(f"ERROR: Updating eula.txt file: {config.get_config('server_path')}")
 
         try:  # Saves file as server.jar.
-            with open(config.get('server_path') + '/server.jar', 'wb+') as f: f.write(download_data)
-        except IOError: lprint(f"ERROR: Saving new jar file: {config.get('server_path')}")
+            with open(config.get_config('server_path') + '/server.jar', 'wb+') as f: f.write(download_data)
+        except IOError: lprint(f"ERROR: Saving new jar file: {config.get_config('server_path')}")
         else:
             return download_url, version_info
         return False
@@ -231,8 +232,22 @@ class Server_API(Server_Versioning, Server_Files):
         if config.get_config('windows_compatibility') is True:
             self.launch_command = config.get_config('windows_cmdline_start') + config.get_config('server_launch_command')
 
+    # This will be updated with correct code to send command to server console based on configs.
+    async def send_command(self, command: str) -> bool:
+        """
+        Send command to Minecraft server.
+
+        Args:
+            command str: Command to send to server.
+
+        Returns:
+            bool: If successfully sent command, not the same as if command accepted by server.
+        """
+
+        return False
+
     # Check if server console is reachable.
-    async def _server_console_reachable(self) -> bool:
+    async def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -247,44 +262,6 @@ class Server_API(Server_Versioning, Server_Files):
                     self.last_check_number = unique_number
                     return True
         return False
-
-    async def server_console_reachable(self) -> bool:
-        """
-        Check if server console is reachable by sending a unique number to be checked in logs.
-
-        Returns:
-            bool: Console reachable.
-        """
-
-        return await self._server_console_reachable()
-
-    async def _send_command(self, command: str) -> bool:
-        """
-        Placeholder function for sending command to Minecraft server.
-
-        Args:
-            command str: Command to send to server.
-
-        Returns:
-            bool: If successfully sent command, not the same as if command accepted by server.
-        """
-
-        return False
-
-    # This will be updated with correct code to send command to server console based on configs.
-    async def send_command(self, command: str) -> bool:
-        """
-        Send command to Minecraft server.
-
-        Args:
-            command str: Command to send to server.
-
-        Returns:
-            bool: If successfully sent command, not the same as if command accepted by server.
-        """
-
-        self.last_command_sent = command
-        return await self._send_command(command)
 
     # Get output from the last issued command.
     def get_command_output(self, extra_lines: int = 0) -> Union[str, bool]:
@@ -416,14 +393,32 @@ class Server_API(Server_Versioning, Server_Files):
                 log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
             return log_data
 
-    async def _start_server(self): pass
+    async def server_start(self) -> bool:
+        """
+        Start server.
+
+        Returns:
+            bool: Sent startup command (Not same as successful startup).
+        """
+
+        return False
+
+    async def server_stop(self) -> bool:
+        """
+        Stop server.
+
+        Returns:
+            bool: Sent stop command (Not same as successful stopped).
+        """
+
+        return await self.send_command('stop')
 
 
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def _send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Tmux session.
 
@@ -438,7 +433,7 @@ class Server_API_Tmux(Server_API):
             return False
         return True
 
-    async def _start_server(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start server in specified Tmux pane.
 
@@ -463,7 +458,7 @@ class Server_API_Screen(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def _send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
 
@@ -478,7 +473,7 @@ class Server_API_Screen(Server_API):
             return False
         return True
 
-    async def _start_server(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start server in specified screen session.
 
@@ -496,20 +491,7 @@ class Server_API_Rcon(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def _server_console_reachable(self) -> bool:
-        """
-        Check if server console is reachable by sending a unique number.
-
-        Returns:
-            bool: Console reachable.
-        """
-
-        check_command, unique_number = utils.get_check_command()
-        if response := await self.send_command(check_command):
-            if unique_number in response:
-                return True
-
-    async def _send_command(self, command: str) -> Union[str, bool]:
+    async def send_command(self, command: str) -> Union[str, bool]:
         """
         Send command to server with RCON.
 
@@ -531,18 +513,40 @@ class Server_API_Rcon(Server_API):
             server_rcon_client.stop()
             return return_data
 
+    async def server_console_reachable(self) -> bool:
+        """
+        Check if server console is reachable by sending a unique number.
+
+        Returns:
+            bool: Console reachable.
+        """
+
+        check_command, unique_number = utils.get_check_command()
+        if response := await self.send_command(check_command):
+            if unique_number in response:
+                return True
+
 
 class Server_API_Subprocess(Server_API):
     def __init__(self):
         super().__init__()
 
+        self.server_subprocess = None
 
     # TODO be able to have multiple subprocess servers running and switch between them
-    async def _send_command(self, command):
-        mc_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
-        mc_subprocess.stdin.flush()
+    async def send_command(self, command):
+        if not self.server_subprocess: return False
+        try:
+            self.server_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
+            self.server_subprocess.stdin.flush()
+        except: return False
+        else:
+            self.last_command_output = self.server_subprocess.stdout.readline().decode('utf-8')
+            self.server_subprocess.wait()
 
-    def _start_server(self) -> bool:
+        return True
+
+    async def lserver_start(self) -> bool:
         """
 
         Returns:
@@ -552,11 +556,23 @@ class Server_API_Subprocess(Server_API):
         os.chdir(self.launch_path)
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            mc_subprocess = subprocess.Popen(config.get_config('server_launch_command').split(), stdin=asyncio.subprocess.PIPE,
-                                             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            if config.get_config('windows_compatibility') is True:
+                self.server_subprocess = subprocess.Popen(
+                    config.get_config('windows_cmdline_start') + config.get_config('server_launch_command'),
+                    shell=True
+                )
+            else:
+                self.server_subprocess = subprocess.Popen(
+                    config.get_config('server_launch_command').split(),
+                    stdin=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
         except: lprint("ERROR: Problem starting server subprocess")
 
-        if isinstance(mc_subprocess, subprocess.Popen): return True
+        if isinstance(self.server_subprocess, subprocess.Popen):
+            return True
         return False
         # TODO TEST for windows compatibility
-        #subprocess.Popen(config.get('windows_cmdline_start') + config.get('server_launch_command'), shell=True)
+
+

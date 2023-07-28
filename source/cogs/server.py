@@ -77,7 +77,7 @@ class Server(commands.Cog):
                 return
         data = config.servers[server_name]
         fields = [['Name', data['server_name']], ['server_description', data['server_description']], ['Launch Command', f"`{data['server_launch_command']}`"], ['Wait Time', data['startup_wait_time']]]
-        await ctx.send(embed=components.new_embed(fields, 'Server Info'))
+        await ctx.send(embed=comps.new_embed(fields, 'Server Info'))
         await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
 
     @commands.command(hidden=True)
@@ -113,19 +113,19 @@ class Server(commands.Cog):
             await ctx.send("Use `?selectserver` to use bot commands on new server.")
 
         else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields('example'), 'New Server', 'servernew'))
+            modal_msg = await interaction.response.send_modal(comps.new_modal(comps.server_modal_fields('example'), 'New Server', 'servernew'))
 
     @commands.command(hidden=True)
     async def serveredit(self, ctx, interaction):
         """Edit server information. Updates servers.csv file."""
 
         # This only works with control panel right. This gets selected server's name.
-        server_name = components.data('second_selected')
+        server_name = comps.get_data('second_selected')
         if not server_name:
             await ctx.send("No server selected.")
             return
         if interaction == 'submitted':
-            new_data = components.data('serveredit')
+            new_data = comps.get_data('serveredit')
 
             server_path = join(config.get_config('servers_path'), server_name)
             new_path = join(config.get_config('servers_path'), new_data['server_name'])
@@ -165,20 +165,20 @@ class Server(commands.Cog):
                 slime_vars.servers[server_name] = slime_vars.servers['example'].copy()
                 slime_vars.servers[server_name]['server_name'] = server_name
 
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'New Server', 'serveredit'))
+            modal_msg = await interaction.response.send_modal(comps.new_modal(comps.server_modal_fields(server_name), 'New Server', 'serveredit'))
 
     @commands.command(hidden=True)
     async def servercopy(self, ctx, interaction):
         """Copy server. Only works from control panel for now."""
 
-        server_name = components.data('second_selected')
+        server_name = comps.get_data('second_selected')
 
         if not server_name:
             await ctx.send("No server selected.")
             return
 
         if interaction == 'submitted':
-            new_data = components.data('servercopy')
+            new_data = comps.get_data('servercopy')
 
             # If server name already in use
             if new_data['server_name'] in slime_vars.servers:
@@ -207,7 +207,7 @@ class Server(commands.Cog):
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:
-            modal_msg = await interaction.response.send_modal(components.new_modal(components.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
+            modal_msg = await interaction.response.send_modal(comps.new_modal(comps.server_modal_fields(server_name), 'Copy Server', 'servercopy'))
 
     @commands.command(aliases=['sd', 'deleteserver'])
     async def serverdelete(self, ctx, *name):
@@ -222,7 +222,7 @@ class Server(commands.Cog):
             ?sd valhesia 3
         """
 
-        server_name = get_parameter(name)
+        server_name = utils.get_parameter(name)
         if not server_name:
             await ctx.send("No server selected.")
             return
@@ -306,7 +306,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Updating {slime_vars.selected_server['server_name']}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
-        if await server_status() is not False:
+        if await backend.server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
@@ -361,7 +361,7 @@ class Server(commands.Cog):
         try: arg = int(arg)
         except: pass
         else:
-            config.get_config('autosave_interval') = arg
+            config.set_config('autosave_interval', arg)
 
         # Enables/disables autosave tasks.loop(). Also edits slime_config.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
@@ -369,7 +369,7 @@ class Server(commands.Cog):
             # Starts loop, updates enable_autosave, edits slime_config.py, output to log
             self.autosave_task.start()
             config.set_config('enable_autosave', True)
-            lprint(ctx, f'Autosave: Enabled (interval: {config.get_config('autosave_interval')}m)')
+            lprint(ctx, f"Autosave: Enabled (interval: {config.get_config('autosave_interval')}m)")
         elif arg.lower() in backend.disable_inputs:
             self.autosave_task.cancel()
             slime_vars.enable_autosave = False
@@ -377,12 +377,12 @@ class Server(commands.Cog):
 
         slime_vars.update_vars(slime_vars.config)
         status_msg = ':red_circle: **DISABLED** '
-        if not await server_status(): status_msg = ":pause_button: **PAUSED**"
+        if not await backend.server_status(): status_msg = ":pause_button: **PAUSED**"
         elif config.get_config('enable_autosave'): status_msg = ':green_circle: **ENABLED**'
 
         fields = [['Status', f"{status_msg} | **{config.get_config('autosave_interval')}**min"],
                   ['Note', 'Auto save pauses if server unreachable (not same as disabled). Update server status with `?check` or `?stats`.']]
-        await ctx.send(embed=components.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
+        await ctx.send(embed=comps.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
         lprint(ctx, 'Fetched autosave information')
 
     @tasks.loop(seconds=config.get_config('autosave_interval') * 60)
@@ -391,7 +391,7 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
-        if await send_command('save-all', discord_msg=False):
+        if await backend.send_command('save-all', discord_msg=False):
             lprint(ctx, f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Status/Info
@@ -419,7 +419,7 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        sstatus = await server_status()
+        sstatus = await backend.server_status()
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
@@ -430,7 +430,7 @@ class Server(commands.Cog):
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
         ]
-        await ctx.send(embed=components.new_embed(fields, 'Server Status'))
+        await ctx.send(embed=comps.new_embed(fields, 'Server Status'))
 
         if status is not False:  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
@@ -462,7 +462,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
         log_data = backend.server_log(match=match, file_path=config.get_config('server_log_filepath'), lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
         if log_data:
-            await ctx.send(file=discord.File(convert_to_bytes(log_data), 'server.log'))
+            await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'server.log'))
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
             await ctx.send("**Error:** Problem fetching data.")
@@ -490,7 +490,7 @@ class Server(commands.Cog):
             await ctx.send("**ERROR:** Could not get chat log.")
             return
 
-        await ctx.send(file=discord.File(convert_to_bytes(log_data), 'connections_log.log'))
+        await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'connections_log.log'))
         lprint(ctx, f"Fetched Connection Log: {lines}")
 
     @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
@@ -595,7 +595,7 @@ class Server(commands.Cog):
             ?motd YAGA YEWY!
         """
 
-        message = format_args(message)
+        message = utils.format_args(message)
         motd_property = None
         if config.get_config('server_use_rcon'):
             motd_property = backend.server_motd()
@@ -675,24 +675,24 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if await server_status() is False:
+        if await backend.server_status() is False:
             await ctx.send("Already Offline")
             return
 
         await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
-            await send_command('save-all')
+            await backend.send_command('save-all')
             await asyncio.sleep(3)
-            await send_command('stop')
+            await backend.send_command('stop')
         else:
-            await send_command('say ---WARNING--- Server will halt in 15s!')
+            await backend.send_command('say ---WARNING--- Server will halt in 15s!')
             await ctx.send("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
-            await send_command('say ---WARNING--- 5s left!')
+            await backend.send_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
-            await send_command('save-all')
+            await backend.send_command('save-all')
             await asyncio.sleep(3)
-            await send_command('stop')
+            await backend.send_command('stop')
 
         await asyncio.sleep(5)
         await ctx.send("**Halted Minecraft Server** :stop_sign:")
@@ -712,7 +712,7 @@ class Server(commands.Cog):
             ?reboot now
         """
 
-        await send_command('say ---WARNING--- Server Rebooting...')
+        await backend.send_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
         await ctx.send("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)

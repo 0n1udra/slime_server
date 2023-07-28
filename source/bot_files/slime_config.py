@@ -14,7 +14,6 @@ from typing import Union, Any, Dict
 
 import discord
 
-from bot_files.slime_utils import utils
 
 class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,18 +32,19 @@ class Config():
         self.example_server_configs = self.servers['example']
         self.server_configs = self.example_server_configs  # Will be updated with currently selected server
 
-    def get_config(self, config_key: str) -> Union[Any, None]:
+    def get_config(self, config_key: str, default_return: Any = None) -> Union[Any, None]:
         """
         Get config from bot configs or selected server configs.
 
         Args:
-            config_key:
+            config_key str: Config to get.
+            default_return Any: What to return if not found.
 
         Returns:
-            Any, bool: Returns config value or None if not found.
+            Any, None: Returns config value or None if not found.
         """
 
-        return self.bot_configs.get(config_key) or self.server_configs.get(config_key)
+        return self.bot_configs.get(config_key, default_return) or self.server_configs.get(config_key, default_return)
 
     def set_config(self, key: str, value: Any) -> bool:
         """
@@ -65,7 +65,6 @@ class Config():
             self.server_configs[key] = value
             return True
         return False
-
 
     def initialize_configs(self, configs_from_setup=None):
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
@@ -243,29 +242,40 @@ class Config():
         self.update_all_server_configs()
         return server_configs
 
-    def update_from_user_config(config):
+    def update_from_user_config(self) -> bool:
+        """
+
+        Args:
+
+        Returns:
+
+        """
+        if not os.path.isfile(self.get_config('user_config_filepath')):
+            return False
+
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
-        with open(slime_vars.user_config_filepath, 'r') as openfile:
+        with open(self.get_config('user_config_filepath'), 'r') as openfile:
             def deep_update(original_dict, update_dict):
                 for key, value in update_dict.items():  # Updates nested dictionaries.
                     if isinstance(value, dict) and key in original_dict and isinstance(original_dict[key], dict):
                         deep_update(original_dict[key], value)
                     else: original_dict[key] = value
-            deep_update(config, json.load(openfile))
-        return config
+            deep_update(self.config, json.load(openfile))
+        return True
 
-    def get_server_configs(self, server_name: str) -> Union[Dict, None]:
+    def get_server_configs(self, server_name: str, return_example: bool = False) -> Union[Dict, None]:
         """
         Get configs dictionary of specific server by name.
 
         Args:
             server_name str: Name of server to get configs of.
+            return_example bool: Returns the example server configs if not found specified.
 
         Returns:
             dict, None: Configs dict of specified server or None.
         """
 
-        return config.servers.get(server_name, None)
+        return config.servers.get(server_name, self.example_server_configs if return_example else None)
 
     def switch_server_configs(self, server_name: str) -> bool:
         """

@@ -7,7 +7,6 @@ from bot_files.slime_backend import backend
 from bot_files.slime_config import config
 
 
-bot = None
 buttons_dict = {
     'server':   [['Status Page', 'serverstatus', '\U00002139'], ['Save World', 'saveall', '\U0001F30E'],
                  ['Start Server', 'serverstart', '\U0001F680'], ['Stop Server', 'serverstop', '\U0001F6D1'], ['Reboot Server', 'serverrestart', '\U0001F501'],
@@ -169,9 +168,8 @@ class Comps:
         return embed
 
     def server_modal_fields(self, server_name: str) -> List[List]:
-        # Uses example server as fallback
-        _server = backend.get_server(server_name)
-        data = _server if _server else backend.get_server('example')
+        # .get_server_configs will return the example server configs if nothing found.
+        data = config.get_server_configs(server_name)
 
         # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
         # Limited to 5 components in modal
@@ -199,8 +197,8 @@ class Discord_Modal(discord.ui.Modal):
 
         # Saves data, so it can be retrieved later by other functions, and calls corresponding function using modal's custom_id.
         comps.set_data(custom_id, submitted_data)
-        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
-        await ctx.invoke(bot.get_command(custom_id), 'submitted')
+        ctx = await backend.bot.get_context(interaction.message)  # Get ctx from message.
+        await ctx.invoke(backend.bot.get_command(custom_id), 'submitted')
 
 class Discord_Select(discord.ui.Select):
     def __init__(self, options, custom_id, placeholder='Choose', min_values=1, max_values=1):
@@ -211,7 +209,7 @@ class Discord_Select(discord.ui.Select):
         custom_id = interaction.data['custom_id']
         value = interaction.data['values'][0].strip()
 
-        data(custom_id, value)  # Updates corresponding variables
+        comps.set_data(custom_id, value)  # Updates corresponding variables
 
         if custom_id == 'update_server_panel':
             params = ['']
@@ -220,8 +218,8 @@ class Discord_Select(discord.ui.Select):
                 command, params = value_split[0], value_split[1:]
             except: pass
 
-            ctx = await bot.get_context(interaction.message)  # Get ctx from message.
-            await ctx.invoke(bot.get_command(command), *params)
+            ctx = await backend.bot.get_context(interaction.message)  # Get ctx from message.
+            await ctx.invoke(backend.bot.get_command(command), *params)
 
         # Updates selected currently selected server, this is for ?buttonspanel select server component.
         if custom_id == '_select_server':
@@ -248,13 +246,13 @@ class Discord_Button(discord.ui.Button):
         except: pass
 
         # Runs function of same name as bmode's .custom_id variable. e.g. _teleport_selected()
-        ctx = await bot.get_context(interaction.message)  # Get ctx from message.
+        ctx = await backend.bot.get_context(interaction.message)  # Get ctx from message.
         if params:
-            if params[0] == 'player': params[0] = data('player_selected')  # Use currently selected player as a parameter
+            if params[0] == 'player': params[0] = comps.get_data('player_selected')  # Use currently selected player as a parameter
             if params[0] == 'interaction': params[0] = interaction  # Send interaction object
             else: await interaction.response.defer()
-            await ctx.invoke(bot.get_command(custom_id), *params)
+            await ctx.invoke(backend.bot.get_command(custom_id), *params)
         else:
             await interaction.response.defer()
-            await ctx.invoke(bot.get_command(custom_id))
+            await ctx.invoke(backend.bot.get_command(custom_id))
 

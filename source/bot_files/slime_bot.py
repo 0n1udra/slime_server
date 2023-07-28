@@ -20,7 +20,6 @@ ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
 bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=config.get_config('case_insensitive'), intents=config.intents, help_command=help_cmd)
 backend.update_bot_object(bot)
-components.bot = bot  # Updates bot object for discord components module
 
 @bot.event
 async def on_ready():
@@ -64,8 +63,6 @@ async def on_command(ctx):
     if command_name in role_requirements:
         required_roles = role_requirements[command_name]
         await has_custom_role(required_roles).predicate(ctx)
-
-
 
 
 @bot.event
@@ -118,7 +115,7 @@ class Slime_Bot_Commands(commands.Cog):
         lprint(ctx, "Restarting bot...")
 
         if config.get_config('server_use_subprocess'):
-            if await server_status():
+            if await backend.server_status():
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
         os.chdir(config.get_config('bot_src_path'))
@@ -535,7 +532,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all online players using '@a' argument."""
 
         await ctx.send("All players killed!")
-        await send_command('kill @a')
+        await backend.send_command('kill @a')
         lprint(ctx, 'Killed: All Players')
 
     @commands.command(hidden=True, aliases=['killeverything', 'killallentities'])
@@ -543,7 +540,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all server entities using '@e' argument."""
 
         await ctx.send("All entities killed!")
-        await send_command('kill @e')
+        await backend.send_command('kill @e')
         lprint(ctx, 'Killed: All Entities')
 
     @commands.command(hidden=True, aliases=['killrandom', 'killrandomplayer'])
@@ -551,7 +548,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills random player using '@r' argument."""
 
         await ctx.send("Killed random player! :game_die::knife:")
-        await send_command('kill @r')
+        await backend.send_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
 async def setup(bot):

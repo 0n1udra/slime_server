@@ -26,7 +26,6 @@ from typing import Union, Dict
 
 from discord.ext.commands import Bot
 import mctools
-from file_read_backwards import FileReadBackwards
 
 from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
 from bot_files.slime_config import config
@@ -190,6 +189,7 @@ class Backend:
         """
 
         if self.server_api.send_command(command) is True:
+            self.server_api.last_command_sent = command
             await asyncio.sleep(config.get_config('command_buffer_time'))
             return True
         return False
@@ -232,7 +232,7 @@ class Backend:
 
         return False
     
-    def server_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start Minecraft server depending on whether you're using Tmux subprocess method.
         Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
@@ -241,7 +241,7 @@ class Backend:
             bool: If successful server launch.
         """
 
-        return self.server_api.start_server()
+        return await self.server_api.server_start()
 
     def server_ping(self) -> bool:
         """
@@ -286,7 +286,7 @@ class Backend:
         if config.get_config('ping_before_command') is True:
             response = self.ping_server()
         else:
-            # send_command() will send random number, server is online if match is found in log.
+            # backend.send_command() will send random number, server is online if match is found in log.
             if response := self.server_console_reachable() is not None:
                 response = response
             else: response = self.ping_server()  # Fallback on using ping for server status.
@@ -297,7 +297,7 @@ class Backend:
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        response = await send_command("list", discord_msg=False)
+        response = await backend.send_command("list", discord_msg=False)
         if not response: return False
 
         # Gets data from RCON response or reads server log for line containing player names.
@@ -306,7 +306,7 @@ class Backend:
 
         else:
             await asyncio.sleep(1)
-            log_data = server_log('players online')
+            log_data = backend.read_server_log('players online')
 
         if data := utils.parse_get_player_info(log_data):
             return data
@@ -315,7 +315,7 @@ class Backend:
     async def get_coords(self, player=''):
         """Gets player's location coordinates."""
 
-        if response := await send_command(f"data get entity {player} Pos", skip_check=True):
+        if response := await backend.send_command(f"data get entity {player} Pos", skip_check=True):
             log_data = server_log('entity data', stopgap_str=response[1])
             # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
             # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
@@ -326,6 +326,9 @@ class Backend:
 
 
     # File reading and writing
+    def read_server_log(self, *args, **kwargs):
+        self.server_api.read_server_log(*args, **kwargs)
+
     def update_property(self, property_name=None, value='', file_path=None):
         """
         Edits server.properties file if received target_property and value. Edits inplace with fileinput
@@ -395,7 +398,7 @@ class Backend:
             str: Server motd.
         """
 
-        # Get data from server properties file if able, else use relevant send_command to get it.
+        # Get data from server properties file if able, else use relevant backend.send_command to get it.
         if data := self.get_property('motd'):
             return data
         else:

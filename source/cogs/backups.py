@@ -7,7 +7,7 @@ from discord.ext import commands, tasks
 
 from bot_files.slime_backend import backend
 from bot_files.slime_config import config
-from bot_files.slime_utils import lprint
+from bot_files.slime_utils import lprint, utils
 from bot_files.discord_components import comps
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
@@ -57,10 +57,10 @@ class World_Backups(commands.Cog):
         if not name:
             await ctx.send("Usage: `?worldbackup <name>`\nExample: `?worldbackup Before the reckoning`")
             return
-        name = format_args(name)
+        name = utils.format_args(name)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        await send_command(f"save-all", discord_msg=False)
+        await backend.backend.send_command(f"save-all", discord_msg=False)
         await asyncio.sleep(3)
         try: new_backup = backend.new_backup(name, config.get_config('server_path') + '/world', config.get_config('world_backups_path'))
         except:
@@ -72,7 +72,7 @@ class World_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('worldbackupslist'))
         lprint(ctx, "New world backup: " + name)
 
-        if components.data('server_panel_components'):
+        if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
 
     @commands.command(aliases=['wbdate'])
@@ -98,7 +98,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'bmode':  # If this command triggered from a bmode.
-            index = components.data('second_selected', reset=True)
+            index = comps.get_data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
@@ -107,7 +107,7 @@ class World_Backups(commands.Cog):
 
         fetched_restore = backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
-        if await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
+        if await backend.backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -120,7 +120,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**Restored World:** `{fetched_restore}`")
         lprint(ctx, "World restored: " + fetched_restore)
         await asyncio.sleep(5)
-        await ctx.send("Start server with `?start` or click bmode", view=components.new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click bmode", view=comps.new_buttons(start_button))
 
     @commands.command(aliases=['deleteworld', 'wbd'])
     async def worldbackupdelete(self, ctx, index=''):
@@ -135,7 +135,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'bmode':
-            index = components.data('second_selected', reset=True)
+            index = comps.get_data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
@@ -152,7 +152,7 @@ class World_Backups(commands.Cog):
         await ctx.send(f"**World Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted world backup: " + to_delete)
 
-        if components.data('server_panel_components'):
+        if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
 
     @commands.command(aliases=['rebirth', 'hades', 'resetworld'])
@@ -170,11 +170,11 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        await send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
+        await backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
-        if await server_status() is not False:
+        if await backend.server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         try: shutil.rmtree(join(config.get_config('server_path'), 'world'))
@@ -232,9 +232,9 @@ class Server_Backups(commands.Cog):
             await ctx.send("Usage: `?serverbackup <name>`\nExample: `?serverbackup Everything just dandy`")
             return
 
-        name = format_args(name)
+        name = utils.format_args(name)
         await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        if await send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
+        if await backend.send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
 
         try: new_backup = backend.new_backup(name, config.get_config('server_path'), config.get_config('server_backups_path'))
         except:
@@ -246,7 +246,7 @@ class Server_Backups(commands.Cog):
         await ctx.invoke(self.bot.get_command('serverbackupslist'))
         lprint(ctx, "New server backup: " + new_backup)
 
-        if components.data('server_panel_components'):
+        if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
 
     @commands.command(aliases=['sbdate'])
@@ -270,7 +270,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'bmode':
-            index = components.data('second_selected', reset=True)
+            index = comps.get_data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
@@ -280,8 +280,8 @@ class Server_Backups(commands.Cog):
         fetched_restore = backend.get_from_index(config.get_config('server_backups_path'), index, 'd')
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
-        if await server_status() is not False:
-            await send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
+        if await backend.server_status() is not False:
+            await backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}")
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -292,7 +292,7 @@ class Server_Backups(commands.Cog):
             return
 
         await ctx.send(f"**Server Restored:** `{fetched_restore}`")
-        await ctx.send("Start server with `?start` or click bmode", view=components.new_buttons(start_button))
+        await ctx.send("Start server with `?start` or click bmode", view=comps.new_buttons(start_button))
         lprint(ctx, "Server restored: " + fetched_restore)
 
     @commands.command(aliases=['deleteserverrestore', 'serverdeletebackup', 'serverrestoredelete', 'sbd'])
@@ -309,7 +309,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'bmode':  # If this command triggered from a bmode.
-            index = components.data('second_selected', reset=True)
+            index = comps.data('second_selected', reset=True)
         try: index = int(index)
         except:
             await ctx.send("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")
@@ -326,7 +326,7 @@ class Server_Backups(commands.Cog):
         await ctx.send(f"**Server Backup Deleted:** `{to_delete}`")
         lprint(ctx, "Deleted server backup: " + to_delete)
 
-        if components.data('server_panel_components'):
+        if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'server_backups')  # Updates panel if open
 
 async def setup(bot):
