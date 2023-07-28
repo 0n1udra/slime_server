@@ -120,49 +120,28 @@ class Backend:
             bool: Successful switch.
         """
 
-        if config.switch_server_configs(server_name) is True:
-            if self._change_server_api() is True:
-                return True
-        return False
-
-    def _update_subprocess_api(self) -> Server_API_Subprocess:
-        """
-        Using subprocess needs special handling to preserve possible running Minecraft subprocesses process.
-
-        Returns:
-            Server_API_Subprocess: A server subprocess API object.
-        """
-
-        server_name = config.selected_server['name']
-
-        # Checks if a subprocess API instance for selected server already exists.
-        if config.selected_server['name'] in self.subprocess_servers:
-            return self.subprocess_servers[config.selected_server['name']]
-        else:
-            # Create new subprocess API
-            new_subprocess_server = Server_API_Subprocess()
-            self.subprocess_servers[server_name] = new_subprocess_server
-            return new_subprocess_server
-
-    def _change_server_api(self) -> bool:
-        """
-        Updates the server_api object depending on server configs.
-
-        Returns:
-            bool: If updated successfully.
-
-        """
+        if config.switch_server_configs(server_name) is False:
+            return False
 
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
         if config.get_config('use_subprocess') is True:
-            self.server_api = self._update_subprocess_api()
+            server_name = config.selected_server['name']
+            # Checks if a subprocess API instance for selected server already exists.
+            if config.selected_server['name'] in self.subprocess_servers:
+                return self.subprocess_servers[server_name]
+            else:
+                # Create new subprocess API
+                new_subprocess_server = Server_API_Subprocess()
+                self.subprocess_servers[server_name] = new_subprocess_server
+                return True
+
         for config_name, api in self.server_api_types.items():
             # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
             if config.get_config(config_name) is True:
-                self.server_api = api()
-                return True
-        else: return True
+                self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
+                break
+        return True
 
     # Need?
     def get_selected_server(self):
@@ -214,24 +193,8 @@ class Backend:
 
         return self.server_api.get_command_output()
 
-    # ===== Server Functions
-    async def get_status(self, force_check: bool = False) -> bool:
-        """
-        Returns boolean if server is active.
-        Depending on configs, prioritizes ping_server(), server_console_reachable(), _get_status()
 
-        Returns:
-            bool: If server is active (not same as MC console is reachable).
-        """
-
-        if config.get_config('ping_before_command') is True:
-            return self.server_ping()
-        # Can force check even if configs disable it.
-        elif config.get_config('check_before_command') is True or force_check is True:
-            return await self.server_api.server_console_reachable()
-
-        return False
-    
+    # Start/Stop
     async def server_start(self) -> bool:
         """
         Start Minecraft server depending on whether you're using Tmux subprocess method.
@@ -242,6 +205,25 @@ class Backend:
         """
 
         return await self.server_api.server_start()
+
+    # Server status
+    # Checks if server is reachable. By sending a command or using ping, depending on configs.
+    async def server_status(self, force_check: bool = False) -> bool:
+        """
+        Returns boolean if server is active.
+        Depending on configs, priority: ping_server(), server_console_reachable(), _get_status()
+
+        Returns:
+            bool: If server is active (not always same as MC console is reachable).
+        """
+
+        # Prioritizes using ping instead of sending command to console.
+        if config.get_config('ping_before_command') is True:
+            return self.server_ping()
+        # Can force check even if configs disable it.
+        elif config.get_config('check_before_command') is True or force_check is True:
+            return await self.server_api.server_console_reachable()
+        return self.server_ping()
 
     def server_ping(self) -> bool:
         """
@@ -255,6 +237,7 @@ class Backend:
             return utils.ping_address(address)
         return False
 
+    # Query ping server. Must have 'enable-query=true' in server.properties.
     def server_ping_query(self) -> bool:
         """
         Gets server information using mctools.PINGClient()
@@ -274,31 +257,28 @@ class Backend:
             return False
         else: return stats
 
-    async def server_status(self, discord_msg=False):
+    # Get data
+    def get_motd(self):
         """
-        Gets server active status, by sending command to server and checking server log.
+        Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
 
         Returns:
-            bool: returns True if server is online.
+            str: Server motd.
         """
 
-        # Uses ping to check if server is online.
-        if config.get_config('ping_before_command') is True:
-            response = self.ping_server()
+        # Get data from server properties file if able, else use relevant backend.send_command to get it.
+        if data := self.get_property('motd'):
+            return data
         else:
-            # backend.send_command() will send random number, server is online if match is found in log.
-            if response := self.server_console_reachable() is not None:
-                response = response
-            else: response = self.ping_server()  # Fallback on using ping for server status.
-
-        #self.server_active = response
-        return response
+            pass
 
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        response = await backend.send_command("list", discord_msg=False)
-        if not response: return False
+        if not await backend.send_command("list"):
+            return False
+
+        response = self.get_command_output()
 
         # Gets data from RCON response or reads server log for line containing player names.
         if config.get_config('server_use_rcon') is True:
@@ -316,14 +296,12 @@ class Backend:
         """Gets player's location coordinates."""
 
         if response := await backend.send_command(f"data get entity {player} Pos", skip_check=True):
-            log_data = server_log('entity data', stopgap_str=response[1])
+            log_data = self.read_server_log('entity data', stopgap_str=response[1])
             # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
             # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
             if log_data:
                 location = log_data.split('[')[-1][:-3].replace('d', '')
                 return location
-
-
 
     # File reading and writing
     def read_server_log(self, *args, **kwargs):
@@ -390,22 +368,8 @@ class Backend:
                 return data[1]
         return False
 
-    def get_motd(self):
-        """
-        Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
-
-        Returns:
-            str: Server motd.
-        """
-
-        # Get data from server properties file if able, else use relevant backend.send_command to get it.
-        if data := self.get_property('motd'):
-            return data
-        else:
-            pass
-
-    # ===== Backups
-    def new_server(self, server_name: str) -> Union[Dict, bool]:
+    # Adding/Deleting servers
+    def server_new(self, server_name: str) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -416,14 +380,37 @@ class Backend:
             dict, bool: Dictionary of new server configs or False if failed.
         """
 
+        # Checks if server configs already exists.
+        if server_name in config.servers:
+            lprint(f"ERROR: Can't create new server, configs already exists for: {server_name}")
+            return False
+
+        # Create new configs for server.
+        if config.new_server_configs(server_name) is False:
+            lprint(f"ERROR: Issue creating new configs for: {server_name}")
+            return False
+
+        # Create new folder for server.
         new_folder = join(config.get_config('servers_path'), server_name.strip())
-        try: os.mkdir(new_folder)
-        except:
+        if not file_utils.new_dir(new_folder):
             lprint("ERROR: Problem creating new server folder")
             return False
-        else: return config.update_server_configs(server_name)
 
+        return config.new_server_configs(server_name)
 
+    def server_delete(self, server_name) -> bool:
+        """
+
+        Args:
+            server_name:
+
+        Returns:
+
+        """
+
+        return False
+
+    # Backup/Restore
     def new_backup(self, new_name, src, dst):
         """
         Create a new world or server backup, by copying and renaming folder.
@@ -454,6 +441,8 @@ class Backend:
 
         shutil.rmtree(dst)
         shutil.copytree(src, dst)
+
+    def delete_backup(self): pass
 
 
 backend = Backend()

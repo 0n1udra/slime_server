@@ -345,6 +345,27 @@ class File_Utils:
 
 class Utils:
 
+    def update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
+        """
+        Updates the paths variables in the configs with correct path.
+        E.g.
+        # TODO: add example
+
+        Args:
+            server_name str: Name of server to update data with.
+            config_data str('SELECTED_SERVER'): What section of the paths to replace.
+
+        Returns:
+            dict: An updated dictionary.
+        """
+
+        config_data = config_data.copy()
+        for k, v in config_data.items():
+            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+                config_data[k] = v.replace(text_to_replace, server_name)
+
+        return config_data
+
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
         """
@@ -477,7 +498,7 @@ class Utils:
                 return True
             return False
 
-    def convert_to_bytes(data): return io.BytesIO(data.encode())
+    def convert_to_bytes(self, data: Any) -> io.BytesIO: return io.BytesIO(data.encode())
 
 
 

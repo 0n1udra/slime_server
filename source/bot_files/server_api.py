@@ -11,11 +11,8 @@ The functions starting with '_' are expected to be overridden in the inheritance
 
 Following functions must be async:
     send_command()
-    _send_command()
     get_command_output()
-    _get_command_output()
     server_start()
-    _server_start()
 """
 
 import os

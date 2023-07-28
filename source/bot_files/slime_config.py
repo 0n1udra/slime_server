@@ -14,6 +14,7 @@ from typing import Union, Any, Dict
 
 import discord
 
+from bot_files.slime_utils import utils, file_utils
 
 class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -212,17 +213,33 @@ class Config():
             server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
 
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
-            text_to_replace = 'SELECTED_SERVER'
-            server_configs['server_name'] = server_name
-            for k, v in server_configs.items():
-                if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
-                    server_configs[k] = v.replace(text_to_replace, server_name)
+            utils.update_config_paths(server_configs, server_name)
 
-            # Updates slime_vars then writes to file.
-            #slime_vars.servers.update({name: server})
-            #slime_vars.update_vars(slime_vars.config)
+        # Updates user config json file.
+        file_utils.write_json(self.configs)
 
-    def update_server_configs(self, server_name: str, new_data: Dict) -> Dict:
+    def new_server_configs(self, server_name: str, config_data: Dict = None) -> Union[Dict, bool]:
+        """
+
+
+        Args:
+            server_name:
+            config_data:
+
+        Returns:
+
+        """
+
+        if server_name in self.servers:
+            return False
+
+        # TODO: Possibly add isinstance() for reliability
+        self.servers[server_name] = config_data if config_data.copy() else self.example_server_configs.copy()
+        # Adds default configs for not set, and updates config json file.
+        self.update_all_server_configs()
+        return True
+
+    def update_server_configs(self, server_name: str, new_data: Dict) -> Union[Dict, bool]:
         """
 
         Args:
@@ -230,8 +247,11 @@ class Config():
             new_data:
 
         Returns:
-            dict: Updated server configs dict.
+            dict, bool: Updated server configs dict, or False if no configs exists.
         """
+
+        # Makes this function only for updating configs. If configs not exist, must use new_server_configs()
+        if server_name not in self.servers: return False
 
         server_configs = self.example_server_configs.copy()
         # Gets any preexisting data.
@@ -239,7 +259,10 @@ class Config():
             server_configs.update(self.servers[server_name])
         server_configs.update(new_data)  # Updates example template values with user set ones, fallback on 'example' defaults
         self.servers[server_name] = server_configs
+
+        # Adds default configs for not set, and updates config json file.
         self.update_all_server_configs()
+
         return server_configs
 
     def update_from_user_config(self) -> bool:
