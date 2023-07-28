@@ -16,12 +16,8 @@ Project Structure:
 """
 
 import os
-import re
-import asyncio
-import requests
 import fileinput
 from os.path import join
-from collections import deque
 from typing import Union, Dict
 
 from discord.ext.commands import Bot
@@ -169,7 +165,6 @@ class Backend:
 
         if self.server_api.send_command(command) is True:
             self.server_api.last_command_sent = command
-            await asyncio.sleep(config.get_config('command_buffer_time'))
             return True
         return False
 
@@ -278,15 +273,7 @@ class Backend:
         if not await backend.send_command("list"):
             return False
 
-        response = self.get_command_output()
-
-        # Gets data from RCON response or reads server log for line containing player names.
-        if config.get_config('server_use_rcon') is True:
-            log_data = response[0]
-
-        else:
-            await asyncio.sleep(1)
-            log_data = backend.read_server_log('players online')
+        log_data = self.get_command_output()
 
         if data := utils.parse_get_player_info(log_data):
             return data
@@ -295,13 +282,40 @@ class Backend:
     async def get_coords(self, player=''):
         """Gets player's location coordinates."""
 
-        if response := await backend.send_command(f"data get entity {player} Pos", skip_check=True):
-            log_data = self.read_server_log('entity data', stopgap_str=response[1])
-            # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
-            # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-            if log_data:
-                location = log_data.split('[')[-1][:-3].replace('d', '')
-                return location
+        if not await backend.send_command(f"data get entity {player} Pos"):
+            return False
+            #log_data = self.read_server_log('entity data', stopgap_str=response[1])
+        # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
+        # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
+        if log_data := self.get_command_output():
+            location = log_data.split('[')[-1][:-3].replace('d', '')
+            return location
+
+    def get_server_version(self) -> str:
+        """
+        Gets server version number.
+
+        Returns:
+            str: Server version.
+        """
+
+        # Manual override of server version.
+        version = 'N/A'
+        if data := config.get_config('server_version'):
+            version = data
+        elif config.get_config('server_files_access') is True:
+            # Tries to find version info from latest.log.
+            if data := self.read_server_log('server version'):
+                version = data.split('version')[1].strip()
+            # Tries to find info in server.properties next.
+            elif data := self.get_property('version'):
+                version = data
+        else:
+            # Get version info from server console.
+            if self.send_command('version'):
+                version = self.get_command_output()
+
+        return version
 
     # File reading and writing
     def read_server_log(self, *args, **kwargs):
@@ -421,13 +435,16 @@ class Backend:
             dst str: Destination for backup.
         """
 
-        if not isdir(dst): os.makedirs(dst)
+        if not file_utils.new_dir(dst):
+            return False
         # TODO add multiple world folders backup
         # folder name: version tag if known, date, optional name
-        version = f"{'v(' + server_version() + ') ' if 'N/A' not in server_version() else ''}"
-        new_name = f"({extra.get_datetime()}) {version}{new_name}"
+
+        version = self.get_server_version()
+        version_text = f"{'v(' + version + ') ' if 'N/A' not in version else ''}"
+        new_name = f"({utils.get_datetime()}) {version_text}{new_name}"
         new_backup_path = join(dst, new_name.strip())
-        shutil.copytree(src, new_backup_path)
+        file_utils.copy_dir(src, new_backup_path)
         return new_backup_path
 
     def restore_backup(self, src, dst):
@@ -439,12 +456,11 @@ class Backend:
             dst str: Location to copy backup to.
         """
 
-        shutil.rmtree(dst)
-        shutil.copytree(src, dst)
+        if file_utils.delete_dir(dst):
+            file_utils.copy_dir(src, dst)
 
-    def delete_backup(self): pass
+    def delete_backup(self, path):
+        file_utils.delete_dir(path)
 
 
 backend = Backend()
-# ========== Server Commands: start, send command, read log, etc
-

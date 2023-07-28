@@ -3,9 +3,8 @@
 import os
 import sys
 import time
-import json
 
-from bot_files.slime_config import config
+from bot_files.slime_config import config, __version__, __date__
 from bot_files.slime_bot import bot
 from bot_files.slime_utils import lprint
 from bot_files.slime_backend import backend
@@ -16,21 +15,23 @@ beta_mode = ''
 def setup_configs():
     # Creates flatten dict to make it easier to find items to use as defaults
     def get_input(config_prompts):
+        new_configs = {}
         for variable, prompt in config_prompts.items():
             default_value = config.get_config(variable, "''")
             input_type = type(default_value)
             config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if input_type is bool:
                 if str(config_input).lower() in ['y', 'yes']:
-                    config[variable] = True
+                    new_configs[variable] = True
                 if str(config_input).lower() in ['n', 'no']:
-                    config[variable] = False
+                    new_configs[variable] = False
             else:
-                try: config[variable] = input_type(config_input) if input_type else config_input  # Converts to needed type.
+                try:
+                    new_configs[variable] = input_type(config_input) if input_type else config_input  # Converts to needed type.
                 except:
-                    config[variable] = default_value
+                    new_configs[variable] = default_value
                     print("Using default:", default_value)
-        return config
+        return new_configs
 
     bot_config_prompts = {
         "home_path": "Manually set home path. Leave blank to use default.",
@@ -55,21 +56,14 @@ def setup_configs():
     }
 
     print("----- Config Setup -----\nPress enter to use default.")
-    bot_configs = get_input(bot_config_prompts)
+    config.configs['bot_configs'].update(get_input(bot_config_prompts))
 
     # Asks to continue to server configs
-    server_configs = {}
     ask_input = input(f"\nContinue to server config (y/n): ").strip().lower()
-    if ask_input in ['y', 'yes']: server_configs = get_input(server_config_prompts)
+    if ask_input in ['y', 'yes']:
+        config.configs['bot_configs'].update(get_input(server_config_prompts))
 
-    # Updates dictionaries and returns new dictionary to update slime_vars.config
-
-    try: open(user_config_filepath, 'a').close()
-    except: lprint( "ERROR: Unable to create 'user_config.json' file.")
-    else:  # Creates new json
-        with open(user_config_filepath, "w") as outfile: outfile.write(json.dumps(config.configs, indent=4))
-        lprint("INFO: New user_config.json created.")
-
+    config.update_all_server_configs()
 
 def _start_bot():
     """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
@@ -250,7 +244,7 @@ if __name__ == '__main__':
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
-        config.set_config('bot_token_filepath', os.path.join(config.get_config('home_dir'), 'keys', 'slime_bot_beta.token'))
+        config.set_config('bot_token_filepath', os.path.join(config.home_path, 'keys', 'slime_bot_beta.token'))
         config.set_config('channel_id', '916450451061350420')
 
     if 'starttmux' in sys.argv and config.get_config('use_tmux'):

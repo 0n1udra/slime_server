@@ -14,7 +14,6 @@ from typing import Union, Any, Dict
 
 import discord
 
-from bot_files.slime_utils import utils, file_utils
 
 class Config():
     bot_src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -205,6 +204,27 @@ class Config():
             }
         }
 
+    def _update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
+        """
+        Updates the paths variables in the configs with correct path.
+        E.g.
+        # TODO: add example
+
+        Args:
+            server_name str: Name of server to update data with.
+            config_data str('SELECTED_SERVER'): What section of the paths to replace.
+
+        Returns:
+            dict: An updated dictionary.
+        """
+
+        config_data = config_data.copy()
+        for k, v in config_data.items():
+            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+                config_data[k] = v.replace(text_to_replace, server_name)
+
+        return config_data
+
     def update_all_server_configs(self) -> None:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
@@ -213,10 +233,12 @@ class Config():
             server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
 
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
-            utils.update_config_paths(server_configs, server_name)
+            self._update_config_paths(server_configs, server_name)
 
+        from bot_files.slime_utils import file_utils
         # Updates user config json file.
-        file_utils.write_json(self.configs)
+        print("O---------------K")
+        file_utils.write_json(self.get_config('user_config_filepath'), self.configs)
 
     def new_server_configs(self, server_name: str, config_data: Dict = None) -> Union[Dict, bool]:
         """
@@ -257,9 +279,12 @@ class Config():
         # Gets any preexisting data.
         if server_name in self.servers:
             server_configs.update(self.servers[server_name])
+        new_server_name = server_configs['server_name']
         server_configs.update(new_data)  # Updates example template values with user set ones, fallback on 'example' defaults
-        self.servers[server_name] = server_configs
+        self.servers[new_server_name] = server_configs
 
+        # Updates paths variables with new server name, e.g. ../servers/old_name/ > ../servers/new_name/
+        self._update_config_paths(server_configs, new_server_name, server_name)
         # Adds default configs for not set, and updates config json file.
         self.update_all_server_configs()
 
@@ -283,7 +308,7 @@ class Config():
                     if isinstance(value, dict) and key in original_dict and isinstance(original_dict[key], dict):
                         deep_update(original_dict[key], value)
                     else: original_dict[key] = value
-            deep_update(self.config, json.load(openfile))
+            deep_update(self.configs, json.load(openfile))
         return True
 
     def get_server_configs(self, server_name: str, return_example: bool = False) -> Union[Dict, None]:

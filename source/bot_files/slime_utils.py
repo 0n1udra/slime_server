@@ -19,11 +19,9 @@ from os import listdir
 from os.path import isdir, isfile, join, exists
 
 from typing import Union, Any, Tuple, List, Dict, Generator
-import mctools
 from discord.ext.commands import Context
 
 from bot_files.slime_config import config
-import bot_files.discord_components as components
 
 enable_inputs = ['enable', 'activate', 'true', 'on']
 disable_inputs = ['disable', 'deactivate', 'false', 'off']
@@ -169,7 +167,6 @@ class File_Utils:
             bool: Whether if succesful or not.
         """
 
-        if not self.test_file(file_path): return False
         try:
             with open(file_path, "w") as outfile:
                 outfile.write(json.dumps(data, indent=4))
@@ -345,26 +342,6 @@ class File_Utils:
 
 class Utils:
 
-    def update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
-        """
-        Updates the paths variables in the configs with correct path.
-        E.g.
-        # TODO: add example
-
-        Args:
-            server_name str: Name of server to update data with.
-            config_data str('SELECTED_SERVER'): What section of the paths to replace.
-
-        Returns:
-            dict: An updated dictionary.
-        """
-
-        config_data = config_data.copy()
-        for k, v in config_data.items():
-            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
-                config_data[k] = v.replace(text_to_replace, server_name)
-
-        return config_data
 
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
@@ -393,8 +370,11 @@ class Utils:
 
         # Checks if command was called from button
         if 'bmode' in arg:
-            from_data_dict = components.data(key, reset=True)
-            if from_data_dict: return from_data_dict
+            from bot_files.discord_components import comps
+            from_data_dict = comps.get_data(key)
+            if from_data_dict:
+                comps.set_data(key, None)
+                return from_data_dict
 
         elif type(arg) in (list, tuple):
             return ' '.join(arg)

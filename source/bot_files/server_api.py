@@ -57,7 +57,7 @@ class Server_Files:
         pass
 
 
-class Server_Versioning(Server_Files):
+class Server_Update(Server_Files):
     """
     This class handles finding the latest direct download link for different server types.
     For each server type (vanilla, PaperMC, Bukkit, etc) you need to have a get_X_url() function.
@@ -74,40 +74,6 @@ class Server_Versioning(Server_Files):
             'paper': [self.get_papermc_url, ['paper']],
             'bukkit': [self.get_bukkit_url, ['bukkit']],
         }
-
-    def _get_server_version(self) -> str:
-        """
-        Get Minecraft server version.
-
-        Returns:
-            str: Server version.
-        """
-
-        return 'N/A'
-
-    def get_server_version(self) -> str:
-        """
-        Gets server version number.
-
-        Returns:
-            str: Server version.
-        """
-
-        # Manual override of server version.
-        version = 'N/A'
-        if data := config.get_config('server_version'):
-            version = data
-        elif config.get_config('server_files_access') is True:
-            # Tries to find versio info from latest.log.
-            if data := self.server_log('server version'):
-                version = data.split('version')[1].strip()
-            # Tries to find info in server.properties next.
-            elif data := self.get_property('version'):
-                version = data
-        else:
-            # Get version info from server console.
-            version = self._get_server_version()
-        return version
 
     def _check_latest_version(self):
         """
@@ -204,7 +170,7 @@ class Server_Versioning(Server_Files):
     def get_bukkit_url(self): pass
 
 
-class Server_API(Server_Versioning, Server_Files):
+class Server_API(Server_Update, Server_Files):
     """
     Depending on configs, using class inheritance relevant functions will be updated.
     server_console_reachable()
@@ -241,6 +207,7 @@ class Server_API(Server_Versioning, Server_Files):
             bool: If successfully sent command, not the same as if command accepted by server.
         """
 
+        await asyncio.sleep(config.get_config('command_buffer_time'))
         return False
 
     # Check if server console is reachable.
@@ -411,6 +378,7 @@ class Server_API(Server_Versioning, Server_Files):
         return await self.send_command('stop')
 
 
+
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
@@ -427,10 +395,11 @@ class Server_API_Tmux(Server_API):
         """
 
         if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{command}' ENTER"):
+            await asyncio.sleep(config.get_config('command_buffer_time'))
             return False
         return True
 
-    async def server_start(self) -> bool:
+    def server_start(self) -> bool:
         """
         Start server in specified Tmux pane.
 
@@ -467,10 +436,11 @@ class Server_API_Screen(Server_API):
         """
 
         if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}\n'"):
+            await asyncio.sleep(config.get_config('command_buffer_time'))
             return False
         return True
 
-    async def server_start(self) -> bool:
+    def server_start(self) -> bool:
         """
         Start server in specified screen session.
 
@@ -499,16 +469,17 @@ class Server_API_Rcon(Server_API):
             str, bool: Output from RCON or False if error.
         """
 
+        # TODO possibly add persistent connection
         server_rcon_client = mctools.RCONClient(config.get_config('server_address'), port=config.get_config('rcon_port'))
         try:
-            server_rcon_client.login(config.get_config('rcon_pass'))
+            server_rcon_client.login(config.get_config('rcon_pass'))  # Connect to server
         except ConnectionError:
             lprint(f"Error Connecting to RCON: {config.get_config('server_ip')} : {config.get_config('rcon_port')}")
             return False
         else:
-            return_data = server_rcon_client.command(command)
-            server_rcon_client.stop()
-            return return_data
+            self.last_command_output = server_rcon_client.command(command)  # Send command and get output.
+            server_rcon_client.stop()  # Disconnect.
+            return self.last_command_output
 
     async def server_console_reachable(self) -> bool:
         """
@@ -543,7 +514,7 @@ class Server_API_Subprocess(Server_API):
 
         return True
 
-    async def lserver_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
 
         Returns:

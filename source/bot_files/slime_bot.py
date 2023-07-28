@@ -11,11 +11,9 @@ from bot_files.slime_backend import backend
 from bot_files.slime_config import config
 from bot_files.slime_config import __version__, __date__, __author__
 from bot_files.slime_utils import lprint, utils
-import bot_files.discord_components as components
 from bot_files.discord_components import comps, buttons_dict
 
 
-ctx = 'slime_bot.py'  # For logging. So you know where it's coming from.
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
 bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=config.get_config('case_insensitive'), intents=config.intents, help_command=help_cmd)
@@ -26,22 +24,23 @@ async def on_ready():
     await bot.wait_until_ready()
     await setup(bot)
 
-    lprint(ctx, f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
+    lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
     await backend.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
         try: channel_id = int(config.get_config('channel_id'))
-        except: lprint(ctx, "ERROR: Invalid Channel ID")
-        channel = bot.get_channel(channel_id)
-        backend.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
+        except: lprint("ERROR: Invalid Channel ID")
+        else:
+            channel = bot.get_channel(channel_id)
+            backend.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
 
-        await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
-        if 'hidebanner' not in sys.argv:
-            await channel.send(f"Server: `{config.selected_server['server_name']}`")
-            # Shows some useful buttons
-            on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-            await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
+            await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+            if 'hidebanner' not in sys.argv:
+                await channel.send(f"Server: `{config.selected_server['server_name']}`")
+                # Shows some useful buttons
+                on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+                await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
 
 # TODO fix
 role_requirements = {
@@ -82,7 +81,7 @@ class Slime_Bot_Commands(commands.Cog):
         # Shows player's online and ping info in bot's custom status text.
         if config.get_config('players_custom_status'):
             self.custom_status_task.start()
-            lprint(ctx, f"Custom status task started (interval: {config.get_config('custom_status_interval')}m)")
+            lprint(f"Custom status task started (interval: {config.get_config('custom_status_interval')}m)")
 
     @tasks.loop(seconds=config.get_config('custom_status_interval') * 60)
     async def custom_status_task(self):
@@ -557,10 +556,10 @@ async def setup(bot):
             try: await bot.load_extension(f"cogs.{i[:-3]}")
             except commands.ExtensionAlreadyLoaded: pass
             except commands.ExtensionNotFound:
-                lprint(ctx, f"ERROR: Unable to load cog: {i}")
+                lprint(f"ERROR: Unable to load cog: {i}")
                 exit()
             except:
-                lprint(ctx, "ERROR: Error with loading cogs.")
+                lprint("ERROR: Error with loading cogs.")
                 exit()
 
     await bot.add_cog(Slime_Bot_Commands(bot))
