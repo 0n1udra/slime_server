@@ -11,7 +11,6 @@ from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils
 from bot_files.discord_components import comps
 
-ctx = 'server.py'
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -42,7 +41,7 @@ class Server(commands.Cog):
         else: name = utils.format_args(name)
 
         if not name and 'list' not in name:
-            await ctx.send(f"**Current Server:** `{config.get_config('selected_server')['server_name']}`")
+            await ctx.send(f"**Current Server:** `{config.get_config('server_name')}`")
             await ctx.send(f"Use `?serverselect list` or `?ss list` to list servers, and `?ss server_name` to switch.")
         elif 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
@@ -50,11 +49,11 @@ class Server(commands.Cog):
                 # Shows server name, description, location, and Launch Command.
                 embed.add_field(name=sdata['server_name'], value=f"Description: {sdata['server_description']}\nLocation: `{sdata['server_path']}`\nLaunch Command: `{sdata['server_launch_command']}`", inline=False)
             await ctx.send(embed=embed)
-            await ctx.send(f"**Current Server:** `{config.selected_server['server_name']}`")
+            await ctx.send(f"**Current Server:** `{config.server_configs['server_name']}`")
             await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in config.servers:
             if not config.get_config('players_custom_status'):
-                await self.bot.change_presence(activity=discord.Activity(name=f"- {config.selected_server['server_name']}", type=1))
+                await self.bot.change_presence(activity=discord.Activity(name=f"- {config.server_configs['server_name']}", type=1))
             backend.select_server(name)
             await ctx.send(f"**Selected Server:** {name}")
         else: await ctx.send("**ERROR:** Server not found.")
@@ -302,11 +301,11 @@ class Server(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?serverbackup command.
         """
 
-        lprint(ctx, f"Updating {slime_vars.selected_server['server_name']}...")
-        await ctx.send(f"***Updating {slime_vars.selected_server['server_name']}...*** :arrows_counterclockwise:")
+        lprint(ctx, f"Updating {config.get_config('server_name')}...")
+        await ctx.send(f"***Updating {config.get_config('server_name')}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
-        if await backend.server_status() is not False:
+        if backend.server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
@@ -323,7 +322,7 @@ class Server(commands.Cog):
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
-        if not await backend.send_command('save-all'): return
+        if backend.send_command('save-all') is False: return
 
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
@@ -377,7 +376,7 @@ class Server(commands.Cog):
 
         slime_vars.update_vars(slime_vars.config)
         status_msg = ':red_circle: **DISABLED** '
-        if not await backend.server_status(): status_msg = ":pause_button: **PAUSED**"
+        if backend.server_status() is False: status_msg = ":pause_button: **PAUSED**"
         elif config.get_config('enable_autosave'): status_msg = ':green_circle: **ENABLED**'
 
         fields = [['Status', f"{status_msg} | **{config.get_config('autosave_interval')}**min"],
@@ -391,7 +390,7 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
-        if await backend.send_command('save-all', discord_msg=False):
+        if backend.send_command('save-all', discord_msg=False):
             lprint(ctx, f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Status/Info
@@ -408,7 +407,7 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        response = await backend.server_status()
+        response = backend.server_status()
         if response:
             await ctx.send("**Server ACTIVE** :green_circle:")
         elif response is None:
@@ -419,7 +418,7 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        sstatus = await backend.server_status()
+        sstatus = backend.server_status()
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
@@ -644,17 +643,17 @@ class Server(commands.Cog):
         """
 
         # Exits function if server already online.
-        if await backend.server_status() is True:
+        if backend.server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
         if not backend.server_start():
             await ctx.send("**Error:** Could not start Minecraft server.")
             return False
-        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('selected_server')['server_name']}**\nStartup time: {config.get_config('startup_wait_time')}s.")
+        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('server_name')}**\nStartup time: {config.get_config('startup_wait_time')}s.")
 
         # checks if set custom wait time in selected_server list.
-        try: wait_time = int(config.selected_server['startup_wait_time'])
+        try: wait_time = int(config.server_configs['startup_wait_time'])
         except: wait_time = config.get_config('startup_wait_time')
         await ctx.send(f"***Fetching Status in {wait_time}s...***")
         await asyncio.sleep(wait_time)
@@ -675,24 +674,24 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if await backend.server_status() is False:
+        if backend.server_status() is False:
             await ctx.send("Already Offline")
             return
 
         await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
-            await backend.send_command('save-all')
+            backend.send_command('save-all')
             await asyncio.sleep(3)
-            await backend.send_command('stop')
+            backend.send_command('stop')
         else:
-            await backend.send_command('say ---WARNING--- Server will halt in 15s!')
+            backend.send_command('say ---WARNING--- Server will halt in 15s!')
             await ctx.send("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
-            await backend.send_command('say ---WARNING--- 5s left!')
+            backend.send_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
-            await backend.send_command('save-all')
+            backend.send_command('save-all')
             await asyncio.sleep(3)
-            await backend.send_command('stop')
+            backend.send_command('stop')
 
         await asyncio.sleep(5)
         await ctx.send("**Halted Minecraft Server** :stop_sign:")
@@ -712,7 +711,7 @@ class Server(commands.Cog):
             ?reboot now
         """
 
-        await backend.send_command('say ---WARNING--- Server Rebooting...')
+        backend.send_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
         await ctx.send("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)

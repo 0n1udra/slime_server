@@ -28,10 +28,6 @@ from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
 
-# Used for removing ANSI escape characters
-ctx = 'backend_functions.py'
-
-
 class Backend:
     # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
     server_api_types = {
@@ -43,10 +39,11 @@ class Backend:
     def __init__(self):
         # Specific API for server interaction depending on server type (vanilla, PaperMC, etc) .
         self.bot = None
-        self.server_api = Server_API()
+        self.server_api = None
         self.subprocess_servers = {}
         self.discord_channel = None
         self.server_active = False
+        self.select_server(config.get_config('selected_server'))
         #self.discord_channel = self.update_discord_chennel(bot)
 
     # ===== Discord
@@ -63,11 +60,11 @@ class Backend:
 
         if bot:
             self.bot = bot
-            self.update_discord_channel()
+            self.set_discord_channel()
             return True
         return False
 
-    def update_discord_channel(self) -> bool:
+    def set_discord_channel(self) -> bool:
         """
         Updates discord_channel with Discord channel object wtih channel_id config, so you can use send_channel_msg func.
 
@@ -79,7 +76,8 @@ class Backend:
         """
 
         if channel_id := config.get_config('channel_id'):
-            try: channel_id = int(channel_id)  # Basic check if valid ID.
+            try:
+                channel_id = int(channel_id)  # Basic check if valid ID.
             except:
                 lprint("ERROR: Invalid Channel ID")
                 return False
@@ -98,11 +96,9 @@ class Backend:
             bool:
         """
 
-        # TODO: Fix return actually successful send
-        if self.discord_channel:
-            await self.discord_channel.send(msg)
-            return True
-        else: return False
+        try: await self.discord_channel.send(msg)
+        except: return False
+        return True
 
     # ===== Server API
     def select_server(self, server_name: str) -> bool:
@@ -122,9 +118,9 @@ class Backend:
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
         if config.get_config('use_subprocess') is True:
-            server_name = config.selected_server['name']
+            server_name = config.server_configs['name']
             # Checks if a subprocess API instance for selected server already exists.
-            if config.selected_server['name'] in self.subprocess_servers:
+            if config.server_configs['name'] in self.subprocess_servers:
                 return self.subprocess_servers[server_name]
             else:
                 # Create new subprocess API
@@ -139,18 +135,8 @@ class Backend:
                 break
         return True
 
-    # Need?
-    def get_selected_server(self):
-        """
-        Returns configs dictionary of currently selected server.
-
-        Returns:
-            dict: Configs dict of selected server.
-        """
-        return config.server_configs
-
     # Send command to server console.
-    async def send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
         Sends command to server, then reads from latest.log file for output.
@@ -169,7 +155,7 @@ class Backend:
         return False
 
     # Check if server console is reachable.
-    async def console_reachable(self) -> bool:
+    def console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -188,9 +174,8 @@ class Backend:
 
         return self.server_api.get_command_output()
 
-
-    # Start/Stop
-    async def server_start(self) -> bool:
+    # ===== Start/Stop
+    def server_start(self) -> bool:
         """
         Start Minecraft server depending on whether you're using Tmux subprocess method.
         Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
@@ -199,11 +184,11 @@ class Backend:
             bool: If successful server launch.
         """
 
-        return await self.server_api.server_start()
+        return self.server_api.server_start()
 
-    # Server status
+    # ===== Server status
     # Checks if server is reachable. By sending a command or using ping, depending on configs.
-    async def server_status(self, force_check: bool = False) -> bool:
+    def server_status(self, force_check: bool = False) -> bool:
         """
         Returns boolean if server is active.
         Depending on configs, priority: ping_server(), server_console_reachable(), _get_status()
@@ -217,7 +202,7 @@ class Backend:
             return self.server_ping()
         # Can force check even if configs disable it.
         elif config.get_config('check_before_command') is True or force_check is True:
-            return await self.server_api.server_console_reachable()
+            return self.server_api.server_console_reachable()
         return self.server_ping()
 
     def server_ping(self) -> bool:
@@ -252,7 +237,7 @@ class Backend:
             return False
         else: return stats
 
-    # Get data
+    # ===== Get data
     def get_motd(self):
         """
         Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
@@ -267,10 +252,10 @@ class Backend:
         else:
             pass
 
-    async def get_players(self):
+    def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        if not await backend.send_command("list"):
+        if not backend.send_command("list"):
             return False
 
         log_data = self.get_command_output()
@@ -279,10 +264,10 @@ class Backend:
             return data
         return False
 
-    async def get_coords(self, player=''):
+    def get_coords(self, player=''):
         """Gets player's location coordinates."""
 
-        if not await backend.send_command(f"data get entity {player} Pos"):
+        if not backend.send_command(f"data get entity {player} Pos"):
             return False
             #log_data = self.read_server_log('entity data', stopgap_str=response[1])
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
@@ -317,7 +302,7 @@ class Backend:
 
         return version
 
-    # File reading and writing
+    # ===== File reading and writing
     def read_server_log(self, *args, **kwargs):
         self.server_api.read_server_log(*args, **kwargs)
 
@@ -382,7 +367,7 @@ class Backend:
                 return data[1]
         return False
 
-    # Adding/Deleting servers
+    # ===== Adding/Deleting servers
     def server_new(self, server_name: str) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
@@ -424,7 +409,7 @@ class Backend:
 
         return False
 
-    # Backup/Restore
+    # ===== Backup/Restore
     def new_backup(self, new_name, src, dst):
         """
         Create a new world or server backup, by copying and renaming folder.

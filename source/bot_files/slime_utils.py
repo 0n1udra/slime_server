@@ -474,7 +474,6 @@ class Utils:
             ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ping_out, ping_error = ping.communicate()
             if ping_out.strip():
-                print('te', ping_out)
                 return True
             return False
 

@@ -123,9 +123,9 @@ class Server_Update(Server_Files):
 
         # Checks if server name and description contains keyword to determine what url builder func to use.
         for k, v in self.url_builder_functions.items():
-            if any(i in config.selected_server['name'] for i in v[1]):
+            if any(i in config.server_configs['name'] for i in v[1]):
                 return v[0]
-            elif any(i in config.selected_server['server_description'] for i in v[1]):
+            elif any(i in config.server_configs['server_description'] for i in v[1]):
                 return v[0]
         return None
 
@@ -196,7 +196,7 @@ class Server_API(Server_Update, Server_Files):
             self.launch_command = config.get_config('windows_cmdline_start') + config.get_config('server_launch_command')
 
     # This will be updated with correct code to send command to server console based on configs.
-    async def send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
         Send command to Minecraft server.
 
@@ -207,11 +207,10 @@ class Server_API(Server_Update, Server_Files):
             bool: If successfully sent command, not the same as if command accepted by server.
         """
 
-        await asyncio.sleep(config.get_config('command_buffer_time'))
         return False
 
     # Check if server console is reachable.
-    async def server_console_reachable(self) -> bool:
+    def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -219,9 +218,9 @@ class Server_API(Server_Update, Server_Files):
             bool: Console reachable.
         """
 
-        if config.get_config('server_file_access') is True:
+        if config.get_config('server_files_access') is True:
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
-            if await self.send_command(check_command) is True:
+            if self.send_command(check_command) is True:
                 if self.get_command_output(unique_number) is True:  # Check logs for unique number.
                     self.last_check_number = unique_number
                     return True
@@ -357,7 +356,7 @@ class Server_API(Server_Update, Server_Files):
                 log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
             return log_data
 
-    async def server_start(self) -> bool:
+    def server_start(self) -> bool:
         """
         Start server.
 
@@ -367,7 +366,7 @@ class Server_API(Server_Update, Server_Files):
 
         return False
 
-    async def server_stop(self) -> bool:
+    def server_stop(self) -> bool:
         """
         Stop server.
 
@@ -375,7 +374,7 @@ class Server_API(Server_Update, Server_Files):
             bool: Sent stop command (Not same as successful stopped).
         """
 
-        return await self.send_command('stop')
+        return self.send_command('stop')
 
 
 
@@ -383,7 +382,7 @@ class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Tmux session.
 
@@ -395,7 +394,7 @@ class Server_API_Tmux(Server_API):
         """
 
         if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{command}' ENTER"):
-            await asyncio.sleep(config.get_config('command_buffer_time'))
+            #asyncio.sleep(config.get_config('command_buffer_time'))
             return False
         return True
 
@@ -424,7 +423,7 @@ class Server_API_Screen(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def send_command(self, command: str) -> bool:
+    def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
 
@@ -436,7 +435,7 @@ class Server_API_Screen(Server_API):
         """
 
         if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}\n'"):
-            await asyncio.sleep(config.get_config('command_buffer_time'))
+            #asyncio.sleep(config.get_config('command_buffer_time'))
             return False
         return True
 
@@ -490,7 +489,7 @@ class Server_API_Rcon(Server_API):
         """
 
         check_command, unique_number = utils.get_check_command()
-        if response := await self.send_command(check_command):
+        if response := self.send_command(check_command):
             if unique_number in response:
                 return True
 

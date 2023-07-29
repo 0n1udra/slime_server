@@ -24,7 +24,7 @@ class Basics(commands.Cog):
         """
 
         command = utils.utils.format_args(command)
-        if not await backend.backend.send_command(command): return False
+        if backend.backend.send_command(command) is False: return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)
@@ -46,7 +46,7 @@ class Basics(commands.Cog):
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
-            if await backend.send_command('say ' + msg):
+            if backend.send_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
@@ -69,7 +69,7 @@ class Basics(commands.Cog):
             await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
-        if not await backend.send_command(f"tell {player} {msg}"): return
+        if backend.send_command(f"tell {player} {msg}") is False: return
 
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
@@ -134,7 +134,7 @@ class World(commands.Cog):
             await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if not await backend.send_command(f'weather {state} {duration}'): return
+        if backend.send_command(f'weather {state} {duration}') is False: return
 
         await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
@@ -143,7 +143,7 @@ class World(commands.Cog):
     async def weatheron(self, ctx):
         """Enable weather cycle."""
 
-        await backend.send_command(f'gamerule doWeatherCycle true')
+        backend.send_command(f'gamerule doWeatherCycle true')
         await ctx.send("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
 
@@ -151,7 +151,7 @@ class World(commands.Cog):
     async def weatheroff(self, ctx):
         """Disable weather cycle."""
 
-        await backend.send_command(f'gamerule doWeatherCycle false')
+        backend.send_command(f'gamerule doWeatherCycle false')
         await ctx.send("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
 
@@ -191,7 +191,7 @@ class World(commands.Cog):
         """
 
         if set_time:
-            if not await backend.send_command(f"time set {set_time}"): return
+            if backend.send_command(f"time set {set_time}") is False: return
             await ctx.send(f"Time Updated ({set_time})  :clock9:")
         else: await ctx.send("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
@@ -212,7 +212,7 @@ class World(commands.Cog):
     async def timeon(self, ctx):
         """Enable day light cycle."""
 
-        await backend.send_command(f'gamerule doDaylightCycle true')
+        backend.send_command(f'gamerule doDaylightCycle true')
         await ctx.send("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
@@ -220,7 +220,7 @@ class World(commands.Cog):
     async def timeoff(self, ctx):
         """Disable day light cycle."""
 
-        await backend.send_command(f'gamerule doDaylightCycle false')
+        backend.send_command(f'gamerule doDaylightCycle false')
         await ctx.send("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
 

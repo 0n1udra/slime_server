@@ -17,30 +17,24 @@ from bot_files.discord_components import comps, buttons_dict
 # Make sure command_prifex doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
 bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=config.get_config('case_insensitive'), intents=config.intents, help_command=help_cmd)
-backend.update_bot_object(bot)
 
 @bot.event
 async def on_ready():
     await bot.wait_until_ready()
     await setup(bot)
+    backend.update_bot_object(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
-    await backend.server_status()  # Check server status on bot startup.
+    backend.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
-        try: channel_id = int(config.get_config('channel_id'))
-        except: lprint("ERROR: Invalid Channel ID")
-        else:
-            channel = bot.get_channel(channel_id)
-            backend.channel_set(channel)  # Needed to set global discord_channel variable for other modules (am i doing this right?).
-
-            await channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
-            if 'hidebanner' not in sys.argv:
-                await channel.send(f"Server: `{config.selected_server['server_name']}`")
-                # Shows some useful buttons
-                on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-                await channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
+        await backend.discord_channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        if 'hidebanner' not in sys.argv:
+            await backend.discord_channel.send(f"Server: `{config.server_configs['server_name']}`")
+            # Shows some useful buttons
+            on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
+            await backend.discord_channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
 # TODO fix
 role_requirements = {
@@ -109,15 +103,16 @@ class Slime_Bot_Commands(commands.Cog):
         """Restart this bot."""
         global slime_vars
 
-        await components.clear()
+        await comps.clear_current_comps()
         await ctx.send("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
+        # If using subprocess, makes sure server is off before restarting bot. Cus, if bot process dies, so does server.
         if config.get_config('server_use_subprocess'):
-            if await backend.server_status():
+            if backend.server_status() is True:
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
-        os.chdir(config.get_config('bot_src_path'))
+        os.chdir(config.get_config('bot_source_path'))
         os.execl(sys.executable, sys.executable, *sys.argv)
 
     @commands.command(aliases=['botquit'])
@@ -155,7 +150,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         await ctx.send("***Updating from GitHub...*** :arrows_counterclockwise:")
 
-        os.chdir(config.get_config('bot_src_path'))
+        os.chdir(config.get_config('bot_source_path'))
         os.system('git pull')
 
         await ctx.invoke(self.bot.get_command("botrestart"))
@@ -240,7 +235,7 @@ class Slime_Bot_Commands(commands.Cog):
         embed = discord.Embed(title='Useful Websites :computer:')
 
         # Creates embed of links from useful_websites dictionary from slime_config.py.
-        for name, url in config.get_config('selected_server')['useful_websites'].items():
+        for name, url in config.get_config['useful_websites'].items():
             embed.add_field(name=name, value=url, inline=False)
 
         await ctx.send(embed=embed)
@@ -249,9 +244,13 @@ class Slime_Bot_Commands(commands.Cog):
     async def setchannel(self, ctx):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
-        config.set_config('channel_id', ctx.channel.id)
-        await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
-        lprint(ctx, f"Set Channel ID: {ctx.channel.id}")
+        if config.set_config('channel_id', ctx.channel.id) is True:
+            await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
+            lprint(ctx, f"Set Channel ID: {ctx.channel.id}")
+        else:
+            await ctx.send(f"**ERROR:** Issue setting channel ID")
+            lprint(ctx, f"ERROR: Issue setting channel ID")
+
 
     @commands.command(aliases=['resetchannelid', 'clearchannelid', 'clearchannel'])
     async def resetchannel(self, ctx):
@@ -276,7 +275,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         secret_buttons = [['Kill Players', '_killplayers', '\U00002753'], ['Kill Entities', '_killentities', '\U0001F4A3'],
                           ['Kill Rando', '_killrando', '\U0001F4A5'], ['HADES Protocol', 'hades', '\U0001F480']]
-        await ctx.send("**Secret Panel**", view=components.new_buttons(secret_buttons))
+        await ctx.send("**Secret Panel**", view=comps.new_buttons(secret_buttons))
 
         lprint(ctx, 'Opened secret panel')
 
@@ -285,7 +284,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Shows useful buttons"""
 
         on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-        await ctx.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=components.new_buttons(on_ready_buttons))
+        await ctx.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
     @commands.command(aliases=['player', 'ppanel', 'pp'])
     async def playerpanel(self, ctx, player=''):
@@ -300,10 +299,10 @@ class Discord_Components_Funcs(commands.Cog):
             ?player Frogo
         """
 
-        await components.clear()
-        components.data('player_selected', 0)
+        await comps.clear_current_comps()
+        comps.set_data('player_selected', 0)
 
-        players = await backend.get_players()  # Gets list of online players
+        players = backend.get_players()  # Gets list of online players
         if not players: players = [["No Players Online"]]  # Shows 'No Player Online' as a list option to notify no players online.
 
         select_options = [['All Players', '@a'], ['Random Player', '@r']] + [[i, i] for i in players[0]]
@@ -311,9 +310,9 @@ class Discord_Components_Funcs(commands.Cog):
         # Sets selection default to player if received 'player' parameter.
         if player:
             select_options += [[player, player, True]]
-            components.data('player_selected', player)
+            comps.set_data('player_selected', player)
 
-        player_selection_panel = await ctx.send("**Player Panel**", view=components.new_selection(select_options, 'player_selected', "Select Player"))
+        player_selection_panel = await ctx.send("**Player Panel**", view=comps.new_selection(select_options, 'player_selected', "Select Player"))
 
         player_buttons = [
             ['Kill', 'kill player', '\U0001F52A'], ['Clear Inventory', 'clearinventory player', '\U0001F4A5'],
@@ -325,9 +324,9 @@ class Discord_Components_Funcs(commands.Cog):
             ['Reload', 'playerpanel', '\U0001F504']
         ]
 
-        b1 = await ctx.send('', view=components.new_buttons(player_buttons))
+        b1 = await ctx.send('', view=comps.new_buttons(player_buttons))
 
-        components.data('current_components', [*components.data('current_components'), player_selection_panel, b1])
+        comps.set_data('current_components', [*comps.get_data('current_components'), player_selection_panel, b1])
         lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['tpp', 'tpanel', 'tppanel'])
@@ -343,9 +342,9 @@ class Discord_Components_Funcs(commands.Cog):
             ?tpp
         """
 
-        await components.clear()  # Clear out used components, so you don't run into conflicts and issues.
+        await comps.clear_current_comps()  # Clear out used components, so you don't run into conflicts and issues.
 
-        players = await backend.get_players()  # Get list of online players.
+        players = backend.get_players()  # Get list of online players.
 
         # Options for selection boxes.
         if players:
@@ -354,20 +353,20 @@ class Discord_Components_Funcs(commands.Cog):
         if target: teleport_select_options += [[target, target, True]]
 
         # Selections updates teleport_selected list, which will be used in _teleport_selected() when bmode clicked.
-        select1 = await ctx.send("**Teleport**", view=components.new_selection([['All Players', '@a']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
-        select2 = await ctx.send('', view=components.new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
+        select1 = await ctx.send("**Teleport**", view=comps.new_selection([['All Players', '@a']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
+        select2 = await ctx.send('', view=comps.new_selection(teleport_select_options, custom_id='teleport_destination', placeholder='Destination'))
 
         buttons = [['Reload', 'teleportpanel', '\U0001F504'], ['Teleport', '_teleport_selected', '\U000026A1'], ['Return', '_return_selected', '\U000021A9']]
-        buttons_msg = await ctx.send('', view=components.new_buttons(buttons))
+        buttons_msg = await ctx.send('', view=comps.new_buttons(buttons))
 
-        components.data('current_components', [*components.data('current_components'), select1, select2, buttons_msg])
+        comps.set_data('current_components', [*comps.get_data('current_components'), select1, select2, buttons_msg])
 
     @commands.command(hidden=True)
     async def _teleport_selected(self, ctx, target_player=None):
         """Teleports selected targets from ?teleport command when use Teleport! bmode."""
 
-        if not target_player: target_player = components.data('teleport_target')  # if not provided player param
-        await ctx.invoke(self.bot.get_command('teleport'), target_player, components.data('teleport_destination'))
+        if not target_player: target_player = comps.get_data('teleport_target')  # if not provided player param
+        await ctx.invoke(self.bot.get_command('teleport'), target_player, comps.get_data('teleport_destination'))
 
     # ===== Bot/server settings, panels, change server, download logs, restore/delete server and world backups
     @commands.command(aliases=['botsettings'])
@@ -379,7 +378,7 @@ class Discord_Components_Funcs(commands.Cog):
         A control panel to control servers, server backups, and world backups.
         """
 
-        await components.clear()
+        await comps.clear_current_comps()
 
         # label, value, is default, description
         mode_select_options = [
@@ -389,17 +388,17 @@ class Discord_Components_Funcs(commands.Cog):
             ['World Backups', '_update_control_panel world_backups', False, 'Backups of world folder'],
             ['Server Backups', '_update_control_panel server_backups', False, 'Backups of server folder']
         ]
-        selection_msg = await ctx.send("**Mode**", view=components.new_selection(mode_select_options, 'update_server_panel', 'Select Mode'))
+        selection_msg = await ctx.send("**Mode**", view=comps.new_selection(mode_select_options, 'update_server_panel', 'Select Mode'))
 
         # Second select menu, world backups, server backups, log files.
         select_options2 = [[' ', '_', False]]
-        selection_msg2 = await ctx.send("", view=components.new_selection(select_options2, 'server_panel2', ''))
+        selection_msg2 = await ctx.send("", view=comps.new_selection(select_options2, 'server_panel2', ''))
         # Buttons will update depending on mode.
-        buttons_msg = await ctx.send("", view=components.new_buttons([['Reload', 'controlpanel', '\U0001F504']]))
-        buttons_msg2 = await ctx.send("", view=components.new_buttons([['Close', '_close_panel', '\U0000274C']]))
+        buttons_msg = await ctx.send("", view=comps.new_buttons([['Reload', 'controlpanel', '\U0001F504']]))
+        buttons_msg2 = await ctx.send("", view=comps.new_buttons([['Close', '_close_panel', '\U0000274C']]))
 
-        components.data('server_panel_components', {'options': select_options2, 'msg': [selection_msg2, buttons_msg, buttons_msg2], 'pages': [0, 0], 'params': []})
-        components.data('current_components', [selection_msg, selection_msg2, buttons_msg, buttons_msg2])
+        comps.set_data('server_panel_components', {'options': select_options2, 'msg': [selection_msg2, buttons_msg, buttons_msg2], 'pages': [0, 0], 'params': []})
+        comps.set_data('current_components', [selection_msg, selection_msg2, buttons_msg, buttons_msg2])
         lprint(ctx, 'Opened server panel')
 
     @commands.command(hidden=True)
@@ -407,8 +406,8 @@ class Discord_Components_Funcs(commands.Cog):
         """Show select menu of server log files available to download."""
 
         failed = False  # if failed to update the components, will try to reload components.
-        components.data('second_selected', None)
-        spc = components.data('server_panel_components')  # [select options, select msg, bmode msg, current page, total pages]
+        comps.set_data('second_selected', None)
+        spc = comps.get_data('server_panel_components')  # [select options, select msg, bmode msg, current page, total pages]
         total_pages = 1
         buttons1 = [['Reload', 'controlpanel', '\U0001F504'], ['Back', '_update_select_page back', '\U00002B05'], ['Next', '_update_select_page next', '\U000027A1']]
         buttons_select_options = [[['Server Actions', '_update_control_panel buttons server', False, 'Status, start, motd, server server logs, properties, etc'],  # label, value, is default, description
@@ -450,14 +449,14 @@ class Discord_Components_Funcs(commands.Cog):
             params = ["**Log Files**", 'second_selected', 'Select File']
 
         try:
-            new_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=components.new_selection(select_options[0], params[1], params[2]))
-            new_msg2 = await spc['msg'][1].edit(content='', view=components.new_buttons(buttons1))
-            new_msg3 = await spc['msg'][2].edit(content='', view=components.new_buttons(buttons2))
+            new_msg = await spc['msg'][0].edit(content=f"{params[0]} (1/{total_pages})", view=comps.new_selection(select_options[0], params[1], params[2]))
+            new_msg2 = await spc['msg'][1].edit(content='', view=comps.new_buttons(buttons1))
+            new_msg3 = await spc['msg'][2].edit(content='', view=comps.new_buttons(buttons2))
             spc['options'] = select_options
             spc['msg'] = [new_msg, new_msg2, new_msg3]
             spc['pages'][1] = total_pages
             spc['params'] = params
-            components.data('server_panel_components', spc)
+            comps.set_data('server_panel_components', spc)
         except: failed = True
 
         if failed:
@@ -470,27 +469,27 @@ class Discord_Components_Funcs(commands.Cog):
         """Shows all the buttons!"""
         global slime_vars
 
-        await components.clear()
-        sserver = config.get_config('selected_server')
+        await comps.clear_current_comps()
+        sserver = config.server_configs
         select_options = [[sserver['server_name'], sserver['server_name'], True, sserver['server_description']]] + [[k, k, False, data['server_description']] for k, data in config.servers.items() if k not in sserver['server_name']]
-        server_selection = await ctx.send("**Select Server**", view=components.new_selection(select_options, '_select_server', "Select Server"))
+        server_selection = await ctx.send("**Select Server**", view=comps.new_selection(select_options, '_select_server', "Select Server"))
 
         buttons_components = []
-        for k, v in components.buttons_dict.items():
+        for k, v in comps.buttons_dict.items():
             # Hides server/world backup commands if there's no local file access.
             if config.get_config('server_files_access') is False and 'backups' in k: continue
-            try: buttons_components.append(await ctx.send(content=k.capitalize(), view=components.new_buttons(v)))
+            try: buttons_components.append(await ctx.send(content=k.capitalize(), view=comps.new_buttons(v)))
             except: pass
-        components.data('current_components', [server_selection, buttons_components])
+        comps.set_data('current_components', [server_selection, buttons_components])
 
     @commands.command(hidden=True)
-    async def _close_panel(self, ctx): await components.clear()
+    async def _close_panel(self, ctx): await comps.clear_current_comps()
 
     @commands.command(hidden=True)
     async def _get_log_file(self, ctx):
         """Download server log file, also unzips beforehand if it's a .gz file."""
 
-        log_selected = components.data('second_selected')
+        log_selected = comps.get_data('second_selected')
         if not log_selected: return  # If not log is selected from Discord selection component
         # Unzips file if it's a .gz file. Will delete file afterwards.
         if log_selected.endswith('.gz'):
@@ -511,7 +510,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Discord select component with next or previous 25 items, since it can only show 25 at a time."""
 
         # Gets next 25 items or previous depending on mode parameter.
-        spc = components.data('server_panel_components')
+        spc = comps.get_data('server_panel_components')
         params = spc['params']
         current_page = spc['pages'][0]
         if mode == 'next': current_page += 1
@@ -519,11 +518,11 @@ class Discord_Components_Funcs(commands.Cog):
         else: return
 
         try: new_msg = await spc['msg'][0].edit(content=f"{params[0]} ({current_page+1}/{spc['pages'][1]})",
-                                                view=components.new_selection(spc['options'][current_page], params[1], params[2]))
+                                                view=comps.new_selection(spc['options'][current_page], params[1], params[2]))
         except: return
         else: spc['pages'][0] = current_page
         spc['msg'][0] = new_msg
-        components.data('server_panel_components', spc)
+        comps.set_data('server_panel_components', spc)
 
     # ===== Extra
     @commands.command(hidden=True, aliases=['killallplayers', 'kilkillkill', 'killall'])
@@ -531,7 +530,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all online players using '@a' argument."""
 
         await ctx.send("All players killed!")
-        await backend.send_command('kill @a')
+        backend.send_command('kill @a')
         lprint(ctx, 'Killed: All Players')
 
     @commands.command(hidden=True, aliases=['killeverything', 'killallentities'])
@@ -539,7 +538,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all server entities using '@e' argument."""
 
         await ctx.send("All entities killed!")
-        await backend.send_command('kill @e')
+        backend.send_command('kill @e')
         lprint(ctx, 'Killed: All Entities')
 
     @commands.command(hidden=True, aliases=['killrandom', 'killrandomplayer'])
@@ -547,7 +546,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills random player using '@r' argument."""
 
         await ctx.send("Killed random player! :game_die::knife:")
-        await backend.send_command('kill @r')
+        backend.send_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
 async def setup(bot):

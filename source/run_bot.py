@@ -17,7 +17,7 @@ def setup_configs():
     def get_input(config_prompts):
         new_configs = {}
         for variable, prompt in config_prompts.items():
-            default_value = config.get_config(variable, "''")
+            default_value = config.get_config(variable)
             input_type = type(default_value)
             config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if input_type is bool:
@@ -34,8 +34,7 @@ def setup_configs():
         return new_configs
 
     bot_config_prompts = {
-        "home_path": "Manually set home path. Leave blank to use default.",
-        "pyenv_path": "Set path for python env. Leave blank if not using or want to use default.",
+        'pyenv_activate_command': 'Command to use to activate/source pyenv if using one.',
         "use_pyenv": "Use Python env (y/n)",
         'bot_token_filepath': "Discord bot token filepath",
         'command_prefix': "Discord command prefix",
@@ -56,12 +55,12 @@ def setup_configs():
     }
 
     print("----- Config Setup -----\nPress enter to use default.")
-    config.configs['bot_configs'].update(get_input(bot_config_prompts))
+    config.bot_configs.update(get_input(bot_config_prompts))
 
     # Asks to continue to server configs
     ask_input = input(f"\nContinue to server config (y/n): ").strip().lower()
     if ask_input in ['y', 'yes']:
-        config.configs['bot_configs'].update(get_input(server_config_prompts))
+        config.example_server_configs.update(get_input(server_config_prompts))
 
     config.update_all_server_configs()
 
@@ -82,8 +81,9 @@ def start_bot():
     if config.get_config('use_tmux') is True:
         no_tmux = False
         # Sources pyenv if set in slime_vars.
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_src_path')}' ENTER"):
-            lprint(f"ERROR: Changing directory ({config.get_config('bot_src_path')})")
+        x = f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_source_path')}' ENTER"
+        if os.system(x):
+            lprint(f"ERROR: Changing directory ({config.get_config('bot_source_path')})")
             no_tmux = True
 
         if no_tmux:
@@ -168,6 +168,7 @@ def show_banner():
     no = '**********'  # 2bad. change it!
 
     vars_msg = f"""
+NOTE: More config info in README.md or read comments in slime_config.py file in bot_files.
 Bot:
 Version             {__version__} - {__date__}
 User                {config.get_config('user')}
@@ -191,8 +192,6 @@ File Access         {config.get_config('server_files_access')}
 Autosave            {config.get_config('enable_autosave')} - {config.get_config('autosave_interval')}min
 Server URL          {config.get_config('server_address') if nono else no}
 Server Port         {config.get_config('server_port') if nono else no}
-
-NOTE: More info on the configs in README.md or use the comments in slime_config.py file in bot_files.
 """
     if config.get_config('use_tmux'): vars_msg += f"""
 Tmux:
@@ -220,11 +219,11 @@ Server Path         {config.get_config('server_path')}
 
     print(vars_msg)
 
+
 if __name__ == '__main__':
-    user_config_filepath = config.get_config('user_config_filepath')
-    if os.path.isfile(user_config_filepath):  # Creates user_config.json if not exist.
-        #loaded_configs = update_from_user_config(slime_vars.config)
-        config.update_from_user_config()
+    if os.path.isfile(config.get_config('user_config_filepath')):  # Creates user_config.json if not exist.
+        #loaded_configs = update_from_file(slime_vars.config)
+        config.update_from_file()
         lprint("INFO: Loaded user_config.json.")
     else:
         lprint("INFO: No 'user_config.json' file detected.")
@@ -244,8 +243,8 @@ if __name__ == '__main__':
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
-        config.set_config('bot_token_filepath', os.path.join(config.home_path, 'keys', 'slime_bot_beta.token'))
-        config.set_config('channel_id', '916450451061350420')
+        config.set_config('bot_token_filepath', os.path.join(config.get_config('home_path'), 'keys', 'slime_bot_beta.token'))
+        config.set_config('channel_id', 916450451061350420)
 
     if 'starttmux' in sys.argv and config.get_config('use_tmux'):
         start_tmux_session()
