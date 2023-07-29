@@ -303,7 +303,9 @@ class File_Utils:
         try:
             os.mkdir(path)
         except:
+            lprint(f"ERROR: Issue creating new folder: {path}")
             return False
+        lprint(f"INFO: New folder: {path}")
         return True
 
     def copy_dir(self, path: str, new_path: str) -> bool:
@@ -320,7 +322,9 @@ class File_Utils:
         try:
             shutil.copytree(path, new_path)
         except:
+            lprint(f"ERROR: Issue copying folder: {path} > {new_path}")
             return False
+        lprint(f"INFO: Copied folder: {path} > {new_path}")
         return True
 
     def move_dir(self, path: str, new_path: str) -> bool:

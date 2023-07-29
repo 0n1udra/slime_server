@@ -27,8 +27,10 @@ from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subpr
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
+class Backups:
+    pass
 
-class Backend:
+class Backend(Backups):
     # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
     server_api_types = {
         'use_rcon': Server_API_Rcon,
@@ -391,23 +393,42 @@ class Backend:
 
         # Create new folder for server.
         new_folder = join(config.get_config('servers_path'), server_name.strip())
-        if not file_utils.new_dir(new_folder):
-            lprint("ERROR: Problem creating new server folder")
-            return False
+        if not file_utils.new_dir(new_folder): return False
 
         return config.new_server_configs(server_name)
 
-    def server_delete(self, server_name) -> bool:
+    def server_delete(self, server_name: str) -> Union[Dict, bool]:
         """
 
         Args:
             server_name:
 
         Returns:
+            dict, bool:
+        """
+
+        if server_name not in config.servers: return False
+        if file_utils.delete_dir(config.servers[server_name]['server_path']) is False: return False
+        server_data = config.servers.pop(server_name)
+        config.update_all_server_configs()
+        return server_data
+
+    def server_copy(self, server_name: str, new_server_name: str) -> Union[Dict, bool]:
+        """
+
+        Args:
+            server_name:
+            new_server_name:
+
+        Returns:
 
         """
 
-        return False
+        if self.server_new(new_server_name) is False: return False
+        if server_data := self.server_delete(server_name):
+            if file_utils.copy_dir(config.servers[server_name]['server_path'], server_data['server_path']) is False:
+                return False
+            else: return server_data
 
     # ===== Backup/Restore
     def new_backup(self, new_name, src, dst):
@@ -445,6 +466,14 @@ class Backend:
             file_utils.copy_dir(src, dst)
 
     def delete_backup(self, path):
+        """
+
+        Args:
+            path:
+
+        Returns:
+
+        """
         file_utils.delete_dir(path)
 
 

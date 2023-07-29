@@ -222,7 +222,8 @@ class Config():
 
         config_data = config_data.copy()
         for k, v in config_data.items():
-            if 'path' in k:  # Replaces SELECTED_SERVER only if key has 'path' in it.
+            if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
+                print("WTF", k, v)
                 config_data[k] = v.replace(text_to_replace, server_name)
 
         return config_data
@@ -233,34 +234,54 @@ class Config():
             if 'example' in server_name: continue  # Skip example template
             server_configs = self.example_server_configs.copy()
             server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
-
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
-            self._update_config_paths(server_configs, server_name)
+            self.servers[server_name] = self._update_config_paths(server_configs, server_name)
 
-        from bot_files.slime_utils import file_utils
         # Updates user config json file.
+        from bot_files.slime_utils import file_utils
         file_utils.write_json(self.get_config('user_config_filepath'), {'bot_configs': self.bot_configs, 'servers': self.servers})
 
     def new_server_configs(self, server_name: str, config_data: Dict = None) -> Union[Dict, bool]:
         """
-
+        New server configs.
 
         Args:
-            server_name:
-            config_data:
+            server_name: Name of new server.
+            config_data: Config dict.
 
         Returns:
-
+            dict, bool: Dict of new configs. False if error.
         """
 
         if server_name in self.servers:
             return False
 
         # TODO: Possibly add isinstance() for reliability
-        self.servers[server_name] = config_data if config_data.copy() else self.example_server_configs.copy()
+        # Uses example server configs if not received config dict.
+        self.servers[server_name] = config_data.copy() if config_data else self.example_server_configs.copy()
+        self.servers[server_name]['server_name'] = server_name
         # Adds default configs for not set, and updates config json file.
         self.update_all_server_configs()
-        return True
+        return self.servers[server_name]
+
+    def delete_server_configs(self, server_name: str) -> Union[Dict, bool]:
+        """
+        Delete server configs.
+
+        Args:
+            server_name: Server configs to delete.
+
+        Returns:
+            dict, bool: Dict of popped server config. False if configs not found.
+        """
+
+        if server_name not in self.servers:
+            return False
+
+        from bot_files.slime_utils import file_utils
+        if file_utils.delete_dir(self.servers[server_name]['server_path']) is False: return False
+        self.update_all_server_configs()
+        return self.servers.pop(server_name)
 
     def update_server_configs(self, server_name: str, new_data: Dict) -> Union[Dict, bool]:
         """

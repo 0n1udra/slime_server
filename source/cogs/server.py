@@ -123,46 +123,26 @@ class Server(commands.Cog):
         if not server_name:
             await ctx.send("No server selected.")
             return
+
         if interaction == 'submitted':
             new_data = comps.get_data('serveredit')
 
-            server_path = join(config.get_config('servers_path'), server_name)
-            new_path = join(config.get_config('servers_path'), new_data['server_name'])
-            # Renames folder if name changed
-            try: rename(server_path, new_path)
-            except:
-                await ctx.send("Server name already in use.")
-                lprint(ctx, f"ERROR: Editing server info {server_path} > {new_path}")
+            if new_data['server_name'] in config.servers:
+                await ctx.send(f"**ERROR:** Server name already in use: {server_name}")
                 return
-            await ctx.send("***Updating Server Info...***")
 
-            example_server = config.example_server_configs.copy()
-            # Pops current server data, then updates it with new data.
-            # Using .pop() so it effectively acts like deleting a server and then adding a new one.
-            # Because if user changes the server name, it will create a new server but won't delete the old.
-            to_replace = server_name  # Part of server paths to replace with new name
-            if server_name in config.servers:
-                server_data = config['servers'].pop(server_name)
-            else:
-                server_data = example_server
-                to_replace = None  # If using example server, will replace SELECTED_SERVER text with server name
-            server_data.update(new_data)
-            # Updates old paths by finding and replacing server name in path
-            server_data = backend.update_server_paths(server_data, server_name, to_replace)
-            # Adds server and updates slime_vars globals and json file
-            slime_vars.config['servers'][server_name] = server_data
-            slime_vars.update_vars(slime_vars.config)
+            # Gets current configs for server to be used to update new configs..
+            if old_server_configs := backend.server_delete(server_name):
+                if backend.server_new(new_data['server_name'], old_server_configs) is False:
+                    return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
-            lprint(ctx, f"Edited server info {server_path} > {new_path}")
-
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
         else:  # Sends modal dialog to input info
             # Creates server config if not exist. NOTE: Does not update json file unless modal is submitted and accepted.
-            if server_name not in slime_vars.servers:
-                slime_vars.servers[server_name] = slime_vars.servers['example'].copy()
-                slime_vars.servers[server_name]['server_name'] = server_name
+            if server_name not in config.servers:
+                config.new_server_configs(server_name)
 
             modal_msg = await interaction.response.send_modal(comps.new_modal(comps.server_modal_fields(server_name), 'New Server', 'serveredit'))
 
@@ -179,29 +159,16 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = comps.get_data('servercopy')
 
-            # If server name already in use
-            if new_data['server_name'] in slime_vars.servers:
-                await ctx.send("Server name already used.")
+            if new_data['server_name'] in config.servers:
+                await ctx.send(f"**ERROR:** Server name already in use: {server_name}")
                 return
 
             await ctx.send("***Copying Server...***")
-            server_path = join(slime_vars.servers_path, server_name)
-            new_path = join(slime_vars.servers_path, new_data['server_name'])
-            try: shutil.copytree(server_path, new_path)
-            except:
-                await ctx.send("**Error:** Issue copying server.")
-                lprint(ctx, f"ERROR: Issue copying server: {server_path} > {new_path}")
-                return
-
-            # Makes a copy of default configs, then updates them with user input
-            server_data = slime_vars.servers['example'].copy()
-            server_data.update(new_data)
-            # Adds new server then updates slime_vars globals and json file.
-            slime_vars.config['servers'][new_data['server_name']] = new_data
-            slime_vars.update_vars(slime_vars.config)
+            if backend.server_copy(server_name, new_data['server_name']) is False:
+                lprint(ctx, f"ERROR: Issue copying server: {server_name} > {new_data['name']}")
+                return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
-            lprint(ctx, f"ERROR: Copied server: {server_path} > {new_path}")
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
@@ -225,23 +192,13 @@ class Server(commands.Cog):
         if not server_name:
             await ctx.send("No server selected.")
             return
-        to_delete = join(config.get_config('servers_path'), server_name)
 
-        await ctx.send("***Deleting Server...***")
-        try: backend.delete_dir(to_delete)
-        except:
-            if 'bmode' in to_delete: return False
-            await ctx.send(f"**Error:** Issue deleting server: `{to_delete}`")
-            return False
+        if backend.server_delete(server_name) is False:
+            await ctx.send(f"**Error:** Issue deleting server: `{server_name}`")
+            return
+        await ctx.send(f"**Server Deleted:** `{server_name}`")
+        lprint(ctx, f"Deleted server: {server_name}")
 
-        try: slime_vars.servers.pop('server_name')
-        except: pass
-
-        await ctx.send(f"**Server Deleted:** `{to_delete}`")
-        lprint(ctx, "Deleted server: " + to_delete)
-        if server_name in slime_vars.servers:
-            slime_vars.config['servers'].pop(server_name)
-            slime_vars.update_vars(slime_vars.config)
         if 'bmode' in name:
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
@@ -256,26 +213,22 @@ class Server(commands.Cog):
             ?sscan
         """
 
-        global slime_vars
         new_servers_found = False
-        example_server = slime_vars.config['servers']['example'].copy()
 
         await ctx.send("***Scanning for new servers...***")
-        for folder in listdir(slime_vars.servers_path):
+        for folder in listdir(config.get_config('servers_path')):
             # Checks if server already in 'slime_vars.servers' dict, and if 'folder' is actually a folder.
-            if folder not in slime_vars.servers.keys() and isdir(join(slime_vars.servers_path, folder)):
-                # Will update server server_name and file paths.
-                slime_vars.config['servers'][folder] = backend.update_server_paths(example_server.copy(), folder)
-                slime_vars.update_vars(slime_vars.config)  # Updates global vars and json file
+            if folder not in config.servers and isdir(join(config.get_config('servers_path'), folder)):
+                config.new_server_configs(folder)  # Create new folder and configs.
 
                 await ctx.send(f"**added:** `{folder}`")
                 lprint(ctx, f"INFO: Added server: {folder}")
                 new_servers_found = True
 
-        if not new_servers_found: await ctx.send("No new servers found.")
+        if not new_servers_found:
+            await ctx.send("No new servers found.")
         else:
             await ctx.invoke(self.bot.get_command('serverselect'))  # Shows all servers in Discord embed
-            slime_vars.update_vars(slime_vars.config)
 
     # ===== Version
     @commands.command(aliases=['lversion', 'lver', 'lv'])
@@ -371,10 +324,9 @@ class Server(commands.Cog):
             lprint(ctx, f"Autosave: Enabled (interval: {config.get_config('autosave_interval')}m)")
         elif arg.lower() in backend.disable_inputs:
             self.autosave_task.cancel()
-            slime_vars.enable_autosave = False
+            config.set_config('enable_autosave', False)
             lprint(ctx, 'Autosave: Disabled')
 
-        slime_vars.update_vars(slime_vars.config)
         status_msg = ':red_circle: **DISABLED** '
         if backend.server_status() is False: status_msg = ":pause_button: **PAUSED**"
         elif config.get_config('enable_autosave'): status_msg = ':green_circle: **ENABLED**'
@@ -545,7 +497,6 @@ class Server(commands.Cog):
     @commands.command(aliases=['pa', 'prall'])
     async def propertiesall(self, ctx):
         """Shows full server properties file."""
-        global slime_vars
 
         if not isfile(config.get_config('server_properties_filepath')):
             await ctx.send('**ERROR:** Could not get server properties file')
