@@ -62,7 +62,7 @@ def setup_configs():
     if ask_input in ['y', 'yes']:
         config.example_server_configs.update(get_input(server_config_prompts))
 
-    config.update_all_server_configs()
+    config.update_all_server_configs()  # Updates paths configs, and writes to file.
 
 def _start_bot():
     """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
@@ -221,13 +221,13 @@ Server Path         {config.get_config('server_path')}
 
 
 if __name__ == '__main__':
-    if os.path.isfile(config.get_config('user_config_filepath')):  # Creates user_config.json if not exist.
-        #loaded_configs = update_from_file(slime_vars.config)
+    if config.get_config('init') is False:
+        lprint("INFO: Created new config file.")
+        setup_configs()  # This will call config.update_all_server_configs which will creates user_config.json if not exist.
+        config.set_config('init', True)
+    else:
         config.update_from_file()
         lprint("INFO: Loaded user_config.json.")
-    else:
-        lprint("INFO: No 'user_config.json' file detected.")
-        setup_configs()
 
     # The order of the if statements is important.
     if 'hidebanner' not in sys.argv: show_banner()

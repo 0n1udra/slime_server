@@ -30,48 +30,14 @@ class Config():
         self.example_server_configs = self.servers['example']
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
 
-    def get_config(self, config_key: str, default_return: Any = None) -> Union[Any, None]:
-        """
-        Get config from bot configs or selected server configs.
-
-        Args:
-            config_key str: Config to get.
-            default_return Any: What to return if not found.
-
-        Returns:
-            Any, None: Returns config value or None if not found.
-        """
-
-        return self.bot_configs.get(config_key, default_return) or self.server_configs.get(config_key, default_return)
-
-    def set_config(self, key: str, value: Any) -> bool:
-        """
-        Updates bot or server config. Only if config already exists.
-
-        Args:
-            key: Config to edit.
-            value: New value.
-
-        Returns:
-            bool: If update successful.
-        """
-
-        if key in self.bot_configs:
-            self.bot_configs[key] = value
-            self.update_all_server_configs()
-            return True
-        elif key in self.server_configs:
-            self.server_configs[key] = value
-            self.update_all_server_configs()
-            return True
-        return False
-
     def initialize_configs(self, configs_from_setup=None):
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
 
         # Gets username to use in paths
-        try: self.user = os.getlogin()
-        except: self.user = getpass.getuser()
+        try:
+            self.user = os.getlogin()
+        except:
+            self.user = getpass.getuser()
         if not self.user:
             print("ERROR: Need to set 'user' variable in slime_config.py")
             exit()
@@ -83,7 +49,7 @@ class Config():
         else:
             self.mc_path = join(os.path.expanduser('~'), 'Games', 'Minecraft')
             self.home_path = os.path.expanduser('~')
-            
+
         self.bot_configs = {
             # Use python virtual environment
             'use_pyenv': True,
@@ -129,6 +95,7 @@ class Config():
 
             'selected_server': 'example',
             'user': self.user,
+            'init': False,
         }
 
         self.servers = {
@@ -198,13 +165,48 @@ class Config():
 
                 # For '?links' command. Shows useful websites.
                 'useful_websites': {
-                                'Minecraft Download': 'https://www.minecraft.net/en-us/download',
-                                'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
-                                'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                                'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
-                                   }
+                    'Minecraft Download': 'https://www.minecraft.net/en-us/download',
+                    'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
+                    'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
+                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
+                }
             }
         }
+
+    def get_config(self, config_key: str, default_return: Any = None) -> Union[Any, None]:
+        """
+        Get config from bot configs or selected server configs.
+
+        Args:
+            config_key str: Config to get.
+            default_return Any: What to return if not found.
+
+        Returns:
+            Any, None: Returns config value or None if not found.
+        """
+
+        return self.bot_configs.get(config_key, self.server_configs.get(config_key, default_return))
+
+    def set_config(self, key: str, value: Any) -> bool:
+        """
+        Updates bot or server config. Only if config already exists.
+
+        Args:
+            key: Config to edit.
+            value: New value.
+
+        Returns:
+            bool: If update successful.
+        """
+
+        if key in self.bot_configs:
+            self.bot_configs[key] = value
+        elif key in self.server_configs:
+            self.server_configs[key] = value
+        else: return False
+        self.update_all_server_configs()
+        return True
+
 
     def _update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
         """
@@ -223,7 +225,6 @@ class Config():
         config_data = config_data.copy()
         for k, v in config_data.items():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
-                print("WTF", k, v)
                 config_data[k] = v.replace(text_to_replace, server_name)
 
         return config_data
@@ -237,9 +238,7 @@ class Config():
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(server_configs, server_name)
 
-        # Updates user config json file.
-        from bot_files.slime_utils import file_utils
-        file_utils.write_json(self.get_config('user_config_filepath'), {'bot_configs': self.bot_configs, 'servers': self.servers})
+        self.update_configs_file()
 
     def new_server_configs(self, server_name: str, config_data: Dict = None) -> Union[Dict, bool]:
         """
@@ -331,19 +330,19 @@ class Config():
             #self.server_configs = self.servers[self.get_config('selected_server')]
         return True
 
-    def get_server_configs(self, server_name: str, return_example: bool = False) -> Union[Dict, None]:
+    def update_configs_file(self) -> bool:
         """
-        Get configs dictionary of specific server by name.
-
-        Args:
-            server_name str: Name of server to get configs of.
-            return_example bool: Returns the example server configs if not found specified.
+        Write self.bot_configs and self.servers to json file.
 
         Returns:
-            dict, None: Configs dict of specified server or None.
+            bool: If successful.
         """
 
-        return config.servers.get(server_name, self.example_server_configs if return_example else None)
+        from bot_files.slime_utils import file_utils
+        _ = file_utils.write_json(self.get_config('user_config_filepath'),
+                                  {'bot_configs': self.bot_configs, 'servers': self.servers})
+        if _ is False: return False
+        return True
 
     def switch_server_configs(self, server_name: str) -> bool:
         """
@@ -358,6 +357,8 @@ class Config():
 
         if server_configs := self.servers.get(server_name, None):
             self.server_configs = server_configs
+            self.bot_configs['selected_server'] = server_name
+            self.update_configs_file()
             return True
         return False
 

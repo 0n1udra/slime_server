@@ -45,6 +45,7 @@ class Backend(Backups):
         self.subprocess_servers = {}
         self.discord_channel = None
         self.server_active = False
+        config.update_from_file()  # Reads from json config file if exists.
         self.select_server(config.get_config('selected_server'))
         #self.discord_channel = self.update_discord_chennel(bot)
 
@@ -135,6 +136,7 @@ class Backend(Backups):
             if config.get_config(config_name) is True:
                 self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
                 break
+        lprint(f"INFO: Selected Server: {server_name}")
         return True
 
     # Send command to server console.
