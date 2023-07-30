@@ -233,8 +233,8 @@ class Config():
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
             if 'example' in server_name: continue  # Skip example template
-            server_configs = self.example_server_configs.copy()
-            server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
+            new_server_configs = self.example_server_configs.copy()
+            new_server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(server_configs, server_name)
 

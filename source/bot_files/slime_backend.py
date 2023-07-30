@@ -63,6 +63,7 @@ class Backend(Backups):
 
         if bot:
             self.bot = bot
+            self.server_api.bot = self.bot
             self.set_discord_channel()
             return True
         return False
@@ -87,21 +88,6 @@ class Backend(Backups):
             else:
                 self.discord_channel = self.bot.get_channel(channel_id)
                 return True
-
-    async def send_channel_msg(self, msg: str) -> bool:
-        """
-        Send message to set channel from channel_id config.
-
-        Args:
-            msg str: Message to send to channel.
-
-        Returns:
-            bool:
-        """
-
-        try: await self.discord_channel.send(msg)
-        except: return False
-        return True
 
     # ===== Server API
     def select_server(self, server_name: str) -> bool:
@@ -136,11 +122,12 @@ class Backend(Backups):
             if config.get_config(config_name) is True:
                 self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
                 break
+
         lprint(f"INFO: Selected Server: {server_name}")
         return True
 
     # Send command to server console.
-    def send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server. Depending on whether server is a subprocess or in Tmux session or using RCON.
         Sends command to server, then reads from latest.log file for output.
@@ -159,7 +146,7 @@ class Backend(Backups):
         return False
 
     # Check if server console is reachable.
-    def console_reachable(self) -> bool:
+    async def console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -167,16 +154,16 @@ class Backend(Backups):
             bool: Console reachable.
         """
 
-        return self.server_api.server_console_reachable()
+        return await self.server_api.server_console_reachable()
 
-    def get_command_output(self) -> Union[str, bool]:
+    async def get_command_output(self) -> Union[str, bool]:
         """
 
         Returns:
 
         """
 
-        return self.server_api.get_command_output()
+        return await self.server_api.get_command_output()
 
     # ===== Start/Stop
     def server_start(self) -> bool:
@@ -192,7 +179,7 @@ class Backend(Backups):
 
     # ===== Server status
     # Checks if server is reachable. By sending a command or using ping, depending on configs.
-    def server_status(self, force_check: bool = False) -> bool:
+    async def server_status(self, force_check: bool = False) -> bool:
         """
         Returns boolean if server is active.
         Depending on configs, priority: ping_server(), server_console_reachable(), _get_status()
@@ -206,7 +193,7 @@ class Backend(Backups):
             return self.server_ping()
         # Can force check even if configs disable it.
         elif config.get_config('check_before_command') is True or force_check is True:
-            return self.server_api.server_console_reachable()
+            return await self.server_api.server_console_reachable()
         return self.server_ping()
 
     def server_ping(self) -> bool:
@@ -242,7 +229,7 @@ class Backend(Backups):
         else: return stats
 
     # ===== Get data
-    def get_motd(self):
+    async def get_motd(self):
         """
         Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
 
@@ -256,19 +243,14 @@ class Backend(Backups):
         else:
             pass
 
-    def get_players(self):
+    async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        if not backend.send_command("list"):
-            return False
-
-        log_data = self.get_command_output()
-
-        if data := utils.parse_get_player_info(log_data):
+        if data := await utils.parse_players_output():
             return data
         return False
 
-    def get_coords(self, player=''):
+    async def get_coords(self, player=''):
         """Gets player's location coordinates."""
 
         if not backend.send_command(f"data get entity {player} Pos"):
@@ -280,7 +262,7 @@ class Backend(Backups):
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
-    def get_server_version(self) -> str:
+    async def get_server_version(self) -> str:
         """
         Gets server version number.
 
@@ -302,7 +284,7 @@ class Backend(Backups):
         else:
             # Get version info from server console.
             if self.send_command('version'):
-                version = self.get_command_output()
+                version = await self.get_command_output()
 
         return version
 

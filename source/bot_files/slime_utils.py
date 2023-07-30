@@ -17,6 +17,7 @@ import datetime
 import subprocess
 from os import listdir
 from os.path import isdir, isfile, join, exists
+from collections import deque
 
 from typing import Union, Any, Tuple, List, Dict, Generator
 from discord.ext.commands import Context
@@ -54,23 +55,6 @@ def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
     # Logs output.
     with open(config.get_config('bot_log_filepath'), 'a') as file:
         file.write(output + '\n')
-
-
-def status_slime_proc(self):
-    """Get bot process name and pid."""
-
-    if proc := utils.get_proc(slime_proc_name, slime_proc_cmdline):
-        lprint(f"INFO: Process info: {proc.name()}, {proc.pid}")
-
-
-def kill_slime_proc(self):
-    """Kills bot process."""
-
-    if proc := utils.get_proc(slime_proc_name, slime_proc_cmdline):
-        proc.kill()
-        lprint("INFO: Bot process killed")
-    else:
-        lprint("ERROR: Bot process not found")
 
 
 class File_Utils:
@@ -264,7 +248,7 @@ class File_Utils:
                     index += 1
                     continue
                 if 's' in mode and item in config.servers:
-                    component_data[-1] = config.get_server_configs(item)['server_description']
+                    component_data[-1] = config.servers[item]['server_description']
                     return_list.appen(component_data)  # For server mode for ?controlpanel command component
                     index += 1
                     continue
@@ -342,8 +326,85 @@ class File_Utils:
         return True
 
 
-class Utils:
+class Proc_Utils:
+    def get_proc(self, proc_name, proc_cmdline=None):
+        """Returns a process by matching name and argument."""
 
+        for proc in psutil.process_iter():
+            if proc.name() == proc_name:
+                # Narrow down process by its arguments. E.g. python3 could have multiple processes.
+                if proc_cmdline:
+                    if any(proc_cmdline in i for i in proc.cmdline()):
+                        return proc
+                else: return proc
+
+    def status_slime_proc(self):
+        """Get bot process name and pid."""
+
+        if proc := self.get_proc(slime_proc_name, slime_proc_cmdline):
+            lprint(f"INFO: Process info: {proc.name()}, {proc.pid}")
+
+    def kill_slime_proc(self):
+        """Kills bot process."""
+
+        if proc := self.get_proc(slime_proc_name, slime_proc_cmdline):
+            proc.kill()
+            lprint("INFO: Bot process killed")
+        else:
+            lprint("ERROR: Bot process not found")
+
+
+class Utils:
+    async def parse_players_output(self):
+        """Extracts wanted data from output of 'list' command."""
+
+        from bot_files.slime_bot import backend
+
+        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
+        try:
+            version = int(backend.server_version().split('.')[1])
+        except: version = 20
+
+        # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
+        if version <= 12:
+            if await backend.send_command("list") is False: return False
+            # Need to use server_log here because I need to get multiple line outputs.
+            log_data = await backend.get_command_output('list')
+            # Parses and returns info from log lines.
+            output = []
+            for i in log_data.split('\n'):
+                output.append(i)
+                if 'There are' in i: break
+            if output := output[:2]:
+                text = output[1].split(':')[-2].strip()
+                player_names = output[0].split(':')[-1].split(',')
+                return player_names, text
+            return False
+        else:
+            if await backend.send_command("list") is False: return False
+            # TODO make get_command_output be able to take command
+            if log_data := await backend.get_command_output():
+                reaesc = re.compile(r'\x1b[^m]*m')
+                # Use regular expression to extract player names
+                log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+                text = log_data[-2]  # There are 2 of a max of 20 players online
+                text = reaesc.sub('', text)  # Remove unwanted escape characters
+                player_names = log_data[-1]  # R3diculous, MysticFrogo
+                # If there's no players active, player_names will still contain some anso escape characters.
+                if len(player_names.strip()) < 5:
+                    return None
+                else:
+                    player_names = [f"{i.strip()[:-4]}\n" if config.get_config('use_rcon') else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+                    # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
+                    # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
+                    new = []
+                    for i in player_names:
+                        x = reaesc.sub('', i).strip().replace('[3', '')
+                        x = x.split(' ')[-1]
+                        x = x.replace('\\x1b', '').strip()
+                        new.append(x)
+                    player_names = new
+                    return player_names, text
 
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
@@ -402,17 +463,6 @@ class Utils:
             return grouped_list, num_of_groups
         except: return None, None
 
-    def get_proc(self, proc_name, proc_cmdline=None):
-        """Returns a process by matching name and argument."""
-
-        for proc in psutil.process_iter():
-            if proc.name() == proc_name:
-                # Narrow down process by its arguments. E.g. python3 could have multiple processes.
-                if proc_cmdline:
-                    if any(proc_cmdline in i for i in proc.cmdline()):
-                        return proc
-                else: return proc
-
     def format_args(self, args, return_no_reason=False):
         """
         Formats passed in *args from Discord command functions.
@@ -445,10 +495,14 @@ class Utils:
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         return ansi_escape.sub('', text)
 
-    def get_public_ip(self):
-        """Gets your public IP address, to updates server ip address varable using request.get()"""
+    def get_public_ip(self) -> Union[str, bool]:
+        """
+        Returns your public IP address.
 
-        global server_ip
+        Returns:
+            str, bool: IP address if fetched, else False.
+        """
+
         try:
             server_ip = json.loads(requests.get('http://jsonip.com').text)['ip']
             config.set_config('server_ip', server_ip)
@@ -482,6 +536,6 @@ class Utils:
     def convert_to_bytes(self, data: Any) -> io.BytesIO: return io.BytesIO(data.encode())
 
 
-
-utils = Utils()
 file_utils = File_Utils()
+proc_utils = Proc_Utils()
+utils = Utils()
