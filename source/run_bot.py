@@ -6,7 +6,7 @@ import time
 
 from bot_files.slime_config import config, __version__, __date__
 from bot_files.slime_bot import bot
-from bot_files.slime_utils import lprint
+from bot_files.slime_utils import lprint, proc_utils
 from bot_files.slime_backend import backend
 
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
@@ -258,9 +258,9 @@ if __name__ == '__main__':
 
     # Background process method (using nohup)
     if 'stopbot' in sys.argv:
-        backend.kill_slime_proc()
+        proc_utils.kill_slime_proc()
 
-    if 'statusbot' in sys.argv: backend.status_slime_proc()
+    if 'statusbot' in sys.argv: proc_utils.status_slime_proc()
 
     if 'startserver' in sys.argv: server_start()
 

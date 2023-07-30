@@ -30,7 +30,7 @@ class Player(commands.Cog):
         """
 
         await ctx.send("***Fetching Player List...***")
-        player_list = backend.get_players()
+        player_list = await backend.get_players()
         if player_list is False:
             await ctx.send("**Error:** Unable to fetch player list.")
             return
@@ -447,7 +447,7 @@ class Permissions(commands.Cog):
         if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if server online.
-        if backend.server_status() is False:
+        if await backend.server_status() is False:
             await ctx.send("**ERROR:** Server offline.")
             return
 
@@ -609,7 +609,7 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if backend.server_status() is False:
+        if await backend.server_status() is False:
             await ctx.send("Server is unreachable.")
             return
 

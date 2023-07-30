@@ -25,7 +25,7 @@ async def on_ready():
     backend.update_bot_object(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
-    backend.server_status()  # Check server status on bot startup.
+    await backend.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
@@ -94,8 +94,6 @@ class Slime_Bot_Commands(commands.Cog):
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
-
-
         await ctx.send(f"Bot Version: v{__version__} - {__date__}\nAuthor: {__author__}")
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botreboot'])
@@ -109,7 +107,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         # If using subprocess, makes sure server is off before restarting bot. Cus, if bot process dies, so does server.
         if config.get_config('server_use_subprocess'):
-            if backend.server_status() is True:
+            if await backend.server_status() is True:
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
         os.chdir(config.get_config('bot_source_path'))
@@ -302,7 +300,7 @@ class Discord_Components_Funcs(commands.Cog):
         await comps.clear_current_comps()
         comps.set_data('player_selected', 0)
 
-        players = backend.get_players()  # Gets list of online players
+        players = await backend.get_players()  # Gets list of online players
         if not players: players = [["No Players Online"]]  # Shows 'No Player Online' as a list option to notify no players online.
 
         select_options = [['All Players', '@a'], ['Random Player', '@r']] + [[i, i] for i in players[0]]
@@ -344,7 +342,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         await comps.clear_current_comps()  # Clear out used components, so you don't run into conflicts and issues.
 
-        players = backend.get_players()  # Get list of online players.
+        players = await backend.get_players()  # Get list of online players.
 
         # Options for selection boxes.
         if players:

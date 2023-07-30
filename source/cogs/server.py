@@ -258,7 +258,7 @@ class Server(commands.Cog):
         await ctx.send(f"***Updating {config.get_config('server_name')}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
-        if backend.server_status() is not False:
+        if await backend.server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
@@ -328,7 +328,7 @@ class Server(commands.Cog):
             lprint(ctx, 'Autosave: Disabled')
 
         status_msg = ':red_circle: **DISABLED** '
-        if backend.server_status() is False: status_msg = ":pause_button: **PAUSED**"
+        if await backend.server_status() is False: status_msg = ":pause_button: **PAUSED**"
         elif config.get_config('enable_autosave'): status_msg = ':green_circle: **ENABLED**'
 
         fields = [['Status', f"{status_msg} | **{config.get_config('autosave_interval')}**min"],
@@ -359,7 +359,7 @@ class Server(commands.Cog):
         """Checks if server is online."""
 
         await ctx.send('***Checking Server Status...***')
-        response = backend.server_status()
+        response = await backend.server_status()
         if response:
             await ctx.send("**Server ACTIVE** :green_circle:")
         elif response is None:
@@ -370,14 +370,14 @@ class Server(commands.Cog):
     async def serverstatus(self, ctx):
         """Shows server active status, version, motd, and online players"""
 
-        sstatus = backend.server_status()
+        sstatus = await backend.server_status()
         if sstatus is True: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
         fields = [
-            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {backend.server_version()}\nMOTD: {backend.server_motd()}"],
+            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
             ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') is True else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
-            ['Address', f"URL: ||`{config.get_config('server_address')}`|| ({backend.server_ping()})\nIP: ||`{backend.get_public_ip()}`|| (Use if URL inactive)"],
+            ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
         ]
@@ -548,7 +548,7 @@ class Server(commands.Cog):
         message = utils.format_args(message)
         motd_property = None
         if config.get_config('server_use_rcon'):
-            motd_property = backend.server_motd()
+            motd_property = await backend.server_motd()
         elif config.get_config('server_files_access'):
             backend.edit_file('motd', message)  # Doesn't edit message if message is blank
             motd_property = backend.edit_file('motd')
@@ -594,7 +594,7 @@ class Server(commands.Cog):
         """
 
         # Exits function if server already online.
-        if backend.server_status() is True:
+        if await backend.server_status() is True:
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
@@ -625,7 +625,7 @@ class Server(commands.Cog):
             ?stop now
         """
 
-        if backend.server_status() is False:
+        if await backend.server_status() is False:
             await ctx.send("Already Offline")
             return
 

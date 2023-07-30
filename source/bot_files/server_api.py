@@ -17,6 +17,7 @@ Following functions must be async:
 
 import os
 import json
+import time
 import asyncio
 import requests
 import subprocess
@@ -183,6 +184,7 @@ class Server_API(Server_Update, Server_Files):
     def __init__(self):
         super().__init__()
 
+        self.bot = None
         self.last_check_number = ''
         self.last_command_sent = ''
         self.last_command_output = ''
@@ -211,7 +213,7 @@ class Server_API(Server_Update, Server_Files):
         return False
 
     # Check if server console is reachable.
-    def server_console_reachable(self) -> bool:
+    async def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
@@ -222,13 +224,13 @@ class Server_API(Server_Update, Server_Files):
         if config.get_config('server_files_access') is True:
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
             if self.send_command(check_command) is True:
-                if self.get_command_output(unique_number) is True:  # Check logs for unique number.
+                if await self.get_command_output(unique_number) is not False:  # Check logs for unique number.
                     self.last_check_number = unique_number
                     return True
         return False
 
     # Get output from the last issued command.
-    def get_command_output(self, extra_lines: int = 0) -> Union[str, bool]:
+    async def get_command_output(self, command: str = None, extra_lines: int = 0) -> Union[str, bool]:
         """
         Gets response from last command.
 
@@ -236,8 +238,11 @@ class Server_API(Server_Update, Server_Files):
             str: Response from last command issued.
         """
 
-        if data := self.read_server_log(search=self.last_command_sent, extra_lines=extra_lines, stopgap_str=self.last_check_number):
+        await asyncio.sleep(config.get_config('command_buffer_time'))
+        if not isinstance(command, str): command = self.last_command_sent
+        if data := self.read_server_log(search=command, extra_lines=extra_lines, stopgap_str=self.last_check_number):
             return data
+
         return False
 
     # ===== Server Files
@@ -258,6 +263,7 @@ class Server_API(Server_Update, Server_Files):
         Returns:
             str: Matched lines in reverse order, joined by '\n'.
         """
+
         # Convert the search strings to lowercase for case-insensitive matching.
         if type(search) is str:
             search = [search.lower()]
@@ -277,7 +283,6 @@ class Server_API(Server_Update, Server_Files):
         for line in read_log_lines(file_path):
             # Gets some extra lines after the match is found, incase the command's output is multiline.
             if match_found and extra_lines >= 0:
-                print('l3', match_found)
                 matched_lines.append(line)
                 extra_lines -= 1
                 continue
@@ -459,7 +464,7 @@ class Server_API_Rcon(Server_API):
     def __init__(self):
         super().__init__()
 
-    async def send_command(self, command: str) -> Union[str, bool]:
+    def send_command(self, command: str) -> Union[str, bool]:
         """
         Send command to server with RCON.
 
@@ -482,7 +487,7 @@ class Server_API_Rcon(Server_API):
             server_rcon_client.stop()  # Disconnect.
             return self.last_command_output
 
-    async def server_console_reachable(self) -> bool:
+    def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number.
 
@@ -503,7 +508,7 @@ class Server_API_Subprocess(Server_API):
         self.server_subprocess = None
 
     # TODO be able to have multiple subprocess servers running and switch between them
-    async def send_command(self, command):
+    def send_command(self, command):
         if not self.server_subprocess: return False
         try:
             self.server_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
@@ -515,7 +520,7 @@ class Server_API_Subprocess(Server_API):
 
         return True
 
-    async def server_start(self) -> bool:
+    def server_start(self) -> bool:
         """
 
         Returns:

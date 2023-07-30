@@ -7,7 +7,7 @@ from discord.ext import commands, tasks
 
 from bot_files.slime_backend import backend
 from bot_files.slime_config import config
-from bot_files.slime_utils import lprint, utils
+from bot_files.slime_utils import lprint, file_utils, utils
 from bot_files.discord_components import comps
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
@@ -60,7 +60,7 @@ class World_Backups(commands.Cog):
         name = utils.format_args(name)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        if not backend.backend.send_command(f"save-all"):
+        if not await backend.backend.send_command(f"save-all"):
             return False
         await asyncio.sleep(3)
         try: new_backup = backend.new_backup(name, config.get_config('server_path') + '/world', config.get_config('world_backups_path'))
@@ -108,7 +108,7 @@ class World_Backups(commands.Cog):
 
         fetched_restore = backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
-        if backend.backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
+        if await backend.backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -171,18 +171,16 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False)
+        if backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False) is True:
+            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
+
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
         await ctx.send("**NOTE:** Next launch may take longer.")
 
-        if backend.server_status() is not False:
-            await ctx.invoke(self.bot.get_command('serverstop'), now=now)
-
-        try: shutil.rmtree(join(config.get_config('server_path'), 'world'))
-        except:
+        if file_utils.delete_dir(join(config.get_config('server_path'), 'world')) is False:
             await ctx.send("Error trying to reset world.")
             lprint(ctx, "ERROR: Issue deleting world folder.")
-        finally:
+        else:
             await ctx.send("**Finished.**")
             await ctx.send("You can now start the server with `?start`.")
             lprint(ctx, "World Reset")
