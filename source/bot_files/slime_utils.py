@@ -122,20 +122,18 @@ class File_Utils:
         """
 
         if not self.test_file(file_path): return False
+
+        # Create a deque to store lines in reverse order.
+        lines = deque()
+
         with open(file_path, 'r') as file:
-            file.seek(0, os.SEEK_END)  # Move the file pointer to the end of the file.
-            file_size = file.tell()  # Get the current file pointer position (end of the file).
+            for line in file:
+                # Add each line to the left side of the deque, effectively reversing the order.
+                lines.appendleft(line.rstrip('\n'))
 
-            # Start reading the file in reverse line by line.
-            while file.tell() > 0:
-                file.seek(-1, os.SEEK_CUR)  # Move one character back from the current position.
-                current_char = file.read(1)  # Read the character at the current position.
-
-                # If we find a newline character or reach the beginning of the file, yield the line.
-                if current_char == '\n' or file.tell() == 0:
-                    line = file.readline().rstrip('\n')
-                    yield line[::-1]  # Reverse the line before yielding.
-                else: file.seek(-1, os.SEEK_CUR)  # Move one character back to include the newline character in the line.
+        # Yield each line from the deque.
+        for line in lines:
+            yield line
 
     def read_json(self, file_path: str) -> Union[List[Dict[str, Any]], bool]:
         """

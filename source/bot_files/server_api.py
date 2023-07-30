@@ -272,27 +272,27 @@ class Server_API(Server_Update, Server_Files):
         matched_lines = deque(maxlen=lines) if top_down_mode else []
 
         # Changes function to read file if reading bottom up or top down.
-        read_log_lines = file_utils.read_file_bottom_up if not top_down_mode else file_utils.read_file
+        read_log_lines = file_utils.read_file_reverse_generator if not top_down_mode else file_utils.read_file_generator
         match_found = False
-        with read_log_lines(file_path, top_down_mode) as log_lines:
-            for line in log_lines:
-                # Gets some extra lines after the match is found, incase the command's output is multiline.
-                if match_found and extra_lines >= 0:
-                    matched_lines.append(line)
-                    extra_lines -= 1
-                    continue
+        for line in read_log_lines(file_path):
+            # Gets some extra lines after the match is found, incase the command's output is multiline.
+            if match_found and extra_lines >= 0:
+                print('l3', match_found)
+                matched_lines.append(line)
+                extra_lines -= 1
+                continue
 
-                # Check if each element in 'search' is found in 'line_lower'.
-                found_matches = [s in line.lower() for s in search]
-                # Determine if the line matches the specified criteria (search and match_mode).
-                # The conditions use 'found_matches', which is a list of booleans indicating the match status.
-                if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
-                    # Append the matched line to the deque or list depending on the search mode.
-                    matched_lines.append(line)
-                    match_found = True
+            # Check if each element in 'search' is found in 'line_lower'.
+            found_matches = [s in line.lower() for s in search]
+            # Determine if the line matches the specified criteria (search and match_mode).
+            # The conditions use 'found_matches', which is a list of booleans indicating the match status.
+            if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
+                # Append the matched line to the deque or list depending on the search mode.
+                matched_lines.append(line)
+                match_found = True
 
-                # Stops if found stopgap_str in line or at the limit user specified.
-                if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
+            # Stops if found stopgap_str in line or at the limit user specified.
+            if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
 
         return '\n'.join(matched_lines)
 
