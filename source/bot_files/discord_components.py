@@ -168,8 +168,10 @@ class Comps:
         return embed
 
     def server_modal_fields(self, server_name: str) -> List[List]:
-        # .get_server_configs will return the example server configs if nothing found.
-        data = config.get_server_configs(server_name)
+        if server := server_name in config.servers.get(server_name):
+            data = server
+        else: data = config.example_server_configs.copy()
+
 
         # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
         # Limited to 5 components in modal
