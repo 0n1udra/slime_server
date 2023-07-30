@@ -192,8 +192,9 @@ class Server_API(Server_Update, Server_Files):
         if custom_path := config.get_config('server_launch_path'):
             self.launch_path = custom_path
 
+        self.launch_command = config.get_config('server_launch_command')
         if config.get_config('windows_compatibility') is True:
-            self.launch_command = config.get_config('windows_cmdline_start') + config.get_config('server_launch_command')
+            self.launch_command = f"{config.get_config('windows_cmdline_start')} {self.launch_command}"
 
     # This will be updated with correct code to send command to server console based on configs.
     def send_command(self, command: str) -> bool:
@@ -406,17 +407,17 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() was successful.
         """
 
-        os.chdir(self.launch_path)
-
         # If failed to change current working directory.
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} 'cd {config.get_config('server_path')}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} 'cd {self.launch_path}' ENTER"):
+            lprint("ERROR: Could not change directory to server launch path.")
             return False
 
         # Starts server in tmux pane.
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{self.launch_command}"):
+        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{self.launch_command}' ENTER"):
+            lprint("ERROR: Problem with server launch command.")
             return False
 
-        return False
+        return True
 
 
 class Server_API_Screen(Server_API):
@@ -448,9 +449,10 @@ class Server_API_Screen(Server_API):
         """
 
         os.chdir(self.launch_path)
-        if not os.system(f"screen -dmS '{config.get_config('screen_session_name')}' {self.launch_command}"):
-            return True
-        else: return False
+        if os.system(f"screen -dmS '{config.get_config('screen_session_name')}' {self.launch_command}"):
+            lprint(f"ERROR: Could not start server with screen: {self.launch_command}")
+            return False
+        return True
 
 
 class Server_API_Rcon(Server_API):
@@ -525,12 +527,12 @@ class Server_API_Subprocess(Server_API):
         try:
             if config.get_config('windows_compatibility') is True:
                 self.server_subprocess = subprocess.Popen(
-                    config.get_config('windows_cmdline_start') + config.get_config('server_launch_command'),
+                    config.get_config(self.launch_command),
                     shell=True
                 )
             else:
                 self.server_subprocess = subprocess.Popen(
-                    config.get_config('server_launch_command').split(),
+                    self.launch_command.split(),
                     stdin=asyncio.subprocess.PIPE,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE
