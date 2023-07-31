@@ -156,14 +156,14 @@ class Backend(Backups):
 
         return await self.server_api.server_console_reachable()
 
-    async def get_command_output(self) -> Union[str, bool]:
+    async def get_command_output(self, keywords: str = None, extra_lines: int = 0) -> Union[str, bool]:
         """
 
         Returns:
 
         """
 
-        return await self.server_api.get_command_output()
+        return await self.server_api.get_command_output(keywords, extra_lines)
 
     # ===== Start/Stop
     def server_start(self) -> bool:
@@ -246,9 +246,7 @@ class Backend(Backups):
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        if data := await utils.parse_players_output():
-            return data
-        return False
+        return await utils.parse_players_output()
 
     async def get_coords(self, player=''):
         """Gets player's location coordinates."""

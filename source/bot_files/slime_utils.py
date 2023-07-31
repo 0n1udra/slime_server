@@ -383,7 +383,7 @@ class Utils:
         else:
             if await backend.send_command("list") is False: return False
             # TODO make get_command_output be able to take command
-            if log_data := await backend.get_command_output():
+            if log_data := await backend.get_command_output('There are'):
                 reaesc = re.compile(r'\x1b[^m]*m')
                 # Use regular expression to extract player names
                 log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo

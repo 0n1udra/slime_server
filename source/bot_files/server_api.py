@@ -230,7 +230,7 @@ class Server_API(Server_Update, Server_Files):
         return False
 
     # Get output from the last issued command.
-    async def get_command_output(self, command: str = None, extra_lines: int = 0) -> Union[str, bool]:
+    async def get_command_output(self, keyword: str = None, extra_lines: int = 0) -> Union[str, bool]:
         """
         Gets response from last command.
 
@@ -239,8 +239,9 @@ class Server_API(Server_Update, Server_Files):
         """
 
         await asyncio.sleep(config.get_config('command_buffer_time'))
-        if not isinstance(command, str): command = self.last_command_sent
-        if data := self.read_server_log(search=command, extra_lines=extra_lines, stopgap_str=self.last_check_number):
+        if not isinstance(keyword, str): keyword = self.last_command_sent
+        if data := self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=self.last_check_number):
+            #print('ok', data)
             return data
 
         return False
@@ -264,13 +265,6 @@ class Server_API(Server_Update, Server_Files):
             str: Matched lines in reverse order, joined by '\n'.
         """
 
-        # Convert the search strings to lowercase for case-insensitive matching.
-        if type(search) is str:
-            search = [search.lower()]
-        elif type(search) is list:
-            search = [s.lower() for s in search]
-        else: search = None
-
         file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
         if not file_path or not os.path.exists(file_path): return False  # If file not exist.
 
@@ -282,16 +276,19 @@ class Server_API(Server_Update, Server_Files):
         match_found = False
         for line in read_log_lines(file_path):
             # Gets some extra lines after the match is found, incase the command's output is multiline.
-            if match_found and extra_lines >= 0:
-                matched_lines.append(line)
-                extra_lines -= 1
-                continue
+            if match_found:
+                if extra_lines > 0:
+                    matched_lines.append(line)
+                    extra_lines -= 1
+                    continue
+                if find_all is False: break
 
             # Check if each element in 'search' is found in 'line_lower'.
-            found_matches = [s in line.lower() for s in search]
+            #found_matches = [s in line.lower() for s in search]
             # Determine if the line matches the specified criteria (search and match_mode).
             # The conditions use 'found_matches', which is a list of booleans indicating the match status.
-            if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
+            #if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
+            if search is None or any([s.lower() in line.lower() for s in search]):
                 # Append the matched line to the deque or list depending on the search mode.
                 matched_lines.append(line)
                 match_found = True
