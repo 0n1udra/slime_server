@@ -20,7 +20,8 @@ import fileinput
 from os.path import join
 from typing import Union, Dict
 
-from discord.ext.commands import Bot
+import discord.ext.commands
+from discord.ext.commands import Bot, Context
 import mctools
 
 from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
@@ -41,6 +42,7 @@ class Backend(Backups):
     def __init__(self):
         # Specific API for server interaction depending on server type (vanilla, PaperMC, etc) .
         self.bot = None
+        self.last_command_channel_id = None
         self.server_api = None
         self.subprocess_servers = {}
         self.discord_channel = None
@@ -61,14 +63,15 @@ class Backend(Backups):
             bool: If successful.
         """
 
-        if bot:
+        if isinstance(bot, Bot):
             self.bot = bot
             self.server_api.bot = self.bot
             self.set_discord_channel()
             return True
+
         return False
 
-    def set_discord_channel(self) -> bool:
+    def set_discord_channel(self, ctx: Context = None) -> bool:
         """
         Updates discord_channel with Discord channel object wtih channel_id config, so you can use send_channel_msg func.
 
@@ -79,15 +82,39 @@ class Backend(Backups):
             bool: Successfully found Discord chanel by set channel_id config.
         """
 
-        if channel_id := config.get_config('channel_id'):
-            try:
-                channel_id = int(channel_id)  # Basic check if valid ID.
-            except:
-                lprint("ERROR: Invalid Channel ID")
-                return False
-            else:
-                self.discord_channel = self.bot.get_channel(channel_id)
-                return True
+        # Needs bot object to get discord channel from channel id.
+        if self.bot is None:
+            return False
+        # Gets channel id from message ctx object.
+        if isinstance(ctx, Context):
+            channel_id = ctx.channel.id
+        # Checks if channel_id is set.
+        elif channel_id := config.get_config('channel_id'):
+            channel_id = channel_id
+
+        # Only updates data if new channel_id received
+        if self.last_command_channel_id != channel_id:
+            self.last_command_channel_id = channel_id
+            config.set_config("channel_id", channel_id)
+            self.discord_channel = self.bot.get_channel(channel_id)
+
+        return True
+
+    async def send_discord_message(self, msg: str) -> bool:
+        """
+
+        Args:
+            msg:
+
+        Returns:
+
+        """
+
+        if self.discord_channel is None:
+            return False
+
+        await self.discord_channel.send(msg)
+        return True
 
     # ===== Server API
     def select_server(self, server_name: str) -> bool:
@@ -106,7 +133,7 @@ class Backend(Backups):
 
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
-        if config.get_config('use_subprocess') is True:
+        if config.get_config('use_subprocess'):
             server_name = config.server_configs['name']
             # Checks if a subprocess API instance for selected server already exists.
             if config.server_configs['name'] in self.subprocess_servers:
@@ -119,7 +146,7 @@ class Backend(Backups):
 
         for config_name, api in self.server_api_types.items():
             # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
-            if config.get_config(config_name) is True:
+            if config.get_config(config_name):
                 self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
                 break
 
@@ -140,21 +167,35 @@ class Backend(Backups):
             bool: If successfully sent command to console.
         """
 
-        if self.server_api.send_command(command) is True:
+
+        # If these configs are set to False, the bot will send the server commands even if status of server status is unknown.
+        # If either one is, the bot will only send the command if server console is reachable or successful ping.
+        if config.get_config('check_before_command') or config.get_config('ping_before_command'):
+            if not await self.console_reachable():
+                return False
+
+        if self.server_api.send_command(command):
             self.server_api.last_command_sent = command
             return True
+
         return False
 
     # Check if server console is reachable.
-    async def console_reachable(self) -> bool:
+    async def console_reachable(self, discord_msg: bool = False) -> Union[bool, None]:
         """
         Check if server console is reachable by sending a unique number to be checked in logs.
 
         Returns:
-            bool: Console reachable.
+            bool, None: Console reachable, or None if unable to get status.
         """
 
-        return await self.server_api.server_console_reachable()
+        if await self.server_api.server_console_reachable():
+            return True
+
+        if discord_msg:
+            await self.send_discord_message("**Server Unreachable**")
+
+        return False
 
     async def get_command_output(self, keywords: str = None, extra_lines: int = 0) -> Union[str, bool]:
         """
@@ -189,10 +230,10 @@ class Backend(Backups):
         """
 
         # Prioritizes using ping instead of sending command to console.
-        if config.get_config('ping_before_command') is True:
+        if config.get_config('ping_before_command'):
             return self.server_ping()
         # Can force check even if configs disable it.
-        elif config.get_config('check_before_command') is True or force_check is True:
+        elif config.get_config('check_before_command') or force_check:
             return await self.server_api.server_console_reachable()
         return self.server_ping()
 
@@ -206,6 +247,7 @@ class Backend(Backups):
 
         if address := config.get_config('server_address'):
             return utils.ping_address(address)
+
         return False
 
     # Query ping server. Must have 'enable-query=true' in server.properties.
@@ -218,7 +260,8 @@ class Backend(Backups):
         """
 
 
-        if not config.get_config('server_address'): return False
+        if not config.get_config('server_address'):
+            return False
 
         try:
             ping = mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port'))
@@ -226,7 +269,8 @@ class Backend(Backups):
             ping.stop()
         except ConnectionRefusedError:
             return False
-        else: return stats
+        else:
+            return stats
 
     # ===== Get data
     async def get_motd(self):
@@ -260,7 +304,7 @@ class Backend(Backups):
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
-    async def get_server_version(self) -> str:
+    def get_server_version(self) -> Union[str, bool]:
         """
         Gets server version number.
 
@@ -272,23 +316,23 @@ class Backend(Backups):
         version = 'N/A'
         if data := config.get_config('server_version'):
             version = data
-        elif config.get_config('server_files_access') is True:
+        elif config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
             if data := self.read_server_log('server version'):
-                version = data.split('version')[1].strip()
+                version = data[0].split('version')[-1].strip()
             # Tries to find info in server.properties next.
             elif data := self.get_property('version'):
                 version = data
-        else:
+        #if not version:
             # Get version info from server console.
-            if self.send_command('version'):
-                version = await self.get_command_output()
+            #if self.send_command('version'):
+                #version = self.server_api.
 
         return version
 
     # ===== File reading and writing
     def read_server_log(self, *args, **kwargs):
-        self.server_api.read_server_log(*args, **kwargs)
+        return self.server_api.read_server_log(*args, **kwargs)
 
     def update_property(self, property_name=None, value='', file_path=None):
         """
@@ -305,10 +349,15 @@ class Backend(Backups):
             tuple: First item is line from file that matched target_property. Second item is just the current value.
         """
 
-        if config.get_config('server_files_access') is False: return False
+        if not config.get_config('server_files_access'):
+            return False
+
         # TODO add property file config
-        if not file_path: file_path = f"{config.get_config('server_path')}/server.properties"
-        if not os.path.isfile(file_path): return False
+        if not file_path:
+            file_path = f"{config.get_config('server_path')}/server.properties"
+
+        if not os.path.isfile(file_path):
+            return False
         return_line = ''
 
         # print() writes to file while using it in FileInput() with inplace=True
@@ -332,7 +381,8 @@ class Backend(Backups):
         # Returns value, and complete line
         if return_line:
             return return_line, return_line.split('=')[1].strip()
-        else: return "Match not found.", 'Match not found.'
+        else:
+            return False
 
     def get_property(self, property_name):
         """
@@ -346,9 +396,10 @@ class Backend(Backups):
             bool: If value not found or if not able to access file.
         """
 
-        if config.get_config('server_files_access') is True:
+        if config.get_config('server_files_access'):
             if data := self.update_property(property_name):
                 return data[1]
+
         return False
 
     # ===== Adding/Deleting servers
@@ -369,13 +420,14 @@ class Backend(Backups):
             return False
 
         # Create new configs for server.
-        if config.new_server_configs(server_name) is False:
+        if not config.new_server_configs(server_name):
             lprint(f"ERROR: Issue creating new configs for: {server_name}")
             return False
 
         # Create new folder for server.
         new_folder = join(config.get_config('servers_path'), server_name.strip())
-        if not file_utils.new_dir(new_folder): return False
+        if not file_utils.new_dir(new_folder):
+            return False
 
         return config.new_server_configs(server_name)
 
@@ -389,8 +441,12 @@ class Backend(Backups):
             dict, bool:
         """
 
-        if server_name not in config.servers: return False
-        if file_utils.delete_dir(config.servers[server_name]['server_path']) is False: return False
+        if server_name not in config.servers:
+            return False
+
+        if not file_utils.delete_dir(config.servers[server_name]['server_path']):
+            return False
+
         server_data = config.servers.pop(server_name)
         config.update_all_server_configs()
         return server_data
@@ -406,11 +462,14 @@ class Backend(Backups):
 
         """
 
-        if self.server_new(new_server_name) is False: return False
+        if not self.server_new(new_server_name):
+            return False
+
         if server_data := self.server_delete(server_name):
             if file_utils.copy_dir(config.servers[server_name]['server_path'], server_data['server_path']) is False:
                 return False
-            else: return server_data
+            else:
+                return server_data
 
     # ===== Backup/Restore
     def new_backup(self, new_name, src, dst):
