@@ -29,12 +29,12 @@ async def on_ready():
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
-        await backend.discord_channel.send(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await backend.send_discord_message(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         if 'hidebanner' not in sys.argv:
-            await backend.discord_channel.send(f"Server: `{config.server_configs['server_name']}`")
+            await backend.send_discord_message(f"Server: `{config.server_configs['server_name']}`")
             # Shows some useful buttons
             on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-            await backend.discord_channel.send('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
+            await backend.send_discord_message('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
 # TODO fix
 role_requirements = {
@@ -60,13 +60,7 @@ async def on_command(ctx):
 
 @bot.event
 async def on_command(ctx):
-    # List of commands that require the role "Admin" to execute
-    admin_commands = ["my_command1", "my_command2"]
-
-    if ctx.command.name in admin_commands:
-        has_role = await has_custom_role("Admin").predicate(ctx)
-        if not has_role:
-            raise commands.MissingRole("Admin")
+    backend.set_discord_channel(ctx)
 
 class Slime_Bot_Commands(commands.Cog):
     def __init__(self, bot):
@@ -107,7 +101,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         # If using subprocess, makes sure server is off before restarting bot. Cus, if bot process dies, so does server.
         if config.get_config('server_use_subprocess'):
-            if await backend.server_status() is True:
+            if await backend.server_status():
                 await ctx.send("Server is running. Stop server first with `?serverstop`.")
 
         os.chdir(config.get_config('bot_source_path'))
@@ -242,7 +236,7 @@ class Slime_Bot_Commands(commands.Cog):
     async def setchannel(self, ctx):
         """Sets channel_id variable, so bot can send messages without ctx."""
 
-        if config.set_config('channel_id', ctx.channel.id) is True:
+        if config.set_config('channel_id', ctx.channel.id):
             await ctx.send(f"Set `channel_id`: ||{ctx.channel.id}||")
             lprint(ctx, f"Set Channel ID: {ctx.channel.id}")
         else:

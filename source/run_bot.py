@@ -78,7 +78,7 @@ def _start_bot():
 
 def start_bot():
     """Uses different methods of launching Discord bot depending on config"""
-    if config.get_config('use_tmux') is True:
+    if config.get_config('use_tmux'):
         no_tmux = False
         # Sources pyenv if set in slime_vars.
         x = f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_source_path')}' ENTER"
@@ -132,7 +132,7 @@ def start_tmux_session():
 def server_start():
     """Start Minecraft server, method varies depending on variables set in slime_config.py."""
 
-    if config.get_config('use_tmux') is True:
+    if config.get_config('use_tmux'):
         backend.server_start()
 
 def show_log():
@@ -236,15 +236,15 @@ if __name__ == '__main__':
         lprint("INFO: To enable startup message banner in discord, use '?setchannel' in the channel you want it in.")
 
     if 'setup' in sys.argv:
-        if config.get_config('server_files_access') is True:
+        if config.get_config('server_files_access'):
             setup_directories()
-        if config.get_config('server_use_rcon') is True:
+        if config.get_config('server_use_rcon'):
             lprint("INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
         config.set_config('bot_token_filepath', os.path.join(config.get_config('home_path'), 'keys', 'slime_bot_beta.token'))
-        config.set_config('channel_id', 916450451061350420)
+        #config.set_config('channel_id', 916450451061350420)
 
     if 'starttmux' in sys.argv and config.get_config('use_tmux'):
         start_tmux_session()

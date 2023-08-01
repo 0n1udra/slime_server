@@ -16,7 +16,7 @@ class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        if config.get_config('enable_autosave') is True:
+        if config.get_config('enable_autosave'):
             self.autosave_task.start()
             lprint(ctx, f"Autosave task started (interval: {config.get_config('autosave_interval')}m)")
 
@@ -371,12 +371,12 @@ class Server(commands.Cog):
         """Shows server active status, version, motd, and online players"""
 
         sstatus = await backend.server_status()
-        if sstatus is True: status = '**ACTIVE** :green_circle:'
+        if sstatus: status = '**ACTIVE** :green_circle:'
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
         fields = [
-            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
-            ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') is True else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
+            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
+            ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
             ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
@@ -448,9 +448,13 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = backend.server_version()
+        response = backend.get_server_version()
+        if response is False:
+            await ctx.send("**ERROR:** Could not get server version")
+            lprint("ERROR: Couldn't get server version.")
+            return
         await ctx.send(f"Current version: `{response}`")
-        lprint(ctx, "Fetched Minecraft server version: " + response)
+        lprint(ctx, f"Fetched Minecraft server version: {response}")
 
     # === Properties
     @commands.command(aliases=['property', 'pr'])
@@ -594,7 +598,7 @@ class Server(commands.Cog):
         """
 
         # Exits function if server already online.
-        if await backend.server_status() is True:
+        if await backend.server_status():
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 

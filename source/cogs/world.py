@@ -24,7 +24,8 @@ class Basics(commands.Cog):
         """
 
         command = utils.utils.format_args(command)
-        if backend.backend.send_command(command) is False: return False
+        if backend.backend.send_command(command) is False:
+            return False
 
         lprint(ctx, "Sent command: " + command)
         await ctx.invoke(self.bot.get_command('serverlog'), lines=3)

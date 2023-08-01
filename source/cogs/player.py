@@ -376,7 +376,7 @@ class Permissions(commands.Cog):
         if not response: return
         log_data = backend.server_log(log_mode=True, stopgap_str=response[1])
 
-        if config.get_config('server_use_rcon') is True:
+        if config.get_config('server_use_rcon'):
             if 'There are no bans' in log_data:
                 banned_players = 'No exiles!'
             else:

@@ -171,7 +171,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        if backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False) is True:
+        if backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
@@ -279,7 +279,7 @@ class Server_Backups(commands.Cog):
         fetched_restore = backend.get_from_index(config.get_config('server_backups_path'), index, 'd')
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
-        if backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}") is True:
+        if backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 

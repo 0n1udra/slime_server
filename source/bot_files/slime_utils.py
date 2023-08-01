@@ -89,7 +89,9 @@ class File_Utils:
             str: Yields a line from file
         """
 
-        if not self.test_file(file_path): return False
+        if not self.test_file(file_path):
+            return False
+
         with open(file_path, 'r') as file:
             for line in file:
                 yield line
@@ -105,7 +107,8 @@ class File_Utils:
             str: A line from file.
         """
 
-        if not self.test_file(file_path): return False
+        if not self.test_file(file_path):
+            return False
 
         # Create a deque to store lines in reverse order.
         lines = deque()
@@ -131,11 +134,14 @@ class File_Utils:
         """
 
 
-        if not self.test_file(file_path): return False
+        if not self.test_file(file_path):
+            return False
+
         try:
             with open(file_path) as file:
                 return [i for i in json.load(file)]
-        except: return False
+        except:
+            return False
 
     def write_json(self, file_path: str, data: dict) -> bool:
         """
@@ -168,7 +174,9 @@ class File_Utils:
             list, bool: List of csv data or False if failed.
         """
 
-        if not self.test_file(file_path): return False
+        if not self.test_file(file_path):
+            return False
+
         with open(file_path) as file:
             return [i for i in csv.reader(file, delimiter=',', skipinitialspace=True)]
 
@@ -184,11 +192,14 @@ class File_Utils:
             bool: If successful.
         """
 
-        if not self.test_file(file_path): return False
+        if not self.test_file(file_path):
+            return False
+
         try:
             with open(file_path, 'w') as file:
                 csv.writer(file).writerows(data)
-        except: return False
+        except:
+            return False
 
         return True
 
@@ -268,7 +279,9 @@ class File_Utils:
         """
 
         try: shutil.rmtree(path)
-        except: return False
+        except:
+            return False
+
         return True
 
     def new_dir(self, path: str) -> bool:
@@ -358,6 +371,7 @@ class Utils:
     async def parse_players_output(self):
         """Extracts wanted data from output of 'list' command."""
 
+
         from bot_files.slime_bot import backend
 
         # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
@@ -391,7 +405,7 @@ class Utils:
                 if len(player_names.strip()) < 5:
                     return None
                 else:
-                    player_names = [f"{i.strip()[:-4]}\n" if config.get_config('use_rcon') else f"{i.strip()}" for i in (log_data[-1]).split(',')]
+                    player_names = [f"{i.strip()[:-4]}\n" if config.get_config('use_rcon') else f"{i.strip()}" for i in (output[-1]).split(',')]
                     # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
                     # player_names_discord = [f"`{i.strip()[:-4]}`\n" if use_rcon else f"`{i.strip()}`\n" for i in (log_data[-1]).split(',')]
                     new = []
@@ -402,6 +416,7 @@ class Utils:
                         new.append(x)
                     player_names = new
                     return player_names, text
+            except: return False
 
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
@@ -475,7 +490,7 @@ class Utils:
 
         if args: return ' '.join(args)
         else:
-            if return_no_reason is True:
+            if return_no_reason:
                 return "No reason given."
             return ''
 
@@ -517,11 +532,12 @@ class Utils:
             bool: If successful.
         """
 
-        if config.get_config('windows_compatibility') is True:  # If on windows.
+        if config.get_config('windows_compatibility'):  # If on windows.
             try:
                 if 'TTL=' in subprocess.run(["ping", "-n", "2", address], capture_output=True, text=True, timeout=10).stdout:
                     return True
-            except: return False
+            except:
+                return False
         else:
             # TODO: FIX
             ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)

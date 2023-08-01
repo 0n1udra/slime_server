@@ -133,13 +133,13 @@ class Config():
                 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
                 'startup_wait_time': 30,
 
-                # Set to False to disable sending 'xp' command to server. NOTE: You won't get for some commands you won't get feedback on success/status.
+                # Only send command to server if ping successful.
+                # NOTE: This will disable and override 'check_before_command'. You can use this if you can't use that.
+                'ping_before_command': False,
+                # Only send command after sending unique number to console to check status.
                 'check_before_command': True,
                 # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
                 'status_checker_command': 'xp',
-                # Enabling this sends a ping to server before sending command to see if active.
-                # NOTE: This will disable and override 'check_before_command'. You can use this if you can't use that.
-                'ping_before_command': False,
                 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
                 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.
                 'command_buffer_time': 1,
@@ -203,7 +203,9 @@ class Config():
             self.bot_configs[key] = value
         elif key in self.server_configs:
             self.server_configs[key] = value
-        else: return False
+        else:
+            return False
+
         self.update_all_server_configs()
         return True
 
@@ -278,7 +280,9 @@ class Config():
             return False
 
         from bot_files.slime_utils import file_utils
-        if file_utils.delete_dir(self.servers[server_name]['server_path']) is False: return False
+        if file_utils.delete_dir(self.servers[server_name]['server_path']) is False:
+            return False
+
         self.update_all_server_configs()
         return self.servers.pop(server_name)
 
@@ -294,7 +298,8 @@ class Config():
         """
 
         # Makes this function only for updating configs. If configs not exist, must use new_server_configs()
-        if server_name not in self.servers: return False
+        if server_name not in self.servers:
+            return False
 
         server_configs = self.example_server_configs.copy()
         # Gets any preexisting data.
@@ -341,7 +346,9 @@ class Config():
         from bot_files.slime_utils import file_utils
         _ = file_utils.write_json(self.get_config('user_config_filepath'),
                                   {'bot_configs': self.bot_configs, 'servers': self.servers})
-        if _ is False: return False
+        if _ is False:
+            return False
+
         return True
 
     def switch_server_configs(self, server_name: str) -> bool:

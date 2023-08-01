@@ -90,7 +90,7 @@ class Comps:
             dict: Updated comp_data dict.
         """
 
-        self.comp_data.update({key, value})
+        self.comp_data[key] = value
         return self.comp_data
 
     def get_data(self, key: str) -> Union[Any, None]:
