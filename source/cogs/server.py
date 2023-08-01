@@ -479,24 +479,32 @@ class Server(commands.Cog):
                            "Show all properties using `?properties all` or `?pa`")
             return False
 
+        # Parse value from *value tuple.
+        value = utils.get_parameter(value)
+
         if 'all' in target_property:
             await ctx.invoke(self.bot.get_command('propertiesall'))
 
-        if value:
-            await ctx.send("Property Updated  :memo:")
-            value = ' '.join(value)
-        else: value = ''
+        if server_property := backend.get_property(target_property):
 
-        backend.edit_file(target_property, value)
-        fetched_property = backend.edit_file(target_property)
-        await asyncio.sleep(2)
+            # Update server property
+            if value:
+                if updated_property := backend.update_property(target_property, value):
+                    await ctx.send(f"Property Updated: `{updated_property}`")
+                    return
+                else:
+                    await ctx.send(f"**ERROR:** Could not update server property: `{target_property}` to `{value}`")
+                    return False
 
-        if fetched_property:
-            await ctx.send(f"`{fetched_property[0].strip()}`")
-            lprint(ctx, f"Server property: {fetched_property[0].strip()}")
-        else:
-            await ctx.send(f"**ERROR:** 404 Property not found.")
-            lprint(ctx, f"Server property not found: {target_property}")
+            # Return current property value
+            await ctx.send(f"Server property: `{server_property}`")
+            lprint(ctx, f"Server property: {server_property}")
+            return
+
+        # If property not found.
+        await ctx.send(f"**ERROR:** Server property not found: {target_property}")
+        return False
+
 
     @commands.command(aliases=['pa', 'prall'])
     async def propertiesall(self, ctx):

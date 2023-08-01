@@ -31,34 +31,8 @@ from file_read_backwards import FileReadBackwards
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
-class Server_Files:
-    def get_property(self, key: str) -> Any:
-        """
 
-        Args:
-            key:
-
-        Returns:
-
-        """
-
-        pass
-
-    def set_property(self, key: str, value: Any) -> bool:
-        """
-
-        Args:
-            key:
-            value:
-
-        Returns:
-
-        """
-
-        pass
-
-
-class Server_Update(Server_Files):
+class Server_Update:
     """
     This class handles finding the latest direct download link for different server types.
     For each server type (vanilla, PaperMC, Bukkit, etc) you need to have a get_X_url() function.
@@ -255,7 +229,9 @@ class Server_API(Server_Update, Server_Files):
         return False
 
     # ===== Server Files
-    def read_server_log(self, search=None, file_path=None, lines=15, extra_lines=0, find_all=False, stopgap_str=None, top_down_mode=False):
+    def read_server_log(self, search: str = None, lines: int = 15, extra_lines: int = 0,
+                        find_all: bool = False, stopgap_str: str = None,
+                        top_down_mode: bool = False) -> Union[List, bool]:
         """
         Read the latest.log file under server/logs folder. Can also find a match.
 
@@ -264,21 +240,22 @@ class Server_API(Server_Update, Server_Files):
                                             If None, it will return all log data without matching.
             file_path (str, optional): File to read. Defaults to the server's latest.log.
             lines (int, optional): Number of most recent lines to return.
-            match_mode (str, optional): Matching mode. Options: 'any' (default), 'all', 'none'.
+            extra_lines int(0): For cases where command output is multi-lined.
+            find_all bool(False): Find all occurrences in latest.log.
             stopgap_str (str, optional): Stops the search when this string is found in the log line.
             top_down_mode (bool, optional): If True, search from the top of the log file.
                                             If False (default), search from the bottom of the log file.
 
         Returns:
-            str: Matched lines in reverse order, joined by '\n'.
+            list: Matched lines.
         """
 
         if not isinstance(search, list):
             search = [search]
 
-        file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
-        if not file_path or not os.path.exists(file_path):
-            return False  # If file not exist.
+        file_path = config.get_config('server_log_filepath')  # server.properties file as default file.
+        if not file_utils.test_file(file_path):
+            return False
 
         # Create a deque, which will efficiently store the most recent matched log lines.
         matched_lines = deque(maxlen=lines) if top_down_mode else []
@@ -287,17 +264,10 @@ class Server_API(Server_Update, Server_Files):
         read_log_lines = file_utils.read_file_reverse_generator if not top_down_mode else file_utils.read_file_generator
         _extra_lines = deque(maxlen=extra_lines + 1)
         for line in read_log_lines(file_path):
-            # Gets some extra lines after the match is found, incase the command's output is multiline.
-
-            # Check if each element in 'search' is found in 'line_lower'.
-            #found_matches = [s in line.lower() for s in search]
-            # Determine if the line matches the specified criteria (search and match_mode).
-            # The conditions use 'found_matches', which is a list of booleans indicating the match status.
-            #if search is None or ((not find_all and any(found_matches)) or (find_all and all(found_matches))):
             if search is None or any([s.lower() in line.lower() for s in search]):
-                # Append the matched line to the deque or list depending on the search mode.
                 matched_lines.append(line)
-                if not find_all: break
+                if not find_all:
+                    break  # find_all = True means find all occurrences in file.
 
             # Needed for some multi-line outputs for some commands (e.g. list command in 1.12)
             if extra_lines: _extra_lines.append(line)
