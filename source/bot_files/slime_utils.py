@@ -362,34 +362,31 @@ class Utils:
 
         # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
         try:
-            version = int(backend.server_version().split('.')[1])
+            version = float(backend.get_server_version().split('.')[1])
         except: version = 20
+
+        if not await backend.send_command("list"):
+            return False
+        output = await backend.get_command_output('There are', 1)
 
         # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
         if version <= 12:
-            if await backend.send_command("list") is False: return False
-            # Need to use server_log here because I need to get multiple line outputs.
-            log_data = await backend.get_command_output('list')
             # Parses and returns info from log lines.
-            output = []
-            for i in log_data.split('\n'):
-                output.append(i)
-                if 'There are' in i: break
-            if output := output[:2]:
-                text = output[1].split(':')[-2].strip()
-                player_names = output[0].split(':')[-1].split(',')
+            try:
+                text = output[0].split(':')[-2].strip()
+                player_names = output[1].split(':')[-1].split(',')
                 return player_names, text
-            return False
+            except:
+                return False
         else:
-            if await backend.send_command("list") is False: return False
             # TODO make get_command_output be able to take command
-            if log_data := await backend.get_command_output('There are'):
+            try:
                 reaesc = re.compile(r'\x1b[^m]*m')
                 # Use regular expression to extract player names
-                log_data = log_data.split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
-                text = log_data[-2]  # There are 2 of a max of 20 players online
+                output = output[0].split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
+                text = output[-2]  # There are 2 of a max of 20 players online
                 text = reaesc.sub('', text)  # Remove unwanted escape characters
-                player_names = log_data[-1]  # R3diculous, MysticFrogo
+                player_names = output[-1]  # R3diculous, MysticFrogo
                 # If there's no players active, player_names will still contain some anso escape characters.
                 if len(player_names.strip()) < 5:
                     return None
