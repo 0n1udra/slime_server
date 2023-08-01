@@ -98,20 +98,24 @@ class Server_Update(Server_Files):
 
         # Picks what url builder function to use based on name and description of selected server.
         url_getter = self.get_url_func()
-        if not url_getter: return False
+        if not url_getter:
+            return False
 
         version_info, download_url = url_getter()
         download_data = requests.get(download_url).content
 
         try:  # Sets eula.txt file.
             with open(config.get_config('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')
-        except IOError: lprint(f"ERROR: Updating eula.txt file: {config.get_config('server_path')}")
+        except IOError:
+            lprint(f"ERROR: Updating eula.txt file: {config.get_config('server_path')}")
 
         try:  # Saves file as server.jar.
             with open(config.get_config('server_path') + '/server.jar', 'wb+') as f: f.write(download_data)
-        except IOError: lprint(f"ERROR: Saving new jar file: {config.get_config('server_path')}")
+        except IOError:
+            lprint(f"ERROR: Saving new jar file: {config.get_config('server_path')}")
         else:
             return download_url, version_info
+
         return False
 
     def get_url_func(self) -> Union[Callable, None]:
@@ -195,7 +199,7 @@ class Server_API(Server_Update, Server_Files):
             self.launch_path = custom_path
 
         self.launch_command = config.get_config('server_launch_command')
-        if config.get_config('windows_compatibility') is True:
+        if config.get_config('windows_compatibility'):
             self.launch_command = f"{config.get_config('windows_cmdline_start')} {self.launch_command}"
 
     # This will be updated with correct code to send command to server console based on configs.
@@ -221,16 +225,17 @@ class Server_API(Server_Update, Server_Files):
             bool: Console reachable.
         """
 
-        if config.get_config('server_files_access') is True:
+        if config.get_config('server_files_access'):
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
-            if self.send_command(check_command) is True:
-                if await self.get_command_output(unique_number) is not False:  # Check logs for unique number.
+            if self.send_command(check_command):
+                if await self.get_command_output(unique_number, check_number=unique_number) is not False:  # Check logs for unique number.
                     self.last_check_number = unique_number
                     return True
+
         return False
 
     # Get output from the last issued command.
-    async def get_command_output(self, keyword: str = None, extra_lines: int = 0) -> Union[str, bool]:
+    async def get_command_output(self, keyword: str = None, extra_lines: int = 0, check_number: str = None) -> Union[str, bool]:
         """
         Gets response from last command.
 
@@ -238,10 +243,13 @@ class Server_API(Server_Update, Server_Files):
             str: Response from last command issued.
         """
 
+        # Can only get command output from server log if there's a check number (e.g. xp 0.45151...).
+        # If there's no unique number to use as a stopgap the bot might return the output from a prior command.
+        if self.last_check_number is None and check_number is None:
+            return False
+
         await asyncio.sleep(config.get_config('command_buffer_time'))
-        if not isinstance(keyword, str): keyword = self.last_command_sent
-        if data := self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=self.last_check_number):
-            #print('ok', data)
+        if data := self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=check_number):
             return data
 
         return False
@@ -265,23 +273,21 @@ class Server_API(Server_Update, Server_Files):
             str: Matched lines in reverse order, joined by '\n'.
         """
 
+        if not isinstance(search, list):
+            search = [search]
+
         file_path = file_path or config.get_config('server_log_filepath')  # server.properties file as default file.
-        if not file_path or not os.path.exists(file_path): return False  # If file not exist.
+        if not file_path or not os.path.exists(file_path):
+            return False  # If file not exist.
 
         # Create a deque, which will efficiently store the most recent matched log lines.
         matched_lines = deque(maxlen=lines) if top_down_mode else []
 
         # Changes function to read file if reading bottom up or top down.
         read_log_lines = file_utils.read_file_reverse_generator if not top_down_mode else file_utils.read_file_generator
-        match_found = False
+        _extra_lines = deque(maxlen=extra_lines + 1)
         for line in read_log_lines(file_path):
             # Gets some extra lines after the match is found, incase the command's output is multiline.
-            if match_found:
-                if extra_lines > 0:
-                    matched_lines.append(line)
-                    extra_lines -= 1
-                    continue
-                if find_all is False: break
 
             # Check if each element in 'search' is found in 'line_lower'.
             #found_matches = [s in line.lower() for s in search]
@@ -291,12 +297,16 @@ class Server_API(Server_Update, Server_Files):
             if search is None or any([s.lower() in line.lower() for s in search]):
                 # Append the matched line to the deque or list depending on the search mode.
                 matched_lines.append(line)
-                match_found = True
+                if not find_all: break
+
+            # Needed for some multi-line outputs for some commands (e.g. list command in 1.12)
+            if extra_lines: _extra_lines.append(line)
 
             # Stops if found stopgap_str in line or at the limit user specified.
-            if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines: break
+            if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines:
+                break
 
-        return '\n'.join(matched_lines)
+        return matched_lines + list(_extra_lines)
 
     # OLD, test new one before deleting
     def _read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
@@ -321,11 +331,16 @@ class Server_API(Server_Update, Server_Files):
 
         # Parameter setups.
         if match is None: match = 'placeholder_match'
+
         match = match.lower()
-        if stopgap_str is None: stopgap_str = 'placeholder_stopgap'
+        if stopgap_str is None:
+            stopgap_str = 'placeholder_stopgap'
+
         # Defaults file to server log.
-        if file_path is None: file_path = config.get_config('server_log_filepath')
-        if not os.path.isfile(file_path): return False
+        if file_path is None:
+            file_path = config.get_config('server_log_filepath')
+        if not os.path.isfile(file_path):
+            return False
 
         log_data = ''  # TODO: Possibly change return data to list for each newline
 
@@ -355,7 +370,7 @@ class Server_API(Server_Update, Server_Files):
                     if stopgap_str.lower() in line.lower(): break  # Stops loop if using stopgap_str variable. e.g. Using with filter_mode.
 
         if log_data:
-            if return_reversed is True:
+            if return_reversed:
                 log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
             return log_data
 
@@ -380,7 +395,6 @@ class Server_API(Server_Update, Server_Files):
         return self.send_command('stop')
 
 
-
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
@@ -397,8 +411,8 @@ class Server_API_Tmux(Server_API):
         """
 
         if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{command}' ENTER"):
-            #asyncio.sleep(config.get_config('command_buffer_time'))
             return False
+
         return True
 
     def server_start(self) -> bool:
@@ -438,8 +452,8 @@ class Server_API_Screen(Server_API):
         """
 
         if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}\n'"):
-            #asyncio.sleep(config.get_config('command_buffer_time'))
             return False
+
         return True
 
     def server_start(self) -> bool:
@@ -454,6 +468,7 @@ class Server_API_Screen(Server_API):
         if os.system(f"screen -dmS '{config.get_config('screen_session_name')}' {self.launch_command}"):
             lprint(f"ERROR: Could not start server with screen: {self.launch_command}")
             return False
+
         return True
 
 
@@ -497,6 +512,8 @@ class Server_API_Rcon(Server_API):
             if unique_number in response:
                 return True
 
+        return False
+
 
 class Server_API_Subprocess(Server_API):
     def __init__(self):
@@ -506,11 +523,14 @@ class Server_API_Subprocess(Server_API):
 
     # TODO be able to have multiple subprocess servers running and switch between them
     def send_command(self, command):
-        if not self.server_subprocess: return False
+        if not self.server_subprocess:
+            return False
+
         try:
             self.server_subprocess.stdin.write(bytes(command + '\n', 'utf-8'))
             self.server_subprocess.stdin.flush()
-        except: return False
+        except:
+            return False
         else:
             self.last_command_output = self.server_subprocess.stdout.readline().decode('utf-8')
             self.server_subprocess.wait()
@@ -527,7 +547,7 @@ class Server_API_Subprocess(Server_API):
         os.chdir(self.launch_path)
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
-            if config.get_config('windows_compatibility') is True:
+            if config.get_config('windows_compatibility'):
                 self.server_subprocess = subprocess.Popen(
                     config.get_config(self.launch_command),
                     shell=True
@@ -545,5 +565,3 @@ class Server_API_Subprocess(Server_API):
             return True
         return False
         # TODO TEST for windows compatibility
-
-
