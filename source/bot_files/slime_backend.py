@@ -334,7 +334,7 @@ class Backend(Backups):
     def read_server_log(self, *args, **kwargs):
         return self.server_api.read_server_log(*args, **kwargs)
 
-    def update_property(self, property_name=None, value='', file_path=None):
+    def update_property(self, property_name=None, value: str = '') -> Union[str, bool]:
         """
         Edits server.properties file if received target_property and value. Edits inplace with fileinput
         If receive no value, will return current set value if property exists.
@@ -342,49 +342,39 @@ class Backend(Backups):
         Args:
             property_name str(None): Find Minecraft server property.
             value str(''): If received argument, will change value.
-            file_path str(server.properties): File to edit. Must be in .properties file format. Default is server.properties file under /server folder containing server.jar.
 
         Returns:
-            str: If target_property was not found.
-            tuple: First item is line from file that matched target_property. Second item is just the current value.
+            str: If target_property returns line from file.
+            bool: Returns False if property not found.
         """
 
         if not config.get_config('server_files_access'):
             return False
 
-        # TODO add property file config
-        if not file_path:
-            file_path = f"{config.get_config('server_path')}/server.properties"
-
-        if not os.path.isfile(file_path):
+        file_path = config.get_config('server_properties_filepath')
+        if not file_utils.test_file(file_path):
             return False
-        return_line = ''
 
         # print() writes to file while using it in FileInput() with inplace=True
         # fileinput doc: https://docs.python.org/3/library/fileinput.html
+        return_line = None
         with fileinput.FileInput(file_path, inplace=True, backup='.bak') as file:
             for line in file:
-                split_line = line.split('=', 1)
-
-                # If found match, and user passed in new value to update it.
+                split_line = line.split('=', 1)  # E.g. enable-rcon=true
                 if property_name in split_line[0] and len(split_line) > 1:
                     if value:
-                        split_line[1] = value  # edits value section of line
-                        new_line = return_line = '='.join(split_line)
-                        print(new_line, end='\n')  # Writes new line to file
+                        line = '='.join([split_line[0], value])
                     # If user did not pass a new value to update property, just return the line from file.
-                    else:
-                        return_line = '='.join(split_line)
-                        print(line, end='')
-                else: print(line, end='')
+                    return_line = line
+                print(line, end='\n')
 
         # Returns value, and complete line
         if return_line:
-            return return_line, return_line.split('=')[1].strip()
-        else:
-            return False
+            return return_line
 
-    def get_property(self, property_name):
+        return False
+
+    def get_property(self, property_name: str) -> Union[str, bool]:
         """
         Get a property from server properties file.
 
@@ -398,7 +388,7 @@ class Backend(Backups):
 
         if config.get_config('server_files_access'):
             if data := self.update_property(property_name):
-                return data[1]
+                return data
 
         return False
 

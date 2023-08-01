@@ -65,7 +65,7 @@ class File_Utils:
 
         Args:
             file_path (str): The path of the file to test.
-            mode (str): What to test for, 'rw', readable, writable.
+            check_writable bool(False): Checks if able to write to file.
 
         Returns:
             bool: If file passed testing based on the mode.
@@ -74,11 +74,13 @@ class File_Utils:
         if not exists(file_path) or not os.access(file_path, os.R_OK):
             lprint(f"ERROR: File not found or not readable: {file_path}")
             return False
+
         if check_writable and not os.access(file_path, os.W_OK):
             return False
+
         return True
 
-    def read_file_generator(self, file_path: str) -> Generator[str, None, None]:
+    def read_file_generator(self, file_path: str) -> Union[Generator[str, None, None], bool]:
         """
         Yield file lines (top to bottom).
 
@@ -371,7 +373,6 @@ class Utils:
     async def parse_players_output(self):
         """Extracts wanted data from output of 'list' command."""
 
-
         from bot_files.slime_bot import backend
 
         # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
@@ -416,7 +417,8 @@ class Utils:
                         new.append(x)
                     player_names = new
                     return player_names, text
-            except: return False
+            except:
+                return False
 
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
