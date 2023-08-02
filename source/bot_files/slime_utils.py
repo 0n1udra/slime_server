@@ -80,49 +80,77 @@ class File_Utils:
 
         return True
 
-    def read_file_generator(self, file_path: str) -> Union[Generator[str, None, None], bool]:
+    def read_file_generator(self, file_path: str, lines: int = None) -> Union[Generator[str, None, None], bool]:
         """
         Yield file lines (top to bottom).
 
         Args:
             file_path (str): File path to yield lines.
+            lines int(None): How many lines to return. None for all.
+
+        Yields:
+            str: File line.
 
         Returns:
-            str: Yields a line from file
+            bool: If file not readable.
         """
 
         if not self.test_file(file_path):
             return False
 
+        line_counter = 0
         with open(file_path, 'r') as file:
             for line in file:
                 yield line
+                line_counter += 1
+                if lines is not None and line_counter >= lines:
+                    break
 
-    def read_file_reverse_generator(self, file_path: str) -> Generator[str, None, None]:
+    def read_file_reverse_generator(self, file_path: str, lines: int = None) -> Union[Generator[str, None, None], bool]:
         """
-        Yield file lines (bottom to top).
+        A generator that returns the lines of a file in reverse order.
+        Used for getting latest console log output.
 
         Args:
-            file_path (str): File to yield line starting from bottom.
+            file_path (str): File path to yield lines.
+            lines int(None): How many lines to return. None for all.
 
-       Returns:
-            str: A line from file.
+        Yields:
+            str: File line.
+
+        Returns:
+            bool: If file not readable.
         """
 
-        if not self.test_file(file_path):
-            return False
-
-        # Create a deque to store lines in reverse order.
-        lines = deque()
-
-        with open(file_path, 'r') as file:
-            for line in file:
-                # Add each line to the left side of the deque, effectively reversing the order.
-                lines.appendleft(line.rstrip('\n'))
-
-        # Yield each line from the deque.
-        for line in lines:
-            yield line
+        buf_size = 8192
+        line_counter = 0
+        with open(file_path, 'rb') as fh:
+            segment = None
+            offset = 0
+            fh.seek(0, os.SEEK_END)
+            file_size = remaining_size = fh.tell()
+            line_counter += 1
+            lines_yielded = 0  # Counter for the number of lines yielded
+            while remaining_size > 0:
+                if lines is not None and lines_yielded >= lines:
+                    break  # Stop generating lines if we have reached the desired number
+                offset = min(file_size, offset + buf_size)
+                fh.seek(file_size - offset)
+                buffer = fh.read(min(remaining_size, buf_size)).decode(encoding='utf-8')
+                remaining_size -= buf_size
+                _lines = buffer.split('\n')
+                if segment is not None:
+                    if buffer[-1] != '\n':
+                        _lines[-1] += segment
+                    else:
+                        yield segment
+                segment = _lines[0]
+                for index in range(len(_lines) - 1, 0, -1):
+                    if _lines[index]:
+                        if lines is not None and lines_yielded >= lines:
+                            break  # Stop generating lines if we have reached the desired number
+                        yield _lines[index]
+                        lines_yielded += 1
 
     def read_json(self, file_path: str) -> Union[List[Dict[str, Any]], bool]:
         """
@@ -370,19 +398,23 @@ class Proc_Utils:
 
 
 class Utils:
-    async def parse_players_output(self):
-        """Extracts wanted data from output of 'list' command."""
+    def parse_players_output(self, output: str, version: str) -> Union[tuple[list[str], str], bool]:
+        """
+        Extracts wanted data from output of 'list' command.
+        Console output is different based on types and versions.
 
-        from bot_files.slime_bot import backend
+        Args:
+            output list: Command output lines.
+            version str: Minecraft version string.
 
-        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
+        Returns:
+            tuple, str or bool: Tuple of player names and console text, or False.
+        """
+
+        # Only gets the second number. E.g. 1.12.2 > 12, 1.14 > 14
         try:
-            version = float(backend.get_server_version().split('.')[1])
+            version = float(version.split('.')[1])
         except: version = 20
-
-        if not await backend.send_command("list"):
-            return False
-        output = await backend.get_command_output('There are', 1)
 
         # In version 1.12 and lower, the /list command outputs usernames on a newline from the 'There are x players' line.
         if version <= 12:
@@ -394,6 +426,7 @@ class Utils:
             except:
                 return False
         else:
+
             # TODO make get_command_output be able to take command
             try:
                 reaesc = re.compile(r'\x1b[^m]*m')
@@ -404,7 +437,7 @@ class Utils:
                 player_names = output[-1]  # R3diculous, MysticFrogo
                 # If there's no players active, player_names will still contain some anso escape characters.
                 if len(player_names.strip()) < 5:
-                    return None
+                    return False
                 else:
                     player_names = [f"{i.strip()[:-4]}\n" if config.get_config('use_rcon') else f"{i.strip()}" for i in (output[-1]).split(',')]
                     # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
@@ -419,6 +452,21 @@ class Utils:
                     return player_names, text
             except:
                 return False
+
+    def parse_version_output(self, output: str) -> Union[str, bool]:
+        """
+
+        Args:
+            output:
+
+        Returns:
+
+        """
+
+        if 'Paper' in output:
+            return output.split('MC:')[1].split(')')[0].strip()
+
+        return False
 
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
@@ -490,7 +538,8 @@ class Utils:
             str: Arguments combines with spaces.
         """
 
-        if args: return ' '.join(args)
+        if args:
+            return ' '.join(args)
         else:
             if return_no_reason:
                 return "No reason given."

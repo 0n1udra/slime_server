@@ -1,14 +1,14 @@
-import shutil
 import asyncio
 from os.path import join
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 from bot_files.slime_backend import backend
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, file_utils, utils
 from bot_files.discord_components import comps
+
 
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
 
@@ -184,6 +184,7 @@ class World_Backups(commands.Cog):
             await ctx.send("**Finished.**")
             await ctx.send("You can now start the server with `?start`.")
             lprint(ctx, "World Reset")
+
 
 class Server_Backups(commands.Cog):
     def __init__(self, bot): self.bot = bot

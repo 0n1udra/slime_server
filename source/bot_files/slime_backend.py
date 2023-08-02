@@ -167,7 +167,6 @@ class Backend(Backups):
             bool: If successfully sent command to console.
         """
 
-
         # If these configs are set to False, the bot will send the server commands even if status of server status is unknown.
         # If either one is, the bot will only send the command if server console is reachable or successful ping.
         if config.get_config('check_before_command') or config.get_config('ping_before_command'):
@@ -290,7 +289,15 @@ class Backend(Backups):
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
-        return await utils.parse_players_output()
+        # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
+
+        version = await self.get_server_version()  # Needs version to know how to parse output.
+        response = await backend.send_command("list")
+        if not response or not version:
+            return False
+
+        output = await backend.get_command_output('There are', 1)
+        return utils.parse_players_output(output, version)
 
     async def get_coords(self, player=''):
         """Gets player's location coordinates."""
@@ -300,22 +307,29 @@ class Backend(Backups):
             #log_data = self.read_server_log('entity data', stopgap_str=response[1])
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
         # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-        if log_data := self.get_command_output():
+        if log_data := self.get_command_output('data get entity'):
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
-    def get_server_version(self) -> Union[str, bool]:
+    async def get_server_version(self) -> Union[str, bool]:
         """
         Gets server version number.
 
         Returns:
-            str: Server version.
+            str, bool: Server version. Or False if not found.
         """
 
+        version = None
+
+        # Get version info from server console.
+        if await self.send_command('version'):
+            if data := await self.get_command_output('This server is running'):
+                version = utils.parse_version_output(data[0])
+
         # Manual override of server version.
-        version = 'N/A'
-        if data := config.get_config('server_version'):
+        elif data := config.get_config('server_version'):
             version = data
+
         elif config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
             if data := self.read_server_log('server version'):
@@ -323,12 +337,15 @@ class Backend(Backups):
             # Tries to find info in server.properties next.
             elif data := self.get_property('version'):
                 version = data
-        #if not version:
-            # Get version info from server console.
-            #if self.send_command('version'):
-                #version = self.server_api.
 
-        return version
+        elif data := config.get_config('server_version'):
+            version = data
+
+        if version:
+            config.set_config('server_version', version)
+            return version
+        else:
+            return False
 
     # ===== File reading and writing
     def read_server_log(self, *args, **kwargs):

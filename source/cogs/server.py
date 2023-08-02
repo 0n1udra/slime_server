@@ -1,6 +1,5 @@
-import shutil
 import asyncio
-from os import listdir, rename
+from os import listdir
 from os.path import join, isdir, isfile
 
 import discord
@@ -11,6 +10,7 @@ from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils
 from bot_files.discord_components import comps
 
+
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -18,7 +18,7 @@ class Server(commands.Cog):
 
         if config.get_config('enable_autosave'):
             self.autosave_task.start()
-            lprint(ctx, f"Autosave task started (interval: {config.get_config('autosave_interval')}m)")
+            lprint(f"Autosave task started (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Servers, new, delete, editing, etc
     @commands.command(aliases=['select', 'sselect', 'selectserver', 'serverslist', 'ss', 'servers', 'listservers'])
@@ -343,7 +343,7 @@ class Server(commands.Cog):
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
         if backend.send_command('save-all', discord_msg=False):
-            lprint(ctx, f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
+            lprint(f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Status/Info
     @commands.command(aliases=['pingserver', 'ping'])
@@ -375,7 +375,7 @@ class Server(commands.Cog):
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
         fields = [
-            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
+            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
             ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
             ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
@@ -448,7 +448,7 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = backend.get_server_version()
+        response = await backend.get_server_version()
         if response is False:
             await ctx.send("**ERROR:** Could not get server version")
             lprint("ERROR: Couldn't get server version.")
@@ -504,7 +504,6 @@ class Server(commands.Cog):
         # If property not found.
         await ctx.send(f"**ERROR:** Server property not found: {target_property}")
         return False
-
 
     @commands.command(aliases=['pa', 'prall'])
     async def propertiesall(self, ctx):
