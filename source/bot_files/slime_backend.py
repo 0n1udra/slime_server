@@ -151,6 +151,7 @@ class Backend(Backups):
                 break
 
         lprint(f"INFO: Selected Server: {server_name}")
+        self.get_server_version(force_check=True)  # Checks server version, needed for parsing some command output.
         return True
 
     # Send command to server console.
@@ -311,7 +312,7 @@ class Backend(Backups):
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
-    async def get_server_version(self) -> Union[str, bool]:
+    async def get_server_version(self, force_check=False) -> Union[str, bool]:
         """
         Gets server version number.
 
@@ -321,14 +322,15 @@ class Backend(Backups):
 
         version = None
 
+        # Check if config has version already. Some commands (?version, etc) will force bot to check server version.
+        if not force_check:
+            if data := config.get_config('server_version'):
+                version = data
+
         # Get version info from server console.
-        if await self.send_command('version'):
+        elif await self.send_command('version'):
             if data := await self.get_command_output('This server is running'):
                 version = utils.parse_version_output(data[0])
-
-        # Manual override of server version.
-        elif data := config.get_config('server_version'):
-            version = data
 
         elif config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
@@ -348,6 +350,7 @@ class Backend(Backups):
             return False
 
     # ===== File reading and writing
+    # TODO Make async
     def read_server_log(self, *args, **kwargs):
         return self.server_api.read_server_log(*args, **kwargs)
 

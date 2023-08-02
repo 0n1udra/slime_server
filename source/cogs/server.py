@@ -375,7 +375,7 @@ class Server(commands.Cog):
         elif sstatus is False: status = '**INACTIVE** :red_circle:'
         else: status = 'N/A'
         fields = [
-            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version()}\nMOTD: {await backend.get_motd()}"],
+            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version(force_check=True)}\nMOTD: {await backend.get_motd()}"],
             ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
             ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
@@ -448,7 +448,7 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = await backend.get_server_version()
+        response = await backend.get_server_version(force_check=True)
         if response is False:
             await ctx.send("**ERROR:** Could not get server version")
             lprint("ERROR: Couldn't get server version.")

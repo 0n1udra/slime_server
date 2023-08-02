@@ -29,6 +29,7 @@ class Config():
         self.initialize_configs()
         self.example_server_configs = self.servers['example']
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
+        self.server_name = self.server_configs['server_name']
 
     def initialize_configs(self, configs_from_setup=None):
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
@@ -202,13 +203,13 @@ class Config():
         if key in self.bot_configs:
             self.bot_configs[key] = value
         elif key in self.server_configs:
-            self.server_configs[key] = value
+            self.servers[self.server_name][key] = value
         else:
             return False
 
         self.update_all_server_configs()
+        self.switch_server_configs(self.server_name)  # Updates instance variables.
         return True
-
 
     def _update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
         """
@@ -332,7 +333,7 @@ class Config():
             json_data = json.load(openfile)
             self.bot_configs.update(json_data['bot_configs'])
             self.servers.update(json_data['servers'])
-            #self.server_configs = self.servers[self.get_config('selected_server')]
+            self.switch_server_configs(self.bot_configs['selected_server'])
         return True
 
     def update_configs_file(self) -> bool:
@@ -344,9 +345,9 @@ class Config():
         """
 
         from bot_files.slime_utils import file_utils
-        _ = file_utils.write_json(self.get_config('user_config_filepath'),
-                                  {'bot_configs': self.bot_configs, 'servers': self.servers})
-        if _ is False:
+        file_data = file_utils.write_json(self.get_config('user_config_filepath'),
+                                          {'bot_configs': self.bot_configs, 'servers': self.servers})
+        if not file_data:
             return False
 
         return True
@@ -364,7 +365,7 @@ class Config():
 
         if server_configs := self.servers.get(server_name, None):
             self.server_configs = server_configs
-            self.bot_configs['selected_server'] = server_name
+            self.server_name = self.bot_configs['selected_server'] = server_name
             self.update_configs_file()
             return True
         return False
