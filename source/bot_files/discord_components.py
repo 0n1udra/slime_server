@@ -35,7 +35,7 @@ class Comps:
         self.comp_data = {'files_panel_component': [], 'teleport_destination': '',
                           'log_select_options': [], 'log_select_page': 0}
 
-    def add_comp(self, key: str, value: Context) -> Dict:
+    def add_comps(self, key: str, value: List) -> Dict:
         """
         Adds Discord message with component to dict, so they can be deleted later.
 
@@ -47,10 +47,10 @@ class Comps:
             dict: Returns updated comp_data dictionary.
         """
 
-        self.active_comps.update({key, value})
+        self.active_comps[key] = value
         return self.active_comps
 
-    async def delete_comp(self, comp_name: str) -> Dict:
+    async def delete_comps(self, comp_name: str) -> Union[Dict, bool]:
         """
         Deletes a message containing componetns.
 
@@ -58,15 +58,16 @@ class Comps:
             comp_name (str): The components to delete.
 
         Returns:
-            dict: Updated active_comps dict.
+            dict, bool: Updated active_comps dict. Comps not found.
         """
 
-        self.active_comps.pop(comp_name)
-        try: await self.active_comps[comp_name].delete()
-        except: pass
-        return self.active_comps
+        if _comps := self.active_comps.pop(comp_name, None):
+            for c in _comps:
+                try: await c.delete()
+                except: pass
+        return False
 
-    def get_comp(self, key) -> Union[Context, None]:
+    def get_comps(self, key) -> Union[Context, None]:
         """
         Get Discord context message of component.
 
@@ -101,7 +102,7 @@ class Comps:
             key: Item to get.
 
         Returns:
-            Value of key.
+            Value of key. None if not found.
         """
 
         return self.comp_data.get(key, None)
@@ -116,10 +117,8 @@ class Comps:
         e.g. Deleting a listing in a selection box.
         """
 
-        for k, v in self.active_comps.items():
-            try: await v.delete()
-            except: pass
-            self.active_comps[k] = []
+        for k in list(self.active_comps.keys()):
+            await self.delete_comps(k)
 
     def new_modal(self, field_args: List, title: str, custom_id: str) -> discord.ui.Modal:
         modal = Discord_Modal(title=title, custom_id=custom_id)
@@ -171,7 +170,6 @@ class Comps:
         if server := server_name in config.servers.get(server_name):
             data = server
         else: data = config.example_server_configs.copy()
-
 
         # type (text, select), label, custom_id, placeholder, default, style True=long, required, max length
         # Limited to 5 components in modal
