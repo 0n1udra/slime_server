@@ -17,7 +17,6 @@ Following functions must be async:
 
 import os
 import json
-import time
 import asyncio
 import requests
 import subprocess
@@ -149,13 +148,11 @@ class Server_Update:
     def get_bukkit_url(self): pass
 
 
-class Server_API(Server_Update, Server_Files):
+class Server_API(Server_Update):
     """
     Depending on configs, using class inheritance relevant functions will be updated.
     server_console_reachable()
-    _send_command()
-    _get_status()
-    _get_server_version() - From Server_Files
+    send_command()
 
     """
 
@@ -219,8 +216,9 @@ class Server_API(Server_Update, Server_Files):
 
         # Can only get command output from server log if there's a check number (e.g. xp 0.45151...).
         # If there's no unique number to use as a stopgap the bot might return the output from a prior command.
-        if self.last_check_number is None and check_number is None:
+        if not check_number and not self.last_check_number:
             return False
+        else: check_number = self.last_check_number
 
         await asyncio.sleep(config.get_config('command_buffer_time'))
         if data := self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=check_number):
@@ -250,8 +248,7 @@ class Server_API(Server_Update, Server_Files):
             list: Matched lines.
         """
 
-        if not isinstance(search, list):
-            search = [search]
+        if not isinstance(search, list): search = [search]
 
         file_path = config.get_config('server_log_filepath')  # server.properties file as default file.
         if not file_utils.test_file(file_path):
@@ -264,6 +261,8 @@ class Server_API(Server_Update, Server_Files):
         read_log_lines = file_utils.read_file_reverse_generator if not top_down_mode else file_utils.read_file_generator
         _extra_lines = deque(maxlen=extra_lines + 1)
         for line in read_log_lines(file_path):
+
+            # If None search, will return all lines. Else, checks if line matches any of search keywords.
             if search is None or any([s.lower() in line.lower() for s in search]):
                 matched_lines.append(line)
                 if not find_all:
@@ -277,72 +276,6 @@ class Server_API(Server_Update, Server_Files):
                 break
 
         return matched_lines + list(_extra_lines)
-
-    # OLD, test new one before deleting
-    def _read_server_log(self, match=None, match_list=[], file_path=None, lines=15, normal_read=False, log_mode=False, filter_mode=False, stopgap_str=None, return_reversed=False):
-        """
-        Read latest.log file under server/logs folder. Can also find match.
-        What a fat ugly function you are :(
-
-        Args:
-            match str: Check for matching string.
-            file_path str(None): File to read. Defaults to server's latest.log
-            lines int(15): Number of most recent lines to return.
-            log_mode bool(False): Return x lines from log file, skips matching.
-            normal_read bool(False): Reads file top down, defaults to bottom up using file-read-backwards module.
-            filter_mode bool(False): Don't stop at first match.
-            return_reversed bool(False): Returns so ordering is newest at bottom going up for older.
-
-        Returns:
-            log_data (str): Returns found match log line or multiple lines from log.
-        """
-
-        global slime_vars
-
-        # Parameter setups.
-        if match is None: match = 'placeholder_match'
-
-        match = match.lower()
-        if stopgap_str is None:
-            stopgap_str = 'placeholder_stopgap'
-
-        # Defaults file to server log.
-        if file_path is None:
-            file_path = config.get_config('server_log_filepath')
-        if not os.path.isfile(file_path):
-            return False
-
-        log_data = ''  # TODO: Possibly change return data to list for each newline
-
-        # Gets file line number
-        line_count = sum(1 for line in open(file_path))
-
-        if normal_read:
-            with open(file_path, 'r') as file:
-                for line in file:
-                    if match in line: return line
-
-        else:  # Read log file bottom up, latest log outputs first.
-            with FileReadBackwards(file_path) as file:
-                i = total = 0
-                # Stops loop at user set limit, if file has no more lines, or at hard limit (don't let user ask for 999 lines of log).
-                while i < lines and total < line_count and total <= config.get_config('log_lines_limit'):
-                    total += 1
-                    line = file.readline()
-                    if not line.strip(): continue  # Skip blank/newlines.
-                    elif log_mode:
-                        log_data += line
-                        i += 1
-                    elif match in line.lower() or any(i in line for i in match_list):
-                        log_data += line
-                        i += 1
-                        if not filter_mode: break  # If filter_mode is not True, loop will stop at first match.
-                    if stopgap_str.lower() in line.lower(): break  # Stops loop if using stopgap_str variable. e.g. Using with filter_mode.
-
-        if log_data:
-            if return_reversed:
-                log_data = '\n'.join(list(reversed(log_data.split('\n'))))[1:]  # Reversed line ordering, so most recent lines are at bottom.
-            return log_data
 
     def server_start(self) -> bool:
         """
@@ -533,5 +466,6 @@ class Server_API_Subprocess(Server_API):
 
         if isinstance(self.server_subprocess, subprocess.Popen):
             return True
+
         return False
         # TODO TEST for windows compatibility
