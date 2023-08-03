@@ -223,7 +223,7 @@ class Discord_Select(discord.ui.Select):
 
         # Updates selected currently selected server, this is for ?buttonspanel select server component.
         if custom_id == '_select_server':
-            config.select_server(value)
+            await config.select_server(value)
 
 class Discord_Button(discord.ui.Button):
     """

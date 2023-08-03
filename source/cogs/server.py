@@ -54,7 +54,7 @@ class Server(commands.Cog):
         elif name in config.servers:
             if not config.get_config('players_custom_status'):
                 await self.bot.change_presence(activity=discord.Activity(name=f"- {config.server_configs['server_name']}", type=1))
-            backend.select_server(name)
+            await backend.select_server(name)
             await ctx.send(f"**Selected Server:** {name}")
         else: await ctx.send("**ERROR:** Server not found.")
 

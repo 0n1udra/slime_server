@@ -48,11 +48,11 @@ class Backend(Backups):
         self.discord_channel = None
         self.server_active = False
         config.update_from_file()  # Reads from json config file if exists.
-        self.select_server(config.get_config('selected_server'))
+        config.update_all_server_configs()
         #self.discord_channel = self.update_discord_chennel(bot)
 
     # ===== Discord
-    def update_bot_object(self, bot: Bot) -> bool:
+    async def update_bot_object(self, bot: Bot) -> bool:
         """
         Update's Discord bot object in Backend, also tries updating discord_channel.
 
@@ -65,8 +65,9 @@ class Backend(Backups):
 
         if isinstance(bot, Bot):
             self.bot = bot
-            self.server_api.bot = self.bot
             self.set_discord_channel()
+            await self.select_server(config.get_config('selected_server'))
+            self.server_api.bot = bot
             return True
 
         return False
@@ -117,7 +118,7 @@ class Backend(Backups):
         return True
 
     # ===== Server API
-    def select_server(self, server_name: str) -> bool:
+    async def select_server(self, server_name: str) -> bool:
         """
         Updates relevant server command functions and configs.
 
@@ -151,7 +152,7 @@ class Backend(Backups):
                 break
 
         lprint(f"INFO: Selected Server: {server_name}")
-        self.get_server_version(force_check=True)  # Checks server version, needed for parsing some command output.
+        await self.get_server_version(force_check=True)  # Checks server version, needed for parsing some command output.
         return True
 
     # Send command to server console.

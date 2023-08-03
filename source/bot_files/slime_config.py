@@ -133,6 +133,8 @@ class Config():
 
                 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
                 'startup_wait_time': 30,
+                # How much time to give server after using 'save-all' command.
+                'save_world_wait_time': 3,
 
                 # Only send command to server if ping successful.
                 # NOTE: This will disable and override 'check_before_command'. You can use this if you can't use that.
@@ -235,11 +237,14 @@ class Config():
     def update_all_server_configs(self) -> None:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
-            if 'example' in server_name: continue  # Skip example template
             new_server_configs = self.example_server_configs.copy()
+            if 'example' in server_name:
+                self.servers['example'] = new_server_configs
+                continue
+
             new_server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
-            self.servers[server_name] = self._update_config_paths(server_configs, server_name)
+            self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
 
         self.update_configs_file()
 

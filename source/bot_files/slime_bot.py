@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_inse
 async def on_ready():
     await bot.wait_until_ready()
     await setup(bot)
-    backend.update_bot_object(bot)
+    await backend.update_bot_object(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
     await backend.server_status()  # Check server status on bot startup.
