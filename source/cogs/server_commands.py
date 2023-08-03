@@ -26,7 +26,7 @@ class Basics(commands.Cog):
         """
 
         command = utils.utils.format_args(command)
-        if backend.backend.send_command(command) is False:
+        if await backend.send_command(command) is False:
             return False
 
         lprint(ctx, "Sent command: " + command)
@@ -49,7 +49,7 @@ class Basics(commands.Cog):
         if not msg:
             await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
-            if backend.send_command('say ' + msg):
+            if await backend.send_command('say ' + msg):
                 await ctx.send("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
@@ -72,7 +72,7 @@ class Basics(commands.Cog):
             await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
-        if backend.send_command(f"tell {player} {msg}") is False: return
+        if await backend.send_command(f"tell {player} {msg}") is False: return
 
         await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
@@ -104,7 +104,7 @@ class Basics(commands.Cog):
         await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
-        if log_data := backend.read_server_log(']: <', lines=lines, find_all=True):
+        if log_data := await backend.read_server_log(']: <', lines=lines, find_all=True):
 
             # optionally filter out chat lines only with certain keywords.
             log_data = '\n'.join([i for i in reversed(log_data) if keyword.lower() in i.lower()])

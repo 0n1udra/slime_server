@@ -17,7 +17,6 @@ import datetime
 import subprocess
 from os import listdir
 from os.path import isdir, isfile, join, exists
-from collections import deque
 
 from typing import Union, Any, Tuple, List, Dict, Generator
 from discord.ext.commands import Context
@@ -233,7 +232,7 @@ class File_Utils:
 
         return True
 
-    def get_from_index(self, path: str, index: int, mode: str) -> str:
+    async def get_from_index(self, path: str, index: int, mode: str) -> str:
         """
         Get server or world backup folder name from passed in index number
 
@@ -572,7 +571,7 @@ class Utils:
         except: return None
         return server_ip
 
-    def ping_address(self, address: str) -> bool:
+    async def ping_address(self, address: str) -> bool:
         """
         Checks if server_address address works by pinging it twice.
 
@@ -587,15 +586,13 @@ class Utils:
             try:
                 if 'TTL=' in subprocess.run(["ping", "-n", "2", address], capture_output=True, text=True, timeout=10).stdout:
                     return True
-            except:
-                return False
+            except: pass
         else:
             # TODO: FIX
             ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ping_out, ping_error = ping.communicate()
-            if ping_out.strip():
-                return True
-            return False
+            return True if ping_out.strip() else False
+
 
     def convert_to_bytes(self, data: Any) -> io.BytesIO: return io.BytesIO(data.encode())
 

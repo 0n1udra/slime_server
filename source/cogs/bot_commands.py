@@ -29,10 +29,10 @@ class Slime_Bot_Commands(commands.Cog):
         """
 
         await self.bot.wait_until_ready()
-        data = backend.server_ping()
+        data = await backend.server_ping_query()
         if not data: return
         # Will show: Playing - X | Ping - X
-        await self.bot.change_presence(activity=discord.Activity(name=f"- {data['players']['online']} | Ping - {int(data['time'])}", type=1))
+        await self.bot.change_presence(activity=discord.Activity(name=f"- {data['players']['online']} | Ping - {data['time']}", type=1))
 
     @commands.command()
     async def botinfo(self, ctx):
@@ -162,7 +162,7 @@ class Slime_Bot_Commands(commands.Cog):
         """
 
         await ctx.send(f"Server IP: ||`{backend.get_public_ip()}`||")
-        await ctx.send(f"Alternative Address: ||`{config.get_config('server_address')}`|| ({backend.ping_address()})")
+        await ctx.send(f"Alternative Address: ||`{config.get_config('server_address')}`|| ({await backend.server_ping()})")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])
@@ -475,7 +475,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all online players using '@a' argument."""
 
         await ctx.send("All players killed!")
-        backend.send_command('kill @a')
+        await backend.send_command('kill @a')
         lprint(ctx, 'Killed: All Players')
 
     @commands.command(hidden=True, aliases=['killeverything', 'killallentities'])
@@ -483,7 +483,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills all server entities using '@e' argument."""
 
         await ctx.send("All entities killed!")
-        backend.send_command('kill @e')
+        await backend.send_command('kill @e')
         lprint(ctx, 'Killed: All Entities')
 
     @commands.command(hidden=True, aliases=['killrandom', 'killrandomplayer'])
@@ -491,7 +491,7 @@ class Discord_Components_Funcs(commands.Cog):
         """Kills random player using '@r' argument."""
 
         await ctx.send("Killed random player! :game_die::knife:")
-        backend.send_command('kill @r')
+        await backend.send_command('kill @r')
         lprint(ctx, 'Killed: Random Player')
 
 async def setup(bot):

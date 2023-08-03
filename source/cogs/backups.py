@@ -28,7 +28,7 @@ class World_Backups(commands.Cog):
             ?saves 15
         """
 
-        worlds = backend.enum_dir(config.get_config('world_backups_path'), 'd')
+        worlds = file_utils.enum_dirs_for_discord(config.get_config('world_backups_path'), 'd')
         lprint(ctx, f"Fetched {amount} world saves")
         if worlds is False:
             await ctx.send("No world backups found.")
@@ -60,18 +60,19 @@ class World_Backups(commands.Cog):
         name = utils.format_args(name)
 
         await ctx.send("***Creating World Backup...*** :new::floppy_disk:")
-        if not await backend.backend.send_command(f"save-all"):
-            return False
-        await asyncio.sleep(3)
-        try: new_backup = backend.new_backup(name, config.get_config('server_path') + '/world', config.get_config('world_backups_path'))
-        except:
-            await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
-            lprint(ctx, "ERROR: New world backup: " + name)
+
+        # Gives server some time to save world.
+        await backend.send_command(f"save-all")
+        await asyncio.sleep(config.get_config('save_all_wait_time'))
+
+        if new_backup := await backend.new_backup(name, config.get_config('server_path') + '/world', config.get_config('world_backups_path')):
+            await ctx.send(f"**New World Backup:** `{new_backup}`")
+            await ctx.invoke(self.bot.get_command('worldbackupslist'))
+            lprint(ctx, "New world backup: " + name)
             return
 
-        await ctx.send(f"**New World Backup:** `{new_backup}`")
-        await ctx.invoke(self.bot.get_command('worldbackupslist'))
-        lprint(ctx, "New world backup: " + name)
+        await ctx.send("**ERROR:** Problem saving the world! || it's doomed!||")
+        lprint(ctx, "ERROR: New world backup: " + name)
 
         if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
@@ -106,13 +107,13 @@ class World_Backups(commands.Cog):
             return
         if not index: return
 
-        fetched_restore = backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
+        fetched_restore = await backend.get_from_index(config.get_config('world_backups_path'), index, 'd')
         await ctx.send("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
-        if await backend.backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
+        if await backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: backend.restore_backup(fetched_restore, join(config.get_config('server_path'), 'world'))
+        try: await backend.restore_backup(fetched_restore, join(config.get_config('server_path'), 'world'))
         except:
             await ctx.send(f"**Error:** Issue restoring world: {fetched_restore}")
             lprint(ctx, "ERROR: World restore: " + fetched_restore)
@@ -171,7 +172,7 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
-        if backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False):
+        if await backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!", discord_msg=False):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await ctx.send(":fire: **Project Rebirth Commencing** :fire:")
@@ -202,7 +203,7 @@ class Server_Backups(commands.Cog):
             ?serversaves 15
         """
 
-        servers = backend.enum_dir(config.get_config('server_backups_path'), 'd')
+        servers = file_utils.enum_dirs_for_discord(config.get_config('server_backups_path'), 'd')
         lprint(ctx, f"Fetched {amount} world backups")
         if servers is False:
             await ctx.send("No server backups found.")
@@ -234,9 +235,9 @@ class Server_Backups(commands.Cog):
 
         name = utils.format_args(name)
         await ctx.send(f"***Creating Server Backup...*** :new::floppy_disk:")
-        if backend.send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
+        if await backend.send_command(f"save-all", discord_msg=False): await asyncio.sleep(3)
 
-        try: new_backup = backend.new_backup(name, config.get_config('server_path'), config.get_config('server_backups_path'))
+        try: new_backup = await backend.new_backup(name, config.get_config('server_path'), config.get_config('server_backups_path'))
         except:
             await ctx.send("**ERROR:** Server backup failed! :interrobang:")
             lprint(ctx, "ERROR: New server backup: " + name)
@@ -280,11 +281,11 @@ class Server_Backups(commands.Cog):
         fetched_restore = backend.get_from_index(config.get_config('server_backups_path'), index, 'd')
         await ctx.send(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
-        if backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
+        if await backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: backend.restore_backup(fetched_restore, config.get_config('server_path'))
+        try: await backend.restore_backup(fetched_restore, config.get_config('server_path'))
         except:
             await ctx.send("**ERROR:** Could not restore server!")
             lprint(ctx, "ERROR: Server restore: " + fetched_restore)

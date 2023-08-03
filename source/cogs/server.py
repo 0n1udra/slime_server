@@ -132,8 +132,8 @@ class Server(commands.Cog):
                 return
 
             # Gets current configs for server to be used to update new configs..
-            if old_server_configs := backend.server_delete(server_name):
-                if backend.server_new(new_data['server_name'], old_server_configs) is False:
+            if old_server_configs := await backend.server_delete(server_name):
+                if await backend.server_new(new_data['server_name'], old_server_configs) is False:
                     return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
@@ -164,7 +164,7 @@ class Server(commands.Cog):
                 return
 
             await ctx.send("***Copying Server...***")
-            if backend.server_copy(server_name, new_data['server_name']) is False:
+            if await backend.server_copy(server_name, new_data['server_name']) is False:
                 lprint(ctx, f"ERROR: Issue copying server: {server_name} > {new_data['name']}")
                 return False
 
@@ -193,7 +193,7 @@ class Server(commands.Cog):
             await ctx.send("No server selected.")
             return
 
-        if backend.server_delete(server_name) is False:
+        if await backend.server_delete(server_name) is False:
             await ctx.send(f"**Error:** Issue deleting server: `{server_name}`")
             return
         await ctx.send(f"**Server Deleted:** `{server_name}`")
@@ -275,7 +275,7 @@ class Server(commands.Cog):
     async def saveall(self, ctx):
         """Save current world using server save-all command."""
 
-        if backend.send_command('save-all') is False: return
+        if await backend.send_command('save-all') is False: return
 
         await ctx.send("World Saved  :floppy_disk:")
         await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
@@ -342,7 +342,7 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
-        if backend.send_command('save-all', discord_msg=False):
+        if await backend.send_command('save-all', discord_msg=False):
             lprint(f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Status/Info
@@ -351,7 +351,7 @@ class Server(commands.Cog):
         """Uses ping command to see if server_address is reachable."""
 
         await ctx.send('***Pinging Server...***')
-        response = backend.ping_address()
+        response = await backend.server_ping()
         await ctx.send(response)
 
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
@@ -377,7 +377,7 @@ class Server(commands.Cog):
         fields = [
             ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version(force_check=True)}\nMOTD: {await backend.get_motd()}"],
             ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
-            ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
+            ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if await backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
         ]
@@ -489,7 +489,7 @@ class Server(commands.Cog):
 
             # Update server property
             if value:
-                if updated_property := backend.update_property(target_property, value):
+                if updated_property := await backend.update_property(target_property, value):
                     await ctx.send(f"Property Updated: `{updated_property}`")
                     return
                 else:
@@ -609,7 +609,7 @@ class Server(commands.Cog):
             await ctx.send("**Server ACTIVE** :green_circle:")
             return False
 
-        if not backend.server_start():
+        if not await backend.server_api.server_start():
             await ctx.send("**Error:** Could not start Minecraft server.")
             return False
         await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('server_name')}**\nStartup time: {config.get_config('startup_wait_time')}s.")
@@ -642,22 +642,22 @@ class Server(commands.Cog):
 
         await ctx.send("***Stopping Minecraft Server...***")
         if 'now' in now:
-            backend.send_command('save-all')
+            await backend.send_command('save-all')
             await asyncio.sleep(3)
-            backend.send_command('stop')
+            await backend.server_api.server_stop()
         else:
-            backend.send_command('say ---WARNING--- Server will halt in 15s!')
+            await backend.send_command('say ---WARNING--- Server will halt in 15s!')
             await ctx.send("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
-            backend.send_command('say ---WARNING--- 5s left!')
+            await backend.send_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
-            backend.send_command('save-all')
+            await backend.send_command('save-all')
             await asyncio.sleep(3)
-            backend.send_command('stop')
 
-        await asyncio.sleep(5)
+            await backend.server_api.server_stop('stop')
+
+        await asyncio.sleep(1)
         await ctx.send("**Halted Minecraft Server** :stop_sign:")
-        backend.mc_subprocess = None
         lprint(ctx, "Stopping Server")
 
     @commands.command(aliases=['restartserver', 'restart'])
@@ -673,7 +673,7 @@ class Server(commands.Cog):
             ?reboot now
         """
 
-        backend.send_command('say ---WARNING--- Server Rebooting...')
+        await backend.send_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
         await ctx.send("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)

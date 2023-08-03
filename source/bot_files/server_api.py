@@ -174,7 +174,7 @@ class Server_API(Server_Update):
             self.launch_command = f"{config.get_config('windows_cmdline_start')} {self.launch_command}"
 
     # This will be updated with correct code to send command to server console based on configs.
-    def send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Send command to Minecraft server.
 
@@ -221,13 +221,13 @@ class Server_API(Server_Update):
         else: check_number = self.last_check_number
 
         await asyncio.sleep(config.get_config('command_buffer_time'))
-        if data := self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=check_number):
+        if data := await self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=check_number):
             return data
 
         return False
 
     # ===== Server Files
-    def read_server_log(self, search: str = None, lines: int = 15, extra_lines: int = 0,
+    async def read_server_log(self, search: str = None, lines: int = 15, extra_lines: int = 0,
                         find_all: bool = False, stopgap_str: str = None,
                         top_down_mode: bool = False) -> Union[List, bool]:
         """
@@ -277,7 +277,7 @@ class Server_API(Server_Update):
 
         return matched_lines + list(_extra_lines)
 
-    def server_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start server.
 
@@ -318,7 +318,7 @@ class Server_API_Tmux(Server_API):
 
         return True
 
-    def server_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start server in specified Tmux pane.
 
@@ -359,7 +359,7 @@ class Server_API_Screen(Server_API):
 
         return True
 
-    def server_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
         Start server in specified screen session.
 
@@ -440,7 +440,7 @@ class Server_API_Subprocess(Server_API):
 
         return True
 
-    def server_start(self) -> bool:
+    async def server_start(self) -> bool:
         """
 
         Returns:

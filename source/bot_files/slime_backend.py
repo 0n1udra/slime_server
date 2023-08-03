@@ -49,7 +49,6 @@ class Backend(Backups):
         self.server_active = False
         config.update_from_file()  # Reads from json config file if exists.
         config.update_all_server_configs()
-        #self.discord_channel = self.update_discord_chennel(bot)
 
     # ===== Discord
     async def update_bot_object(self, bot: Bot) -> bool:
@@ -207,18 +206,6 @@ class Backend(Backups):
 
         return await self.server_api.get_command_output(keywords, extra_lines)
 
-    # ===== Start/Stop
-    def server_start(self) -> bool:
-        """
-        Start Minecraft server depending on whether you're using Tmux subprocess method.
-        Note: Priority is given to subprocess method over Tmux if both corresponding booleans are True.
-
-        Returns:
-            bool: If successful server launch.
-        """
-
-        return self.server_api.server_start()
-
     # ===== Server status
     # Checks if server is reachable. By sending a command or using ping, depending on configs.
     async def server_status(self, force_check: bool = False) -> bool:
@@ -232,13 +219,13 @@ class Backend(Backups):
 
         # Prioritizes using ping instead of sending command to console.
         if config.get_config('ping_before_command'):
-            return self.server_ping()
+            return await self.server_ping()
         # Can force check even if configs disable it.
         elif config.get_config('check_before_command') or force_check:
             return await self.server_api.server_console_reachable()
-        return self.server_ping()
+        return await self.server_ping()
 
-    def server_ping(self) -> bool:
+    async def server_ping(self) -> bool:
         """
         Uses ping command to check if server reachable.
 
@@ -246,13 +233,15 @@ class Backend(Backups):
             bool: If ping was successful.
         """
 
+        if data := await self.server_ping_query():
+            return data['time']
         if address := config.get_config('server_address'):
-            return utils.ping_address(address)
+            return await utils.server_ping(address)
 
         return False
 
     # Query ping server. Must have 'enable-query=true' in server.properties.
-    def server_ping_query(self) -> bool:
+    async def server_ping_query(self) -> Union[Dict, bool]:
         """
         Gets server information using mctools.PINGClient()
 
@@ -260,15 +249,14 @@ class Backend(Backups):
             dict: Dictionary containing 'version', and 'description' (motd).
         """
 
-
-        if not config.get_config('server_address'):
+        if not config.get_config('server_address') or not config.get_config('server_port'):
             return False
 
         try:
             ping = mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port'))
             stats = ping.get_stats()
             ping.stop()
-        except ConnectionRefusedError:
+        except:
             return False
         else:
             return stats
@@ -304,7 +292,7 @@ class Backend(Backups):
     async def get_coords(self, player=''):
         """Gets player's location coordinates."""
 
-        if not backend.send_command(f"data get entity {player} Pos"):
+        if not await backend.send_command(f"data get entity {player} Pos"):
             return False
             #log_data = self.read_server_log('entity data', stopgap_str=response[1])
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
@@ -335,7 +323,7 @@ class Backend(Backups):
 
         elif config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
-            if data := self.read_server_log('server version'):
+            if data := await self.read_server_log('server version'):
                 version = data[0].split('version')[-1].strip()
             # Tries to find info in server.properties next.
             elif data := self.get_property('version'):
@@ -352,10 +340,10 @@ class Backend(Backups):
 
     # ===== File reading and writing
     # TODO Make async
-    def read_server_log(self, *args, **kwargs):
-        return self.server_api.read_server_log(*args, **kwargs)
+    async def read_server_log(self, *args, **kwargs):
+        return await self.server_api.read_server_log(*args, **kwargs)
 
-    def update_property(self, property_name=None, value: str = '') -> Union[str, bool]:
+    async def update_property(self, property_name=None, value: str = '') -> Union[str, bool]:
         """
         Edits server.properties file if received target_property and value. Edits inplace with fileinput
         If receive no value, will return current set value if property exists.
@@ -390,12 +378,9 @@ class Backend(Backups):
                 print(line, end='\n')
 
         # Returns value, and complete line
-        if return_line:
-            return return_line
+        return return_line if return_lines else False
 
-        return False
-
-    def get_property(self, property_name: str) -> Union[str, bool]:
+    async def get_property(self, property_name: str) -> Union[str, bool]:
         """
         Get a property from server properties file.
 
@@ -408,13 +393,13 @@ class Backend(Backups):
         """
 
         if config.get_config('server_files_access'):
-            if data := self.update_property(property_name):
+            if data := await self.update_property(property_name):
                 return data
 
         return False
 
     # ===== Adding/Deleting servers
-    def server_new(self, server_name: str) -> Union[Dict, bool]:
+    async def server_new(self, server_name: str) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -442,7 +427,7 @@ class Backend(Backups):
 
         return config.new_server_configs(server_name)
 
-    def server_delete(self, server_name: str) -> Union[Dict, bool]:
+    async def server_delete(self, server_name: str) -> Union[Dict, bool]:
         """
 
         Args:
@@ -462,7 +447,7 @@ class Backend(Backups):
         config.update_all_server_configs()
         return server_data
 
-    def server_copy(self, server_name: str, new_server_name: str) -> Union[Dict, bool]:
+    async def server_copy(self, server_name: str, new_server_name: str) -> Union[Dict, bool]:
         """
 
         Args:
@@ -473,17 +458,17 @@ class Backend(Backups):
 
         """
 
-        if not self.server_new(new_server_name):
+        if not await self.server_new(new_server_name):
             return False
 
-        if server_data := self.server_delete(server_name):
+        if server_data := await self.server_delete(server_name):
             if file_utils.copy_dir(config.servers[server_name]['server_path'], server_data['server_path']) is False:
                 return False
             else:
                 return server_data
 
     # ===== Backup/Restore
-    def new_backup(self, new_name, src, dst):
+    async def new_backup(self, new_name, src, dst):
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -505,7 +490,7 @@ class Backend(Backups):
         file_utils.copy_dir(src, new_backup_path)
         return new_backup_path
 
-    def restore_backup(self, src, dst):
+    async def restore_backup(self, src, dst):
         """
         Restores world or server backup. Overwrites existing files.
 
@@ -517,7 +502,7 @@ class Backend(Backups):
         if file_utils.delete_dir(dst):
             file_utils.copy_dir(src, dst)
 
-    def delete_backup(self, path):
+    async def delete_backup(self, path):
         """
 
         Args:

@@ -86,9 +86,9 @@ class Player(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if backend.send_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}") is False: return
+        if await backend.send_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}") is False: return
 
-        backend.send_command(f'kill {target}')
+        await backend.send_command(f'kill {target}')
 
         await ctx.send(f"`{target}` :gun: assassinated!")
         lprint(ctx, f"Killed: {target}")
@@ -114,11 +114,11 @@ class Player(commands.Cog):
             await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
 
-        if backend.send_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}") is False: return
+        if await backend.send_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}") is False: return
 
         await ctx.send(f"Killing {target} in {delay}s :bomb:")
         await asyncio.sleep(delay)
-        backend.send_command(f'kill {target}')
+        await backend.send_command(f'kill {target}')
 
         await ctx.send(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
@@ -154,7 +154,7 @@ class Player(commands.Cog):
             await ctx.invoke(self.bot.get_command('teleportpanel'), target)
             return
 
-        if backend.send_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s") is False: return
+        if await backend.send_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s") is False: return
         await ctx.send(f"***Teleporting in 5s...***")
 
         # Saves current coordinates of target player before teleporting them, so they may be returned.
@@ -172,7 +172,7 @@ class Player(commands.Cog):
             destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
 
         await asyncio.sleep(5)
-        backend.send_command(f"tp {target} {destination}")
+        await backend.send_command(f"tp {target} {destination}")
 
         await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
         lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
@@ -204,9 +204,9 @@ class Player(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if backend.send_command(f"say {player} now in {mode} : {reason}") is False: return
+        if await backend.send_command(f"say {player} now in {mode} : {reason}") is False: return
 
-        backend.send_command(f"gamemode {mode} {player}")
+        await backend.send_command(f"gamemode {mode} {player}")
 
         await ctx.send(f"`{player}` is now in `{mode.upper()}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
@@ -232,15 +232,15 @@ class Player(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if backend.send_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}") is False: return
+        if await backend.send_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}") is False: return
 
-        backend.send_command(f"gamemode {mode} {player}")
+        await backend.send_command(f"gamemode {mode} {player}")
         await ctx.send(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
         lprint(ctx, f"Set gamemode: {player} for {duration}s")
 
         await asyncio.sleep(duration)
-        backend.send_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
-        backend.send_command(f"gamemode survival {player}")
+        await backend.send_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
+        await backend.send_command(f"gamemode survival {player}")
         await ctx.send(f"`{player}` is back to survival.")
 
     # ===== Inventory
@@ -260,9 +260,9 @@ class Player(commands.Cog):
             await ctx.send("Usage: `?clear <player>")
             return False
 
-        if backend.send_command(f"say ---WARNING--- {target} will lose everything!") is False: return
+        if await backend.send_command(f"say ---WARNING--- {target} will lose everything!") is False: return
 
-        backend.send_command(f'clear {target}')
+        await backend.send_command(f'clear {target}')
 
         await ctx.send(f"`{target}` inventory cleared")
         lprint(ctx, f"Cleared: {target}")
@@ -310,10 +310,10 @@ class Permissions(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if not backend.send_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}'): return
+        if not await backend.send_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}'): return
 
         await asyncio.sleep(5)
-        backend.send_command(f"kick {player}")
+        await backend.send_command(f"kick {player}")
 
         await ctx.send(f"`{player}` is outta here :wave:")
         lprint(ctx, f"Kicked: {player}")
@@ -336,11 +336,11 @@ class Permissions(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if not backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False: return
+        if not await backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False: return
 
         await asyncio.sleep(5)
 
-        backend.send_command(f"ban {player} {reason}")
+        await backend.send_command(f"ban {player} {reason}")
 
         await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
@@ -363,9 +363,9 @@ class Permissions(commands.Cog):
             return False
 
         reason = utils.format_args(reason, return_no_reason=True)
-        if backend.send_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:") is False: return
+        if await backend.send_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:") is False: return
 
-        backend.send_command(f"pardon {player}")
+        await backend.send_command(f"pardon {player}")
 
         await ctx.send(~"Cleansed `{player}` :flag_white:")
         lprint(ctx, f"Pardoned {player} : {reason}")
@@ -375,9 +375,9 @@ class Permissions(commands.Cog):
         """Show list of current bans."""
 
         banned_players = ''
-        response = backend.send_command("banlist")
+        response = await backend.send_command("banlist")
         if not response: return
-        log_data = backend.read_server_log('banned players')
+        log_data = await backend.read_server_log('banned players')
 
         if config.get_config('server_use_rcon'):
             if 'There are no bans' in log_data:
@@ -455,27 +455,27 @@ class Permissions(commands.Cog):
 
         # Enable/disable whitelisting.
         if arg.lower() in backend.enable_inputs:
-            backend.send_command('whitelist on')
+            await backend.send_command('whitelist on')
             await ctx.send("**Whitelist ACTIVE** ")
             lprint(ctx, f"Whitelist: Enabled")
         elif arg.lower() in backend.disable_inputs:
-            backend.send_command('whitelist off')
+            await backend.send_command('whitelist off')
             await ctx.send("**Whitelist INACTIVE**")
             lprint(ctx, f"Whitelist: Disabled")
 
         # Add/remove user to whitelist (one at a time).
         elif arg == 'add' and arg2:
-            backend.send_command(f"whitelist {arg} {arg2}")
+            await backend.send_command(f"whitelist {arg} {arg2}")
             await ctx.send(f"Added `{arg2}` to whitelist  :page_with_curl::pen_fountain:")
             lprint(ctx, f"Added to whitelist: {arg2}")
         elif arg == 'remove' and arg2:
-            backend.send_command(f"whitelist {arg} {arg2}")
+            await backend.send_command(f"whitelist {arg} {arg2}")
             await ctx.send(f"Removed `{arg2}` from whitelist.")
             lprint(ctx, f"Removed from whitelist: {arg2}")
 
         # Reload server whitelisting feature.
         elif arg == 'reload':
-            backend.send_command('whitelist reload')
+            await backend.send_command('whitelist reload')
             await ctx.send("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
 
         # Check/enable/disable whitelist enforce feature.
@@ -491,14 +491,14 @@ class Permissions(commands.Cog):
         # List whitelisted.
         elif not arg or arg == 'list':
             if config.get_config('server_use_rcon'):
-                log_data = backend.send_command('whitelist list')
+                log_data = await backend.send_command('whitelist list')
                 log_data = log_data[1]
                 log_data = backend.remove_ansi(log_data).split(':')
             else:
-                _, rnumber = backend.send_command('whitelist list')
+                _, rnumber = await backend.send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
                 match_list = ['whitelisted:', 'whitelisted player(s):']  # Varies depending on server version/type.
-                log_data = backend.read_server_log(match_list=match_list, find_all=True)
+                log_data = await backend.read_server_log(match_list=match_list, find_all=True)
                 if not log_data:
                     await ctx.send('No whitelisted')
                     return
