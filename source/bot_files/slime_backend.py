@@ -232,7 +232,7 @@ class Backend():
         if data := await self.server_ping_query():
             return data['time']
         if address := config.get_config('server_address'):
-            return await utils.server_ping(address)
+            return await utils.ping_address(address)
 
         return False
 
