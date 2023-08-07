@@ -23,8 +23,8 @@ buttons_dict = {
                  ['Enable Weather', 'weatheron', '\U0001F7E2'], ['Disable Weather', 'weatheroff', '\U0001F534'],
                  ['Day', 'timeday', '\U00002600'], ['Night', 'timenight', '\U0001F319'],
                  ['Enable Time', 'timeon', '\U0001F7E2'], ['Disable Time', 'timeoff', '\U0001F534']],
-    'extra':    [['Restart Bot', 'botrestart', '\U0001F501'], ['Bot Log', 'botlog', '\U0001F4C3'],
-                 ['Set Channel ID', 'setchannelid', '\U0001FA9B'], ['Get Address', 'ip', '\U0001F310'], ['Website Links', 'links', '\U0001F517']]
+    'extra':    [['Restart Bot', 'botrestart', '\U0001F501'], ['Bot Log', 'botlog', '\U0001F4C3'], ['Get Address', 'ip', '\U0001F310'],
+                 ['Website Links', 'links', '\U0001F517'], ['Clear Messages', 'clearmessages', '\U0001F9F9']]
                 }
 
 class Comps:
@@ -41,7 +41,7 @@ class Comps:
 
         Args:
             key (str): Relevant name for component message(s)
-            value (Context): Discord ctx.send() context.
+            value (Context): Discord backend.send_msg() context.
 
         Returns:
             dict: Returns updated comp_data dictionary.
@@ -65,6 +65,7 @@ class Comps:
             for c in _comps:
                 try: await c.delete()
                 except: pass
+            return True
         return False
 
     def get_comps(self, key) -> Union[Context, None]:
@@ -94,18 +95,19 @@ class Comps:
         self.comp_data[key] = value
         return self.comp_data
 
-    def get_data(self, key: str) -> Union[Any, None]:
+    def get_data(self, key: str, fallback: Any = []) -> Union[Any, None]:
         """
         Returns value from comp_data dict.
 
         Args:
-            key: Item to get.
+            key str: Item to get.
+            fallback Any: What to return if data not found.
 
         Returns:
             Value of key. None if not found.
         """
 
-        return self.comp_data.get(key, None)
+        return self.comp_data.get(key, fallback)
 
     async def clear_current_comps(self) -> None:
         """
@@ -167,7 +169,7 @@ class Comps:
         return embed
 
     def server_modal_fields(self, server_name: str) -> List[List]:
-        if server := server_name in config.servers.get(server_name):
+        if server := config.servers.get(server_name):
             data = server
         else: data = config.example_server_configs.copy()
 
@@ -223,7 +225,7 @@ class Discord_Select(discord.ui.Select):
 
         # Updates selected currently selected server, this is for ?buttonspanel select server component.
         if custom_id == '_select_server':
-            await config.select_server(value)
+            await backend.select_server(value)
 
 class Discord_Button(discord.ui.Button):
     """

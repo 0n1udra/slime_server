@@ -23,8 +23,7 @@ from discord.ext.commands import Context
 
 from bot_files.slime_config import config
 
-enable_inputs = ['enable', 'activate', 'true', 'on']
-disable_inputs = ['disable', 'deactivate', 'false', 'off']
+
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
@@ -232,7 +231,7 @@ class File_Utils:
 
         return True
 
-    async def get_from_index(self, path: str, index: int, mode: str) -> str:
+    def get_from_index(self, path: str, index: int, mode: str) -> Union[str, bool]:
         """
         Get server or world backup folder name from passed in index number
 
@@ -254,7 +253,7 @@ class File_Utils:
             else: continue
         try:
             return f'{path}/{items[index]}'
-        except: return ''
+        except: return False
 
     # TODO Test (everything)
     def enum_dirs_for_discord(self, path: str, mode: str, index_mode: bool = False):
@@ -281,18 +280,11 @@ class File_Utils:
             elif 'd' in mode and isdir(join(path, item)): flag = True
 
             if flag:
-                component_data = [item, index, False, index]
-                if index_mode:
-                    # label, value, is default, description
-                    return_list.append(component_data)  # Need this for world/server commands
-                    index += 1
-                    continue
+                component_data = [item, item, False, index]
                 if 's' in mode and item in config.servers:
                     component_data[-1] = config.servers[item]['server_description']
-                    return_list.appen(component_data)  # For server mode for ?controlpanel command component
-                    index += 1
-                    continue
                 return_list.append(component_data)  # Last 2 list items is for new_selection.
+                index += 1
             else: continue
         return return_list
 
@@ -313,7 +305,7 @@ class File_Utils:
 
         return True
 
-    def new_dir(self, path: str) -> bool:
+    def new_dir(self, path: str) -> Union[bool, None]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -321,9 +313,12 @@ class File_Utils:
             path str: Path to create new directory.
 
         Returns:
-            bool: If successfully created new dir at path.
+            bool, None: If successfully created new dir at path. None if folder already exists.
         """
 
+        if os.path.isdir(path):
+            lprint(f"ERROR: Folder already exist: {path}")
+            return None
         try:
             os.mkdir(path)
         except:
@@ -483,7 +478,7 @@ class Utils:
                 player_names = output[1].split(':')[-1].split(',')
                 return player_names, text
             except:
-                return False
+                return None
         else:
 
             # TODO make get_command_output be able to take command
@@ -496,7 +491,7 @@ class Utils:
                 player_names = output[-1]  # R3diculous, MysticFrogo
                 # If there's no players active, player_names will still contain some anso escape characters.
                 if len(player_names.strip()) < 5:
-                    return False
+                    return None
                 else:
                     player_names = [f"{i.strip()[:-4]}\n" if config.get_config('use_rcon') else f"{i.strip()}" for i in (output[-1]).split(',')]
                     # Outputs player names in special discord format. If using RCON, need to clip off 4 trailing unreadable characters.
@@ -652,7 +647,6 @@ class Utils:
             ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ping_out, ping_error = ping.communicate()
             return True if ping_out.strip() else False
-
 
     def convert_to_bytes(self, data: Any) -> io.BytesIO: return io.BytesIO(data.encode())
 

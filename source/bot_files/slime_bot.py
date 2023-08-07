@@ -21,16 +21,15 @@ async def on_ready():
     await backend.update_bot_object(bot)
 
     lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
-    await backend.server_status()  # Check server status on bot startup.
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
-        await backend.send_discord_message(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await backend.send_msg(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         if 'hidebanner' not in sys.argv:
-            await backend.send_discord_message(f"Server: `{config.server_configs['server_name']}`")
+            await backend.send_msg(f"Server: `{config.server_configs['server_name']}`")
             # Shows some useful buttons
             on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
-            await backend.send_discord_message('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
+            await backend.send_msg('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
 # TODO fix
 role_requirements = {

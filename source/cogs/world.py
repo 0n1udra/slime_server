@@ -24,12 +24,12 @@ class World(commands.Cog):
         """
 
         if not state:
-            await ctx.send("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
+            await backend.send_msg("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
         if await backend.send_command(f'weather {state} {duration}') is False: return
 
-        await ctx.send(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
+        await backend.send_msg(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
 
     @commands.command(aliases=['enableweather', 'weatherenable'])
@@ -37,7 +37,7 @@ class World(commands.Cog):
         """Enable weather cycle."""
 
         await backend.send_command(f'gamerule doWeatherCycle true')
-        await ctx.send("Weather cycle **ENABLED**")
+        await backend.send_msg("Weather cycle **ENABLED**")
         lprint(ctx, 'Weather Cycle: Enabled')
 
     @commands.command(aliases=['disableweather', 'weatherdisable'])
@@ -45,7 +45,7 @@ class World(commands.Cog):
         """Disable weather cycle."""
 
         await backend.send_command(f'gamerule doWeatherCycle false')
-        await ctx.send("Weather cycle **DISABLED**")
+        await backend.send_msg("Weather cycle **DISABLED**")
         lprint(ctx, 'Weather Cycle: Disabled')
 
     @commands.command(aliases=['clearweather', 'weathersetclear'])
@@ -85,8 +85,8 @@ class World(commands.Cog):
 
         if set_time:
             if await backend.send_command(f"time set {set_time}") is False: return
-            await ctx.send(f"Time Updated ({set_time})  :clock9:")
-        else: await ctx.send("Need time input, like: `12`, `day`")
+            await backend.send_msg(f"Time Updated ({set_time})  :clock9:")
+        else: await backend.send_msg("Need time input, like: `12`, `day`")
         lprint(ctx, f"Timed set: {set_time}")
 
     @commands.command(aliaases=['daytime', 'setday', 'timesetday'])
@@ -106,7 +106,7 @@ class World(commands.Cog):
         """Enable day light cycle."""
 
         await backend.send_command(f'gamerule doDaylightCycle true')
-        await ctx.send("Daylight cycle **ENABLED**")
+        await backend.send_msg("Daylight cycle **ENABLED**")
         lprint(ctx, 'Daylight Cycle: Enabled')
 
     @commands.command(aliases=['diabletime', 'timecycleoff'])
@@ -114,7 +114,7 @@ class World(commands.Cog):
         """Disable day light cycle."""
 
         await backend.send_command(f'gamerule doDaylightCycle false')
-        await ctx.send("Daylight cycle **DISABLED**")
+        await backend.send_msg("Daylight cycle **DISABLED**")
         lprint(ctx, 'Daylight Cycle: Disabled')
 
 async def setup(bot):

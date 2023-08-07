@@ -47,10 +47,10 @@ class Basics(commands.Cog):
         msg = utils.format_args(msg)
 
         if not msg:
-            await ctx.send("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
+            await backend.send_msg("Usage: `?s <message>`\nExample: `?s Hello everyone!`")
         else:
             if await backend.send_command('say ' + msg):
-                await ctx.send("Message circulated to all active players :loudspeaker:")
+                await backend.send_msg("Message circulated to all active players :loudspeaker:")
                 lprint(ctx, f"Server said: {msg}")
 
     @commands.command(aliases=['whisper', 't', 'w'])
@@ -69,12 +69,12 @@ class Basics(commands.Cog):
 
         msg = utils.format_args(msg)
         if not player or not msg:
-            await ctx.send("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
+            await backend.send_msg("Usage: `?tell <player> <message>`\nExample: `?ttell MysticFrogo sup hundo`")
             return False
 
         if await backend.send_command(f"tell {player} {msg}") is False: return
 
-        await ctx.send(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
+        await backend.send_msg(f"Communiqué transmitted to: `{player}` :mailbox_with_mail:")
         lprint(ctx, f"Messaged {player} : {msg}")
 
     @commands.command(aliases=['chat', 'playerchat', 'getchat', 'showchat', 'clog', 'cl', 'c'])
@@ -96,23 +96,23 @@ class Basics(commands.Cog):
         try:
             lines = int(args[0])
             args = args[1:]
-        except: lines = 5
+        except: lines = 20
 
         try: keyword = ' ' .join(args)
         except: keyword = None
 
-        await ctx.send(f"***Loading {lines} Chat Log...*** :speech_left:")
+        await backend.send_msg(f"***Loading {lines} Chat Log...*** :speech_left:")
 
         # Get only log lines that are user chats.
         if log_data := await backend.read_server_log(']: <', lines=lines, find_all=True):
 
             # optionally filter out chat lines only with certain keywords.
-            log_data = '\n'.join([i for i in reversed(log_data) if keyword.lower() in i.lower()])
+            log_data = '\n'.join([i for i in log_data if keyword.lower() in i.lower()])
             if log_data:
-                await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'chat_log.log'))
+                await backend.send_msg(file=discord.File(utils.convert_to_bytes(log_data), 'chat_log.log'))
                 lprint(ctx, f"Fetched Chat Log: {lines} {keyword}")
                 return
-        await ctx.send("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
+        await backend.send_msg("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
 
 
 async def setup(bot):

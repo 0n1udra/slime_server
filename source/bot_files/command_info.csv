@@ -66,8 +66,6 @@ Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
 Bot Info, `?botinfo`, Get this bot's version and other info.
 Bot Restart, `?rebootbot` `?rbot`, Reboots this discord bot.
 Bot Update, `?botupdate` `?updatebot` `?gitupdate`, Uses git pull command to update code, WARNING: Issues may arise.
-Set Channel, `?setchannel` `?setchannelid`, Set channel_id variable to allow bot to send important bot/server event updates.
-Reset Channel, `?resetchannel` `?resetchannelid`, Reset channel_id variable.
 Minecraft Commands Wiki page, `?mccommands`, `?mcc`, Show link to Wiki page that has all available Minecraft server commands and more information on individual commands.
 Secret Panel, `?secretpanel`, `?sp`, ?????????
 [HADES Protocol], `?newworld` `?hades`, *WARNING*: Activating HADES Protocol! ||Deletes world save, new one generated at start. Will not make backup||

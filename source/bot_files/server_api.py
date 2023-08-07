@@ -198,7 +198,7 @@ class Server_API(Server_Update):
 
         if config.get_config('server_files_access'):
             check_command, unique_number = utils.get_check_command()  # Custom command to send with unique number.
-            if self.send_command(check_command):
+            if await self.send_command(check_command):
                 if await self.get_command_output(unique_number, check_number=unique_number) is not False:  # Check logs for unique number.
                     self.last_check_number = unique_number
                     return True
@@ -228,8 +228,8 @@ class Server_API(Server_Update):
 
     # ===== Server Files
     async def read_server_log(self, search: str = None, lines: int = 15, extra_lines: int = 0,
-                        find_all: bool = False, stopgap_str: str = None,
-                        top_down_mode: bool = False) -> Union[List, bool]:
+                              find_all: bool = False, stopgap_str: str = None,
+                              top_down_mode: bool = False) -> Union[List, bool]:
         """
         Read the latest.log file under server/logs folder. Can also find a match.
 
@@ -255,15 +255,14 @@ class Server_API(Server_Update):
             return False
 
         # Create a deque, which will efficiently store the most recent matched log lines.
-        matched_lines = deque(maxlen=lines) if top_down_mode else []
+        matched_lines = []
 
         # Changes function to read file if reading bottom up or top down.
-        read_log_lines = file_utils.read_file_reverse_generator if not top_down_mode else file_utils.read_file_generator
+        read_log_lines = file_utils.read_file_generator if top_down_mode else file_utils.read_file_reverse_generator
         _extra_lines = deque(maxlen=extra_lines + 1)
         for line in read_log_lines(file_path):
-
             # If None search, will return all lines. Else, checks if line matches any of search keywords.
-            if search is None or any([s.lower() in line.lower() for s in search]):
+            if search[0] is None or any([str(s).lower() in line.lower() for s in search]):
                 matched_lines.append(line)
                 if not find_all:
                     break  # find_all = True means find all occurrences in file.
@@ -275,7 +274,7 @@ class Server_API(Server_Update):
             if (stopgap_str and stopgap_str in line) or len(matched_lines) >= lines:
                 break
 
-        return matched_lines + list(_extra_lines)
+        return list(reversed(matched_lines + list(_extra_lines)))
 
     async def server_start(self) -> bool:
         """
@@ -287,7 +286,7 @@ class Server_API(Server_Update):
 
         return False
 
-    def server_stop(self) -> bool:
+    async def server_stop(self) -> bool:
         """
         Stop server.
 
@@ -295,14 +294,14 @@ class Server_API(Server_Update):
             bool: Sent stop command (Not same as successful stopped).
         """
 
-        return self.send_command('stop')
+        return await self.send_command('stop')
 
 
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
 
-    def send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Tmux session.
 
@@ -343,7 +342,7 @@ class Server_API_Screen(Server_API):
     def __init__(self):
         super().__init__()
 
-    def send_command(self, command: str) -> bool:
+    async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
 
@@ -379,7 +378,7 @@ class Server_API_Rcon(Server_API):
     def __init__(self):
         super().__init__()
 
-    def send_command(self, command: str) -> Union[str, bool]:
+    async def send_command(self, command: str) -> Union[str, bool]:
         """
         Send command to server with RCON.
 
@@ -402,7 +401,7 @@ class Server_API_Rcon(Server_API):
             server_rcon_client.stop()  # Disconnect.
             return self.last_command_output
 
-    def server_console_reachable(self) -> bool:
+    async def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number.
 
@@ -411,7 +410,7 @@ class Server_API_Rcon(Server_API):
         """
 
         check_command, unique_number = utils.get_check_command()
-        if response := self.send_command(check_command):
+        if response := await self.send_command(check_command):
             if unique_number in response:
                 return True
 
@@ -425,7 +424,7 @@ class Server_API_Subprocess(Server_API):
         self.server_subprocess = None
 
     # TODO be able to have multiple subprocess servers running and switch between them
-    def send_command(self, command):
+    async def send_command(self, command):
         if not self.server_subprocess:
             return False
 

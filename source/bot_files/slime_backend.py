@@ -109,8 +109,9 @@ class Backend():
         if self.discord_channel is None:
             return False
 
-        self.messages.append(await self.discord_channel.send(*args, **kwargs))
-        return True
+        msg = await self.discord_channel.send(*args, **kwargs)
+        self.messages.append(msg)
+        return msg
 
     async def clear_messages(self, clear_comps=False) -> None:
         """
@@ -279,6 +280,18 @@ class Backend():
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
+    async def get_motd(self) -> Union[str, bool]:
+        """
+
+        Returns:
+
+        """
+
+        if data := await self.get_property('motd'):
+            return str(data).split('=')[-1]
+
+        return 'N/A'
+
     async def get_server_version(self, force_check=False) -> Union[str, bool]:
         """
         Gets server version number.
@@ -377,7 +390,7 @@ class Backend():
         return False
 
     # ===== Adding/Deleting servers
-    async def server_new(self, server_name: str) -> Union[Dict, bool]:
+    async def server_new(self, server_name: str, server_data: Dict = None) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -394,7 +407,8 @@ class Backend():
             return False
 
         # Create new configs for server.
-        if not config.new_server_configs(server_name):
+        server_data = config.new_server_configs(server_name, server_data)
+        if not server_data:
             lprint(f"ERROR: Issue creating new configs for: {server_name}")
             return False
 
@@ -515,7 +529,7 @@ class Backend():
 
         return new_name
 
-    async def restore_backup(self, src, dst):
+    async def restore_backup(self, src, dst) -> bool:
         """
         Restores world or server backup. Overwrites existing files.
 
@@ -525,18 +539,11 @@ class Backend():
         """
 
         if file_utils.delete_dir(dst):
-            file_utils.copy_dir(src, dst)
+            if file_utils.copy_dir(src, dst):
+                return True
 
-    async def delete_backup(self, path):
-        """
+        return False
 
-        Args:
-            path:
-
-        Returns:
-
-        """
-        file_utils.delete_dir(path)
 
 
 backend = Backend()

@@ -41,22 +41,22 @@ class Server(commands.Cog):
         else: name = utils.format_args(name)
 
         if not name and 'list' not in name:
-            await ctx.send(f"**Current Server:** `{config.get_config('server_name')}`")
-            await ctx.send(f"Use `?serverselect list` or `?ss list` to list servers, and `?ss server_name` to switch.")
+            await backend.send_msg(f"**Current Server:** `{config.get_config('server_name')}`")
+            await backend.send_msg(f"Use `?serverselect list` or `?ss list` to list servers, and `?ss server_name` to switch.")
         elif 'list' in name:
             embed = discord.Embed(title='Server List :desktop:')
             for server, sdata in config.servers.items():
                 # Shows server name, description, location, and Launch Command.
                 embed.add_field(name=sdata['server_name'], value=f"Description: {sdata['server_description']}\nLocation: `{sdata['server_path']}`\nLaunch Command: `{sdata['server_launch_command']}`", inline=False)
-            await ctx.send(embed=embed)
-            await ctx.send(f"**Current Server:** `{config.server_configs['server_name']}`")
-            await ctx.send(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
+            await backend.send_msg(embed=embed)
+            await backend.send_msg(f"**Current Server:** `{config.server_configs['server_name']}`")
+            await backend.send_msg(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in config.servers:
             if not config.get_config('players_custom_status'):
                 await self.bot.change_presence(activity=discord.Activity(name=f"- {config.server_configs['server_name']}", type=1))
             await backend.select_server(name)
-            await ctx.send(f"**Selected Server:** {name}")
-        else: await ctx.send("**ERROR:** Server not found.")
+            await backend.send_msg(f"**Selected Server:** {name}")
+        else: await backend.send_msg("**ERROR:** Server not found.")
 
     @commands.command(aliases=['si'])
     async def serverinfo(self, ctx, *name):
@@ -80,22 +80,22 @@ class Server(commands.Cog):
         """Create new server. Only works from control panel."""
 
         if interaction == 'submitted':
-            await ctx.send("***Creating New Server...***")
+            await backend.send_msg("***Creating New Server...***")
 
             data_from_modal = comps.get_data('servernew')
             new_server_name = data_from_modal['server_name']
 
             if new_server_name in config.servers:
-                await ctx.send("Server name already used.")
+                await backend.send_msg("Server name already used.")
                 return
 
             # Tries to create new folder.
             if isdir(join(config.get_config('servers_path'), new_server_name)):
-                await ctx.send(f"Folder `{new_server_name}` already exists. Will create new servers entry in config.")
+                await backend.send_msg(f"Folder `{new_server_name}` already exists. Will create new servers entry in config.")
             else:
                 try: backend.new_server(new_server_name)
                 except:
-                    await ctx.send("**Error**: Issue creating server.")
+                    await backend.send_msg("**Error**: Issue creating server.")
                     lprint(ctx, f"ERROR: Creating server: {new_server_name}")
                     return
 
@@ -105,7 +105,7 @@ class Server(commands.Cog):
 
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
             except: pass
-            await ctx.send("Use `?selectserver` to use bot commands on new server.")
+            await backend.send_msg("Use `?selectserver` to use bot commands on new server.")
 
         else:
             modal_msg = await interaction.response.send_modal(comps.new_modal(comps.server_modal_fields('example'), 'New Server', 'servernew'))
@@ -117,7 +117,7 @@ class Server(commands.Cog):
         # This only works with control panel right. This gets selected server's name.
         server_name = comps.get_data('second_selected')
         if not server_name:
-            await ctx.send("No server selected.")
+            await backend.send_msg("No server selected.")
             return
 
         if interaction == 'submitted':
@@ -145,17 +145,17 @@ class Server(commands.Cog):
         server_name = comps.get_data('second_selected')
 
         if not server_name:
-            await ctx.send("No server selected.")
+            await backend.send_msg("No server selected.")
             return
 
         if interaction == 'submitted':
             new_data = comps.get_data('servercopy')
 
             if new_data['server_name'] in config.servers:
-                await ctx.send(f"**ERROR:** Server name already in use: {server_name}")
+                await backend.send_msg(f"**ERROR:** Server name already in use: {server_name}")
                 return
 
-            await ctx.send("***Copying Server...***")
+            await backend.send_msg("***Copying Server...***")
             if await backend.server_copy(server_name, new_data['server_name']) is False:
                 lprint(ctx, f"ERROR: Issue copying server: {server_name} > {new_data['name']}")
                 return False
@@ -182,13 +182,13 @@ class Server(commands.Cog):
 
         server_name = utils.get_parameter(name)
         if not server_name:
-            await ctx.send("No server selected.")
+            await backend.send_msg("No server selected.")
             return
 
         if await backend.server_delete(server_name) is False:
-            await ctx.send(f"**Error:** Issue deleting server: `{server_name}`")
+            await backend.send_msg(f"**Error:** Issue deleting server: `{server_name}`")
             return
-        await ctx.send(f"**Server Deleted:** `{server_name}`")
+        await backend.send_msg(f"**Server Deleted:** `{server_name}`")
         lprint(ctx, f"Deleted server: {server_name}")
 
         if 'bmode' in name:
@@ -207,18 +207,18 @@ class Server(commands.Cog):
 
         new_servers_found = False
 
-        await ctx.send("***Scanning for new servers...***")
+        await backend.send_msg("***Scanning for new servers...***")
         for folder in listdir(config.get_config('servers_path')):
             # Checks if server already in 'slime_vars.servers' dict, and if 'folder' is actually a folder.
             if folder not in config.servers and isdir(join(config.get_config('servers_path'), folder)):
                 config.new_server_configs(folder)  # Create new folder and configs.
 
-                await ctx.send(f"**added:** `{folder}`")
+                await backend.send_msg(f"**added:** `{folder}`")
                 lprint(ctx, f"INFO: Added server: {folder}")
                 new_servers_found = True
 
         if not new_servers_found:
-            await ctx.send("No new servers found.")
+            await backend.send_msg("No new servers found.")
         else:
             await ctx.invoke(self.bot.get_command('serverselect'))  # Shows all servers in Discord embed
 
@@ -228,7 +228,7 @@ class Server(commands.Cog):
         """Gets latest Minecraft server version number from official website."""
 
         response = backend.check_latest_mc_versiont()
-        await ctx.send(f"Latest version: `{response}`")
+        await backend.send_msg(f"Latest version: `{response}`")
         lprint(ctx, "Fetched latest Minecraft server version: " + response)
 
     @commands.command(aliases=['updateserver', 'su', 'update'])
@@ -247,19 +247,19 @@ class Server(commands.Cog):
         """
 
         lprint(ctx, f"Updating {config.get_config('server_name')}...")
-        await ctx.send(f"***Updating {config.get_config('server_name')}...*** :arrows_counterclockwise:")
+        await backend.send_msg(f"***Updating {config.get_config('server_name')}...*** :arrows_counterclockwise:")
 
         # Halts server if running.
         if await backend.server_status() is not False:
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await ctx.send(f"***Downloading latest server jar***")
+        await backend.send_msg(f"***Downloading latest server jar***")
         version, url = backend.download_latest()  # Updates server.jar file.
         if version:
-            await ctx.send(f"Version: `{version}`\nSource: `{url}`\nNOTE: Next launch may take longer than usual.")
+            await backend.send_msg(f"Version: `{version}`\nSource: `{url}`\nNOTE: Next launch may take longer than usual.")
             await asyncio.sleep(3)
-        else: await ctx.send("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
+        else: await backend.send_msg("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
 
     # ===== Save/Autosave
@@ -269,8 +269,8 @@ class Server(commands.Cog):
 
         if await backend.send_command('save-all') is False: return
 
-        await ctx.send("World Saved  :floppy_disk:")
-        await ctx.send("**NOTE:** This is not the same as making a backup using `?backup`.")
+        await backend.send_msg("World Saved  :floppy_disk:")
+        await backend.send_msg("**NOTE:** This is not the same as making a backup using `?backup`.")
         lprint(ctx, "Saved World")
 
     @commands.command()
@@ -299,7 +299,7 @@ class Server(commands.Cog):
             ?autosave 60 - will send 'save-all' command to server every 60min.
         """
 
-        if not arg: await ctx.send(f"Usage: Update interval(min) `?autosave 60`, activate `?autosave on`.")
+        if not arg: await backend.send_msg(f"Usage: Update interval(min) `?autosave 60`, activate `?autosave on`.")
 
         # Parses user input and sets invertal for autosave.
         try: arg = int(arg)
@@ -309,12 +309,12 @@ class Server(commands.Cog):
 
         # Enables/disables autosave tasks.loop(). Also edits slime_config.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
-        if arg.lower() in backend.enable_inputs:
+        if arg.lower() in utils.enable_inputs:
             # Starts loop, updates enable_autosave, edits slime_config.py, output to log
             self.autosave_task.start()
             config.set_config('enable_autosave', True)
             lprint(ctx, f"Autosave: Enabled (interval: {config.get_config('autosave_interval')}m)")
-        elif arg.lower() in backend.disable_inputs:
+        elif arg.lower() in utils.disable_inputs:
             self.autosave_task.cancel()
             config.set_config('enable_autosave', False)
             lprint(ctx, 'Autosave: Disabled')
@@ -325,7 +325,7 @@ class Server(commands.Cog):
 
         fields = [['Status', f"{status_msg} | **{config.get_config('autosave_interval')}**min"],
                   ['Note', 'Auto save pauses if server unreachable (not same as disabled). Update server status with `?check` or `?stats`.']]
-        await ctx.send(embed=comps.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
+        await backend.send_msg(embed=comps.new_embed(fields, 'Autosave :repeat::floppy_disk:'))
         lprint(ctx, 'Fetched autosave information')
 
     @tasks.loop(seconds=config.get_config('autosave_interval') * 60)
@@ -334,7 +334,7 @@ class Server(commands.Cog):
 
         await self.bot.wait_until_ready()
         # Will only send command if server is active. use ?check or ?stats to update server_active boolean so this can work.
-        if await backend.send_command('save-all', discord_msg=False):
+        if await backend.send_command('save-all'):
             lprint(f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
     # ===== Status/Info
@@ -342,21 +342,21 @@ class Server(commands.Cog):
     async def serverping(self, ctx):
         """Uses ping command to see if server_address is reachable."""
 
-        await ctx.send('***Pinging Server...***')
+        await backend.send_msg('***Pinging Server...***')
         response = await backend.server_ping()
-        await ctx.send(response)
+        await backend.send_msg(response)
 
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
     async def servercheck(self, ctx):
         """Checks if server is online."""
 
-        await ctx.send('***Checking Server Status...***')
+        await backend.send_msg('***Checking Server Status...***')
         response = await backend.server_status()
         if response:
-            await ctx.send("**Server ACTIVE** :green_circle:")
+            await backend.send_msg("**Server ACTIVE** :green_circle:")
         elif response is None:
-            await ctx.send("**ERROR:** Unable to check server status.")
-        else: await ctx.send("**Server INACTIVE** :red_circle:")
+            await backend.send_msg("**ERROR:** Unable to check server status.")
+        else: await backend.send_msg("**Server INACTIVE** :red_circle:")
 
     @commands.command(aliases=['stat', 'stats', 'status', 'info'])
     async def serverstatus(self, ctx):
@@ -373,15 +373,15 @@ class Server(commands.Cog):
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
         ]
-        await ctx.send(embed=comps.new_embed(fields, 'Server Status'))
+        await backend.send_msg(embed=comps.new_embed(fields, 'Server Status'))
 
         if status is not False:  # Only fetches players list if server online.
             await ctx.invoke(self.bot.get_command('players'))
         await ctx.invoke(self.bot.get_command('bannermsg'))
         lprint(ctx, "Fetched server status")
 
-    @commands.command(aliases=['log', 'mlog'])
-    async def serverlog(self, ctx, lines=10, match=None):
+    @commands.command(aliases=['log', 'mlog', 'slog'])
+    async def serverlog(self, ctx, lines=20, match=None):
         """
         Show server log.
 
@@ -398,21 +398,17 @@ class Server(commands.Cog):
         if those lines contains 'hello'. Instead, it'll keep going through 'latest.log' until it finds 5 matches (or until the file ends).
         """
 
-        # If received match argument, switches server_log mode.
-        filter_mode, log_mode = False, True
-        if match: filter_mode, log_mode = True, False
-
-        await ctx.send(f"***Fetching {lines} Minecraft Log...*** :tools:")
-        log_data = backend.server_log(match=match, file_path=config.get_config('server_log_filepath'), lines=lines, log_mode=log_mode, filter_mode=filter_mode, return_reversed=True)
+        await backend.send_msg(f"***Fetching {lines} Minecraft Log...*** :tools:")
+        log_data = await backend.read_server_log(search=match, lines=lines, find_all=True)
         if log_data:
-            await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'server.log'))
+            await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'server.log'))
             lprint(ctx, f"Fetched Minecraft Log: {lines}")
         else:
-            await ctx.send("**Error:** Problem fetching data.")
+            await backend.send_msg("**Error:** Problem fetching data.")
             lprint(ctx, "ERROR: Issue getting minecraft log data")
 
-    @commands.command(aliases=['sclog', 'connectionlog', 'connectionslog', 'serverconnectionlog', 'joinedlog', 'loginlog'])
-    async def serverconnectionslog(self, ctx, lines=5):
+    @commands.command(aliases=['sclog', 'connectionlog', 'connectionslog', 'conlog', 'joinlog', 'loginlog'])
+    async def serverconnectionslog(self, ctx, lines=20):
         """
         Shows log lines relating to connections (joining, disconnects, kicks, etc).
 
@@ -424,16 +420,16 @@ class Server(commands.Cog):
             ?clogs 10
         """
 
-        await ctx.send(f"***Fetching {lines} Connection Log...*** :satellite:")
+        await backend.send_msg(f"***Fetching {lines} Connection Log...*** :satellite:")
 
         match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
         # Get only log lines that are connection related.
-        log_data = backend.server_log(match_list=match_list, lines=lines, filter_mode=True, return_reversed=True)
+        log_data = await backend.read_server_log(search=match_list, lines=lines, find_all=True)
         if not log_data:
-            await ctx.send("**ERROR:** Could not get chat log.")
+            await backend.send_msg("**ERROR:** Could not get chat log.")
             return
 
-        await ctx.send(file=discord.File(utils.convert_to_bytes(log_data), 'connections_log.log'))
+        await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'connections_log.log'))
         lprint(ctx, f"Fetched Connection Log: {lines}")
 
     @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
@@ -442,10 +438,10 @@ class Server(commands.Cog):
 
         response = await backend.get_server_version(force_check=True)
         if response is False:
-            await ctx.send("**ERROR:** Could not get server version")
+            await backend.send_msg("**ERROR:** Could not get server version")
             lprint("ERROR: Couldn't get server version.")
             return
-        await ctx.send(f"Current version: `{response}`")
+        await backend.send_msg(f"Current version: `{response}`")
         lprint(ctx, f"Fetched Minecraft server version: {response}")
 
     # === Properties
@@ -467,7 +463,7 @@ class Server(commands.Cog):
         """
 
         if not target_property:
-            await ctx.send("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`\n"
+            await backend.send_msg("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`\n"
                            "Show all properties using `?properties all` or `?pa`")
             return False
 
@@ -477,24 +473,24 @@ class Server(commands.Cog):
         if 'all' in target_property:
             await ctx.invoke(self.bot.get_command('propertiesall'))
 
-        if server_property := backend.get_property(target_property):
+        if server_property := await backend.get_property(target_property):
 
             # Update server property
             if value:
                 if updated_property := await backend.update_property(target_property, value):
-                    await ctx.send(f"Property Updated: `{updated_property}`")
+                    await backend.send_msg(f"Property Updated: `{updated_property}`")
                     return
                 else:
-                    await ctx.send(f"**ERROR:** Could not update server property: `{target_property}` to `{value}`")
+                    await backend.send_msg(f"**ERROR:** Could not update server property: `{target_property}` to `{value}`")
                     return False
 
             # Return current property value
-            await ctx.send(f"Server property: `{server_property}`")
+            await backend.send_msg(f"Server property: `{server_property}`")
             lprint(ctx, f"Server property: {server_property}")
             return
 
         # If property not found.
-        await ctx.send(f"**ERROR:** Server property not found: {target_property}")
+        await backend.send_msg(f"**ERROR:** Server property not found: {target_property}")
         return False
 
     @commands.command(aliases=['pa', 'prall'])
@@ -502,10 +498,10 @@ class Server(commands.Cog):
         """Shows full server properties file."""
 
         if not isfile(config.get_config('server_properties_filepath')):
-            await ctx.send('**ERROR:** Could not get server properties file')
+            await backend.send_msg('**ERROR:** Could not get server properties file')
             return
         with open(config.get_config('server_properties_filepath'), 'rb') as f:
-            await ctx.send(file=discord.File(f, config.get_config('server_properties_filepath')))
+            await backend.send_msg(file=discord.File(f, config.get_config('server_properties_filepath')))
 
         #await ctx.invoke(self.bot.get_command('properties'), target_property='all')
 
@@ -525,15 +521,15 @@ class Server(commands.Cog):
 
         if not mode:
             online_mode = backend.edit_file('online-mode')[1]
-            await ctx.send(f"online mode: `{online_mode}`")
+            await backend.send_msg(f"online mode: `{online_mode}`")
             lprint(ctx, f"Fetched online-mode state: {online_mode}")
         elif mode in ['true', 'false']:
             backend.edit_file('online-mode', mode)
             server_property = backend.edit_file('online-mode')
-            await ctx.send(f"Updated online mode: `{server_property[1]}`")
-            await ctx.send("**Note:** Server restart required for change to take effect.")
+            await backend.send_msg(f"Updated online mode: `{server_property[1]}`")
+            await backend.send_msg("**Note:** Server restart required for change to take effect.")
             lprint(ctx, f"Updated online-mode: {server_property[1].strip()}")
-        else: await ctx.send("Need a true or false argument (in lowercase).")
+        else: await backend.send_msg("Need a true or false argument (in lowercase).")
 
     @commands.command(aliases=['updatemotd', 'servermotd'])
     async def motd(self, ctx, *message):
@@ -549,24 +545,18 @@ class Server(commands.Cog):
         """
 
         message = utils.format_args(message)
-        motd_property = None
-        if config.get_config('server_use_rcon'):
-            motd_property = await backend.server_motd()
-        elif config.get_config('server_files_access'):
-            backend.edit_file('motd', message)  # Doesn't edit message if message is blank
-            motd_property = backend.edit_file('motd')
-            if motd_property: motd_property = motd_property[1].strip()
-
-        if not motd_property:
-            await ctx.send('**Error:** Fetching server motd failed.')
-            return
-
         if message:
-            await ctx.send(f"Updated MOTD: `{motd_property}`")
-            lprint(ctx, "Updated MOTD: " + motd_property)
+            if await backend.update_property('motd', message):
+                await backend.send_msg(f"Updated MOTD: `{message}`")
+                lprint(ctx, f"Updated MOTD: {message}")
+            else:
+                await backend.send_msg('**ERROR:** Problem updating motd.')
+
+        elif current_motd := await backend.get_motd():
+            await backend.send_msg(f"Current MOTD: `{current_motd}`")
+            lprint(ctx, f"Fetched MOTD: {current_motd}")
         else:
-            await ctx.send(f"Current MOTD: `{motd_property}`")
-            lprint(ctx, "Fetched MOTD: " + motd_property)
+            await backend.send_msg('**Error:** Fetching server motd failed.')
 
     @commands.command(aliases=['serverrcon'])
     async def rcon(self, ctx, state=''):
@@ -584,8 +574,8 @@ class Server(commands.Cog):
 
         if state in ['true', 'false', '']:
             response = backend.edit_file('enable-rcon', state)
-            await ctx.send(f"`{response[0]}`")
-        else: await ctx.send("Need a true or false argument (in lowercase).")
+            await backend.send_msg(f"`{response[0]}`")
+        else: await backend.send_msg("Need a true or false argument (in lowercase).")
 
     # ===== Start/Stop
     @commands.command(aliases=['startserver', 'start'])
@@ -598,18 +588,18 @@ class Server(commands.Cog):
 
         # Exits function if server already online.
         if await backend.server_status():
-            await ctx.send("**Server ACTIVE** :green_circle:")
+            await backend.send_msg("**Server ACTIVE** :green_circle:")
             return False
 
         if not await backend.server_api.server_start():
-            await ctx.send("**Error:** Could not start Minecraft server.")
+            await backend.send_msg("**Error:** Could not start Minecraft server.")
             return False
-        await ctx.send(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('server_name')}**\nStartup time: {config.get_config('startup_wait_time')}s.")
+        await backend.send_msg(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('server_name')}**\nStartup time: {config.get_config('startup_wait_time')}s.")
 
         # checks if set custom wait time in selected_server list.
         try: wait_time = int(config.server_configs['startup_wait_time'])
         except: wait_time = config.get_config('startup_wait_time')
-        await ctx.send(f"***Fetching Status in {wait_time}s...***")
+        await backend.send_msg(f"***Fetching Status in {wait_time}s...***")
         await asyncio.sleep(wait_time)
 
         await ctx.invoke(self.bot.get_command('serverstatus'))
@@ -629,27 +619,27 @@ class Server(commands.Cog):
         """
 
         if await backend.server_status() is False:
-            await ctx.send("Already Offline")
+            await backend.send_msg("Already Offline")
             return
 
-        await ctx.send("***Stopping Minecraft Server...***")
+        await backend.send_msg("***Stopping Minecraft Server...***")
         if 'now' in now:
             await backend.send_command('save-all')
             await asyncio.sleep(3)
             await backend.server_api.server_stop()
         else:
             await backend.send_command('say ---WARNING--- Server will halt in 15s!')
-            await ctx.send("***Halting Minecraft Server in 15s...***")
+            await backend.send_msg("***Halting Minecraft Server in 15s...***")
             await asyncio.sleep(10)
             await backend.send_command('say ---WARNING--- 5s left!')
             await asyncio.sleep(5)
             await backend.send_command('save-all')
             await asyncio.sleep(3)
 
-            await backend.server_api.server_stop('stop')
+            await backend.server_api.server_stop()
 
         await asyncio.sleep(1)
-        await ctx.send("**Halted Minecraft Server** :stop_sign:")
+        await backend.send_msg("**Halted Minecraft Server** :stop_sign:")
         lprint(ctx, "Stopping Server")
 
     @commands.command(aliases=['restartserver', 'restart'])
@@ -667,7 +657,7 @@ class Server(commands.Cog):
 
         await backend.send_command('say ---WARNING--- Server Rebooting...')
         lprint(ctx, "Restarting Server")
-        await ctx.send("***Restarting Minecraft Server...*** :repeat:")
+        await backend.send_msg("***Restarting Minecraft Server...*** :repeat:")
         await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
         await asyncio.sleep(3)
