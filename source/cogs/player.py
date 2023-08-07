@@ -547,13 +547,17 @@ class Permissions(commands.Cog):
 
         reason = utils.format_args(reason, return_no_reason=True)
 
-        if not await backend.get_command_output(f'INFO]: Opped {player}'):
-            await ctx.send("**ERROR:** Problem setting OP status.")
+        response = utils.parse_opadd_output('\n'.join(await backend.get_command_output()), player)
+        if response is False:
+            await backend.send_msg("**ERROR:** Problem setting OP status.")
             lprint(ctx, f"ERROR: Couldn't OP: {player}")
             return False
+        elif response is None:
+            await ctx.send(f'`{player}` Already Operator, nothing changed.')
+            return None
 
         await backend.send_command(f"say ---INFO--- {player} is now OP : {reason}")
-        await ctx.send(f"**New OP Player:** `{player}`")
+        await backend.send_msg(f"**New OP Player:** `{player}`")
         lprint(ctx, f"New server OP: {player}")
 
     @commands.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
@@ -579,13 +583,17 @@ class Permissions(commands.Cog):
 
         reason = utils.format_args(reason, return_no_reason=True)
 
-        if not await backend.get_command_output(f'INFO]: De-opped {player}'):
-            await ctx.send("**ERROR:** Problem removing OP status.")
+        response = utils.parse_deop_output('\n'.join(await backend.get_command_output()), player)
+        if response is False:
+            await backend.send_msg("**ERROR:** Problem removing OP status.")
             lprint(ctx, f"ERROR: Removing server OP: {player}")
             return False
+        if response is None:
+            await ctx.send(f'`{player}` Was not Operator, nothing changed.')
+            return None
 
         await backend.send_command(f"say ---INFO--- {player} no longer OP : {reason}")
-        await ctx.send(f"**Player OP Removed:** `{player}`")
+        await backend.send_msg(f"**Player OP Removed:** `{player}`")
         lprint(ctx, f"Removed Server OP: {player}")
 
     @commands.command(aliases=['optime', 'opt', 'optimedlimit'])

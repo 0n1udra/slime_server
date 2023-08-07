@@ -397,7 +397,54 @@ class Proc_Utils:
 
 
 class Utils:
-    def parse_players_output(self, output: str, version: str) -> Union[tuple[list[str], str], bool]:
+    enable_inputs = ['enable', 'activate', 'true', 'on']
+    disable_inputs = ['disable', 'deactivate', 'false', 'off']
+
+    def parse_opadd_output(self, output: str, username: str) -> Union[bool, None]:
+        """
+
+
+        Args:
+            output:
+
+        Returns:
+
+        """
+
+        added_keywords = ['a server operator', 'INFO]: Opped']
+        already_added_keywords = ['Nothing changed. The player already is an operator']
+
+        if any(i in output for i in already_added_keywords):
+            return None
+
+        if username.lower() in output.lower() and any(i in output for i in added_keywords):
+            return True
+
+        return False
+
+    def parse_deop_output(self, output: str, username: str) -> Union[bool, None]:
+        """
+
+
+        Args:
+            output:
+
+        Returns:
+
+        """
+
+        removed_keywords = ['no longer a server operator']
+        already_removed_keywords = ['Nothing changed. The player is not an operator']
+
+        if any(i in output for i in already_removed_keywords):
+            return None
+
+        if username.lower() in output.lower() and any(i in output for i in removed_keywords):
+            return True
+
+        return False
+
+    def parse_players_output(self, output: str, version: str) -> Union[tuple[list[str], str], bool, None]:
         """
         Extracts wanted data from output of 'list' command.
         Console output is different based on types and versions.
