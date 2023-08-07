@@ -94,7 +94,7 @@ class Slime_Bot_Commands(commands.Cog):
         await backend.send_msg("***Updating from GitHub...*** :arrows_counterclockwise:")
 
         os.chdir(config.get_config('bot_source_path'))
-        os.system('git pull')
+        os.system('git stash && git pull')
 
         await ctx.invoke(self.bot.get_command("botrestart"))
 

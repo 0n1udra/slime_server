@@ -30,9 +30,9 @@ from bot_files.slime_utils import lprint, utils, file_utils
 class Backend():
     # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
     server_api_types = {
-        'use_rcon': Server_API_Rcon,
-        'use_tmux': Server_API_Tmux,
-        'use_screen': Server_API_Screen
+        'server_use_rcon': Server_API_Rcon,
+        'server_use_screen': Server_API_Screen,
+        'use_tmux': Server_API_Tmux
     }
 
     def __init__(self):
@@ -155,11 +155,15 @@ class Backend():
                 self.subprocess_servers[server_name] = new_subprocess_server
                 return True
 
+        print(config.server_configs)
         for config_name, api in self.server_api_types.items():
             # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
             if config.get_config(config_name):
                 self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
                 break
+
+        if not self.server_api:
+            self.server_api = Server_API_Tmux()
 
         lprint(f"INFO: Selected Server: {server_name}")
         return True

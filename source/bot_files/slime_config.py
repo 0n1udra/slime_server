@@ -1,5 +1,5 @@
 __version__ = '9.0 beta'
-__date__ = '19/07/2023'
+__date__ = '07/08/2023'
 __author__ = 'github.com/0n1udra'
 __license__ = 'GPL 3'
 __status__ = 'Development'
@@ -90,7 +90,7 @@ class Config():
             'bot_log_filepath': join(self.bot_source_path, 'slime_bot.log'),
 
             # Use cmd commands. E.g. 'start' command when starting a server only if platform.systems() == 'Windows'.
-            'windows_compatibility': True if platform.system() else False,
+            'windows_compatibility': True if platform.system() == 'Windows' else False,
             # Will be prefixed to server_launch_command in server_start() func to be windows compatible.
             'windows_cmdline_start': 'start "Minecraft server"',
 

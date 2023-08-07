@@ -200,7 +200,7 @@ Server Path         {config.get_config('server_path')}
 
 if __name__ == '__main__':
     if config.get_config('init') is False:
-        lprint("INFO: Created new config file.")
+        lprint("INFO: Initializing config.")
         setup_configs()  # This will call config.update_all_server_configs which will creates user_config.json if not exist.
         config.set_config('init', True)
     else:
