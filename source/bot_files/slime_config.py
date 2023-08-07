@@ -239,7 +239,7 @@ class Config():
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
             new_server_configs = self.example_server_configs.copy()
-            if 'example' in server_name:
+            if 'example' == server_name:
                 self.servers['example'] = new_server_configs
                 continue
 
@@ -264,14 +264,11 @@ class Config():
         if server_name in self.servers:
             return False
 
-        # TODO: Possibly add isinstance() for reliability
-        # Uses example server configs if not received config dict.
         self.servers[server_name] = config_data.copy() if config_data else self.example_server_configs.copy()
         self.servers[server_name]['server_name'] = server_name
-        # Adds default configs for not set, and updates config json file.
+        # Adds default configs for the ones not set, and updates config json file.
         self.update_all_server_configs()
         return self.servers[server_name]
-
 
     def update_server_configs(self, server_name: str, new_data: Dict) -> Union[Dict, bool]:
         """

@@ -100,7 +100,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'bmode':  # If this command triggered from a bmode.
-            index = comps.get_data('second_selected', reset=True)
+            index = comps.get_data('second_selected')
         try: index = int(index)
         except:
             await backend.send_msg("Usage: `?worldrestore <index> [now]`\nExample: `?worldrestore 0 now`")
@@ -136,7 +136,7 @@ class World_Backups(commands.Cog):
         """
 
         if index == 'bmode':
-            index = comps.get_data('second_selected', reset=True)
+            index = comps.get_data('second_selected')
         try: index = int(index)
         except:
             await backend.send_msg("Usage: `?worldbackupdelete <index>`\nExample: `?wbd 1`")
@@ -270,7 +270,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'bmode':
-            index = comps.get_data('second_selected', reset=True)
+            index = comps.get_data('second_selected')
         try: index = int(index)
         except:
             await backend.send_msg("Usage: `?serverrestore <index> [now]`\nExample: `?serverrestore 2 now`")
@@ -308,7 +308,7 @@ class Server_Backups(commands.Cog):
         """
 
         if index == 'bmode':  # If this command triggered from a bmode.
-            index = comps.data('second_selected', reset=True)
+            index = comps.get_data('second_selected')
         try: index = int(index)
         except:
             await backend.send_msg("Usage: `?serverbackupdelete <index>`\nExample: `?sbd 3`")

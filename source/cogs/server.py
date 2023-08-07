@@ -91,15 +91,13 @@ class Server(commands.Cog):
 
             # Tries to create new folder.
             if isdir(join(config.get_config('servers_path'), new_server_name)):
-                await backend.send_msg(f"Folder `{new_server_name}` already exists. Will create new servers entry in config.")
+                await backend.send_msg(f"Folder `{new_server_name}` already exists. Use `?sscan` to add it and create configs for it..")
             else:
-                try: backend.new_server(new_server_name)
-                except:
+                if not await backend.server_new(new_server_name, data_from_modal):
                     await backend.send_msg("**Error**: Issue creating server.")
                     lprint(ctx, f"ERROR: Creating server: {new_server_name}")
                     return
 
-            backend.new_server(data_from_modal)
             # Adds new server to servers dict.
             await ctx.invoke(self.bot.get_command('serverinfo'), new_server_name)
 
@@ -157,7 +155,7 @@ class Server(commands.Cog):
 
             await backend.send_msg("***Copying Server...***")
             if await backend.server_copy(server_name, new_data['server_name']) is False:
-                lprint(ctx, f"ERROR: Issue copying server: {server_name} > {new_data['name']}")
+                lprint(ctx, f"ERROR: Issue copying server: {server_name} > {new_data['server_name']}")
                 return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])

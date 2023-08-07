@@ -145,9 +145,9 @@ class Backend():
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
         if config.get_config('use_subprocess'):
-            server_name = config.server_configs['name']
+            server_name = config.server_configs['server_name']
             # Checks if a subprocess API instance for selected server already exists.
-            if config.server_configs['name'] in self.subprocess_servers:
+            if config.server_configs['server_name'] in self.subprocess_servers:
                 return self.subprocess_servers[server_name]
             else:
                 # Create new subprocess API
@@ -276,7 +276,7 @@ class Backend():
             #log_data = self.read_server_log('entity data', stopgap_str=response[1])
         # ['', '14:38:26] ', 'Server thread/INFO]: R3diculous has the following entity data: ', '-64.0d, 65.0d, 16.0d]\n']
         # Removes 'd' and newline character to get player coordinate. '-64.0 65.0 16.0d'
-        if log_data := self.get_command_output('data get entity'):
+        if log_data := await self.get_command_output('data get entity'):
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
@@ -390,7 +390,7 @@ class Backend():
         return False
 
     # ===== Adding/Deleting servers
-    async def server_new(self, server_name: str, server_data: Dict = None) -> Union[Dict, bool]:
+    async def server_new(self, server_name: str, server_data: Dict = None, new_folder=True) -> Union[Dict, bool]:
         """
         Create a new world or server backup, by copying and renaming folder.
 
@@ -413,7 +413,7 @@ class Backend():
             return False
 
         # Create new folder for server.
-        if not os.path.isdir(server_data['server_path']):
+        if new_folder and not os.path.isdir(server_data['server_path']):
             if not file_utils.new_dir(server_data['server_path']):
                 return False
 
@@ -481,14 +481,12 @@ class Backend():
 
         """
 
-        if not await self.server_new(new_server_name):
-            return False
-
-        if server_data := await self.server_delete(server_name):
-            if file_utils.copy_dir(config.servers[server_name]['server_path'], server_data['server_path']) is False:
+        if new_server := await self.server_new(new_server_name, new_folder=False):
+            if file_utils.copy_dir(config.servers[server_name]['server_path'], new_server['server_path']) is False:
                 return False
             else:
-                return server_data
+                return new_server
+        return False
 
     # ===== Backup/Restore
     async def new_backup(self, new_name, mode: str) -> Union[str, bool]:
