@@ -5,6 +5,9 @@ Scroll down for requirements, setup instructions and screenshots.
 - See releases: https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
 
+### Beta Branch:
+- If using Git CLI, you can use `git checkout beta` to switch branch. You might have to use `git stash` to stash local changes before switching. 
+
 ### Features:
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
 - Show connection history, chat log, online players, banned, OP list, and whitelist.
