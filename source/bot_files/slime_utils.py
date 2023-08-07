@@ -367,6 +367,19 @@ class File_Utils:
             return False
         return True
 
+    def setup_directories(self):
+        """Create necessary directories, servers, world_backups, server_backups."""
+
+        # Creates Server folder, folder for world backups, and folder for server backups.
+        os.makedirs(config.get_config('servers_path'))
+        lprint("INFO: Created: " + config.get_config('servers_path'))
+        os.makedirs(config.get_config('server_path'))
+        lprint("INFO: Created: " + config.get_config('server_path'))
+        os.makedirs(config.get_config('world_backups_path'))
+        lprint("INFO: Created: " + config.get_config('world_backups_path'))
+        os.makedirs(config.get_config('server_backups_path'))
+        lprint("INFO: Created: " + config.get_config('server_backups_path'))
+
 
 class Proc_Utils:
     def get_proc(self, proc_name, proc_cmdline=None):

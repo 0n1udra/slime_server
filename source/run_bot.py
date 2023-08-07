@@ -6,8 +6,7 @@ import time
 
 from bot_files.slime_config import config, __version__, __date__
 from bot_files.slime_bot import bot
-from bot_files.slime_utils import lprint, proc_utils
-from bot_files.slime_backend import backend
+from bot_files.slime_utils import lprint, file_utils, proc_utils
 
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
@@ -102,19 +101,6 @@ def start_bot():
         else: lprint("INFO: Started slime_bot.py")
 
     else: _start_bot()  # Starts inline if not using tmux.
-
-def setup_directories():
-    """Create necessary directories."""
-
-    # Creates Server folder, folder for world backups, and folder for server backups.
-    os.makedirs(config.get_config('servers_path'))
-    lprint("INFO: Created: " + config.get_config('servers_path'))
-    os.makedirs(config.get_config('server_path'))
-    lprint("INFO: Created: " + config.get_config('server_path'))
-    os.makedirs(config.get_config('world_backups_path'))
-    lprint("INFO: Created: " + config.get_config('world_backups_path'))
-    os.makedirs(config.get_config('server_backups_path'))
-    lprint("INFO: Created: " + config.get_config('server_backups_path'))
 
 def start_tmux_session():
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
@@ -229,14 +215,13 @@ if __name__ == '__main__':
 
     if 'setup' in sys.argv:
         if config.get_config('server_files_access'):
-            setup_directories()
+            file_utils.setup_directories()
         if config.get_config('server_use_rcon'):
             lprint("INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
 
     if 'beta' in sys.argv:
         beta_mode = 'beta'
         config.set_config('bot_token_filepath', os.path.join(config.get_config('home_path'), 'keys', 'slime_bot_beta.token'))
-        #config.set_config('channel_id', 916450451061350420)
 
     if 'starttmux' in sys.argv and config.get_config('use_tmux'):
         start_tmux_session()
