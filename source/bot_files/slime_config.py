@@ -111,7 +111,7 @@ class Config():
                 'server_address': 'localhost',  # Leave '' for blank instead of None or False
                 'server_port': 25565,
                 # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
-                'server_ip': 'localhost',
+                'server_ip': 'localost',
 
                 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
                 'server_files_access': True,
@@ -155,16 +155,13 @@ class Config():
                 # Max number of log lines to read. Increase if server is really busy.
                 'log_lines_limit': 500,
 
-                # Set to True to backup 'world' folder only, exclude folders like 'world_nether', etc...
-                'exact_world_foldername': False,
-
                 # SELECTED_SERVER will be substituted with server name.
                 'server_path': join(self.mc_path, 'servers', 'SELECTED_SERVER'),
-                "world_backups_path": join(self.mc_path, 'world_backups', 'SELECTED_SERVER'),
-                "server_backups_path": join(self.mc_path, 'server_backups', 'SELECTED_SERVER'),
-                "server_logs_path": join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs'),
-                "server_log_filepath": join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs', 'latest.log'),
-                "server_properties_filepath": join(self.mc_path, 'servers', 'SELECTED_SERVER', 'server.properties'),
+                'world_backups_path': join(self.mc_path, 'world_backups', 'SELECTED_SERVER'),
+                'server_backups_path': join(self.mc_path, 'server_backups', 'SELECTED_SERVER'),
+                'server_logs_path': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs'),
+                'server_log_filepath': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs', 'latest.log'),
+                'server_properties_filepath': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'server.properties'),
 
                 # For '?links' command. Shows useful websites.
                 'useful_websites': {
@@ -232,6 +229,10 @@ class Config():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 config_data[k] = v.replace(text_to_replace, server_name)
 
+            # Turns anything that contains only numbers to integer format.
+            if str(v).isnumeric():
+                config_data[k] = int(v)
+
         return config_data
 
     def update_all_server_configs(self) -> None:
@@ -271,33 +272,14 @@ class Config():
         self.update_all_server_configs()
         return self.servers[server_name]
 
-    def delete_server_configs(self, server_name: str) -> Union[Dict, bool]:
-        """
-        Delete server configs.
-
-        Args:
-            server_name: Server configs to delete.
-
-        Returns:
-            dict, bool: Dict of popped server config. False if configs not found.
-        """
-
-        if server_name not in self.servers:
-            return False
-
-        from bot_files.slime_utils import file_utils
-        if file_utils.delete_dir(self.servers[server_name]['server_path']) is False:
-            return False
-
-        self.update_all_server_configs()
-        return self.servers.pop(server_name)
 
     def update_server_configs(self, server_name: str, new_data: Dict) -> Union[Dict, bool]:
         """
+        Updates server configs.
 
         Args:
-            server_name:
-            new_data:
+            server_name str: Name of server to edit.
+            new_data dict: Updated server configs dict.
 
         Returns:
             dict, bool: Updated server configs dict, or False if no configs exists.
@@ -311,14 +293,13 @@ class Config():
         # Gets any preexisting data.
         if server_name in self.servers:
             server_configs.update(self.servers[server_name])
-        new_server_name = server_configs['server_name']
         server_configs.update(new_data)  # Updates example template values with user set ones, fallback on 'example' defaults
-        self.servers[new_server_name] = server_configs
-
+        new_server_name = server_configs['server_name']
         # Updates paths variables with new server name, e.g. ../servers/old_name/ > ../servers/new_name/
-        self._update_config_paths(server_configs, new_server_name, server_name)
-        # Adds default configs for not set, and updates config json file.
-        self.update_all_server_configs()
+        self.servers[new_server_name] = self._update_config_paths(server_configs, new_server_name, server_name)
+
+        self.servers.pop(server_name)  # Delete old server configs
+        self.update_configs_file()
 
         return server_configs
 
@@ -335,7 +316,8 @@ class Config():
 
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
         with open(self.get_config('user_config_filepath'), 'r') as openfile:
-            json_data = json.load(openfile)
+            try: json_data = json.load(openfile)
+            except: return False
             self.bot_configs.update(json_data['bot_configs'])
             self.servers.update(json_data['servers'])
             self.switch_server_configs(self.bot_configs['selected_server'])

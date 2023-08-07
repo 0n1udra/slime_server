@@ -399,11 +399,11 @@ class Backend():
             return False
 
         # Create new folder for server.
-        new_folder = join(config.get_config('servers_path'), server_name.strip())
-        if not file_utils.new_dir(new_folder):
-            return False
+        if not os.path.isdir(server_data['server_path']):
+            if not file_utils.new_dir(server_data['server_path']):
+                return False
 
-        return config.new_server_configs(server_name)
+        return server_data
 
     async def server_delete(self, server_name: str) -> Union[Dict, bool]:
         """
@@ -424,6 +424,37 @@ class Backend():
         server_data = config.servers.pop(server_name)
         config.update_all_server_configs()
         return server_data
+
+    async def server_edit(self, server_name: str, new_server_data: Dict) -> bool:
+        """
+        Edit existing server configs. Also renames folder if name changed.
+
+        Args:
+            server_name str: Server name to edit.
+            server_data dict: New server configs.
+
+        Returns:
+            bool: If update successful.
+        """
+
+        # Updates folder name if name changed.
+        if server_name != new_server_data['server_name']:
+            original_path = config.servers[server_name]['server_path']
+            new_path = join(config.get_config('servers_path'), new_server_data['server_name'])
+            if os.path.isdir(original_path) is False:
+                return False
+
+            try: os.rename(original_path, new_path)
+            except:
+                return False
+            lprint(f"Renamed server folder: {original_path} > {new_path}")
+
+        # Updates server configs.
+        if config.update_server_configs(server_name, new_server_data):
+            lprint(f"Updated server configs: {server_name}")
+            return True
+
+        return False
 
     async def server_copy(self, server_name: str, new_server_name: str) -> Union[Dict, bool]:
         """

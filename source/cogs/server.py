@@ -66,18 +66,14 @@ class Server(commands.Cog):
 
         # if get_parameter() returning bmode tuple, means no server was selected or server name given
         if 'bmode' in server_name:
-            await ctx.send("No info to get.")
+            await backend.send_msg("No info to get.")
             return
 
-        if server_name not in config.servers:
-            # TODO simplify os isdir and join into function
-            if isdir(join(config.get_config('servers_path'), server_name)):
-                await ctx.send("Server folder found, but no server configs.\nUse the Edit button to create a new config entry for it.")
-                return
-        data = config.servers[server_name]
-        fields = [['Name', data['server_name']], ['server_description', data['server_description']], ['Launch Command', f"`{data['server_launch_command']}`"], ['Wait Time', data['startup_wait_time']]]
-        await ctx.send(embed=comps.new_embed(fields, 'Server Info'))
-        await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
+        if data := config.servers.get(server_name):
+            fields = [['Name', data['server_name']], ['server_description', data['server_description']], ['Launch Command', f"`{data['server_launch_command']}`"], ['Wait Time', data['startup_wait_time']]]
+            await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
+            await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
+        return False
 
     @commands.command(hidden=True)
     async def servernew(self, ctx, interaction):
@@ -127,14 +123,10 @@ class Server(commands.Cog):
         if interaction == 'submitted':
             new_data = comps.get_data('serveredit')
 
-            if new_data['server_name'] in config.servers:
-                await ctx.send(f"**ERROR:** Server name already in use: {server_name}")
-                return
-
             # Gets current configs for server to be used to update new configs..
-            if old_server_configs := await backend.server_delete(server_name):
-                if await backend.server_new(new_data['server_name'], old_server_configs) is False:
-                    return False
+            if not await backend.server_edit(server_name, new_data):
+                await ctx.send("**ERROR:** Problem editing server configs.")
+                return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
             try: await ctx.invoke(self.bot.get_command('_update_control_panel'), 'servers')
