@@ -20,18 +20,14 @@ import fileinput
 from os.path import join
 from typing import Union, Dict
 
-import discord.ext.commands
 from discord.ext.commands import Bot, Context
 import mctools
 
-from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
+from bot_files.server_api import Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
-class Backups:
-    pass
-
-class Backend(Backups):
+class Backend():
     # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
     server_api_types = {
         'use_rcon': Server_API_Rcon,
@@ -42,13 +38,13 @@ class Backend(Backups):
     def __init__(self):
         # Specific API for server interaction depending on server type (vanilla, PaperMC, etc) .
         self.bot = None
+        self.messages = []
         self.last_command_channel_id = None
         self.server_api = None
         self.subprocess_servers = {}
         self.discord_channel = None
         self.server_active = False
         config.update_from_file()  # Reads from json config file if exists.
-        config.update_all_server_configs()
 
     # ===== Discord
     async def update_bot_object(self, bot: Bot) -> bool:
@@ -100,7 +96,7 @@ class Backend(Backups):
 
         return True
 
-    async def send_discord_message(self, msg: str) -> bool:
+    async def send_msg(self, *args, **kwargs) -> bool:
         """
 
         Args:
@@ -113,8 +109,22 @@ class Backend(Backups):
         if self.discord_channel is None:
             return False
 
-        await self.discord_channel.send(msg)
+        self.messages.append(await self.discord_channel.send(*args, **kwargs))
         return True
+
+    async def clear_messages(self, clear_comps=False) -> None:
+        """
+
+        Args:
+            clear_comps:
+
+        Returns:
+
+        """
+
+        for msg in self.messages:
+            try: await msg.delete()
+            except: pass
 
     # ===== Server API
     async def select_server(self, server_name: str) -> bool:
@@ -151,7 +161,6 @@ class Backend(Backups):
                 break
 
         lprint(f"INFO: Selected Server: {server_name}")
-        await self.get_server_version(force_check=True)  # Checks server version, needed for parsing some command output.
         return True
 
     # Send command to server console.
@@ -171,29 +180,12 @@ class Backend(Backups):
         # If these configs are set to False, the bot will send the server commands even if status of server status is unknown.
         # If either one is, the bot will only send the command if server console is reachable or successful ping.
         if config.get_config('check_before_command') or config.get_config('ping_before_command'):
-            if not await self.console_reachable():
+            if not await self.server_api.server_console_reachable():
                 return False
 
-        if self.server_api.send_command(command):
+        if await self.server_api.send_command(command):
             self.server_api.last_command_sent = command
             return True
-
-        return False
-
-    # Check if server console is reachable.
-    async def console_reachable(self, discord_msg: bool = False) -> Union[bool, None]:
-        """
-        Check if server console is reachable by sending a unique number to be checked in logs.
-
-        Returns:
-            bool, None: Console reachable, or None if unable to get status.
-        """
-
-        if await self.server_api.server_console_reachable():
-            return True
-
-        if discord_msg:
-            await self.send_discord_message("**Server Unreachable**")
 
         return False
 
@@ -262,20 +254,6 @@ class Backend(Backups):
             return stats
 
     # ===== Get data
-    async def get_motd(self):
-        """
-        Gets current message of the day from server, either by reading from server.properties file or using PINGClient.
-
-        Returns:
-            str: Server motd.
-        """
-
-        # Get data from server properties file if able, else use relevant backend.send_command to get it.
-        if data := self.get_property('motd'):
-            return data
-        else:
-            pass
-
     async def get_players(self):
         """Extracts wanted data from output of 'list' command."""
 
@@ -316,27 +294,27 @@ class Backend(Backups):
             if data := config.get_config('server_version'):
                 version = data
 
+        elif config.get_config('server_files_access'):
+            # Tries to find version info from latest.log.
+            if data := await self.read_server_log('server version', top_down_mode=True):
+                version = data[0].split('version')[-1].strip()
+            # Tries to find info in server.properties next.
+            elif data := await self.get_property('version'):
+                version = data
+
         # Get version info from server console.
         elif await self.send_command('version'):
             if data := await self.get_command_output('This server is running'):
                 version = utils.parse_version_output(data[0])
 
-        elif config.get_config('server_files_access'):
-            # Tries to find version info from latest.log.
-            if data := await self.read_server_log('server version'):
-                version = data[0].split('version')[-1].strip()
-            # Tries to find info in server.properties next.
-            elif data := self.get_property('version'):
-                version = data
-
-        elif data := config.get_config('server_version'):
-            version = data
+        # Updates server version in configs.
+        if version != config.get_config('server_version'):
+            config.set_config('server_version', version)
 
         if version:
-            config.set_config('server_version', version)
             return version
-        else:
-            return False
+
+        return False
 
     # ===== File reading and writing
     # TODO Make async
@@ -374,11 +352,11 @@ class Backend(Backups):
                     if value:
                         line = '='.join([split_line[0], value])
                     # If user did not pass a new value to update property, just return the line from file.
-                    return_line = line
-                print(line, end='\n')
+                    return_line = line.strip()
+                print(line, end='')
 
         # Returns value, and complete line
-        return return_line if return_lines else False
+        return return_line if return_line else False
 
     async def get_property(self, property_name: str) -> Union[str, bool]:
         """
@@ -468,27 +446,43 @@ class Backend(Backups):
                 return server_data
 
     # ===== Backup/Restore
-    async def new_backup(self, new_name, src, dst):
+    async def new_backup(self, new_name, mode: str) -> Union[str, bool]:
         """
-        Create a new world or server backup, by copying and renaming folder.
+        Create a new world or server backup, by copying all folders with 'world_' in its name.
 
         Args:
             new_name str: Name of new copy. Final name will have date and time prefixed.
-            src str: Folder to backup, whether it's a world folder or a entire server folder.
-            dst str: Destination for backup.
+
+        Returns:
+            str, bool: If success, returns name path of backup, else False if error happens.
         """
 
-        if not file_utils.new_dir(dst):
-            return False
-        # TODO add multiple world folders backup
-        # folder name: version tag if known, date, optional name
-
-        version = self.get_server_version()
-        version_text = f"{'v(' + version + ') ' if 'N/A' not in version else ''}"
+        # Creates folder name, date, version, optional keywords
+        version = await self.get_server_version()
+        version_text = f"{f'v({version}) ' if version else ''}"
         new_name = f"({utils.get_datetime()}) {version_text}{new_name}"
-        new_backup_path = join(dst, new_name.strip())
-        file_utils.copy_dir(src, new_backup_path)
-        return new_backup_path
+        # E.g. (2023-08-03 16-29) v(1.19.4) test backup
+
+        # Copies whole server folder.
+        if 'server' in mode:
+            new_backup_path = join(config.get_config('server_backups_path'), new_name.strip())
+            source_path = config.get_config('server_path')
+            if file_utils.copy_dir(source_path, new_backup_path) is False:
+                return False
+
+        # Copies all folders containing 'world' in name. I.e. world, world_nether, world_the_end
+        elif 'world' in mode:
+            new_backup_path = join(config.get_config('world_backups_path'), new_name.strip())
+            error = False
+            for folder in os.listdir(config.get_config('server_path')):
+                if 'world' in folder:
+                    if file_utils.copy_dir(join(config.get_config('server_path'), folder), join(new_backup_path, folder)) is False:
+                        error = True  # Even if failed, try to backup the others.
+
+            if error:
+                return False
+
+        return new_name
 
     async def restore_backup(self, src, dst):
         """
