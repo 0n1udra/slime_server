@@ -178,7 +178,7 @@ class Slime_Bot_Commands(commands.Cog):
         embed = discord.Embed(title='Useful Websites :computer:')
 
         # Creates embed of links from useful_websites dictionary from slime_config.py.
-        for name, url in config.get_config['useful_websites'].items():
+        for name, url in config.get_config('useful_websites').items():
             embed.add_field(name=name, value=url, inline=False)
 
         await backend.send_msg(embed=embed)
@@ -231,7 +231,7 @@ class Discord_Components_Funcs(commands.Cog):
             ?player Frogo
         """
 
-        await comps.clear_current_comps()
+        await comps.delete_comps('player_panel')
         comps.set_data('player_selected', 0)
 
         players = await backend.get_players()  # Gets list of online players
@@ -258,7 +258,7 @@ class Discord_Components_Funcs(commands.Cog):
 
         b1 = await backend.send_msg('', view=comps.new_buttons(player_buttons))
 
-        comps.set_data('current_components', [*comps.get_data('current_components'), player_selection_panel, b1])
+        comps.add_comps('player_panel', [player_selection_panel, b1])
         lprint(ctx, 'Opened player panel')
 
     @commands.command(aliases=['tpp', 'tpanel', 'tppanel'])
@@ -279,10 +279,13 @@ class Discord_Components_Funcs(commands.Cog):
         players = await backend.get_players()  # Get list of online players.
 
         # Options for selection boxes.
-        if players:
-            teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]]
-        else: teleport_select_options = [['No Online Players', '_', True]]
-        if target: teleport_select_options += [[target, target, True]]
+        teleport_select_options = [['Random Player', '@r']] + [[i, i] for i in players[0]] if players else [['No Online Players', '_', True]]
+        for i in teleport_select_options:
+            if target and target.lower() == i[0].lower():
+                i.append(True)
+                break
+            comps.set_data('teleport_target', target)
+            comps.set_data('teleport_destination', target)
 
         # Selections updates teleport_selected list, which will be used in _teleport_selected() when bmode clicked.
         select1 = await backend.send_msg("**Teleport**", view=comps.new_selection([['All Players', '@a']] + teleport_select_options, custom_id='teleport_target', placeholder='Target'))
@@ -297,8 +300,8 @@ class Discord_Components_Funcs(commands.Cog):
     async def _teleport_selected(self, ctx, target_player=None):
         """Teleports selected targets from ?teleport command when use Teleport! bmode."""
 
-        if not target_player: target_player = comps.get_data('teleport_target')  # if not provided player param
-        await ctx.invoke(self.bot.get_command('teleport'), target_player, comps.get_data('teleport_destination'))
+        if not target_player: target_player = comps.get_data('teleport_target', '')  # if not provided player param
+        await ctx.invoke(self.bot.get_command('teleport'), target_player, comps.get_data('teleport_destination', ''))
 
     # ===== Bot/server settings, panels, change server, download logs, restore/delete server and world backups
     @commands.command(aliases=['botsettings'])
@@ -363,13 +366,13 @@ class Discord_Components_Funcs(commands.Cog):
             params = ["**Servers**", 'second_selected', 'Select Server']
 
         elif mode == 'world_backups':
-            select_options, total_pages = utils.group_items(file_utils.enum_dirs_for_discord(config.get_config('world_backups_path'), 'd', True))
+            select_options, total_pages = utils.group_items(file_utils.enum_dirs_for_discord(config.get_config('world_backups_path'), 'db'))
             if not select_options: select_options = [[['No world backups', '_', True]]]
             buttons2 = [['Restore', 'worldbackuprestore bmode', '\U000021A9'], ['Delete', 'worldbackupdelete bmode', '\U0001F5D1'], ['Backup World', 'worldbackupdate', '\U0001F195']]
             params = ["**World Backups**", 'second_selected', 'Select World Backup']
 
         elif mode == 'server_backups':
-            select_options, total_pages = utils.group_items(file_utils.enum_dirs_for_discord(config.get_config('server_backups_path'), 'd', True))
+            select_options, total_pages = utils.group_items(file_utils.enum_dirs_for_discord(config.get_config('server_backups_path'), 'db'))
             if not select_options: select_options = [[['No server backups', '_', True]]]
             buttons2 = [['Restore', 'serverrestore bmode', '\U000021A9'], ['Delete', 'serverbackupdelete bmode', '\U0001F5D1'], ['Backup Server', 'serverbackupdate', '\U0001F195']]
             params = ["**Server Backups**", 'second_selected', 'Select Server Backup']
@@ -399,7 +402,6 @@ class Discord_Components_Funcs(commands.Cog):
     @commands.command(aliases=['buttons', 'b'])
     async def buttonspanel(self, ctx):
         """Shows all the buttons!"""
-        global slime_vars
 
         await comps.clear_current_comps()
         sserver = config.server_configs
@@ -412,7 +414,7 @@ class Discord_Components_Funcs(commands.Cog):
             if config.get_config('server_files_access') is False and 'backups' in k: continue
             try: buttons_components.append(await backend.send_msg(content=k.capitalize(), view=comps.new_buttons(v)))
             except: pass
-        comps.set_data('current_components', [server_selection, buttons_components])
+        comps.add_comps('buttons_panel', [server_selection, *buttons_components])
 
     @commands.command(hidden=True)
     async def _close_panel(self, ctx): await comps.clear_current_comps()
@@ -422,7 +424,6 @@ class Discord_Components_Funcs(commands.Cog):
         """Download server log file, also unzips beforehand if it's a .gz file."""
 
         log_selected = comps.get_data('second_selected')
-        print('ok', log_selected)
         if not log_selected: return  # If not log is selected from Discord selection component
         # Unzips file if it's a .gz file. Will delete file afterwards.
         if log_selected.endswith('.gz'):
