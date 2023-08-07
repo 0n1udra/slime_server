@@ -65,7 +65,9 @@ class Comps:
             for c in _comps:
                 try: await c.delete()
                 except: pass
+
             return True
+
         return False
 
     def get_comps(self, key) -> Union[Context, None]:

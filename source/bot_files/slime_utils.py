@@ -256,14 +256,13 @@ class File_Utils:
         except: return False
 
     # TODO Test (everything)
-    def enum_dirs_for_discord(self, path: str, mode: str, index_mode: bool = False):
+    def enum_dirs_for_discord(self, path: str, mode: str):
         """
         Returns a list containing index for folder/file in a path with variables for Discord select component.
 
         Args:
             path str: Path of world or server backups location.
             mode str: Aggregate only files or only directories.
-            index_mode bool: Put index as second item in list.
 
         Returns:
             list: Data for Discord select component.
@@ -281,8 +280,13 @@ class File_Utils:
 
             if flag:
                 component_data = [item, item, False, index]
+                # For control panel in Server mode, need to show server description in select component options.
                 if 's' in mode and item in config.servers:
                     component_data[-1] = config.servers[item]['server_description']
+                # For world/server backup mode in control panel, need to be return the index of selected.
+                if 'b' in mode:
+                    component_data[1] = index
+
                 return_list.append(component_data)  # Last 2 list items is for new_selection.
                 index += 1
             else: continue
@@ -474,8 +478,8 @@ class Utils:
         if version <= 12:
             # Parses and returns info from log lines.
             try:
-                text = output[0].split(':')[-2].strip()
-                player_names = output[1].split(':')[-1].split(',')
+                text = output[1].split(':')[-2].strip()
+                player_names = output[0].split(':')[-1].split(',')
                 return player_names, text
             except:
                 return None

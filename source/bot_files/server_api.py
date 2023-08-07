@@ -101,7 +101,7 @@ class Server_Update:
 
         # Checks if server name and description contains keyword to determine what url builder func to use.
         for k, v in self.url_builder_functions.items():
-            if any(i in config.server_configs['name'] for i in v[1]):
+            if any(i in config.server_configs['server_name'] for i in v[1]):
                 return v[0]
             elif any(i in config.server_configs['server_description'] for i in v[1]):
                 return v[0]

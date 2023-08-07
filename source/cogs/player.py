@@ -45,7 +45,7 @@ class Player(commands.Cog):
         _player_list = []
         for i in player_list[0]:
             if 'location' in args:  # Get xyz coords for each player.
-                player_location = backend.get_coords(i)
+                player_location = await backend.get_coords(i)
                 _player_list.append(f'{i.strip()} {player_location if player_location else "Location N/A"}\n')
             else: _player_list.append(f'{i.strip()}, ')
 
@@ -161,7 +161,7 @@ class Player(commands.Cog):
         await backend.send_msg(f"***Teleporting in 5s...***")
 
         # Saves current coordinates of target player before teleporting them, so they may be returned.
-        targets_coords = backend.get_coords(target)
+        targets_coords = await backend.get_coords(target)
         try: comps.get_data('teleport_return', targets_coords.replace(',', ''))
         except: comps.set_data('teleport_return', 0)
 
@@ -282,7 +282,7 @@ class Player(commands.Cog):
             ?locate Steve
         """
 
-        if location := backend.get_coords(player):
+        if location := await backend.get_coords(player):
             await backend.send_msg(f"Located `{player}`: `{location}`")
             lprint(ctx, f"Located {player}: {location}")
             return location
@@ -380,7 +380,6 @@ class Permissions(commands.Cog):
         banned_players = ''
         await backend.send_command("banlist")
         log_data = await backend.read_server_log('banned players')
-        print(log_data)
         if not log_data:
             await ctx.send("Unable to get ban list.")
 
