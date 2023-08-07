@@ -1,4 +1,4 @@
-__version__ = '9.0'
+__version__ = '9.0 beta'
 __date__ = '19/07/2023'
 __author__ = 'github.com/0n1udra'
 __license__ = 'GPL 3'

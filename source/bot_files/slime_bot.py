@@ -24,7 +24,7 @@ async def on_ready():
 
     # Will send startup messages to specified channel if given channel_id.
     if config.get_config('channel_id'):
-        await backend.send_msg(f':white_check_mark: v{__version__} **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
+        await backend.send_msg(f':white_check_mark: (v{__version__}) **Bot PRIMED** {datetime.datetime.now().strftime("%X")}')
         if 'hidebanner' not in sys.argv:
             await backend.send_msg(f"Server: `{config.server_configs['server_name']}`")
             # Shows some useful buttons
