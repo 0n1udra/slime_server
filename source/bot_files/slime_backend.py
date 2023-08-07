@@ -155,7 +155,6 @@ class Backend():
                 self.subprocess_servers[server_name] = new_subprocess_server
                 return True
 
-        print(config.server_configs)
         for config_name, api in self.server_api_types.items():
             # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
             if config.get_config(config_name):
