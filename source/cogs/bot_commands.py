@@ -161,8 +161,8 @@ class Slime_Bot_Commands(commands.Cog):
             ?address
         """
 
-        await backend.send_msg(f"Server IP: ||`{backend.get_public_ip()}`||")
-        await backend.send_msg(f"Alternative Address: ||`{config.get_config('server_address')}`|| ({await backend.server_ping()})")
+        await backend.send_msg(f"Server IP: ||`{utils.get_public_ip()}`||")
+        await backend.send_msg(f"Alternative Address: ||`{config.get_config('server_address')}`|| ({await backend.server_ping()}ms)")
         lprint(ctx, 'Fetched server address')
 
     @commands.command(aliases=['websites', 'showlinks', 'usefullinks', 'sites', 'urls'])

@@ -228,7 +228,7 @@ class Backend():
         """
 
         if data := await self.server_ping_query():
-            return data['time']
+            return round(data['time'], 2)
         if address := config.get_config('server_address'):
             return await utils.ping_address(address)
 
