@@ -440,7 +440,7 @@ class Backend():
             return False
 
         server_data = config.servers.pop(server_name)
-        config.update_all_server_configs()
+        config.update_configs_file()
         return server_data
 
     async def server_edit(self, server_name: str, new_server_data: Dict) -> bool:

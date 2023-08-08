@@ -1,3 +1,8 @@
+"""
+self.bot_configs contain all bot related settings.
+self.servers contains configs for each server.
+"""
+
 __version__ = '9.0.1 beta'
 __date__ = '07/08/2023'
 __author__ = 'github.com/0n1udra'
@@ -7,7 +12,6 @@ __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm onlin
 
 import os
 import json
-import getpass
 import platform
 from os.path import join
 from typing import Union, Any, Dict
@@ -31,30 +35,16 @@ class Config():
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
 
-    def initialize_configs(self, configs_from_setup=None):
+    def initialize_configs(self) -> None:
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
 
-        # Gets username to use in paths
-        try:
-            self.user = os.getlogin()
-        except:
-            self.user = getpass.getuser()
-        if not self.user:
-            print("ERROR: Need to set 'user' variable in slime_config.py")
-            exit()
-
-        # Get configs from run_bot.py setup_configs()
-        if configs_from_setup:
-            self.mc_path = configs_from_setup['mc_path']
-            self.home_path = configs_from_setup['home_path']
-        else:
-            self.mc_path = join(os.path.expanduser('~'), 'Games', 'Minecraft')
-            self.home_path = os.path.expanduser('~')
+        self.mc_path = join(os.path.expanduser('~'), 'Games', 'Minecraft')
+        self.home_path = os.path.expanduser('~')
 
         self.bot_configs = {
             # Use python virtual environment
             'use_pyenv': True,
-            'pyenv_activate_command': f'source /home/{self.user}/pyenvs/slime_server/bin/activate',
+            'pyenv_activate_command': f'source {self.home_path}/pyenvs/slime_server/bin/activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",
             # Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
@@ -95,7 +85,6 @@ class Config():
             'windows_cmdline_start': 'start "Minecraft server"',
 
             'selected_server': 'example',
-            'user': self.user,
             'init': False,
         }
 

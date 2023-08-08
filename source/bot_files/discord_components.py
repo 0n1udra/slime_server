@@ -50,6 +50,18 @@ class Comps:
         self.active_comps[key] = value
         return self.active_comps
 
+    def get_comps(self, key) -> Union[Context, None]:
+        """
+        Get Discord context message of component.
+
+        Args:
+            key:
+
+        Returns:
+            Context, None: Discord message context or None.
+        """
+        return self.active_comps.get(key, None)
+
     async def delete_comps(self, comp_name: str) -> Union[Dict, bool]:
         """
         Deletes a message containing componetns.
@@ -70,17 +82,18 @@ class Comps:
 
         return False
 
-    def get_comps(self, key) -> Union[Context, None]:
+    async def clear_current_comps(self) -> None:
         """
-        Get Discord context message of component.
+        Deletes old components to prevent conflicts.
+        When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
+        When new panel is opened the old one is deleted.
 
-        Args:
-            key:
-
-        Returns:
-            Context, None: Discord message context or None.
+        Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
+        e.g. Deleting a listing in a selection box.
         """
-        return self.active_comps.get(key, None)
+
+        for k in list(self.active_comps.keys()):
+            await self.delete_comps(k)
 
     def set_data(self, key: str, value: Any) -> Dict:
         """
@@ -110,19 +123,6 @@ class Comps:
         """
 
         return self.comp_data.get(key, fallback)
-
-    async def clear_current_comps(self) -> None:
-        """
-        Deletes old components to prevent conflicts.
-        When certain panels (e.g. worldrestorepanel) are opened, they will be added to current_components list.
-        When new panel is opened the old one is deleted.
-
-        Is needed because if you change something with an old panel when a new one is needed, conflicts may happen.
-        e.g. Deleting a listing in a selection box.
-        """
-
-        for k in list(self.active_comps.keys()):
-            await self.delete_comps(k)
 
     def new_modal(self, field_args: List, title: str, custom_id: str) -> discord.ui.Modal:
         modal = Discord_Modal(title=title, custom_id=custom_id)

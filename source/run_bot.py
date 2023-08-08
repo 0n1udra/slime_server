@@ -11,7 +11,9 @@ from bot_files.slime_utils import lprint, file_utils, proc_utils
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
 
-def setup_configs():
+def setup_configs() -> None:
+    """if 'init' variable in configs is False, asks user to setup basic configs."""
+
     # Creates flatten dict to make it easier to find items to use as defaults
     def get_input(config_prompts):
         new_configs = {}
@@ -34,7 +36,7 @@ def setup_configs():
 
     bot_config_prompts = {
         'pyenv_activate_command': 'Command to use to activate/source pyenv if using one.',
-        "use_pyenv": "Use Python env (y/n)",
+        'use_pyenv': "Use Python env (y/n)",
         'bot_token_filepath': "Discord bot token filepath",
         'command_prefix': "Discord command prefix",
         'channel_id': "Channel ID to send startup message in.",
@@ -43,11 +45,11 @@ def setup_configs():
         'use_tmux': "Use Tmux (y/n)"
     }
     server_config_prompts = {  # Optionally setup server
-        'server_name': "Server name",
-        'server_description': "Server description",
-        'server_address': "Server domain/IP",
-        'server_port': "Server port",
-        'server_files_access': "Bot can access MC files locally (y/n)",
+        'server_name': 'Server name',
+        'server_description': 'Server description',
+        'server_address': 'Server domain/IP',
+        'server_port': 'Server port',
+        'server_files_access': 'Bot can access MC files locally (y/n)',
         'rcon_pass': 'RCON password',
         'rcon_port': 'RCON Port',
         'server_use_rcon': 'Enable RCON',
@@ -63,8 +65,9 @@ def setup_configs():
 
     config.update_all_server_configs()  # Updates paths configs, and writes to file.
 
-def _start_bot():
+def _start_bot() -> None:
     """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
+
     if os.path.isfile(config.get_config('bot_token_filepath')):
         with open(config.get_config('bot_token_filepath'), 'r') as file:
             TOKEN = file.readline()
@@ -75,8 +78,9 @@ def _start_bot():
 
     bot.run(TOKEN)
 
-def start_bot():
+def start_bot() -> None:
     """Uses different methods of launching Discord bot depending on config"""
+
     if config.get_config('use_tmux'):
         no_tmux = False
         # Sources pyenv if set in slime_vars.
@@ -102,7 +106,7 @@ def start_bot():
 
     else: _start_bot()  # Starts inline if not using tmux.
 
-def start_tmux_session():
+def start_tmux_session() -> None:
     """Starts Tmux session in detached mode, with 2 panes, and sets name."""
 
     if os.system(f"tmux new -d -s {config.get_config('tmux_session_name')}"):
@@ -115,12 +119,14 @@ def start_tmux_session():
 
     time.sleep(1)
 
-def show_log():
+def show_log() -> None:
     """Use watch + tail command on bot log."""
 
     os.system(f"watch -n {watch_interval} tail {config.get_config('bot_log_filepath')}")
 
-def script_help():
+def script_help() -> None:
+    """Shows help page for run_bot.py"""
+
     help = """
     python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
     python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
@@ -140,7 +146,9 @@ def script_help():
     """
     print(help)
 
-def show_banner():
+def show_banner() -> None:
+    """Shows banner containing some bot config."""
+
     # Hides sensitive info from output.
     nono = config.get_config('show_sensitive_info')  # what? got a problem with the naming? it works.
     no = '**********'  # 2bad. change it!

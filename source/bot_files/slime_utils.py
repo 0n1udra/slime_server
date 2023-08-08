@@ -538,7 +538,7 @@ class Utils:
         status_check_command = config.get_config('status_checker_command') + ' ' + random_number
         return status_check_command, random_number
 
-    def get_parameter(self, arg, nrg_msg=False, key='second_selected', **kwargs):
+    def get_parameter(self, arg, nrg_msg: bool = False, key: str = 'second_selected', **kwargs) -> str:
         """
         Gets needed parameter for function to run properly.
         Discord commands can be called from buttons or prefix command.
@@ -549,6 +549,9 @@ class Utils:
             arg: Will either receive parameters from using prefix, or will be bmode.
             nrg_msg bool: Returns 'No reason given' string, if arg is empty.
             key str: Key of data dict to get parameter from. Used for getting selection from components.
+
+        Returns:
+            str: Needed data to use as parameters for bot command.
         """
 
         # Checks if command was called from button
@@ -567,7 +570,7 @@ class Utils:
 
         return arg
 
-    def group_items(self, items, size=25):
+    def group_items(self, items, size: int = 25) -> Union[Tuple[List, int], Tuple[None, None]]:
         """
         Discord select componenet can only show 25 items at a time.
         This is to group items in sublist of 25.
@@ -583,13 +586,13 @@ class Utils:
             return grouped_list, num_of_groups
         except: return None, None
 
-    def format_args(self, args, return_no_reason=False):
+    def format_args(self, args: tuple, return_no_reason: bool = False) -> str:
         """
         Formats passed in *args from Discord command functions.
         This is so quotes aren't necessary for Discord command arguments.
 
         Args:
-            args str: Passed in args to combine and return.
+            args tuple: Data to combine into single str for bot command.
             return_no_reason bool(False): returns string 'No reason given.' for commands that require a reason (kick, ban, etc).
 
         Returns:
@@ -603,16 +606,24 @@ class Utils:
                 return "No reason given."
             return ''
 
-    def format_coords(self, coordinates):
-        pass
+    def get_datetime(self) -> str:
+        """
+        Returns date and time: 2021-12-04 01-49
 
-    def get_datetime(self):
-        """Returns date and time. (2021-12-04 01-49)"""
+        Returns:
+            str: Formatted time date.
+        """
 
         return datetime.datetime.now().strftime('%Y-%m-%d %H-%M')
 
-    def remove_ansi(self, text):
-        """Removes ANSI escape characters."""
+    def remove_ansi(self, text: str) -> str:
+        """
+        Removes ANSI escape characters.
+
+        Returns:
+            str: Formatted string.
+        """
+
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         return ansi_escape.sub('', text)
 
@@ -652,7 +663,19 @@ class Utils:
             ping_out, ping_error = ping.communicate()
             return True if ping_out.strip() else False
 
-    def convert_to_bytes(self, data: Any) -> io.BytesIO: return io.BytesIO(data.encode())
+    def convert_to_bytes(self, data: Any) -> io.BytesIO:
+        """
+        Converts data to ByteIO data.
+        Mainly used for formatting data to be sent as a Discord file attachment.
+
+        Args:
+            data: Data to convert.
+
+        Returns:
+            ByteIO: io.ByteIO data.
+        """
+
+        return io.BytesIO(data.encode())
 
 
 file_utils = File_Utils()
