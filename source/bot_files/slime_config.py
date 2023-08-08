@@ -136,9 +136,6 @@ class Config():
                 # How much time to give server after using 'save-all' command.
                 'save_world_wait_time': 3,
 
-                # Only send command to server if ping successful.
-                # NOTE: This will disable and override 'check_before_command'. You can use this if you can't use that.
-                'ping_before_command': False,
                 # Only send command after sending unique number to console to check status.
                 'check_before_command': True,
                 # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.

@@ -60,6 +60,7 @@ class World_Backups(commands.Cog):
         name = utils.format_args(name)
 
         await backend.send_msg("***Creating World Backup...*** :new::floppy_disk:")
+        lprint(ctx, f"INFO: Creating world backup: {name}")
 
         # Gives server some time to save world.
         await backend.send_command(f"save-all")
@@ -109,6 +110,7 @@ class World_Backups(commands.Cog):
 
         fetched_restore = file_utils.get_from_index(config.get_config('world_backups_path'), index, 'd')
         await backend.send_msg("***Restoring World...*** :floppy_disk::leftwards_arrow_with_hook:")
+        lprint(ctx, f"INFO: Restoring world from backup: {fetched_restore}")
         if await backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
@@ -143,13 +145,14 @@ class World_Backups(commands.Cog):
             return
 
         to_delete = file_utils.get_from_index(config.get_config('world_backups_path'), index, 'd')
+        lprint(ctx, f"INFO: Deleting world backup {to_delete}")
         if not to_delete:
             await ctx.send("No backup was selected.")
             return
 
         if file_utils.delete_dir(to_delete):
             await backend.send_msg(f"**World Backup Deleted:** `{to_delete}`")
-            lprint(ctx, "Deleted world backup: " + to_delete)
+            lprint(ctx, "INFO: Deleted world backup: " + to_delete)
         else:
             await backend.send_msg(f"**Error:** Issue deleting: `{to_delete}`")
             lprint(ctx, "ERROR: Deleting world backup: " + to_delete)
@@ -177,6 +180,7 @@ class World_Backups(commands.Cog):
 
         await backend.send_msg(":fire: **Project Rebirth Commencing** :fire:")
         await backend.send_msg("**NOTE:** Next launch may take longer.")
+        lprint(ctx, f"INFO: Resetting world")
 
         if file_utils.delete_dir(join(config.get_config('server_path'), 'world')) is False:
             await backend.send_msg("Error trying to reset world.")
@@ -234,6 +238,7 @@ class Server_Backups(commands.Cog):
             return
 
         name = utils.format_args(name)
+        lprint(ctx, f"Creating new server backup {name}")
         await backend.send_msg(f"***Creating Server Backup...*** :new::floppy_disk:")
         if await backend.send_command(f"save-all"): await asyncio.sleep(3)
 
@@ -278,6 +283,7 @@ class Server_Backups(commands.Cog):
         if not index: return
 
         fetched_restore = file_utils.get_from_index(config.get_config('server_backups_path'), index, 'd')
+        lprint(ctx, f"Restoring server from backup: {fetched_restore}")
         await backend.send_msg(f"***Restoring Server...*** :floppy_disk::leftwards_arrow_with_hook:")
 
         if await backend.send_command(f"say ---WARNING--- Initiating jump to save point in 5s! : {fetched_restore}"):
@@ -315,6 +321,7 @@ class Server_Backups(commands.Cog):
             return
 
         to_delete = file_utils.get_from_index(config.get_config('server_backups_path'), index, 'd')
+        lprint(ctx, f"Deleting server backup: {to_delete}")
         if not to_delete:
             await ctx.send("No backup was selected.")
             return

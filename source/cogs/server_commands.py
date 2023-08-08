@@ -10,7 +10,7 @@ from bot_files.slime_utils import lprint, utils
 class Basics(commands.Cog):
     def __init__(self, bot): self.bot = bot
 
-    @commands.command(aliases=['command', 'mcommand', 'm/'])
+    @commands.command(aliases=['command', 'mcommand', 'm/', '/'])
     async def servercommand(self, ctx, *command):
         """
         Pass command directly to server.
@@ -25,7 +25,7 @@ class Basics(commands.Cog):
         Note: You will get the latest 2 lines from server output, if you need more use ?log.
         """
 
-        command = utils.utils.format_args(command)
+        command = utils.format_args(command)
         if await backend.send_command(command) is False:
             return False
 

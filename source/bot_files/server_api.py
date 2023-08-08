@@ -206,7 +206,7 @@ class Server_API(Server_Update):
         return False
 
     # Get output from the last issued command.
-    async def get_command_output(self, keyword: str = None, extra_lines: int = 0, check_number: str = None) -> Union[str, bool]:
+    async def get_command_output(self, keyword: str = None, extra_lines: int = 0, check_number: str = None, all_lines=False) -> Union[str, bool]:
         """
         Gets response from last command.
 
@@ -221,7 +221,7 @@ class Server_API(Server_Update):
         else: check_number = self.last_check_number
 
         await asyncio.sleep(config.get_config('command_buffer_time'))
-        if data := await self.read_server_log(search=keyword, extra_lines=extra_lines, stopgap_str=check_number):
+        if data := await self.read_server_log(search=keyword, extra_lines=extra_lines, find_all=all_lines, stopgap_str=check_number):
             return data
 
         return False
@@ -353,7 +353,7 @@ class Server_API_Screen(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}\n'"):
+        if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}^M'"):
             return False
 
         return True

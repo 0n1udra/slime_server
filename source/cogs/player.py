@@ -338,8 +338,11 @@ class Permissions(commands.Cog):
             await backend.send_msg("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
             return False
 
+        await ctx.send("***Banning player in 5s...***")
         reason = utils.format_args(reason, return_no_reason=True)
-        if not await backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False: return
+        if await backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False:
+            await ctx.send("**ERROR:** Issue banning player.")
+            return
 
         await asyncio.sleep(5)
 
@@ -379,9 +382,10 @@ class Permissions(commands.Cog):
 
         banned_players = ''
         await backend.send_command("banlist")
-        log_data = await backend.read_server_log('banned players')
+        log_data = await backend.get_command_output(extra_lines=20, all_lines=True)
         if not log_data:
             await ctx.send("Unable to get ban list.")
+            return
 
         if config.get_config('server_use_rcon'):
             if 'There are no bans' in log_data:
@@ -401,7 +405,7 @@ class Permissions(commands.Cog):
                 banned_players += data[0].strip() + '.'  # Gets line that says 'There are x bans'.
 
         else:
-            for line in filter(None, log_data.split('\n')):  # Filters out blank lines you sometimes get.
+            for line in log_data:
                 if 'was banned by' in line:  # finds log lines that shows banned players.
                     # Gets relevant data from current log line, and formats it for Discord output.
                     # E.g. [16:42:53] [Server thread/INFO] [minecraft/DedicatedServer]: Slime was banned by Server: No reason given
@@ -502,7 +506,9 @@ class Permissions(commands.Cog):
                 await backend.send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
                 match_list = ['whitelisted:', 'whitelisted player(s):']  # Varies depending on server version/type.
-                log_data = await backend.read_server_log(search=match_list, find_all=True)
+                log_data = await backend.get_command_output(keywords=match_list)
+                if isinstance(log_data, list):
+                    log_data = '\n'.join(log_data)
                 if not log_data:
                     await backend.send_msg('No whitelisted')
                     return

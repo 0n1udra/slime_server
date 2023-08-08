@@ -181,9 +181,9 @@ class Backend():
             bool: If successfully sent command to console.
         """
 
-        # If these configs are set to False, the bot will send the server commands even if status of server status is unknown.
-        # If either one is, the bot will only send the command if server console is reachable or successful ping.
-        if config.get_config('check_before_command') or config.get_config('ping_before_command'):
+        # check_before_command is False, the bot will send the server commands even if status of server status is unknown.
+        # Skips this if no local file access.
+        if config.get_config('check_before_command') and config.get_config('server_files_access'):
             if not await self.server_api.server_console_reachable():
                 return False
 
@@ -193,14 +193,14 @@ class Backend():
 
         return False
 
-    async def get_command_output(self, keywords: str = None, extra_lines: int = 0) -> Union[str, bool]:
+    async def get_command_output(self, keywords: str = None, extra_lines: int = 0, all_lines=False) -> Union[str, bool]:
         """
 
         Returns:
 
         """
 
-        return await self.server_api.get_command_output(keywords, extra_lines)
+        return await self.server_api.get_command_output(keywords, extra_lines, extra_lines, all_lines)
 
     # ===== Server status
     # Checks if server is reachable. By sending a command or using ping, depending on configs.
@@ -213,12 +213,10 @@ class Backend():
             bool: If server is active (not always same as MC console is reachable).
         """
 
-        # Prioritizes using ping instead of sending command to console.
-        if config.get_config('ping_before_command'):
-            return await self.server_ping()
         # Can force check even if configs disable it.
-        elif config.get_config('check_before_command') or force_check:
+        if config.get_config('check_before_command') or force_check:
             return await self.server_api.server_console_reachable()
+
         return await self.server_ping()
 
     async def server_ping(self) -> bool:
@@ -308,9 +306,9 @@ class Backend():
         # Check if config has version already. Some commands (?version, etc) will force bot to check server version.
         if not force_check:
             if data := config.get_config('server_version'):
-                version = data
+                return data
 
-        elif config.get_config('server_files_access'):
+        if config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
             if data := await self.read_server_log('server version', top_down_mode=True):
                 version = data[0].split('version')[-1].strip()
@@ -335,6 +333,9 @@ class Backend():
     # ===== File reading and writing
     # TODO Make async
     async def read_server_log(self, *args, **kwargs):
+        if not config.get_config('server_files_access'):
+            return False
+
         return await self.server_api.read_server_log(*args, **kwargs)
 
     async def update_property(self, property_name=None, value: str = '') -> Union[str, bool]:
