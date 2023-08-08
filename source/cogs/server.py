@@ -341,8 +341,11 @@ class Server(commands.Cog):
         """Uses ping command to see if server_address is reachable."""
 
         await backend.send_msg('***Pinging Server...***')
-        response = await backend.server_ping()
-        await backend.send_msg(response)
+        try: ping = f"({float(await backend.server_ping())}ms)"
+        except: ping = ''
+        if ping:
+            await backend.send_msg(ping)
+        else: await backend.send_msg("Unable to get ping.")
 
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
     async def servercheck(self, ctx):

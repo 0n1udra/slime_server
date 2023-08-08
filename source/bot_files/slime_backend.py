@@ -219,7 +219,7 @@ class Backend():
 
         return await self.server_ping()
 
-    async def server_ping(self) -> bool:
+    async def server_ping(self) -> Union[str, bool]:
         """
         Uses ping command to check if server reachable.
 
