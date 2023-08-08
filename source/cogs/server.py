@@ -308,6 +308,9 @@ class Server(commands.Cog):
         # Enables/disables autosave tasks.loop(). Also edits slime_config.py file, so autosave state can be saved on bot restarts.
         arg = str(arg)
         if arg.lower() in utils.enable_inputs:
+            if config.get_config('enable_autosave'):
+                await backend.send_msg('Autosave already enabled')
+                return
             # Starts loop, updates enable_autosave, edits slime_config.py, output to log
             self.autosave_task.start()
             config.set_config('enable_autosave', True)
