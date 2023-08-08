@@ -338,10 +338,10 @@ class Permissions(commands.Cog):
             await backend.send_msg("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
             return False
 
-        await ctx.send("***Banning player in 5s...***")
+        await backend.send_msg("***Banning player in 5s...***")
         reason = utils.format_args(reason, return_no_reason=True)
         if await backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False:
-            await ctx.send("**ERROR:** Issue banning player.")
+            await backend.send_msg("**ERROR:** Issue banning player.")
             return
 
         await asyncio.sleep(5)
@@ -384,7 +384,7 @@ class Permissions(commands.Cog):
         await backend.send_command("banlist")
         log_data = await backend.get_command_output(extra_lines=20, all_lines=True)
         if not log_data:
-            await ctx.send("Unable to get ban list.")
+            await backend.send_msg("Unable to get ban list.")
             return
 
         if config.get_config('server_use_rcon'):
@@ -563,7 +563,7 @@ class Permissions(commands.Cog):
             lprint(ctx, f"ERROR: Couldn't OP: {player}")
             return False
         elif response is None:
-            await ctx.send(f'`{player}` Already Operator, nothing changed.')
+            await backend.send_msg(f'`{player}` Already Operator, nothing changed.')
             return None
 
         await backend.send_command(f"say ---INFO--- {player} is now OP : {reason}")
@@ -599,7 +599,7 @@ class Permissions(commands.Cog):
             lprint(ctx, f"ERROR: Removing server OP: {player}")
             return False
         if response is None:
-            await ctx.send(f'`{player}` Was not Operator, nothing changed.')
+            await backend.send_msg(f'`{player}` Was not Operator, nothing changed.')
             return None
 
         await backend.send_command(f"say ---INFO--- {player} no longer OP : {reason}")

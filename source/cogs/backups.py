@@ -147,7 +147,7 @@ class World_Backups(commands.Cog):
         to_delete = file_utils.get_from_index(config.get_config('world_backups_path'), index, 'd')
         lprint(ctx, f"INFO: Deleting world backup {to_delete}")
         if not to_delete:
-            await ctx.send("No backup was selected.")
+            await backend.send_msg("No backup was selected.")
             return
 
         if file_utils.delete_dir(to_delete):
@@ -323,7 +323,7 @@ class Server_Backups(commands.Cog):
         to_delete = file_utils.get_from_index(config.get_config('server_backups_path'), index, 'd')
         lprint(ctx, f"Deleting server backup: {to_delete}")
         if not to_delete:
-            await ctx.send("No backup was selected.")
+            await backend.send_msg("No backup was selected.")
             return
 
         if file_utils.delete_dir(to_delete):

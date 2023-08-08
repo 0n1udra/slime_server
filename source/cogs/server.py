@@ -123,7 +123,7 @@ class Server(commands.Cog):
 
             # Gets current configs for server to be used to update new configs..
             if not await backend.server_edit(server_name, new_data):
-                await ctx.send("**ERROR:** Problem editing server configs.")
+                await backend.send_msg("**ERROR:** Problem editing server configs.")
                 return False
 
             await ctx.invoke(self.bot.get_command('serverinfo'), new_data['server_name'])
