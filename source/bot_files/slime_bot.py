@@ -57,7 +57,14 @@ async def on_command(ctx):
 async def on_command(ctx):
     backend.set_discord_channel(ctx)
 
-async def setup(bot):
+async def setup(bot: commands.Bot) -> None:
+    """
+    Loads all cogs from cogs folder.
+
+    Args:
+        bot: Discord bot object
+    """
+
     for i in os.listdir('./cogs'):
         if i.endswith('.py'):
             try:

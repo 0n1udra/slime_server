@@ -17,6 +17,7 @@ Following functions must be async:
 
 import os
 import json
+import aiohttp
 import asyncio
 import requests
 import subprocess
@@ -24,8 +25,6 @@ from collections import deque
 from typing import Union, Any, Callable, Tuple, List
 
 import mctools
-from bs4 import BeautifulSoup
-from file_read_backwards import FileReadBackwards
 
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
@@ -48,8 +47,9 @@ class Server_Update:
             'paper': [self.get_papermc_url, ['paper']],
             'bukkit': [self.get_bukkit_url, ['bukkit']],
         }
+        self.vanilla_manifest_url = 'https://launchermeta.mojang.com/mc/game/version_manifest.json'
 
-    def _check_latest_version(self):
+    async def check_latest_version(self) -> str:
         """
         Gets latest Minecraft server version number from official website using bs4.
 
@@ -57,12 +57,16 @@ class Server_Update:
             str: Latest version number.
         """
 
-        soup = BeautifulSoup(requests.get(config.get_config('new_server_address')).text, 'html.parser')
-        for i in soup.findAll('a'):
-            if i.string and 'minecraft_server' in i.string:
-                return '.'.join(i.string.split('.')[1:][:-1])  # Extract version number.
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.vanilla_manifest_url) as response:
+                if response.status == 200:
+                    try:
+                        response = await response.json()
+                        return response['latest']['release']
+                    except: pass
+        return 'N/A'
 
-    def server_update(self) -> Union[Tuple[str], bool]:
+    async def server_update(self) -> Union[Tuple[str, str], bool]:
         """
 
         Returns:
@@ -74,8 +78,13 @@ class Server_Update:
         if not url_getter:
             return False
 
-        version_info, download_url = url_getter()
-        download_data = requests.get(download_url).content
+        download_url, version_info = url_getter()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(download_url) as response:
+                if response.status == 200:
+                    download_data = await response.read()
+                else:
+                    return False
 
         try:  # Sets eula.txt file.
             with open(config.get_config('server_path') + '/eula.txt', 'w+') as f: f.write('eula=true')

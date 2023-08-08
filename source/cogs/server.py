@@ -221,13 +221,14 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverselect'))  # Shows all servers in Discord embed
 
     # ===== Version
-    @commands.command(aliases=['lversion', 'lver', 'lv'])
+    @commands.command(aliases=['lversion', 'lver', 'lv', 'checklatest', 'checkupdate'])
     async def latestversion(self, ctx):
         """Gets latest Minecraft server version number from official website."""
 
-        response = backend.check_latest_mc_versiont()
-        await backend.send_msg(f"Latest version: `{response}`")
-        lprint(ctx, "Fetched latest Minecraft server version: " + response)
+        await ctx.send("***Fetching latest vanilla server version...***")
+        version = await backend.server_api.check_latest_version()
+        await backend.send_msg(f"Latest version: `{version}`")
+        lprint(ctx, f"Fetched latest Minecraft server version: {version}")
 
     @commands.command(aliases=['updateserver', 'su', 'update'])
     async def serverupdate(self, ctx, now=''):
@@ -252,8 +253,8 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
-        await backend.send_msg(f"***Downloading latest server jar***")
-        version, url = backend.download_latest()  # Updates server.jar file.
+        await backend.send_msg(f"***Downloading latest server jar...***")
+        url, version = await backend.server_api.server_update()  # Updates server.jar file.
         if version:
             await backend.send_msg(f"Version: `{version}`\nSource: `{url}`\nNOTE: Next launch may take longer than usual.")
             await asyncio.sleep(3)

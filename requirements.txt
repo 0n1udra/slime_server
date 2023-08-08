@@ -6,3 +6,4 @@ file-read-backwards==2.0.0
 mctools==1.2.0
 psutil
 requests
+aiohttp
