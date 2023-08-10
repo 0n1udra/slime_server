@@ -39,7 +39,6 @@ def setup_configs() -> None:
         'use_pyenv': "Use Python env (y/n)",
         'bot_token_filepath': "Discord bot token filepath",
         'command_prefix': "Discord command prefix",
-        'channel_id': "Channel ID to send startup message in.",
         'mc_path': "Path for MC servers and their backups",
         'tmux_session_name': "Tmux session name",
         'use_tmux': "Use Tmux (y/n)"
