@@ -68,7 +68,6 @@ class Config():
             'use_tmux': True,
             'tmux_session_name': 'slime_server',
             'tmux_bot_pane': '0.0',
-            'tmux_minecraft_pane': '0.1',
 
             # If editing these paths, make sure the 'example' server defaults are updated aswell.
             'home_path': self.home_path,
@@ -104,12 +103,18 @@ class Config():
 
                 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
                 'server_files_access': True,
+
+                # Tmux pane for minecraft server if using Tmux.
+                'tmux_minecraft_pane': '0.1',
                 # Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
+
                 'server_use_screen': False,
                 'screen_session_name': 'minecraft_server',
+
                 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also.
                 # Useful if you can't use Tmux. Prioritizes server_use_subprocess over Tmux option for commands like ?serverstart.
                 'server_use_subprocess': False,
+
                 # Launch command to start Minecraft java server.
                 'server_launch_command': 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui',
                 # Set a custom path where to launch server. Set to None to use default.
