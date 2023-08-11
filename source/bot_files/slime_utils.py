@@ -627,6 +627,28 @@ class Utils:
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         return ansi_escape.sub('', text)
 
+    def print_dict_data(self, data: dict, indent: int = 0) -> str:
+        """
+        Formats dictionary data into single string with indents.
+        Indents for nesting dictionary data.
+
+        Args:
+            data: Dictionary with data to format.
+            indent: How many indents when found nested dict. This is for when function self calls.
+
+        Returns:
+            str: Formatted data.
+        """
+
+        result = ''
+        for key, value in data.items():
+            if isinstance(value, dict):
+                result += f'    {key}:\n'
+                result += self.print_dict_data(value, indent + 4)
+            else:
+                result += ' ' * indent + f'{key}: {value}\n'
+        return result
+
     def get_public_ip(self) -> Union[str, bool]:
         """
         Returns your public IP address.

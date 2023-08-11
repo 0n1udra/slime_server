@@ -352,6 +352,20 @@ class Server(commands.Cog):
             await backend.send_msg(ping)
         else: await backend.send_msg("Unable to get ping.")
 
+    @commands.command(aliases=['queryserver', 'pingquery', 'queryping', 'query'])
+    async def serverquery(self, ctx):
+        """
+        Uses mctools library to get basic server info from server query.
+        NOTE: Must have enable-query=true in server.properties for this to work.
+        """
+
+        await backend.send_msg("***Attempting Server Query...***")
+        if response := await backend.server_ping_query():
+            # Formats data to look nicer with indents, and also removes any unwanted escape characters.
+            await backend.send_msg(f'```json\n{utils.remove_ansi(utils.print_dict_data(response)).strip()}```')
+        else:
+            await backend.send_msg("**ERROR:** Query ping failed.")
+
     @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
     async def servercheck(self, ctx):
         """Checks if server is online."""
