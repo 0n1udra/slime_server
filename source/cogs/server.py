@@ -16,6 +16,7 @@ class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+        # TODO make autosave multi server compatible somehow....
         if config.get_config('enable_autosave'):
             self.autosave_task.start()
             lprint(f"Autosave task started (interval: {config.get_config('autosave_interval')}m)")
