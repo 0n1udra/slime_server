@@ -11,6 +11,7 @@ __status__ = 'Development'
 __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
 
 import os
+import re
 import json
 import platform
 from os.path import join
@@ -218,6 +219,8 @@ class Config():
         config_data = config_data.copy()
         for k, v in config_data.items():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
+                # Makes sure all paths uses double slashes '//' for windows and linux compatibility
+                v = re.sub(r'(?<!/)/(?![/])', '//', v)
                 config_data[k] = v.replace(text_to_replace, server_name)
 
             # Turns anything that contains only numbers to integer format.
