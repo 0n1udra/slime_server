@@ -165,6 +165,9 @@ class Config():
             }
         }
 
+        self.update_variables()
+
+    def update_variables(self):
         self.example_server_configs = self.servers['example']
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
@@ -228,6 +231,7 @@ class Config():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
                 v = re.sub(r'(?<!/)/(?![/])', '//', v).replace('\\', '//')
+                v = re.sub(r'/+', '//', v)
                 if v.endswith('/'): v = v[:-2]
                 if server_name and config_data['server_name'] != 'example':
                     v = v.replace(text_to_replace, server_name)
@@ -319,6 +323,7 @@ class Config():
             except: return False
             self.bot_configs.update(json_data['bot_configs'])
             self.servers.update(json_data['servers'])
+            self.update_variables()
             self.switch_server_configs(self.bot_configs['selected_server'])
         return True
 

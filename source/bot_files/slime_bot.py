@@ -41,24 +41,22 @@ command_config = {
     }
 }
 
-@bot.event
+#@bot.event
 async def on_command(ctx):
-    @bot.event
-    async def on_command(ctx):
-        # Get the command name from the invoked context
-        command_name = ctx.command.name
-        print(command_name)
+    # Get the command name from the invoked context
+    command_name = ctx.command.name
+    print(command_name)
 
-        # Get the allowed roles for the command from the JSON configuration
-        allowed_roles = command_config.get('roles', {}).get(command_name, [])
+    # Get the allowed roles for the command from the JSON configuration
+    allowed_roles = command_config.get('roles', {}).get(command_name, [])
 
-        # Check if the user has any of the allowed roles
-        if any(role.name in allowed_roles for role in ctx.author.roles):
-            # User has permission, continue with executing the command
-            await bot.process_commands(ctx)
-        else:
-            # User does not have permission, send a message or perform other actions
-            await ctx.send('You do not have permission to use this command.')
+    # Check if the user has any of the allowed roles
+    if any(role.name in allowed_roles for role in ctx.author.roles):
+        # User has permission, continue with executing the command
+        await bot.process_commands(ctx)
+    else:
+        # User does not have permission, send a message or perform other actions
+        await ctx.send('You do not have permission to use this command.')
 
 
 @bot.event

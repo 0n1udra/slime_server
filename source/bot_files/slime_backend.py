@@ -23,7 +23,7 @@ from typing import Union, Dict
 from discord.ext.commands import Bot, Context
 import mctools
 
-from bot_files.server_api import Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
+from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subprocess, Server_API_Rcon, Server_API_Tmux
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
@@ -162,7 +162,7 @@ class Backend():
                 break
 
         if not self.server_api:
-            self.server_api = Server_API_Tmux()
+            self.server_api = Server_API()
 
         lprint(f"INFO: Selected Server: {server_name}")
         return True
