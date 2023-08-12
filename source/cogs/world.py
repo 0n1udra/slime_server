@@ -53,21 +53,21 @@ class World(commands.Cog):
         """Set weather to clear."""
 
         await ctx.invoke(self.bot.get_command('weatherset'), state='clear')
-        lprint(ctx, 'Weather: Disabled')
+        lprint(ctx, 'Weather: Clear')
 
     @commands.command(aliases=['rainweather', 'weathersetrain'])
     async def weatherrain(self, ctx):
         """Set weather to clear."""
 
         await ctx.invoke(self.bot.get_command('weatherset'), state='rain')
-        lprint(ctx, 'Weather: Disabled')
+        lprint(ctx, 'Weather: Rain')
 
     @commands.command(aliases=['thunderweather', 'weathersetthunder'])
     async def weatherthunder(self, ctx):
         """Set weather to clear."""
 
         await ctx.invoke(self.bot.get_command('weatherset'), state='thunder')
-        lprint(ctx, 'Weather: Disabled')
+        lprint(ctx, 'Weather: Thunder')
 
     # ===== Time
     @commands.command(aliases=['time', 'settime'])
