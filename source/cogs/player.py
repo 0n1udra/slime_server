@@ -373,7 +373,7 @@ class Permissions(commands.Cog):
 
         await backend.send_command(f"pardon {player}")
 
-        await backend.send_msg(~"Cleansed `{player}` :flag_white:")
+        await backend.send_msg(f"Cleansed `{player}` :flag_white:")
         lprint(ctx, f"Pardoned {player} : {reason}")
 
     @commands.command(aliases=['bl', 'bans'])
@@ -383,26 +383,16 @@ class Permissions(commands.Cog):
         banned_players = ''
         await backend.send_command("banlist")
         log_data = await backend.get_command_output(extra_lines=20, all_lines=True)
+        print('banlist', log_data)
         if not log_data:
             await backend.send_msg("Unable to get ban list.")
             return
 
         if config.get_config('server_use_rcon'):
-            if 'There are no bans' in log_data:
+            if 'There are no bans' in log_data[0]:
                 banned_players = 'No exiles!'
             else:
-                data = log_data.split(':', 1)
-                for line in data[1].split('.'):
-                    line = backend.remove_ansi(line)
-                    line = line.split(':')
-                    reason = backend.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
-                    player = line[0].split(' ')[0].strip()
-                    banner = line[0].split(' ')[-1].strip()
-                    if len(player) < 2:
-                        continue
-                    banned_players += f"**{player}** banned by `{banner}` : `{reason}`\n"
-
-                banned_players += data[0].strip() + '.'  # Gets line that says 'There are x bans'.
+                banned_players = '\n'.join(i for i in utils.remove_ansi(log_data[0]).split('.'))
 
         else:
             for line in log_data:
@@ -499,9 +489,10 @@ class Permissions(commands.Cog):
         # List whitelisted.
         elif not arg or arg == 'list':
             if config.get_config('server_use_rcon'):
-                log_data = await backend.send_command('whitelist list')
-                log_data = log_data[1]
-                log_data = backend.remove_ansi(log_data).split(':')
+                if await backend.send_command('whitelist list') is False:
+                    await backend.send_msg("**ERROR:** Unable to fetch whitelist.")
+                log_data = await backend.get_command_output()
+                log_data = utils.remove_ansi(log_data[0]).split(':')
             else:
                 await backend.send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
