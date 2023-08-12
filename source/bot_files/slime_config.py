@@ -165,6 +165,10 @@ class Config():
             }
         }
 
+        self.example_server_configs = self.servers['example']
+        self.server_configs = self.servers['example']  # Will be updated with currently selected server
+        self.server_name = self.server_configs['server_name']
+
     def get_config(self, config_key: str, default_return: Any = None) -> Union[Any, None]:
         """
         Get config from bot configs or selected server configs.
@@ -219,12 +223,11 @@ class Config():
             dict: An updated dictionary.
         """
 
-
         config_data = config_data.copy()
         for k, v in config_data.items():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
-                v = re.sub(r'(?<!/)/(?![/])', '//', v)
+                v = re.sub(r'(?<!/)/(?![/])', '//', v).replace('\\', '//')
                 if server_name and config_data['server_name'] != 'example':
                     v = v.replace(text_to_replace, server_name)
                 config_data[k] = v
