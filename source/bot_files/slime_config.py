@@ -198,15 +198,18 @@ class Config():
         else:
             return False
 
-        self.update_all_server_configs()
+        self.update_all_configs()
         self.switch_server_configs(self.server_name)  # Updates instance variables.
         return True
 
-    def _update_config_paths(self, config_data: Dict, server_name: str, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
+    def _update_config_paths(self, config_data: Dict, server_name: str = None, text_to_replace: str = 'SELECTED_SERVER') -> Dict:
         """
-        Updates the paths variables in the configs with correct path.
-        E.g.
-        # TODO: add example
+        Updates the paths variables in the configs with correct path and format.
+        Replaces any singular slash with double for linux and windows compatibility.
+        Example:
+        "server_path": "/home/0n1udra/Games/Minecraft/servers/SELECTED_SERVER"
+        into
+        "server_path": "//home//0n1udra//Games//Minecraft//servers//papermc",
 
         Args:
             server_name str: Name of server to update data with.
@@ -216,12 +219,15 @@ class Config():
             dict: An updated dictionary.
         """
 
+
         config_data = config_data.copy()
         for k, v in config_data.items():
             if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
                 v = re.sub(r'(?<!/)/(?![/])', '//', v)
-                config_data[k] = v.replace(text_to_replace, server_name)
+                if server_name and config_data['server_name'] != 'example':
+                    v = v.replace(text_to_replace, server_name)
+                config_data[k] = v
 
             # Turns anything that contains only numbers to integer format.
             if str(v).isnumeric():
@@ -229,17 +235,15 @@ class Config():
 
         return config_data
 
-    def update_all_server_configs(self) -> None:
+    def update_all_configs(self) -> None:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
         for server_name, server_configs in self.servers.items():
             new_server_configs = self.example_server_configs.copy()
-            if 'example' == server_name:
-                self.servers['example'] = new_server_configs
-                continue
-
             new_server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
+
+        self.bot_configs = self._update_config_paths(self.bot_configs)
 
         self.update_configs_file()
 
@@ -261,7 +265,7 @@ class Config():
         self.servers[server_name] = config_data.copy() if config_data else self.example_server_configs.copy()
         self.servers[server_name]['server_name'] = server_name
         # Adds default configs for the ones not set, and updates config json file.
-        self.update_all_server_configs()
+        self.update_all_configs()
         return self.servers[server_name]
 
     def update_server_configs(self, server_name: str, new_data: Dict) -> Union[Dict, bool]:

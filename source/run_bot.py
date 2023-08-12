@@ -62,7 +62,7 @@ def setup_configs() -> None:
     if ask_input in ['y', 'yes']:
         config.example_server_configs.update(get_input(server_config_prompts))
 
-    config.update_all_server_configs()  # Updates paths configs, and writes to file.
+    config.update_all_configs()  # Updates paths configs, and writes to file.
 
 def _start_bot() -> None:
     """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
@@ -208,7 +208,7 @@ Server Path         {config.get_config('server_path')}
 if __name__ == '__main__':
     if config.get_config('init') is False:
         lprint("INFO: Initializing config.")
-        setup_configs()  # This will call config.update_all_server_configs which will creates user_config.json if not exist.
+        setup_configs()  # This will call config.update_all_configs which will creates user_config.json if not exist.
         config.set_config('init', True)
     else:
         config.update_from_file()
