@@ -39,7 +39,7 @@ class Slime_Bot_Commands(commands.Cog):
         await asyncio.sleep(1)
         await backend.send_msg("Channel set.")
 
-    @commands.command()
+    @commands.command(aliases=['bi'])
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 

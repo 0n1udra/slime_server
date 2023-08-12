@@ -144,7 +144,7 @@ class Backend():
 
         # In cases of wanting to use subprocess to run Minecraft server and have the ability to switch servers to control.
         # This needs its own object so you can switch between them without killing the Minecraft server subprocess.
-        if config.get_config('use_subprocess'):
+        if config.get_config('server_use_subprocess'):
             server_name = config.server_configs['server_name']
             # Checks if a subprocess API instance for selected server already exists.
             if config.server_configs['server_name'] in self.subprocess_servers:
@@ -153,6 +153,7 @@ class Backend():
                 # Create new subprocess API
                 new_subprocess_server = Server_API_Subprocess()
                 self.subprocess_servers[server_name] = new_subprocess_server
+                self.server_api = new_subprocess_server
                 return True
 
         for config_name, api in self.server_api_types.items():

@@ -74,9 +74,12 @@ class Server(commands.Cog):
             fields = []
             for k, v in data.items():
                 fields += [[k, v]]
+            fields += [['API Interface', backend.server_api.current_api]]
+            print(fields)
             await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
-
-        await backend.send_msg("**ERROR:** No server info.")
+            lprint("Fetched server info")
+        else:
+            await backend.send_msg("**ERROR:** No server info.")
         return False
 
     @commands.command(hidden=True)

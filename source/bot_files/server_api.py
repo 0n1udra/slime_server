@@ -76,7 +76,7 @@ class Server_Update:
         # Picks what url builder function to use based on name and description of selected server.
         url_getter = self.get_url_func()
         if not url_getter:
-            return False
+            return False, False
 
         download_url, version_info = url_getter()
         async with aiohttp.ClientSession() as session:
@@ -98,7 +98,7 @@ class Server_Update:
         else:
             return download_url, version_info
 
-        return False
+        return False, False
 
     def get_url_func(self) -> Union[Callable, None]:
         """
@@ -467,10 +467,8 @@ class Server_API_Subprocess(Server_API):
         # Runs MC server as subprocess. Note, If this script stops, the server will stop.
         try:
             if config.get_config('windows_compatibility'):
-                self.server_subprocess = subprocess.Popen(
-                    config.get_config(self.launch_command),
-                    shell=True
-                )
+                print(self.launch_command)
+                self.server_subprocess = subprocess.Popen(self.launch_command, shell=True)
             else:
                 self.server_subprocess = subprocess.Popen(
                     self.launch_command.split(),
