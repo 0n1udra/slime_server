@@ -168,6 +168,7 @@ class Server_API(Server_Update):
     def __init__(self):
         super().__init__()
 
+        self.current_api = 'Base'
         self.bot = None
         self.last_check_number = ''
         self.last_command_sent = ''
@@ -293,6 +294,7 @@ class Server_API(Server_Update):
             bool: Sent startup command (Not same as successful startup).
         """
 
+        lprint("Server start not avaliable with current API.")
         return False
 
     async def server_stop(self) -> bool:
@@ -309,6 +311,8 @@ class Server_API(Server_Update):
 class Server_API_Tmux(Server_API):
     def __init__(self):
         super().__init__()
+
+        self.current_api = 'Tmux'
 
     async def send_command(self, command: str) -> bool:
         """
@@ -351,6 +355,8 @@ class Server_API_Screen(Server_API):
     def __init__(self):
         super().__init__()
 
+        self.current_api = 'Screen'
+
     async def send_command(self, command: str) -> bool:
         """
         Sends command to Minecraft server console in Screen session.
@@ -386,6 +392,8 @@ class Server_API_Screen(Server_API):
 class Server_API_Rcon(Server_API):
     def __init__(self):
         super().__init__()
+
+        self.current_api = 'RCON'
 
     async def send_command(self, command: str) -> Union[str, bool]:
         """
@@ -430,6 +438,7 @@ class Server_API_Subprocess(Server_API):
     def __init__(self):
         super().__init__()
 
+        self.current_api = 'Subprocess'
         self.server_subprocess = None
 
     # TODO be able to have multiple subprocess servers running and switch between them

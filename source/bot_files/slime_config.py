@@ -232,7 +232,7 @@ class Config():
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
                 v = re.sub(r'(?<!/)/(?![/])', '//', v).replace('\\', '//')
                 v = re.sub(r'/+', '//', v)
-                if v.endswith('/'): v = v[:-2]
+                if v.endswith('//'): v = v[:-2]
                 if server_name and config_data['server_name'] != 'example':
                     v = v.replace(text_to_replace, server_name)
                 config_data[k] = v
