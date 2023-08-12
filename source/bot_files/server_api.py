@@ -286,6 +286,32 @@ class Server_API(Server_Update):
 
         return list(reversed(matched_lines + list(_extra_lines)))
 
+    async def server_subprocess_start(self) -> bool:
+        """
+
+        Returns:
+
+        """
+
+        os.chdir(self.launch_path)
+        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
+        try:
+            if config.get_config('windows_compatibility'):
+                self.server_subprocess = subprocess.Popen(self.launch_command, shell=True)
+            else:
+                self.server_subprocess = subprocess.Popen(
+                    self.launch_command.split(),
+                    stdin=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+        except: lprint("ERROR: Problem starting server subprocess")
+
+        if isinstance(self.server_subprocess, subprocess.Popen):
+            return True
+
+        return False
+
     async def server_start(self) -> bool:
         """
         Start server.
@@ -432,6 +458,9 @@ class Server_API_Rcon(Server_API):
 
         return False
 
+    async def server_start(self):
+        return await self.server_subprocess_start()
+
 
 class Server_API_Subprocess(Server_API):
     def __init__(self):
@@ -463,23 +492,4 @@ class Server_API_Subprocess(Server_API):
 
         """
 
-        os.chdir(self.launch_path)
-        # Runs MC server as subprocess. Note, If this script stops, the server will stop.
-        try:
-            if config.get_config('windows_compatibility'):
-                print(self.launch_command)
-                self.server_subprocess = subprocess.Popen(self.launch_command, shell=True)
-            else:
-                self.server_subprocess = subprocess.Popen(
-                    self.launch_command.split(),
-                    stdin=asyncio.subprocess.PIPE,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
-                )
-        except: lprint("ERROR: Problem starting server subprocess")
-
-        if isinstance(self.server_subprocess, subprocess.Popen):
-            return True
-
-        return False
-        # TODO TEST for windows compatibility
+        return await self.server_subprocess_start()
