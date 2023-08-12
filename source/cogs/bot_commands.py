@@ -34,6 +34,11 @@ class Slime_Bot_Commands(commands.Cog):
         # Will show: Playing - X | Ping - X
         await self.bot.change_presence(activity=discord.Activity(name=f"- {data['players']['online']} | Ping - {data['time']}", type=1))
 
+    @commands.command(aliases=['set', 'channel', 'sc'])
+    async def setchannel(self, ctx):
+        await asyncio.sleep(1)
+        await backend.send_msg("Channel set.")
+
     @commands.command()
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
@@ -184,7 +189,6 @@ class Slime_Bot_Commands(commands.Cog):
             embed.add_field(name=name, value=url, inline=False)
 
         await backend.send_msg(embed=embed)
-
 
     @commands.command(aliases=['clearmsg', 'clear'])
     async def clearmessages(self, ctx):
