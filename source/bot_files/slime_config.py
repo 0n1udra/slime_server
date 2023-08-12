@@ -14,21 +14,22 @@ import os
 import re
 import json
 import platform
-from os.path import join
 from typing import Union, Any, Dict
 
 import discord
 
 
 class Config():
-    bot_source_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    bot_source_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace('\\', '//')
     # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
     intents = discord.Intents.default()  # Default: discord.Intents.default()
     intents.message_content = True  # Default: True
 
     def __init__(self):
-        # Set default variables. (needed before setup_configs() in run_bot.py to allow usage of defaults)
 
+        # Set default variables. (needed before setup_configs() in run_bot.py to allow usage of defaults)
+        self.home_path = os.path.expanduser('~').replace('\\', '//')
+        self.mc_path = f"{self.home_path}//Games//Minecraft"
         self.bot_configs = {}
         self.servers = {'example': {}}
         self.initialize_configs()
@@ -36,25 +37,24 @@ class Config():
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
 
-    def initialize_configs(self) -> None:
+    def initialize_configs(self, mc_path: str = None) -> None:
         """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
 
-        self.mc_path = join(os.path.expanduser('~'), 'Games', 'Minecraft')
-        self.home_path = os.path.expanduser('~')
+        if mc_path: self.mc_path = mc_path
 
         self.bot_configs = {
             # Use python virtual environment
             'use_pyenv': True,
-            'pyenv_activate_command': f'source {self.home_path}/pyenvs/slime_server/bin/activate',
+            'pyenv_activate_command': f'source {self.home_path}//pyenvs//slime_server//bin//activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",
             # Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
             'show_sensitive_info': False,
 
             # ===== Discord config
-            # Set location of Discord bot token using os.path.join. e.g. join(home_dir, 'keys', 'slime_bot.token')
+            # Set location of Discord bot token using double back slashes '//'
             # Get Discord bot token at: https://discord.com/developers/applications
-            'bot_token_filepath': join(self.home_path, 'keys', 'slime_bot.token'),
+            'bot_token_filepath': f'{self.home_path}//keys//slime_bot.token',
             'command_prefix': '?',
             # Case insensitivity for discord commands. e.g. ?players, ?Players, ?pLaYers will be the same.
             'case_insensitive': True,
@@ -74,10 +74,10 @@ class Config():
             'home_path': self.home_path,
             'bot_source_path': self.bot_source_path,
             'mc_path': self.mc_path,
-            'servers_path': join(self.mc_path, 'servers'),
-            'user_config_filepath': join(self.bot_source_path, 'user_config.json'),
-            'bot_filepath': join(self.bot_source_path, 'bot_files'),
-            'bot_log_filepath': join(self.bot_source_path, 'slime_bot.log'),
+            'servers_path': f'{self.mc_path}//servers',
+            'user_config_filepath': f'{self.bot_source_path}//user_config.json',
+            'bot_filepath': f'{self.bot_source_path}//bot_files',
+            'bot_log_filepath': f'{self.bot_source_path}//slime_bot.log',
 
             # Use cmd commands. E.g. 'start' command when starting a server only if platform.systems() == 'Windows'.
             'windows_compatibility': True if platform.system() == 'Windows' else False,
@@ -148,12 +148,12 @@ class Config():
                 'log_lines_limit': 500,
 
                 # SELECTED_SERVER will be substituted with server name.
-                'server_path': join(self.mc_path, 'servers', 'SELECTED_SERVER'),
-                'world_backups_path': join(self.mc_path, 'world_backups', 'SELECTED_SERVER'),
-                'server_backups_path': join(self.mc_path, 'server_backups', 'SELECTED_SERVER'),
-                'server_logs_path': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs'),
-                'server_log_filepath': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'logs', 'latest.log'),
-                'server_properties_filepath': join(self.mc_path, 'servers', 'SELECTED_SERVER', 'server.properties'),
+                'server_path': f'{self.mc_path}//servers//SELECTED_SERVER',
+                'world_backups_path': f'{self.mc_path}//world_backups//SELECTED_SERVER',
+                'server_backups_path': f'{self.mc_path}//server_backups//SELECTED_SERVER',
+                'server_logs_path': f'{self.mc_path}//servers//SELECTED_SERVER//logs',
+                'server_log_filepath': f'{self.mc_path}//servers//SELECTED_SERVER//logs//latest.log',
+                'server_properties_filepath': f'{self.mc_path}//servers//SELECTED_SERVER//server.properties',
 
                 # For '?links' command. Shows useful websites.
                 'useful_websites': {

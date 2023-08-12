@@ -55,7 +55,9 @@ def setup_configs() -> None:
     }
 
     print("----- Config Setup -----\nPress enter to use default.")
-    config.bot_configs.update(get_input(bot_config_prompts))
+    configs = get_input(bot_config_prompts)
+    config.initialize_configs(mc_path=configs['mc_path'])
+    config.bot_configs.update(configs)
 
     # Asks to continue to server configs
     ask_input = input(f"\nContinue to server config (y/n): ").strip().lower()
@@ -85,7 +87,7 @@ def start_bot() -> None:
         # Sources pyenv if set in slime_vars.
         x = f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_source_path')}' ENTER"
         if os.system(x):
-            lprint(f"ERROR: Changing directory ({config.get_config('bot_source_path')})")
+            lprint(f"ERROR: Changing directory {config.get_config('bot_source_path')}")
             no_tmux = True
 
         if no_tmux:
@@ -216,9 +218,6 @@ if __name__ == '__main__':
 
     # The order of the if statements is important.
     if 'hidebanner' not in sys.argv: show_banner()
-
-    if not config.get_config('channel_id'):
-        lprint("INFO: To enable startup message banner in discord, use '?setchannel' in the channel you want it in.")
 
     if 'setup' in sys.argv:
         if config.get_config('server_files_access'):
