@@ -71,11 +71,9 @@ class Server(commands.Cog):
             return
 
         if data := config.servers.get(server_name, config.server_configs):
-            fields = []
+            fields = [['API Interface', backend.server_api.current_api]]
             for k, v in data.items():
                 fields += [[k, v]]
-            fields += [['API Interface', backend.server_api.current_api]]
-            print(fields)
             await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
             lprint("Fetched server info")
         else:
