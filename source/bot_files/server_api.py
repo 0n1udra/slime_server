@@ -443,6 +443,23 @@ class Server_API_Rcon(Server_API):
             server_rcon_client.stop()  # Disconnect.
             return self.last_command_output
 
+    async def get_command_output(self, keyword: str = None, extra_lines: int = 0, check_number: str = None, all_lines=False) -> Union[List, bool]:
+        """
+
+        Args:
+            keyword:
+            extra_lines:
+            check_number:
+            all_lines:
+
+        Returns:
+
+        """
+
+        if data := self.last_command_output:
+            return [data]
+        return False
+
     async def server_console_reachable(self) -> bool:
         """
         Check if server console is reachable by sending a unique number.
