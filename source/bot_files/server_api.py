@@ -295,7 +295,6 @@ class Server_API(Server_Update):
         """
 
         lprint("Server start not avaliable with current API.")
-        return False
 
     async def server_stop(self) -> bool:
         """

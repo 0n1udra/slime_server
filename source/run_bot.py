@@ -164,6 +164,7 @@ Subprocess          {config.get_config('server_use_subprocess')}
 Tmux                {config.get_config('use_tmux')}
 RCON                {config.get_config('server_use_rcon')}
 Bot Log             {config.get_config('bot_log_filepath')}
+Windows Mode        {config.get_config('windows_compatibility')}
 
 Discord:
 Discord Token       {config.get_config('bot_token_filepath') if nono else no}

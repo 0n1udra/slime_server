@@ -43,6 +43,11 @@ class Slime_Bot_Commands(commands.Cog):
     async def botinfo(self, ctx):
         """Shows bot version and other info."""
 
+        if data := config.bot_configs:
+            fields = []
+            for k, v in data.items():
+                fields += [[k, v]]
+        await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
         await backend.send_msg(f"Bot Version: v{__version__} - {__date__}\nAuthor: {__author__}")
 
     @commands.command(aliases=['rbot', 'rebootbot', 'botreboot'])

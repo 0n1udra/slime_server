@@ -71,26 +71,12 @@ class Server(commands.Cog):
             return
 
         if data := config.servers.get(server_name, config.server_configs):
-            fields = [['Name', data['server_name']],
-                      ['Server Description', data['server_description']],
-                      ['Server Version', data['server_version']],
-                      ['Server Address', data['server_address']],
-                      ['Server Port', data['server_port']],
-                      ['Server Interface API', backend.server_api.current_api],
-                      ['Server File Access', data['server_files_access']],
-                      ['Server Path', data['server_path']],
-                      ['Launch Command', f"`{data['server_launch_command']}`"],
-                      ['Tmux Pane', data['tmux_minecraft_pane']],
-                      ['Use Screen', data['server_use_screen']],
-                      ['Screen Session Name', data['screen_session_name']],
-                      ['Use RCON', data['server_use_rcon']],
-                      ['RCON Pass', data['rcon_pass']],
-                      ['RCON Port', data['rcon_port']],
-                      ['Autosave', data['enable_autosave']],
-                      ['Wait Time', data['startup_wait_time']]
-                     ]
+            fields = []
+            for k, v in data.items():
+                fields += [[k, v]]
             await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
 
+        await backend.send_msg("**ERROR:** No server info.")
         return False
 
     @commands.command(hidden=True)
