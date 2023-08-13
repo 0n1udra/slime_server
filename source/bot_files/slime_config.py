@@ -238,7 +238,7 @@ class Config():
                 config_data[k] = v
 
             # Turns anything that contains only numbers to integer format.
-            if str(v).isnumeric() and 'pass' not in k:
+            if str(v).isnumeric() and 'pass' not in k and 'version' not in k:
                 config_data[k] = int(v)
 
         return config_data

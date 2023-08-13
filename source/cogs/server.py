@@ -451,6 +451,7 @@ class Server(commands.Cog):
         log_data = await backend.read_server_log(search=match_list, lines=lines, find_all=True)
         if not log_data:
             await backend.send_msg("**ERROR:** Could not get chat log.")
+            lprint(ctx, "ERROR: Problem fetching connections log.")
             return
 
         await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'connections_log.log'))

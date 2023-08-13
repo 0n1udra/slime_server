@@ -383,7 +383,6 @@ class Permissions(commands.Cog):
         banned_players = ''
         await backend.send_command("banlist")
         log_data = await backend.get_command_output(extra_lines=20, all_lines=True)
-        print('banlist', log_data)
         if not log_data:
             await backend.send_msg("Unable to get ban list.")
             return

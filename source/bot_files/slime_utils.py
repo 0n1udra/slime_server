@@ -482,9 +482,9 @@ class Utils:
             except:
                 return None
         else:
-
             # TODO make get_command_output be able to take command
             try:
+                print('pl', output)
                 reaesc = re.compile(r'\x1b[^m]*m')
                 # Use regular expression to extract player names
                 output = output[0].split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo

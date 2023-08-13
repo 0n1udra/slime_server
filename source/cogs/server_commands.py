@@ -112,7 +112,9 @@ class Basics(commands.Cog):
                 await backend.send_msg(file=discord.File(utils.convert_to_bytes(log_data), 'chat_log.log'))
                 lprint(ctx, f"Fetched Chat Log: {lines} {keyword}")
                 return
+
         await backend.send_msg("**ERROR:** Problem fetching chat logs, there may be nothing to fetch.")
+        lprint(ctx, "ERROR: Problem fetching chat log.")
 
 
 async def setup(bot):
