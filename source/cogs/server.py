@@ -461,7 +461,7 @@ class Server(commands.Cog):
     async def serverversion(self, ctx):
         """Gets Minecraft server version."""
 
-        response = await backend.get_server_version()
+        response = await backend.get_server_version(force_check=True)
         if response is False:
             await backend.send_msg("**ERROR:** Could not get server version")
             lprint("ERROR: Couldn't get server version.")

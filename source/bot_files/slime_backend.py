@@ -314,7 +314,7 @@ class Backend():
         lprint(f"INFO: Fetching MoTD: {msg}")
         return msg
 
-    async def get_server_version(self) -> Union[str, bool]:
+    async def get_server_version(self, force_check=False) -> Union[str, bool]:
         """
         Gets server version number.
 
@@ -326,6 +326,8 @@ class Backend():
 
         # Check if config has version already. Some commands (?version, etc) will force bot to check server version.
         from_config = config.get_config('server_version')
+        if not force_check and from_config:
+            return from_config
 
         if config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
@@ -340,18 +342,13 @@ class Backend():
             if data := await self.get_command_output('This server is running'):
                 version = utils.parse_version_output(data[0])
 
-        # Returns version from config file.
-        if not version:
-            version = from_config
-
-        # Updates server version in configs.
-        if version != config.get_config('server_version'):
+        # Fallback to version from config file.
+        version = version or from_config
+        # Only update if different version.
+        if version and version != config.get_config('server_version'):
             config.set_config('server_version', version)
 
-        if version:
-            return version
-
-        return False
+        return version if version else False
 
     # ===== File reading and writing
     # TODO Make async
