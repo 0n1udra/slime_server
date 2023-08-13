@@ -73,9 +73,10 @@ class Server(commands.Cog):
         if data := config.servers.get(server_name, config.server_configs):
             fields = [['API Interface', backend.server_api.current_api]]
             for k, v in data.items():
-                if isinstance(k, dict): continue
+                if isinstance(v, dict): continue
                 fields += [[k, v]]
-            await backend.send_msg(embed=comps.new_embed(fields, 'Server Info'))
+            await backend.send_msg(embed=comps.new_embed(fields[:20], 'Server Info 1/2'))
+            await backend.send_msg(embed=comps.new_embed(fields[20:], 'Server Info 2/2'))
             lprint("Fetched server info")
         else:
             await backend.send_msg("**ERROR:** No server info.")
