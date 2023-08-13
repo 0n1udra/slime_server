@@ -366,7 +366,7 @@ class File_Utils:
             return False
         return True
 
-    def setup_directories(self):
+    def setup_directories(self) -> None:
         """Create necessary directories, servers, world_backups, server_backups."""
 
         # Creates Server folder, folder for world backups, and folder for server backups.
@@ -454,7 +454,7 @@ class Utils:
 
         return False
 
-    def parse_players_output(self, output: str, version: str) -> Union[tuple[list[str], str], bool, None]:
+    def parse_players_output(self, output: str, version: str) -> Union[Tuple[List[str], str], bool, None]:
         """
         Extracts wanted data from output of 'list' command.
         Console output is different based on types and versions.

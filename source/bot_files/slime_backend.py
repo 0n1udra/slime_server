@@ -18,7 +18,7 @@ Project Structure:
 import os
 import fileinput
 from os.path import join
-from typing import Union, Dict
+from typing import Union, Dict, Tuple, List
 
 from discord.ext.commands import Bot, Context
 import mctools
@@ -244,7 +244,13 @@ class Backend():
             dict: Dictionary containing 'version', and 'description' (motd).
         """
 
-        if not config.get_config('server_address') or not config.get_config('server_port'):
+        if not config.get_config('server_address'):
+            await self.send_msg("**Error:** Could not query server address.")
+            lprint("ERROR: Could not query server address.")
+            return False
+        if not config.get_config('server_port'):
+            await self.send_msg("**Error:** Server port issue.")
+            lprint("ERROR: Server port issue.")
             return False
 
         try:
@@ -257,20 +263,31 @@ class Backend():
             return stats
 
     # ===== Get data
-    async def get_players(self):
-        """Extracts wanted data from output of 'list' command."""
+    async def get_players(self) -> Union[Tuple[List[str], str], bool]:
+        """
+        Extracts wanted data from output of 'list' command.
+
+        Returns:
+            Player data, bool: Returns player names and associating text, or False.
+        """
 
         # Converts server version to usable int. Extracts number after initial '1.', e.g. '1.12.2' > 12
-
         version = await self.get_server_version()  # Needs version to know how to parse output.
-        response = await backend.send_command("list")
-        if not response or not version:
+        response = await self.send_command("list")
+
+        if not response:
+            await self.send_msg("**Error:** No response from console.")
+            lprint("ERROR: Unable to fetch player list, no response from console.")
+            return False
+        if not version:
+            await backend.send_msg("**Error:** Unable to get server version.")
+            lprint("ERROR: Unable to fetch player list, problem getting server version.")
             return False
 
         output = await backend.get_command_output('There are', 1)
         return utils.parse_players_output(output, version)
 
-    async def get_coords(self, player=''):
+    async def get_coords(self, player: str = '') -> Union[str, bool]:
         """Gets player's location coordinates."""
 
         if not await backend.send_command(f"data get entity {player} Pos"):
@@ -282,19 +299,22 @@ class Backend():
             location = log_data.split('[')[-1][:-3].replace('d', '')
             return location
 
-    async def get_motd(self) -> Union[str, bool]:
+    async def get_motd(self) -> str:
         """
+        Returns the server's Message of the day.
 
         Returns:
-
+            str: MoTD, or N/A if not found.
         """
 
         if data := await self.get_property('motd'):
-            return str(data).split('=')[-1]
+            msg = str(data).split('=')[-1]
+        else: msg = 'N/A'
 
-        return 'N/A'
+        lprint(f"INFO: Fetching MoTD: {msg}")
+        return msg
 
-    async def get_server_version(self, force_check=False) -> Union[str, bool]:
+    async def get_server_version(self) -> Union[str, bool]:
         """
         Gets server version number.
 
@@ -305,9 +325,7 @@ class Backend():
         version = None
 
         # Check if config has version already. Some commands (?version, etc) will force bot to check server version.
-        if not force_check:
-            if data := config.get_config('server_version'):
-                return data
+        from_config = config.get_config('server_version')
 
         if config.get_config('server_files_access'):
             # Tries to find version info from latest.log.
@@ -321,6 +339,10 @@ class Backend():
         elif await self.send_command('version'):
             if data := await self.get_command_output('This server is running'):
                 version = utils.parse_version_output(data[0])
+
+        # Returns version from config file.
+        if not version:
+            version = from_config
 
         # Updates server version in configs.
         if version != config.get_config('server_version'):
