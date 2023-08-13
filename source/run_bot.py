@@ -6,7 +6,7 @@ import time
 
 from bot_files.slime_config import config, __version__, __date__
 from bot_files.slime_bot import bot
-from bot_files.slime_utils import lprint, file_utils, proc_utils
+from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
 
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 beta_mode = ''
@@ -40,8 +40,8 @@ def setup_configs() -> None:
         'bot_token_filepath': "Discord bot token filepath",
         'command_prefix': "Discord command prefix",
         'mc_path': "Path for MC servers and their backups",
-        'tmux_session_name': "Tmux session name",
-        'use_tmux': "Use Tmux (y/n)"
+        'bot_tmux_name': "Tmux session name",
+        'bot_use_tmux': "Use Tmux (y/n)"
     }
     server_config_prompts = {  # Optionally setup server
         'server_name': 'Server name',
@@ -82,10 +82,10 @@ def _start_bot() -> None:
 def start_bot() -> None:
     """Uses different methods of launching Discord bot depending on config"""
 
-    if config.get_config('use_tmux'):
+    if config.get_config('bot_use_tmux'):
         no_tmux = False
         # Sources pyenv if set in slime_vars.
-        x = f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} 'cd {config.get_config('bot_source_path')}' ENTER"
+        x = f"tmux send-keys -t {config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')} 'cd {config.get_config('bot_source_path')}' ENTER"
         if os.system(x):
             lprint(f"ERROR: Changing directory {config.get_config('bot_source_path')}")
             no_tmux = True
@@ -96,29 +96,16 @@ def start_bot() -> None:
 
         # Activate python env.
         if config.get_config('use_pyenv'):
-            if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} '{config.get_config('pyenv_activate_command')}' ENTER"):
+            if os.system(f"tmux send-keys -t {config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')} '{config.get_config('pyenv_activate_command')}' ENTER"):
                 lprint(f"ERROR: {config.get_config('pyenv_activate_command')}")
             else: lprint(f"INFO: Activated pyenv")
 
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')} '{config.get_config('bot_launch_command')} {beta_mode}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')} '{config.get_config('bot_launch_command')} {beta_mode}' ENTER"):
             lprint("ERROR: Could not start bot in tmux. Will run bot here.")
             _start_bot()
         else: lprint("INFO: Started slime_bot.py")
 
     else: _start_bot()  # Starts inline if not using tmux.
-
-def start_tmux_session() -> None:
-    """Starts Tmux session in detached mode, with 2 panes, and sets name."""
-
-    if os.system(f"tmux new -d -s {config.get_config('tmux_session_name')}"):
-        lprint(f"ERROR: Starting tmux session")
-    else: lprint(f"INFO: Started Tmux detached session")
-
-    if os.system(f"tmux split-window -v -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_bot_pane')}"):
-        lprint("ERROR: Creating second tmux panes")
-    else: lprint("INFO: Created second tmux panes")
-
-    time.sleep(1)
 
 def show_log() -> None:
     """Use watch + tail command on bot log."""
@@ -161,7 +148,7 @@ Version             {__version__} - {__date__}
 User                {config.get_config('user')}
 Python Env          {config.get_config('pyenv_activate_command') if config.get_config('use_pyenv') else 'None'}
 Subprocess          {config.get_config('server_use_subprocess')}
-Tmux                {config.get_config('use_tmux')}
+Tmux                {config.get_config('bot_use_tmux')}
 RCON                {config.get_config('server_use_rcon')}
 Bot Log             {config.get_config('bot_log_filepath')}
 Windows Mode        {config.get_config('windows_compatibility')}
@@ -181,16 +168,16 @@ Autosave            {config.get_config('enable_autosave')} - {config.get_config(
 Server URL          {config.get_config('server_address') if nono else no}
 Server Port         {config.get_config('server_port') if nono else no}
 """
-    if config.get_config('use_tmux'): vars_msg += f"""
+    if config.get_config('bot_use_tmux'): vars_msg += f"""
 Tmux:
-Session Name        {config.get_config('tmux_session_name')}
-Bot Pane            {config.get_config('tmux_bot_pane')}
-Server Pane         {config.get_config('tmux_minecraft_pane')}
+Session Name        {config.get_config('bot_tmux_name')}
+Bot Pane            {config.get_config('bot_tmux_pane')}
+Server Pane         {config.get_config('server_tmux_pane')}
 """
 
     if config.get_config('server_use_screen'): vars_msg += f"""
 Screen:
-Session Name        {config.get_config('screen_session_name')}
+Session Name        {config.get_config('server_screen_name')}
 """
 
     if config.get_config('server_use_rcon'): vars_msg += f"""
@@ -230,8 +217,8 @@ if __name__ == '__main__':
         beta_mode = 'beta'
         config.set_config('bot_token_filepath', os.path.join(config.get_config('home_path'), 'keys', 'slime_bot_beta.token'))
 
-    if 'starttmux' in sys.argv and config.get_config('use_tmux'):
-        start_tmux_session()
+    if 'starttmux' in sys.argv and config.get_config('bot_use_tmux'):
+        utils.start_tmux_session(config.get_config('bot_tmux_name'))
         time.sleep(1)
 
     if 'startbot' in sys.argv:
@@ -250,12 +237,13 @@ if __name__ == '__main__':
 
     # My personal shortcut.
     if 'slime' in sys.argv:
-        start_tmux_session()
+        utils.start_tmux_session(config.get_config('bot_tmux_name'))
         time.sleep(1)
         start_bot()
-        os.system(f"tmux attach -t {config.get_config('tmux_session_name')}")
+        os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
-    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {config.get_config('tmux_session_name')}")
+    # TODO add attach args for server tmux and screen.
+    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
     if 'help' in sys.argv: script_help()
 

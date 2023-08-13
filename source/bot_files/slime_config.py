@@ -33,6 +33,7 @@ class Config():
         self.bot_configs = {}
         self.servers = {'example': {}}
         self.initialize_configs()
+        self.initial_example_configs = {}
         self.example_server_configs = self.servers['example']
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
@@ -66,9 +67,9 @@ class Config():
             'custom_status_interval': 1,
 
             # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-            'use_tmux': True,
-            'tmux_session_name': 'slime_server',
-            'tmux_bot_pane': '0.0',
+            'bot_use_tmux': True,
+            'bot_tmux_name': 'slime_server',
+            'bot_tmux_pane': '0.0',
 
             # If editing these paths, make sure the 'example' server defaults are updated aswell.
             'home_path': self.home_path,
@@ -100,17 +101,19 @@ class Config():
                 'server_address': 'localhost',  # Leave '' for blank instead of None or False
                 'server_port': 25565,
                 # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
-                'server_ip': 'localost',
+                'server_ip': 'localhost',
 
                 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
                 'server_files_access': True,
 
+                # Use tmux to run/command Miencraft server.
+                'server_tmux_name': 'slime_server',
                 # Tmux pane for minecraft server if using Tmux.
-                'tmux_minecraft_pane': '0.1',
+                'server_tmux_pane': '0.1',
+                
                 # Use screen to start and send commands to Minecraft server. Only Minecraft server, bot can be run alone or in tmux.
-
                 'server_use_screen': False,
-                'screen_session_name': 'minecraft_server',
+                'server_screen_name': 'minecraft_server',
 
                 # Uses subprocess.Popen() to run Minecraft server and send commands. If this bot halts, server will halt also.
                 # Useful if you can't use Tmux. Prioritizes server_use_subprocess over Tmux option for commands like ?serverstart.
@@ -161,13 +164,15 @@ class Config():
                     'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
                     'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
                     'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
-                }
+                },
             }
         }
 
         self.update_variables()
 
-    def update_variables(self):
+    def update_variables(self) -> None:
+        """Update needed instance variables, and also adds any newly added server configs."""
+
         self.example_server_configs = self.servers['example']
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
@@ -245,6 +250,7 @@ class Config():
 
     def update_all_configs(self) -> None:
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
+
         for server_name, server_configs in self.servers.items():
             new_server_configs = self.example_server_configs.copy()
             new_server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
@@ -307,13 +313,8 @@ class Config():
         return server_configs
 
     def update_from_file(self) -> bool:
-        """
+        """Updates configs from config json file."""
 
-        Args:
-
-        Returns:
-
-        """
         if not os.path.isfile(self.get_config('user_config_filepath')):
             return False
 
@@ -323,7 +324,10 @@ class Config():
             except: return False
             self.bot_configs.update(json_data['bot_configs'])
             self.servers.update(json_data['servers'])
+            # Adds any newly added configs to servers.
+            self.servers['example'].update(self.example_server_configs)
             self.update_variables()
+            # This will also call update_config_file() which will write to user_config.json
             self.switch_server_configs(self.bot_configs['selected_server'])
         return True
 

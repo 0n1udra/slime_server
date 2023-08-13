@@ -32,7 +32,7 @@ class Backend():
     server_api_types = {
         'server_use_rcon': Server_API_Rcon,
         'server_use_screen': Server_API_Screen,
-        'use_tmux': Server_API_Tmux
+        'bot_use_tmux': Server_API_Tmux
     }
 
     def __init__(self):
@@ -157,7 +157,7 @@ class Backend():
                 return True
 
         for config_name, api in self.server_api_types.items():
-            # Checks if corresponding config is enabled to use API, e.g. use_rcon, use_tmux, use_screen, etc...
+            # Checks if corresponding config is enabled to use API, e.g. use_rcon, bot_use_tmux, use_screen, etc...
             if config.get_config(config_name):
                 self.server_api = api()  # Set server_api to correct API (Server_API_Tmux, Server_API_Rcon, etc).
                 break
@@ -351,7 +351,6 @@ class Backend():
         return version if version else False
 
     # ===== File reading and writing
-    # TODO Make async
     async def read_server_log(self, *args, **kwargs):
         if not config.get_config('server_files_access'):
             return False

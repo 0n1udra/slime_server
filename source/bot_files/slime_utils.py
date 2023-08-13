@@ -8,6 +8,7 @@ import os
 import csv
 import json
 import math
+import time
 import shutil
 import psutil
 import random
@@ -484,7 +485,6 @@ class Utils:
         else:
             # TODO make get_command_output be able to take command
             try:
-                print('pl', output)
                 reaesc = re.compile(r'\x1b[^m]*m')
                 # Use regular expression to extract player names
                 output = output[0].split(':')  # [23:08:55 INFO]: There are 2 of a max of 20 players online: R3diculous, MysticFrogo
@@ -696,6 +696,35 @@ class Utils:
         """
 
         return io.BytesIO(data.encode())
+
+    def start_tmux_session(self, tmux_session_name: str) -> bool:
+        """
+        Starts Tmux session in detached mode, with 2 panes, and sets name.
+
+        Args:
+            tmux_session_name str: Name of new tmux session.
+
+        Returns:
+            bool: If successful.
+        """
+
+        # If tmux session already exists.
+        if not os.system(f"tmux ls | grep {tmux_session_name}"):
+            lprint("INFO: Tmux session already exists.")
+            return None
+
+        if os.system(f"tmux new -d -s {tmux_session_name}"):
+            lprint(f"ERROR: Starting tmux session: {tmux_session_name}")
+            return False
+        else: lprint(f"INFO: Started Tmux detached session: {tmux_session_name}")
+
+        if os.system(f"tmux split-window -v -t {tmux_session_name}:0.0"):
+            lprint(f"ERROR: Creating second tmux panes: {tmux_session_name}")
+            return False
+        else: lprint(f"INFO: Created second tmux panes: {tmux_session_name}")
+
+        time.sleep(1)
+        return True
 
 
 file_utils = File_Utils()

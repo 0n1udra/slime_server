@@ -173,7 +173,7 @@ class Slime_Bot_Commands(commands.Cog):
             ?address
         """
 
-        await backend.send_msg(f"Server IP: ||`{utils.get_public_ip()}`||")
+        await backend.send_msg(f"Server Address: ||`{utils.get_public_ip()}:{config.get_config('server_port')}`||")
         try: ping = f"({float(await backend.server_ping())}ms)"
         except: ping = ''
         await backend.send_msg(f"Alternative Address: ||`{config.get_config('server_address')}`|| {ping}")

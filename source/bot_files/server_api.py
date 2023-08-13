@@ -2,7 +2,7 @@
 Handles how to interact with the Minecraft server based on the configs.
 Inside Backend object there is the _change_server_api() function,
   which decides which Server_API_X class to set as self.server_api in the 'Backend' object.
-For example, if the 'use_tmux' config is True, _change_server_api() will use a new instance of 'Server_API_Tmux'.
+For example, if the 'bot_use_tmux' config is True, _change_server_api() will use a new instance of 'Server_API_Tmux'.
 I'm using Python class inheritance, it works by override certain functions in base 'Server_API' class.
 Each Server_API_X class should have its own send_command() with its own way to interact with the server.
 For example, in Server_API_Tmux it uses os.system() to send commands to a tmux pane containing the server console,
@@ -350,7 +350,7 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{command}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} '{command}' ENTER"):
             return False
 
         return True
@@ -363,13 +363,16 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() was successful.
         """
 
+        if utils.start_tmux_session(config.get_config('server_tmux_name')) is False:
+            return False
+
         # If failed to change current working directory.
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} 'cd {self.launch_path}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} 'cd {self.launch_path}' ENTER"):
             lprint("ERROR: Could not change directory to server launch path.")
             return False
 
         # Starts server in tmux pane.
-        if os.system(f"tmux send-keys -t {config.get_config('tmux_session_name')}:{config.get_config('tmux_minecraft_pane')} '{self.launch_command}' ENTER"):
+        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} '{self.launch_command}' ENTER"):
             lprint("ERROR: Problem with server launch command.")
             return False
 
@@ -393,7 +396,7 @@ class Server_API_Screen(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"screen -S {config.get_config('screen_session_name')} -X stuff '{command}^M'"):
+        if os.system(f"screen -S {config.get_config('server_screen_name')} -X stuff '{command}^M'"):
             return False
 
         return True
@@ -407,7 +410,7 @@ class Server_API_Screen(Server_API):
         """
 
         os.chdir(self.launch_path)
-        if os.system(f"screen -dmS '{config.get_config('screen_session_name')}' {self.launch_command}"):
+        if os.system(f"screen -dmS '{config.get_config('server_screen_name')}' {self.launch_command}"):
             lprint(f"ERROR: Could not start server with screen: {self.launch_command}")
             return False
 

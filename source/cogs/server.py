@@ -393,7 +393,7 @@ class Server(commands.Cog):
         fields = [
             ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version(force_check=True)}\nMOTD: {await backend.get_motd()}"],
             ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
-            ['Address', f"Address: ||`{config.get_config('server_address')}`|| ({'Working' if await backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
+            ['Address', f"Address: ||`{config.get_config('server_address')}:{config.get_config('server_part')}`|| ({'Working' if await backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken))"],
             ['Location', f"`{config.get_config('server_path')}`"],
             ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
         ]
