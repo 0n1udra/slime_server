@@ -338,6 +338,8 @@ class Server_API_Tmux(Server_API):
         super().__init__()
 
         self.current_api = 'Tmux'
+        self.tmux = config.get_config('server_tmux_name')
+        self.pane = config.get_config('server_tmux_pane')
 
     async def send_command(self, command: str) -> bool:
         """
@@ -350,7 +352,8 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} '{command}' ENTER"):
+        if os.system(f"tmux send-keys -t {self.tmux}:{self.pane} '{command}' ENTER"):
+            lprint(f"ERROR: Problem sending command to Tmux: {self.tmux}:{self.pane} > {command}")
             return False
 
         return True
@@ -363,19 +366,20 @@ class Server_API_Tmux(Server_API):
             bool: If os.system() was successful.
         """
 
-        if utils.start_tmux_session(config.get_config('server_tmux_name')) is False:
+        if utils.start_tmux_session(self.tmux) is False:
             return False
 
         # If failed to change current working directory.
-        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} 'cd {self.launch_path}' ENTER"):
-            lprint("ERROR: Could not change directory to server launch path.")
+        if os.system(f"tmux send-keys -t {self.tmux}:{self.pane} 'cd {self.launch_path}' ENTER"):
+            lprint(f"ERROR: Unable to change to server launch path with Tmux {self.tmux}:{self.pane} > {self.launch_path}")
             return False
 
         # Starts server in tmux pane.
-        if os.system(f"tmux send-keys -t {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')} '{self.launch_command}' ENTER"):
-            lprint("ERROR: Problem with server launch command.")
+        if os.system(f"tmux send-keys -t {self.tmux}:{self.pane} '{self.launch_command}' ENTER"):
+            lprint(f"ERROR: Problem launching server with Tmux: {self.tmux}:{self.pane} > {self.launch_command}")
             return False
 
+        lprint(f"INFO: Started Minecraft in Tmux session: {self.tmux}:{self.pane} > {self.launch_command}")
         return True
 
 
@@ -384,6 +388,7 @@ class Server_API_Screen(Server_API):
         super().__init__()
 
         self.current_api = 'Screen'
+        self.screen = config.get_config('server_screen_name')
 
     async def send_command(self, command: str) -> bool:
         """
@@ -396,7 +401,8 @@ class Server_API_Screen(Server_API):
             bool: If os.system() command was successful (not if MC command was successful).
         """
 
-        if os.system(f"screen -S {config.get_config('server_screen_name')} -X stuff '{command}^M'"):
+        if os.system(f"screen -S {self.screen} -X stuff '{command}^M'"):
+            lprint(f"ERROR: Problem sending command to screen: {self.screen} > {command}")
             return False
 
         return True
@@ -410,10 +416,11 @@ class Server_API_Screen(Server_API):
         """
 
         os.chdir(self.launch_path)
-        if os.system(f"screen -dmS '{config.get_config('server_screen_name')}' {self.launch_command}"):
-            lprint(f"ERROR: Could not start server with screen: {self.launch_command}")
+        if os.system(f"screen -dmS '{self.screen}' {self.launch_command}"):
+            lprint(f"ERROR: Could not start server with screen: {self.screen} > {self.launch_command}")
             return False
 
+        lprint(f"INFO: Started Minecraft in screen session: {self.screen} > {self.launch_command}")
         return True
 
 

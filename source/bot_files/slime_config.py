@@ -107,6 +107,7 @@ class Config():
                 'server_files_access': True,
 
                 # Use tmux to run/command Miencraft server.
+                'server_use_tmux': True,
                 'server_tmux_name': 'slime_server',
                 # Tmux pane for minecraft server if using Tmux.
                 'server_tmux_pane': '0.1',

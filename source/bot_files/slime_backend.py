@@ -32,7 +32,8 @@ class Backend():
     server_api_types = {
         'server_use_rcon': Server_API_Rcon,
         'server_use_screen': Server_API_Screen,
-        'bot_use_tmux': Server_API_Tmux
+        'server_use_tmux': Server_API_Tmux,
+        'server_use_subprocess': Server_API_Subprocess,
     }
 
     def __init__(self):
@@ -333,9 +334,6 @@ class Backend():
             # Tries to find version info from latest.log.
             if data := await self.read_server_log('server version', top_down_mode=True):
                 version = data[0].split('version')[-1].strip()
-            # Tries to find info in server.properties next.
-            elif data := await self.get_property('version'):
-                version = data
 
         # Get version info from server console.
         elif await self.send_command('version'):

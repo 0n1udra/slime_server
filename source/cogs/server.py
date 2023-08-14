@@ -614,6 +614,7 @@ class Server(commands.Cog):
         """
 
         # Exits function if server already online.
+        lprint("INFO: Fetching server status.")
         if await backend.server_status():
             await backend.send_msg("**Server ACTIVE** :green_circle:")
             return False
