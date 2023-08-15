@@ -212,6 +212,7 @@ class Server_API(Server_Update):
                 if await self.get_command_output(unique_number, check_number=unique_number) is not False:  # Check logs for unique number.
                     self.last_check_number = unique_number
                     return True
+        else: return None
 
         return False
 
