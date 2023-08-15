@@ -259,7 +259,7 @@ class Config():
         for server_name, server_configs in self.servers.items():
             new_server_configs = self.example_server_configs.copy()
             # Updates example template values with user set ones, fallback on 'example' defaults. Also removes any items not in example configs.
-            new_server_configs.update((k, v) for k, v in new_server_configs.items() if k in self.example_server_configs)
+            new_server_configs.update((k, v) for k, v in server_configs.items() if k in self.example_server_configs)
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
 
