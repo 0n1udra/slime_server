@@ -45,7 +45,7 @@ class Config():
 
         self.bot_configs = {
             # Use python virtual environment
-            'use_pyenv': True,
+            'use_pyenv': False,
             'pyenv_activate_command': f'source {self.home_path}//pyenvs//slime_server//bin//activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",
@@ -66,10 +66,14 @@ class Config():
             'players_custom_status': True,
             'custom_status_interval': 1,
 
-            # Use Tmux to send commands to server. You can disable Tmux and RCON to disable server control, and can just use files/folder manipulation features like world backup/restore.
-            'bot_use_tmux': True,
-            'bot_tmux_name': 'slime_server',
+            # Use Tmux to send commands to server.
+            'bot_use_tmux': False,
+            'bot_tmux_name': 'slime_bot',
             'bot_tmux_pane': '0.0',
+
+            # Use Screen to run bot. NOTE: Tmux takes priority of both are set to True.
+            'bot_use_screen': False,
+            'bot_screen_name': 'slime_bot',
 
             # If editing these paths, make sure the 'example' server defaults are updated aswell.
             'home_path': self.home_path,
@@ -104,10 +108,10 @@ class Config():
                 'server_ip': 'localhost',
 
                 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
-                'server_files_access': True,
+                'server_files_access': False,
 
                 # Use tmux to run/command Miencraft server.
-                'server_use_tmux': True,
+                'server_use_tmux': False,
                 'server_tmux_name': 'slime_server',
                 # Tmux pane for minecraft server if using Tmux.
                 'server_tmux_pane': '0.1',

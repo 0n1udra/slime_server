@@ -697,6 +697,7 @@ class Utils:
 
         return io.BytesIO(data.encode())
 
+    # For run_bot.py
     def start_tmux_session(self, tmux_session_name: str) -> bool:
         """
         Starts Tmux session in detached mode, with 2 panes, and sets name.
@@ -725,6 +726,14 @@ class Utils:
 
         time.sleep(1)
         return True
+
+    def attach_server_session(self):
+
+        os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
+        pass
+
+    def attach_bot_session(self):
+        pass
 
 
 file_utils = File_Utils()

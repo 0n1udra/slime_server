@@ -18,11 +18,20 @@ def setup_configs() -> None:
     def get_input(config_prompts):
         new_configs = {}
         for variable, prompt in config_prompts.items():
+            parts = prompt.split(':')
+            if len(parts) > 1:
+                prompt = parts[1].strip()
+                config_key = parts[0]
+                negate_config = '!' in config_key
+                if negate_config and new_configs.get(config_key.split('!')[1]):
+                    continue
+                elif not negate_config and not new_configs.get(config_key):
+                    continue
             default_value = config.get_config(variable)
             input_type = type(default_value)
             config_input = input(f"{prompt} [{default_value}]: ").strip() or default_value  # Uses default value if enter nothing.
             if input_type is bool:
-                if str(config_input).lower() in ['y', 'yes']:
+                if str(config_input).lower() in ['y', 'yes'] or config_input is True:
                     new_configs[variable] = True
                 if str(config_input).lower() in ['n', 'no']:
                     new_configs[variable] = False
@@ -34,35 +43,47 @@ def setup_configs() -> None:
                     print("Using default:", default_value)
         return new_configs
 
+    # Some questions can be skipped, like how pyenv_activate_command prompt will only show if user says yes to use_pyenv.
+    # Add the config with colon, and get_input() will split the prompt and check the prior received inputs. Order of prompts is important.
+    # A ! means skip prompt if specified config was answered. E.g. !bot_use_screen will be skipped if bot_use_tmux is True.
     bot_config_prompts = {
-        'pyenv_activate_command': 'Command to use to activate/source pyenv if using one.',
         'use_pyenv': "Use Python env (y/n)",
-        'bot_token_filepath': "Discord bot token filepath",
+        'pyenv_activate_command': 'use_pyenv: Command to use to activate/source pyenv if using one',
+        'bot_token_filepath': "!use_pyenv: Discord bot token filepath",
         'command_prefix': "Discord command prefix",
-        'mc_path': "Path for MC servers and their backups",
-        'bot_tmux_name': "Tmux session name",
-        'bot_use_tmux': "Use Tmux (y/n)"
+        'bot_use_tmux': "Run bot using Tmux (y/n)",
+        'bot_tmux_name': "bot_use_tmux: Tmux session name for bot",
+        'bot_use_screen': "!bot_use_tmux: Run bot using Screen (y/n)",
+        'bot_screen_name': 'bot_use_screen: Screen session name for bot'
     }
     server_config_prompts = {  # Optionally setup server
         'server_name': 'Server name',
         'server_description': 'Server description',
         'server_address': 'Server domain/IP',
         'server_port': 'Server port',
-        'server_files_access': 'Bot can access MC files locally (y/n)',
-        'rcon_pass': 'RCON password',
-        'rcon_port': 'RCON Port',
-        'server_use_rcon': 'Enable RCON',
+        'server_files_access': "Let bot access Minecraft server files (y/n)",
+        'mc_path': "server_files_access: Path for MC servers and their backups",
+        'server_use_rcon': 'Use RCON (y/n)',
+        'rcon_pass': 'server_use_rcon: RCON password',
+        'rcon_port': 'server_use_rcon: RCON Port',
+        'server_use_tmux': "Run server using Tmux (y/n)",
+        'server_tmux_name': "server_use_tmux: Tmux session name for server",
+        'server_use_screen': "!server_use_tmux: Run server using Screen (y/n)",
+        'server_screen_name': 'server_use_screen: Screen session name for server',
+        'server_use_subprocess': "!server_use_tmux: Run server subprocess (y/n)",
     }
 
     print("----- Config Setup -----\nPress enter to use default.")
     configs = get_input(bot_config_prompts)
-    config.initialize_configs(mc_path=configs['mc_path'])
+    if mc_path := configs.get('mc_path'):
+        config.initialize_configs(mc_path=mc_path)
     config.bot_configs.update(configs)
 
     # Asks to continue to server configs
-    ask_input = input(f"\nContinue to server config (y/n): ").strip().lower()
+    ask_input = input(f"\nContinue to server config (y/n) [False]: ").strip().lower()
     if ask_input in ['y', 'yes']:
-        config.example_server_configs.update(get_input(server_config_prompts))
+        new_server_config = get_input(server_config_prompts)
+        config.new_server_configs(new_server_config['server_name'], new_server_config)
 
     config.update_all_configs()  # Updates paths configs, and writes to file.
 
@@ -243,7 +264,10 @@ if __name__ == '__main__':
         os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
     # TODO add attach args for server tmux and screen.
-    if 'attachtmux' in sys.argv: os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
+    if 'attachbot' in sys.argv:
+        os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
+    if 'attachserver' in sys.argv:
+        os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
     if 'help' in sys.argv: script_help()
 
