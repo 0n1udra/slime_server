@@ -168,12 +168,10 @@ def show_banner() -> None:
 NOTE: More config info in README.md or read comments in slime_config.py file in bot_files.
 Bot:
 Version             {__version__} - {__date__}
-User                {config.get_config('user')}
 Python Env          {config.get_config('pyenv_activate_command') if config.get_config('use_pyenv') else 'None'}
-Subprocess          {config.get_config('server_use_subprocess')}
-Tmux                {config.get_config('bot_use_tmux')}
-RCON                {config.get_config('server_use_rcon')}
 Bot Log             {config.get_config('bot_log_filepath')}
+Tmux                {config.get_config('bot_use_tmux')}
+Screen              {config.get_config('bot_use_screen')}
 Windows Mode        {config.get_config('windows_compatibility')}
 
 Discord:
@@ -183,36 +181,49 @@ Case Insensitive    {config.get_config('case_insensitive')}
 Intents             {config.intents}
 Channel ID          {config.get_config('channel_id') if nono else no}
 Show Custom Status  {config.get_config('check_before_command')} - {config.get_config('custom_status_interval')}min
+        """
 
+    if config.get_config('bot_use_tmux'): vars_msg += f"""
+Bot Tmux:
+Session and pane    {config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')}
+        """
+
+    if config.get_config('bot_use_screen'): vars_msg += f"""
+Bot Screen:
+Session Name        {config.get_config('bot_screen_name')}
+        """
+
+    vars_msg += f"""
 Server:
-Minecraft Folder    {config.get_config('mc_path')}
 File Access         {config.get_config('server_files_access')}
 Autosave            {config.get_config('enable_autosave')} - {config.get_config('autosave_interval')}min
 Server URL          {config.get_config('server_address') if nono else no}
 Server Port         {config.get_config('server_port') if nono else no}
+RCON                {config.get_config('server_use_rcon')}
+Tmux                {config.get_config('server_use_tmux')}
+Screen              {config.get_config('server_use_screen')}
+Subprocess          {config.get_config('server_use_subprocess')}
 """
-    if config.get_config('bot_use_tmux'): vars_msg += f"""
-Tmux:
-Session Name        {config.get_config('bot_tmux_name')}
-Bot Pane            {config.get_config('bot_tmux_pane')}
-Server Pane         {config.get_config('server_tmux_pane')}
-"""
+
+    if config.get_config('server_use_tmux'): vars_msg += f"""
+Server Tmux:        
+Session and name    {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')}
+            """
 
     if config.get_config('server_use_screen'): vars_msg += f"""
-Screen:
+Server Screen:
 Session Name        {config.get_config('server_screen_name')}
-"""
+        """
 
     if config.get_config('server_use_rcon'): vars_msg += f"""
-RCON:
+Server RCON:
 Pass                {config.get_config('rcon_pass') if nono else no}
 Port                {config.get_config('rcon_port') if nono else no}
 """
 
     if config.get_config('server_files_access'): vars_msg += f"""
-Local Server:
+Server Paths:
 Minecraft Path      {config.get_config('mc_path')}
-Server Path         {config.get_config('server_path')}
 """
 
     print(vars_msg)
