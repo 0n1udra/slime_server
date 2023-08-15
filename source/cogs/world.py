@@ -10,13 +10,13 @@ class World(commands.Cog):
 
     # ===== Weather
     @commands.command(aliases=['weather', 'setweather'])
-    async def weatherset(self, ctx, state='', duration=300):
+    async def weatherset(self, ctx, state='', duration=0):
         """
         Set weather.
 
         Args:
             state: <clear/rain/thunder>: Weather to change to.
-            duration optional default(0): Duration in seconds. Defaults to 300 (5min).
+            duration optional default(0): Duration in seconds. Defaults to random.
 
         Usage:
             ?weatherset rain - Rain for 300s.
@@ -27,7 +27,10 @@ class World(commands.Cog):
             await backend.send_msg("Usage: `?weather <state> [duration]`\nExample: `?weather rain`")
             return False
 
-        if await backend.send_command(f'weather {state} {duration}') is False: return
+
+        if await backend.send_command(f"weather {state} {duration if duration else ''}") is False:
+            await backend.send_msg('ERROR: Could not set weather.')
+            return
 
         await backend.send_msg(f"Weather set to: **{state.capitalize()}** {'(' + str(duration) + 's)' if duration else ''}")
         lprint(ctx, f"Weather set to: {state.capitalize()} for {duration}s")
