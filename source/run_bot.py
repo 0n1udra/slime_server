@@ -23,8 +23,10 @@ def setup_configs() -> None:
                 prompt = parts[1].strip()
                 config_key = parts[0]
                 negate_config = '!' in config_key
+                # Specified config must be false for current prompt to show
                 if negate_config and new_configs.get(config_key.split('!')[1]):
                     continue
+                # Show prompt only if specified config is true.
                 elif not negate_config and not new_configs.get(config_key):
                     continue
             default_value = config.get_config(variable)

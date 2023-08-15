@@ -258,7 +258,8 @@ class Config():
 
         for server_name, server_configs in self.servers.items():
             new_server_configs = self.example_server_configs.copy()
-            new_server_configs.update(server_configs)  # Updates example template values with user set ones, fallback on 'example' defaults
+            # Updates example template values with user set ones, fallback on 'example' defaults. Also removes any items not in example configs.
+            new_server_configs.update((k, v) for k, v in new_server_configs.items() if k in self.example_server_configs)
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
 
@@ -327,7 +328,8 @@ class Config():
         with open(self.get_config('user_config_filepath'), 'r') as openfile:
             try: json_data = json.load(openfile)
             except: return False
-            self.bot_configs.update(json_data['bot_configs'])
+            # Updates bot configs and removes any unused/deprecated configs based on the configs from initialize_configs().
+            self.bot_configs.update((k, v) for k, v in json_data['bot_configs'].items() if k in self.bot_configs)
             self.servers.update(json_data['servers'])
             # Adds any newly added configs to servers.
             self.servers['example'].update(self.example_server_configs)
