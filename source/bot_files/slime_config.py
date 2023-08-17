@@ -238,7 +238,8 @@ class Config():
 
         config_data = config_data.copy()
         for k, v in config_data.items():
-            if 'path' in k and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
+            to_change = ['path', 'pyenv_activate_command']
+            if any(i in k for i in to_change) and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
                 v = re.sub(r'(?<!/)/(?![/])', '//', v).replace('\\', '//')
                 v = re.sub(r'/+', '//', v)

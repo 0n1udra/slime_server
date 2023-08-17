@@ -378,7 +378,6 @@ class Server(commands.Cog):
 
         await backend.send_msg('***Checking Server Status...***')
         response = await backend.server_status()
-        print(response)
         if response:
             await backend.send_msg("**Server ACTIVE** :green_circle:")
         elif response is None:
