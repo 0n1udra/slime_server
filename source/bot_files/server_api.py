@@ -17,7 +17,6 @@ Following functions must be async:
 
 import os
 import json
-import time
 import aiohttp
 import asyncio
 import requests

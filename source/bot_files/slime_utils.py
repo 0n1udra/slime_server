@@ -9,13 +9,13 @@ import csv
 import json
 import math
 import time
+import socket
 import shutil
 import psutil
 import random
 import inspect
 import requests
 import datetime
-import subprocess
 from os import listdir
 from os.path import isdir, isfile, join, exists
 
@@ -660,7 +660,7 @@ class Utils:
         except: return None
         return server_ip
 
-    async def ping_address(self, address: str) -> bool:
+    async def ping_address(self, address: str) -> Union[str, bool]:
         """
         Checks if server_address address works by pinging it twice.
 
@@ -671,16 +671,17 @@ class Utils:
             bool: If successful.
         """
 
-        if config.get_config('windows_compatibility'):  # If on windows.
-            try:
-                if 'TTL=' in subprocess.run(["ping", "-n", "2", address], capture_output=True, text=True, timeout=10).stdout:
-                    return True
-            except: pass
-        else:
-            # TODO: FIX
-            ping = subprocess.Popen(['ping', '-c', '2', address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            ping_out, ping_error = ping.communicate()
-            return True if ping_out.strip() else False
+        try:
+            start_time = time.time()
+            with socket.create_connection((address, 80), timeout=2) as sock:
+                end_time = time.time()
+                latency = end_time - start_time
+                lprint(f"INFO: Pinged: {address}: {latency:.4f} seconds")
+                return str(latency)
+        except (socket.timeout, ConnectionError):
+            lprint(f"ERROR: Failed to ping: {address}")
+
+        return False
 
     def convert_to_bytes(self, data: Any) -> io.BytesIO:
         """

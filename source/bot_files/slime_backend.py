@@ -228,10 +228,18 @@ class Backend():
             bool: If ping was successful.
         """
 
+        results = None
         if data := await self.server_ping_query():
-            return round(data['time'], 2)
+            results = data['time']
         if address := config.get_config('server_address'):
-            return await utils.ping_address(address)
+            results = await utils.ping_address(address)
+
+        try:
+            results = f"{float(results) * 100:.2f}"
+        except: pass
+
+        if results:
+            return results
 
         return False
 
