@@ -16,18 +16,14 @@ import json
 import platform
 from typing import Union, Any, Dict
 
-import discord
-
 
 class Config():
     bot_source_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace('\\', '//')
     # Discord Developer Portal > Applications > Your bot > Bot > Enable 'MESSAGE CONTENT INTENT' Under 'Privileged Gateway Intents'
-    intents = discord.Intents.default()  # Default: discord.Intents.default()
-    intents.message_content = True  # Default: True
 
     def __init__(self):
 
-        # Set default variables. (needed before setup_configs() in run_bot.py to allow usage of defaults)
+        # Set default variables. (needed before config_prompts() in run_bot.py to allow usage of defaults)
         self.home_path = os.path.expanduser('~').replace('\\', '//')
         self.mc_path = f"{self.home_path}//Games//Minecraft"
         self.bot_configs = {}
@@ -39,7 +35,7 @@ class Config():
         self.server_name = self.server_configs['server_name']
 
     def initialize_configs(self, mc_path: str = None) -> None:
-        """Initiates config with correct data and paths, optionally use data from setup_configs() from run_bot.py"""
+        """Initiates config with correct data and paths, optionally use data from config_prompts() from run_bot.py"""
 
         if mc_path: self.mc_path = mc_path
 
@@ -196,7 +192,7 @@ class Config():
 
         return self.bot_configs.get(config_key, self.server_configs.get(config_key, default_return))
 
-    def set_config(self, key: str, value: Any) -> bool:
+    def set_config(self, key: str, value: Any, save: bool = True) -> bool:
         """
         Updates bot or server config. Only if config already exists.
 
@@ -215,8 +211,8 @@ class Config():
         else:
             return False
 
-        self.update_all_configs()
-        self.switch_server_configs(self.server_name)  # Updates instance variables.
+        # Formats data and saves to file.
+        if save: self.update_all_configs()
         return True
 
     def _update_config_paths(self, config_data: Dict, server_name: str = None, text_to_replace: str = 'SELECTED_SERVER') -> Dict:

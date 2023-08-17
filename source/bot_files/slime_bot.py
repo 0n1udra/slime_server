@@ -2,7 +2,7 @@ import os
 import sys
 import datetime
 
-from discord import Activity
+from discord import Activity, Intents
 from discord.ext import commands
 
 from bot_files.slime_backend import backend
@@ -10,10 +10,11 @@ from bot_files.slime_config import __version__, config
 from bot_files.slime_utils import lprint
 from bot_files.discord_components import comps
 
-
-# Make sure command_prifex doesn't conflict with other bots.
+intents = Intents.default()  # Default: discord.Intents.default()
+intents.message_content = True  # Default: True
+# Make sure command_prefix doesn't conflict with other bots.
 help_cmd = commands.DefaultHelpCommand(show_parameter_descriptions=False)
-bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=config.get_config('case_insensitive'), intents=config.intents, help_command=help_cmd)
+bot = commands.Bot(command_prefix=config.get_config('command_prefix'), case_insensitive=config.get_config('case_insensitive'), intents=intents, help_command=help_cmd)
 
 @bot.event
 async def on_ready():

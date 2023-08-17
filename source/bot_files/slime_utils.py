@@ -20,7 +20,6 @@ from os import listdir
 from os.path import isdir, isfile, join, exists
 
 from typing import Union, Any, Tuple, List, Dict, Generator
-from discord.ext.commands import Context
 
 from bot_files.slime_config import config
 
@@ -28,7 +27,7 @@ from bot_files.slime_config import config
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.
 
-def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
+def lprint(arg1: Union[Any, str], arg2:str = None) -> None:
     """
     Prints and Logs events in file.
     Logs who or where function/command was called.
@@ -40,10 +39,10 @@ def lprint(arg1: Union[Context, str], arg2:str = None) -> None:
     """
 
     # Get Discord username if provided Context else gets filename of where lprint() is being called from.
-    if isinstance(arg1, Context):
+    try:
         ctx = arg1.message.author
         msg = arg2
-    else:
+    except:
         ctx = os.path.basename(inspect.stack()[1].filename)
         msg = arg1
 
@@ -647,7 +646,7 @@ class Utils:
                 result += ' ' * indent + f'{key}: {value}\n'
         return result
 
-    def get_public_ip(self) -> Union[str, bool]:
+    def get_public_ip(self) -> Union[str, None]:
         """
         Returns your public IP address.
 
@@ -697,8 +696,7 @@ class Utils:
 
         return io.BytesIO(data.encode())
 
-    # For run_bot.py
-    def start_tmux_session(self, tmux_session_name: str) -> bool:
+    def start_tmux_session(self, tmux_session_name: str) -> Union[bool, None]:
         """
         Starts Tmux session in detached mode, with 2 panes, and sets name.
 
@@ -726,15 +724,6 @@ class Utils:
 
         time.sleep(1)
         return True
-
-    def attach_server_session(self):
-
-        os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
-        pass
-
-    def attach_bot_session(self):
-        pass
-
 
 file_utils = File_Utils()
 proc_utils = Proc_Utils()

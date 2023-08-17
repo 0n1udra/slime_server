@@ -45,7 +45,6 @@ class Backend():
         self.subprocess_servers = {}
         self.discord_channel = None
         self.server_active = False
-        config.update_from_file()  # Reads from json config file if exists.
 
     # ===== Discord
     async def update_bot_object(self, bot: Bot) -> bool:
