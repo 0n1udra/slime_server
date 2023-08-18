@@ -40,12 +40,12 @@ class Slime_Bot_Commands(commands.Cog):
         elif data := await backend.server_ping():
             ping = data
 
-        if not data:
+        if not data or not ping:
             return
 
         # Will show: Playing - X | Ping - X
         # TODO fallback on using public website for ping?
-        await self.bot.change_presence(activity=discord.Activity(name=f"- {players_online} | Ping - {ping}", type=1))
+        await self.bot.change_presence(activity=discord.Activity(name=f"- {players_online} | Ping - {ping}ms", type=1))
 
     @commands.command(aliases=['set', 'channel', 'sc'])
     async def setchannel(self, ctx):
