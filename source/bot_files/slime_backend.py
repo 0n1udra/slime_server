@@ -220,7 +220,7 @@ class Backend():
 
         return await self.server_ping()
 
-    async def server_ping(self) -> Union[str, bool]:
+    async def server_ping(self, use_custom_address: bool = False) -> Union[str, bool]:
         """
         Uses ping command to check if server reachable.
 
@@ -229,10 +229,17 @@ class Backend():
         """
 
         results = None
-        if data := await self.server_ping_query():
+
+        if use_custom_address:
+            address = config.get_config('custom_ping_address')
+        else: address = config.get_config('server_address')
+
+        if data := await utils.ping_address(address):
+            results = data
+        # Uses mctools ping query to get ping.
+        elif data := await self.server_ping_query():
             results = data['time']
-        if address := config.get_config('server_address'):
-            results = await utils.ping_address(address)
+
 
         try:
             results = f"{float(results) * 100:.2f}"

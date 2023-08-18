@@ -25,15 +25,30 @@ class Slime_Bot_Commands(commands.Cog):
     async def custom_status_task(self):
         """
         Updates bot's custom status text with online players and ping
-        NOTE: Need to set 'enable-query=true' in server.properties for this to work.
+        NOTE: Need to set 'enable-query=true' in server.properties for this to work properly.
         """
 
         await self.bot.wait_until_ready()
-        data = await backend.server_ping()
-        if not data: return
+        if query_data := await backend.server_ping_query():
+            players_online = query_data['players']['online']
+        else:
+            return
+
+        # Can use custom address to get ping latency if unable to use server's address.
+        use_custom = False
+        if config.get_config('use_custom_ping_address'):
+            use_custom = True
+        if data := await backend.server_ping(use_custom):
+            ping = data
+        elif data := await backend.server_ping():
+            ping = data
+
+        if not data:
+            return
+
         # Will show: Playing - X | Ping - X
         # TODO fallback on using public website for ping?
-        await self.bot.change_presence(activity=discord.Activity(name=f"- {data['players']['online']} | Ping - {data}", type=1))
+        await self.bot.change_presence(activity=discord.Activity(name=f"- {players_online} | Ping - {ping}", type=1))
 
     @commands.command(aliases=['set', 'channel', 'sc'])
     async def setchannel(self, ctx):

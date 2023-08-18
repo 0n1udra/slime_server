@@ -61,6 +61,9 @@ class Config():
             # NOTE: Need to set 'enable-query=true' in server.properties for this to work. Tip: '?property enable-query true'
             'players_custom_status': True,
             'custom_status_interval': 1,
+            # If unable to use server address to get ping latency.
+            'use_custom_ping_address': False,
+            'custom_ping_address': '1.1.1.1',
 
             # Use Tmux to send commands to server.
             'bot_use_tmux': False,
