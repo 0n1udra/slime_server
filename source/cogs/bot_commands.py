@@ -35,10 +35,7 @@ class Slime_Bot_Commands(commands.Cog):
             return
 
         # Can use custom address to get ping latency if unable to use server's address.
-        use_custom = False
-        if config.get_config('use_custom_ping_address'):
-            use_custom = True
-        if data := await backend.server_ping(use_custom):
+        if data := await backend.server_ping(True if config.get_config('use_custom_ping_address') else False):
             ping = data
         elif data := await backend.server_ping():
             ping = data

@@ -229,17 +229,13 @@ class Backend():
         """
 
         results = None
-
-        if use_custom_address:
-            address = config.get_config('custom_ping_address')
-        else: address = config.get_config('server_address')
-
+        # Use a custom address for getting ping latency.
+        address = config.get_config('custom_ping_address') if use_custom_address else config.get_config('server_address')
         if data := await utils.ping_address(address):
             results = data
         # Uses mctools ping query to get ping.
         elif data := await self.server_ping_query():
             results = data['time']
-
 
         try:
             results = f"{float(results) * 100:.2f}"
