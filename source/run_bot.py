@@ -12,7 +12,6 @@ watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
 class Slime_Bot:
     def __init__(self):
-        #print(config.bot_configs)
         if not config.update_from_file() or config.get_config('init') is False:
             lprint("INFO: Initializing config.")
             self.config_prompts()  # This will call config.update_all_configs which will creates user_config.json if not exist.
@@ -220,7 +219,7 @@ class Slime_Bot:
         elif config.get_config('bot_use_screen'):
             if not self.start_bot_screen():
                 return
-
+        else: self._start_bot()
 
     def show_log(self) -> None:
         """Use watch + tail command on bot log."""
