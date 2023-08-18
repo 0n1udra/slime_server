@@ -674,9 +674,7 @@ class Utils:
         try:
             start_time = time.time()
             with socket.create_connection((address, 80), timeout=2) as sock:
-                end_time = time.time()
-                latency = end_time - start_time
-                return str(latency)
+                return str((time.time() - start_time) * 10)
         except (socket.timeout, ConnectionError):
             lprint(f"ERROR: Failed to ping: {address}")
 
