@@ -103,11 +103,14 @@ class Config():
                 # Server domain or IP address. Used for server_ping(), ping_address(), etc,.
                 'server_address': 'localhost',  # Leave '' for blank instead of None or False
                 'server_port': 25565,
-                # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
-                'server_ip': 'localhost',
 
                 # Local file access allows for server files/folders manipulation,for features like backup/restore world saves, editing server.properties file, and read server log.
                 'server_files_access': False,
+
+                # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
+                'server_use_rcon': False,
+                'rcon_pass': 'pass',
+                'rcon_port': 25575,
 
                 # Use tmux to run/command Miencraft server.
                 'server_use_tmux': False,
@@ -127,11 +130,6 @@ class Config():
                 'server_launch_command': 'java -server -Xmx4G -Xms1G -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:ParallelGCThreads=2 -jar server.jar nogui',
                 # Set a custom path where to launch server. Set to None to use default.
                 'server_launch_path': None,
-
-                # Use RCON to send commands to server. You won't be able to use some features like reading server logs.
-                'server_use_rcon': False,
-                'rcon_pass': 'pass',
-                'rcon_port': 25575,
 
                 # Second to wait before checking status for ?serverstart. e.g. PaperMC ~10s (w/ decent hardware), Vanilla ~20, Valhesia Volatile ~40-50s.
                 'startup_wait_time': 30,
@@ -169,9 +167,13 @@ class Config():
                     'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
                     'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
                 },
+
+                # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
+                'server_ip': 'localhost',
             }
         }
 
+        self.initial_example_configs = self.servers['example']
         self.update_variables()
 
     def update_variables(self) -> None:
@@ -257,9 +259,8 @@ class Config():
         """Checks if there's new configs in 'example' and updates the other servers with defaults."""
 
         for server_name, server_configs in self.servers.items():
-            new_server_configs = self.example_server_configs.copy()
             # Updates example template values with user set ones, fallback on 'example' defaults. Also removes any items not in example configs.
-            new_server_configs.update((k, v) for k, v in server_configs.items() if k in self.example_server_configs)
+            new_server_configs = dict((k, v) for k, v in server_configs.items() if k in self.initial_example_configs)
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
 
@@ -331,9 +332,9 @@ class Config():
             # Updates bot configs and removes any unused/deprecated configs based on the configs from initialize_configs().
             self.bot_configs.update((k, v) for k, v in json_data['bot_configs'].items() if k in self.bot_configs)
             self.servers.update(json_data['servers'])
-            # Adds any newly added configs to servers.
-            self.servers['example'].update(self.example_server_configs)
             self.update_variables()
+            # Adds any newly added configs to servers, and removing any deprecated.
+            self.update_all_configs()
             # This will also call update_config_file() which will write to user_config.json
             self.switch_server_configs(self.bot_configs['selected_server'])
         return True
