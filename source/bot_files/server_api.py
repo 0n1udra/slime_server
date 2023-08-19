@@ -441,15 +441,20 @@ class Server_API_Rcon(Server_API):
             str, bool: Output from RCON or False if error.
         """
 
+        rcon_data = f"address: {config.get_config('server_address')}, port: {config.get_config('rcon_port')}, pass: {config.get_config('rcon_pass')}"
         # TODO possibly add persistent connection
         server_rcon_client = mctools.RCONClient(config.get_config('server_address'), port=config.get_config('rcon_port'))
         try:
             server_rcon_client.login(config.get_config('rcon_pass'))  # Connect to server
-        except ConnectionError:
-            lprint(f"Error Connecting to RCON: {config.get_config('server_ip')} : {config.get_config('rcon_port')}")
-            return False
-        else:
             self.last_command_output = server_rcon_client.command(command)  # Send command and get output.
+        except ConnectionError:
+            lprint(f"ERROR: Unable to connect with RCON: {rcon_data}")
+            return False
+        except mctools.mclient.RCONAuthenticationError:
+            lprint(f"ERROR: RCON Authentication error: {rcon_data}")
+        except:
+            lprint(f"ERROR: Unknown RCON issue: {rcon_data}")
+        else:
             server_rcon_client.stop()  # Disconnect.
             return self.last_command_output
 
