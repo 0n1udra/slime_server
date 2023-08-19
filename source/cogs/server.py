@@ -623,14 +623,8 @@ class Server(commands.Cog):
             await backend.send_msg("**Error:** Could not start Minecraft server.")
             return False
         await backend.send_msg(f"***Launching Minecraft Server...*** :rocket:\nServer Selected: **{config.get_config('server_name')}**\nStartup time: {config.get_config('startup_wait_time')}s.")
+        await backend.send_msg("Use `?check` or `?status` to get more server info.")
 
-        # checks if set custom wait time in selected_server list.
-        try: wait_time = int(config.server_configs['startup_wait_time'])
-        except: wait_time = config.get_config('startup_wait_time')
-        await backend.send_msg(f"***Fetching Status in {wait_time}s...***")
-        await asyncio.sleep(wait_time)
-
-        await ctx.invoke(self.bot.get_command('serverstatus'))
         lprint(ctx, "Starting Minecraft Server")
 
     @commands.command(aliases=['stopserver', 'stop'])
