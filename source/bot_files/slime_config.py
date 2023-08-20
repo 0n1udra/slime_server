@@ -319,14 +319,22 @@ class Config():
 
         return server_configs
 
-    def update_from_file(self) -> bool:
-        """Updates configs from config json file."""
+    def update_from_file(self, custom_file: str = None) -> bool:
+        """
+        Updates configs from config json file.
 
+        Args:
+            custom_file str: Load from custom config file.
+
+        Returns:
+            bool: Update from file successful.
+        """
+        config_file = custom_file if custom_file else config.get_config('user_config_filepath')
         if not os.path.isfile(self.get_config('user_config_filepath')):
             return False
 
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
-        with open(self.get_config('user_config_filepath'), 'r') as openfile:
+        with open(config_file, 'r') as openfile:
             try: json_data = json.load(openfile)
             except: return False
             # Updates bot configs and removes any unused/deprecated configs based on the configs from initialize_configs().

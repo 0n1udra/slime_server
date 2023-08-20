@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import platform
 
 from bot_files.slime_config import config, __version__, __date__
 from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
@@ -12,7 +13,12 @@ watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
 class Slime_Bot:
     def __init__(self):
-        if not config.update_from_file() or config.get_config('init') is False:
+        # Use Windows config file.
+        config_file = None
+        if platform.system() == 'Windows':
+            config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
+        # Asks for some basic configs if no config file found.
+        if not config.update_from_file(config_file) or config.get_config('init') is False:
             lprint("INFO: Initializing config.")
             self.config_prompts()  # This will call config.update_all_configs which will creates user_config.json if not exist.
             config.set_config('init', True)
@@ -36,8 +42,9 @@ class Slime_Bot:
 
         if 'dev' in sys.argv:
             self.dev_mode = 'dev'
-            config.set_config('bot_token_filepath', os.path.join(config.get_config('home_path'),'keys', 'slime_bot_beta.token'),
+            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token",
                               save=False)
+            config.set_config("pyenv_activate_command", "source C://Users//0n1udra//pyenvs//slime_server//bin//activate")
             lprint("INFO: Using dev mode.")
 
         if 'startbot' in sys.argv:
