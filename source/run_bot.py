@@ -14,11 +14,9 @@ watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 class Slime_Bot:
     def __init__(self):
         # Use Windows config file.
-        config_file = None
-        if platform.system() == 'Windows':
-            config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
+        if platform.system() == 'Windows': config._win_mode = True
         # Asks for some basic configs if no config file found.
-        if not config.update_from_file(config_file) or config.get_config('init') is False:
+        if not config.update_from_file() or config.get_config('init') is False:
             lprint("INFO: Initializing config.")
             self.config_prompts()  # This will call config.update_all_configs which will creates user_config.json if not exist.
             config.set_config('init', True)
@@ -42,9 +40,7 @@ class Slime_Bot:
 
         if 'dev' in sys.argv:
             self.dev_mode = 'dev'
-            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token",
-                              save=False)
-            config.set_config("pyenv_activate_command", "source C://Users//0n1udra//pyenvs//slime_server//bin//activate")
+            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
             lprint("INFO: Using dev mode.")
 
         if 'startbot' in sys.argv:
@@ -147,9 +143,6 @@ class Slime_Bot:
 
         print("----- Config Setup -----\nPress enter to use default.")
         configs = get_input(bot_config_promptss)
-        if mc_path := configs.get('mc_path'):
-            config.initialize_configs(mc_path=mc_path)
-        config.bot_configs.update(configs)
 
         # Asks to continue to server configs
         ask_input = input(f"\nContinue to server config (y/n) [False]: ").strip().lower()
@@ -157,6 +150,9 @@ class Slime_Bot:
             new_server_config = get_input(server_config_promptss)
             config.new_server_configs(new_server_config['server_name'], new_server_config)
 
+            if mc_path := new_server_config.get('mc_path'):
+                config.initialize_configs(mc_path=mc_path)
+        config.bot_configs.update(configs)
         config.update_all_configs()  # Updates paths configs, and writes to file.
 
     def _start_bot(self) -> None:
