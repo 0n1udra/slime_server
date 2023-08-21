@@ -152,6 +152,7 @@ class Slime_Bot:
 
             if mc_path := new_server_config.get('mc_path'):
                 config.initialize_configs(mc_path=mc_path)
+
         config.bot_configs.update(configs)
         config.update_all_configs()  # Updates paths configs, and writes to file.
 

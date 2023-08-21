@@ -78,6 +78,24 @@ class File_Utils:
 
         return True
 
+    def test_dir(self, dir_path) -> bool:
+        """
+        Check if file path is reachable.
+
+        Args:
+            dir_path:
+
+        Returns:
+            bool: If file path exists.
+
+        """
+
+        # TODO: Possibly add if writable arg.
+        if os.path.isdir(dir_path):
+            return True
+
+        return False
+
     def read_file_generator(self, file_path: str, lines: int = None) -> Union[Generator[str, None, None], bool]:
         """
         Yield file lines (top to bottom).

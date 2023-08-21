@@ -7,7 +7,7 @@ from discord.ext import commands, tasks
 
 from bot_files.slime_backend import backend
 from bot_files.slime_config import config
-from bot_files.slime_utils import lprint, utils
+from bot_files.slime_utils import lprint, utils, file_utils
 from bot_files.discord_components import comps
 
 
@@ -213,7 +213,12 @@ class Server(commands.Cog):
         new_servers_found = False
 
         await backend.send_msg("***Scanning for new servers...***")
-        for folder in listdir(config.get_config('servers_path')):
+        servers_path = config.get_config('servers_path')
+        if not file_utils.test_dir(servers_path):
+            await backend.send_msg(f"**ERROR:** Unable to scan path for server folders: `{servers_path}`")
+            return False
+
+        for folder in listdir(servers_path):
             # Checks if server already in 'slime_vars.servers' dict, and if 'folder' is actually a folder.
             if folder not in config.servers and isdir(join(config.get_config('servers_path'), folder)):
                 config.new_server_configs(folder)  # Create new folder and configs.
