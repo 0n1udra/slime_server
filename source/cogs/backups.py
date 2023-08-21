@@ -78,7 +78,7 @@ class World_Backups(commands.Cog):
         if comps.get_data('server_panel_components'):
             await ctx.invoke(self.bot.get_command('_update_control_panel'), 'world_backups')  # Updates panel if open
 
-    @commands.command(aliases=['wbdate'])
+    @commands.command(aliases=['wbdate', 'wbnd'])
     async def worldbackupdate(self, ctx):
         """Creates world backup with current date and time as name."""
 

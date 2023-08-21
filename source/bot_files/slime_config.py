@@ -34,6 +34,10 @@ class Config():
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
 
+        # Personal variable, not for public use.
+        self._win_mode =  False
+        self._win_config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
+
     def initialize_configs(self, mc_path: str = None) -> None:
         """Initiates config with correct data and paths, optionally use data from config_prompts() from run_bot.py"""
 
@@ -319,7 +323,7 @@ class Config():
 
         return server_configs
 
-    def update_from_file(self, custom_file: str = None) -> bool:
+    def update_from_file(self) -> bool:
         """
         Updates configs from config json file.
 
@@ -329,8 +333,10 @@ class Config():
         Returns:
             bool: Update from file successful.
         """
-        config_file = custom_file if custom_file else config.get_config('user_config_filepath')
-        if not os.path.isfile(self.get_config('user_config_filepath')):
+
+        config_file = config.get_config('user_config_filepath')
+        if self._win_mode: config_file = self._win_config_file
+        if not os.path.isfile(config_file):
             return False
 
         # Updates bot_config sub-dict. This will preserve manually added variables. It will add defaults of missing needed configs
@@ -356,8 +362,11 @@ class Config():
         """
 
         from bot_files.slime_utils import file_utils
-        file_data = file_utils.write_json(self.get_config('user_config_filepath'),
-                                          {'bot_configs': self.bot_configs, 'servers': self.servers})
+
+        config_file = config.get_config('user_config_filepath')
+        if self._win_mode: config_file = self._win_config_file
+
+        file_data = file_utils.write_json(config_file, {'bot_configs': self.bot_configs, 'servers': self.servers})
         if not file_data:
             return False
 
