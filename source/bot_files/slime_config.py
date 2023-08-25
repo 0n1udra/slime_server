@@ -289,13 +289,12 @@ class Config():
         server_configs = self.example_server_configs.copy()
         # Gets any preexisting data.
         if server_name in self.servers:
-            server_configs.update(self.servers[server_name])
+            server_configs.update(self.servers.pop(server_name))
         server_configs.update(new_data)  # Updates example template values with user set ones, fallback on 'example' defaults
         new_server_name = server_configs['server_name']
         # Updates paths variables with new server name, e.g. ../servers/old_name/ > ../servers/new_name/
         self.servers[new_server_name] = self._update_config_paths(server_configs, new_server_name, server_name)
 
-        self.servers.pop(server_name)  # Delete old server configs
         self.update_configs_file()
 
         return server_configs
