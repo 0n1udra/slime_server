@@ -350,7 +350,7 @@ class Discord_Components_Funcs(commands.Cog):
         selection_msg = await backend.send_msg("**Mode**", view=comps.new_selection(mode_select_options, 'update_server_panel', 'Select Mode'))
 
         # Second select menu, world backups, server backups, log files.
-        select_options2 = [[' ', '_', False]]
+        select_options2 = [['_', '_', False]]
         selection_msg2 = await backend.send_msg("", view=comps.new_selection(select_options2, 'server_panel2', ''))
         # Buttons will update depending on mode.
         buttons_msg = await backend.send_msg("", view=comps.new_buttons([['Reload', 'controlpanel', '\U0001F504']]))
