@@ -14,7 +14,7 @@ watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 class Slime_Bot:
     def __init__(self):
         # Use Windows config file.
-        if platform.system() == 'Windows': config._win_mode = True
+        if platform.system() == 'Windows' and 'dev' in sys.argv: config._win_mode = True
         # Asks for some basic configs if no config file found.
         if not config.update_from_file() or config.get_config('init') is False:
             lprint("INFO: Initializing config.")

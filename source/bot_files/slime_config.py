@@ -35,7 +35,7 @@ class Config():
         self.server_name = self.server_configs['server_name']
 
         # Personal variable, not for public use.
-        self._win_mode =  False
+        self._win_mode = False
         self._win_config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
 
     def initialize_configs(self, mc_path: str = None) -> None:
