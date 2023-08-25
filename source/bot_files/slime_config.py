@@ -34,6 +34,8 @@ class Config():
         self.server_configs = self.servers['example']  # Will be updated with currently selected server
         self.server_name = self.server_configs['server_name']
 
+        # TODO self.config var
+        #self.config_file = self.get_
         # Personal variable, not for public use.
         self._win_mode = False
         self._win_config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"

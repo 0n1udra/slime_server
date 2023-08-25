@@ -32,6 +32,11 @@ class Slime_Bot:
     def parse_runtime_args(self):
         # The order of the if statements is important.
 
+        # Use custom token and configs.
+        if self.dev_mode:
+            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
+            lprint("INFO: Using dev mode.")
+
         # Setup needed folders: servers, server_backups, world_backups
         if 'setup' in sys.argv:
             if config.get_config('server_files_access'):
@@ -72,11 +77,6 @@ class Slime_Bot:
         # Show help page.
         if 'help' in sys.argv:
             self.script_help()
-
-        # Use custom token and configs.
-        if self.dev_mode:
-            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
-            lprint("INFO: Using dev mode.")
 
     def config_prompts(self) -> None:
         """if 'init' variable in configs is False, asks user to setup basic configs."""
@@ -125,15 +125,15 @@ class Slime_Bot:
             'bot_use_tmux': "Run bot using Tmux (y/n)",
             'bot_tmux_name': "bot_use_tmux: Tmux session name for bot",
             'bot_use_screen': "!bot_use_tmux: Run bot using Screen (y/n)",
-            'bot_screen_name': 'bot_use_screen: Screen session name for bot'
+            'bot_screen_name': 'bot_use_screen: Screen session name for bot',
+            'server_files_access': "Let bot access Minecraft server files (y/n)",
+            'mc_path': "server_files_access: Path for MC servers and their backups",
         }
         server_config_promptss = {  # Optionally setup server
             'server_name': 'Server name',
             'server_description': 'Server description',
             'server_address': 'Server domain/IP',
             'server_port': 'Server port',
-            'server_files_access': "Let bot access Minecraft server files (y/n)",
-            'mc_path': "server_files_access: Path for MC servers and their backups",
             'server_use_rcon': 'Use RCON (y/n)',
             'rcon_pass': 'server_use_rcon: RCON password',
             'rcon_port': 'server_use_rcon: RCON Port',
@@ -153,9 +153,8 @@ class Slime_Bot:
             new_server_config = get_input(server_config_promptss)
             config.new_server_configs(new_server_config['server_name'], new_server_config)
 
-            if mc_path := new_server_config.get('mc_path'):
-                config.initialize_configs(mc_path=mc_path)
-
+        if mc_path := configs.get('mc_path'):
+            config.initialize_configs(mc_path=mc_path)
         config.bot_configs.update(configs)
         config.update_all_configs()  # Updates paths configs, and writes to file.
 
