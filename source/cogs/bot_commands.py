@@ -32,7 +32,7 @@ class Slime_Bot_Commands(commands.Cog):
         if query_data := await backend.server_ping_query():
             players_online = query_data['players']['online']
         else:
-            return
+            players_online = 'N/A'
 
         # Can use custom address to get ping latency if unable to use server's address.
         if data := await backend.server_ping(True if config.get_config('use_custom_ping_address') else False):
