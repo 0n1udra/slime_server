@@ -372,6 +372,7 @@ class Server(commands.Cog):
 
         await backend.send_msg("***Attempting Server Query...***")
         if response := await backend.server_ping_query():
+            if 'favicon' in response: response['favicon'] = 'N/A'
             # Formats data to look nicer with indents, and also removes any unwanted escape characters.
             await backend.send_msg(f'```json\n{utils.remove_ansi(utils.print_dict_data(response)).strip()}```')
         else:

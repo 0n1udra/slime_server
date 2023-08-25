@@ -654,7 +654,7 @@ class Utils:
         Returns:
             str: Formatted data.
         """
-
+        # TODO Fix indentation
         result = ''
         for key, value in data.items():
             if isinstance(value, dict):

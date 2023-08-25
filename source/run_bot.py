@@ -13,8 +13,11 @@ watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
 class Slime_Bot:
     def __init__(self):
+        self.dev_mode = ''
+        if 'dev' in sys.argv:
+            self.dev_mode = 'dev'
         # Use Windows config file.
-        if platform.system() == 'Windows' and 'dev' in sys.argv: config._win_mode = True
+        if platform.system() == 'Windows' and self.dev_mode: config._win_mode = True
         # Asks for some basic configs if no config file found.
         if not config.update_from_file() or config.get_config('init') is False:
             lprint("INFO: Initializing config.")
@@ -22,26 +25,23 @@ class Slime_Bot:
             config.set_config('init', True)
         else: lprint("INFO: Loaded user_config.json.")
 
-        self.dev_mode = ''
         self.tmux = f"{config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')}"
         self.screen_name = config.get_config('bot_screen_name')
         self.parse_runtime_args()
 
     def parse_runtime_args(self):
         # The order of the if statements is important.
-        if 'hidebanner' not in sys.argv:
-            self.show_banner()
 
+        # Setup needed folders: servers, server_backups, world_backups
         if 'setup' in sys.argv:
             if config.get_config('server_files_access'):
                 file_utils.setup_directories()
             if config.get_config('server_use_rcon'):
                 lprint("INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
 
-        if 'dev' in sys.argv:
-            self.dev_mode = 'dev'
-            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
-            lprint("INFO: Using dev mode.")
+        # Hides banner
+        if 'hidebanner' not in sys.argv:
+            self.show_banner()
 
         if 'startbot' in sys.argv:
             self.start_bot()
@@ -57,23 +57,26 @@ class Slime_Bot:
         if 'statusbot' in sys.argv:
             proc_utils.status_slime_proc()
 
+        # Show live view of bot log using watch and tail command.
         if 'log' in sys.argv:
             self.show_log()
 
-        # My personal shortcut.
-        if 'slime' in sys.argv:
-            time.sleep(1)
-            self.start_bot()
-            os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
-
         # TODO add attach args for server tmux and screen.
         if 'attachbot' in sys.argv:
-            os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
+            self.attach_bot()
+            #os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
         if 'attachserver' in sys.argv:
-            os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
+            self.attach_server()
+            #os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
+        # Show help page.
         if 'help' in sys.argv:
             self.script_help()
+
+        # Use custom token and configs.
+        if self.dev_mode:
+            config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
+            lprint("INFO: Using dev mode.")
 
     def config_prompts(self) -> None:
         """if 'init' variable in configs is False, asks user to setup basic configs."""
@@ -225,6 +228,17 @@ class Slime_Bot:
                 return
         else: self._start_bot()
 
+    def attach_bot(self) -> None:
+        """"""
+
+        pass
+
+    def attach_server(self) -> None:
+        """
+        """
+
+        pass
+
     def show_log(self) -> None:
         """Use watch + tail command on bot log."""
 
@@ -237,13 +251,13 @@ class Slime_Bot:
 python3 run_bot.py setup download startboth            --  Create required folders, downloads latest server.jar, and start server and bot with Tmux.
 python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
 
-help        - Shows this help page.
-setup       - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
-starttmux   - Start Tmux session named with 2 panes. Top pane for Minecraft server, bottom for bot.
-startbot    - Start Discord bot.
-stopbot     - Stops Discord bot.
-attachtmux  - Attaches to session. Will not start Tmux, use starttmux or setup.
-log         - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
+help            - Shows this help page.
+setup           - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
+startbot        - Creates tmux or screen session and launches Discord bot.
+stopbot         - Stops Discord bot.
+attachbot       - Attaches to session containing bot (tmux or screen).
+attachserver    - Attaches to session containing server (tmux or screen).
+log             - Show bot log using 'watch -n X tail .../bot_log.txt' command. To get out of it, use ctrl + c.
 Use standalone, showlog will not work properly if used with other arguments.
 
 NOTE:   The corresponding functions will run in the order you pass arguments in.
