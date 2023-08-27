@@ -2,7 +2,6 @@
 
 import os
 import sys
-import time
 import platform
 
 from bot_files.slime_config import config, __version__, __date__
@@ -10,22 +9,31 @@ from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
 
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
-
 class Slime_Bot:
     def __init__(self):
         self.dev_mode = ''
         if 'dev' in sys.argv:
             self.dev_mode = 'dev'
+
         # Use Windows config file.
-        if platform.system() == 'Windows' and self.dev_mode: config._win_mode = True
+        if platform.system() == 'Windows' and self.dev_mode:
+            config._win_mode = True
+
         # Asks for some basic configs if no config file found.
         if not config.update_from_file() or config.get_config('init') is False:
             lprint("INFO: Initializing config.")
             self.config_prompts()  # This will call config.update_all_configs which will creates user_config.json if not exist.
-            config.set_config('init', True)
         else: lprint("INFO: Loaded user_config.json.")
 
-        self.tmux = f"{config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')}"
+        # Start bot in a tmux or screen session or else in line.
+        self.bot_session = ''
+        if config.get_config('bot_use_tmux'):
+            self.bot_session = 'tmux'
+        elif config.get_config('bot_use_screen'):
+            self.bot_session = 'screen'
+
+        self.tmux_name = config.get_config('bot_tmux_name')
+        self.tmux = f"{self.tmux_name}:{config.get_config('bot_tmux_pane')}"
         self.screen_name = config.get_config('bot_screen_name')
         self.parse_runtime_args()
 
@@ -69,10 +77,8 @@ class Slime_Bot:
         # TODO add attach args for server tmux and screen.
         if 'attachbot' in sys.argv:
             self.attach_bot()
-            #os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
         if 'attachserver' in sys.argv:
             self.attach_server()
-            #os.system(f"tmux attach -t {config.get_config('bot_tmux_name')}")
 
         # Show help page.
         if 'help' in sys.argv:
@@ -155,8 +161,21 @@ class Slime_Bot:
 
         if mc_path := configs.get('mc_path'):
             config.initialize_configs(mc_path=mc_path)
+
         config.bot_configs.update(configs)
+        config.set_config('init', True)
         config.update_all_configs()  # Updates paths configs, and writes to file.
+
+    def start_bot(self) -> None:
+        """Uses different methods of launching Discord bot depending on config"""
+
+        if 'tmux' in self.bot_session:
+            if not self.start_bot_tmux():
+                return
+        elif 'screen' in self.bot_session:
+            if not self.start_bot_screen():
+                return
+        else: self._start_bot()
 
     def _start_bot(self) -> None:
         """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
@@ -180,7 +199,7 @@ class Slime_Bot:
 
         """
 
-        if utils.start_tmux_session(config.get_config('bot_tmux_name')) is False:
+        if utils.start_tmux_session(self.tmux_name) is False:
             return False
         
         if os.system(f"tmux send-keys -t {self.tmux} 'cd {config.get_config('bot_source_path')}' ENTER"):
@@ -216,27 +235,26 @@ class Slime_Bot:
         lprint(f"INFO: Started bot in screen session: {self.screen_name}")
         return True
 
-    def start_bot(self) -> None:
-        """Uses different methods of launching Discord bot depending on config"""
-
-        if config.get_config('bot_use_tmux'):
-            if not self.start_bot_tmux():
-                return
-        elif config.get_config('bot_use_screen'):
-            if not self.start_bot_screen():
-                return
-        else: self._start_bot()
-
     def attach_bot(self) -> None:
-        """"""
+        """Attaches to tmux/screen session containing bot."""
 
-        pass
+        if 'tmux' in self.bot_session:
+            if os.system(f"tmux a -t {self.tmux_name}"):
+                lprint(f"ERROR: Unable to attach to tmux session: {self.tmux_name}")
+        elif 'screen' in self.bot_session:
+            if os.system(f"screen -r {self.screen_name}"):
+                lprint(f"ERROR: Unable to attach to screen session {self.screen_name}")
 
     def attach_server(self) -> None:
-        """
-        """
+        """Attaches to tmux/screen session containing server."""
 
-        pass
+        if config.get_config('server_use_tmux'):
+            if os.system(f"tmux a -t {config.get_config('server_tmux_name')}"):
+                lprint(f"ERROR: Unable to attach to tmux session: {self.tmux_name}")
+        elif config.get_config('server_use_screen'):
+            if os.system(f"screen -r {config.get_config('server_screen_name')}"):
+                lprint(f"ERROR: Unable to attach to screen session {self.screen_name}")
+
 
     def show_log(self) -> None:
         """Use watch + tail command on bot log."""
@@ -292,7 +310,7 @@ Show Custom Status  {config.get_config('check_before_command')} - {config.get_co
 
         if config.get_config('bot_use_tmux'): vars_msg += f"""
 Bot Tmux:
-Session and pane    {config.get_config('bot_tmux_name')}:{config.get_config('bot_tmux_pane')}
+Session and pane    {self.tmux}
         """
 
         if config.get_config('bot_use_screen'): vars_msg += f"""
