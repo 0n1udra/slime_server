@@ -692,9 +692,12 @@ class Utils:
         try:
             start_time = time.time()
             with socket.create_connection((address, 80), timeout=2) as sock:
+                config.failed_ping_limit = 3
                 return str((time.time() - start_time) * 10)
         except (socket.timeout, ConnectionError):
-            lprint(f"ERROR: Failed to ping: {address}")
+            if config.failed_ping_limit > 0:
+                lprint(f"ERROR: Failed to ping: {address}")
+                config.failed_ping_limit -= 1
 
         return False
 
