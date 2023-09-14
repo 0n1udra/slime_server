@@ -520,7 +520,7 @@ class Backend():
         return False
 
     # ===== Backup/Restore
-    async def new_backup(self, new_name, mode: str) -> Union[str, bool]:
+    async def new_backup(self, new_name, mode: str) -> Union[str, bool, None]:
         """
         Create a new world or server backup, by copying all folders with 'world_' in its name.
 
@@ -528,7 +528,8 @@ class Backend():
             new_name str: Name of new copy. Final name will have date and time prefixed.
 
         Returns:
-            str, bool: If success, returns name path of backup, else False if error happens.
+            str, bool, None: If success, returns name path of backup, else False if error happens.
+                             Returns None if some operations were successful bot some not.
         """
 
         # Creates folder name, date, version, optional keywords
@@ -546,30 +547,52 @@ class Backend():
 
         # Copies all folders containing 'world' in name. I.e. world, world_nether, world_the_end
         elif 'world' in mode:
+            flag = False
             new_backup_path = join(config.get_config('world_backups_path'), new_name.strip())
-            error = False
-            for folder in os.listdir(config.get_config('server_path')):
-                if 'world' in folder:
-                    if file_utils.copy_dir(join(config.get_config('server_path'), folder), join(new_backup_path, folder)) is False:
-                        error = True  # Even if failed, try to backup the others.
+            for folder in config.get_config('world_folders'):
+                if not file_utils.copy_dir(join(config.get_config('server_path'), folder), join(new_backup_path, folder)):
+                    flag = True  # Even if failed, it'll try to backup the others.
 
-            if error:
-                return False
+            if flag:
+                return None
 
         return new_name
 
-    async def restore_backup(self, src, dst) -> bool:
+    async def restore_backup(self, src, mode) -> Union[bool, None]:
         """
-        Restores world or server backup. Overwrites existing files.
+        Restores world or server backup.
+        NOTE: Overwrites existing files.
 
         Args:
-            src str: Backed up folder to copy to current server.
-            dst str: Location to copy backup to.
+            src str: Full path of backup containing world folders to copy to server.
+            mode str: Backup world folders or entire server folder.
+
+        Returns:
+            bool, None: Returns boolean of (all) operation was successful. None if some operations encountered error.
         """
 
-        if file_utils.delete_dir(dst):
-            if file_utils.copy_dir(src, dst):
-                return True
+        server_path = config.get_config('server_path')
+
+        if 'world' in mode:
+            flag = True
+            for folder in os.listdir(src):
+                full_path_server = f"{server_path}//{folder}"
+                full_path_backup = f"{src}//{folder}"
+                # Deletes folder in server directory if exist before copying.
+                if file_utils.test_dir(full_path_server):
+                    if not file_utils.delete_dir(full_path_server):
+                        flag = None
+                        continue
+                if not file_utils.copy_dir(full_path_backup, full_path_server):
+                    flag = None
+                    continue
+
+            return flag
+
+        if 'server' in mode:
+            if file_utils.delete_dir(server_path):
+                if file_utils.cop_dir(src, server_path):
+                    return True
 
         return False
 

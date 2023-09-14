@@ -167,6 +167,7 @@ class Config():
                 'server_logs_path': f'{self.mc_path}//servers//SELECTED_SERVER//logs',
                 'server_log_filepath': f'{self.mc_path}//servers//SELECTED_SERVER//logs//latest.log',
                 'server_properties_filepath': f'{self.mc_path}//servers//SELECTED_SERVER//server.properties',
+                'world_folders': ['world', 'world_nether', 'world_the_end'],
 
                 # For '?links' command. Shows useful websites.
                 'useful_websites': {
@@ -268,7 +269,8 @@ class Config():
 
         for server_name, server_configs in self.servers.items():
             # Updates example template values with user set ones, fallback on 'example' defaults. Also removes any items not in example configs.
-            new_server_configs = dict((k, v) for k, v in server_configs.items() if k in self.initial_example_configs)
+            new_server_configs = self.initial_example_configs.copy()
+            new_server_configs.update((k, v) for k, v in server_configs.items() if k in new_server_configs)
             # Updates paths variables that contain 'SELECTED_SERVER' with server's name
             self.servers[server_name] = self._update_config_paths(new_server_configs, server_name)
 

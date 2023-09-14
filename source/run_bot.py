@@ -193,11 +193,7 @@ class Slime_Bot:
         bot.run(TOKEN)
 
     def start_bot_tmux(self) -> bool:
-        """
-
-        Returns:
-
-        """
+        """Start bot in tmux session."""
 
         if utils.start_tmux_session(self.tmux_name) is False:
             return False
@@ -222,11 +218,7 @@ class Slime_Bot:
         return True
 
     def start_bot_screen(self) -> bool:
-        """
-
-        Returns:
-
-        """
+        """Start bot in screen session."""
 
         if os.system(f"screen -dmS '{self.screen_name}' {config.get_config('bot_launch_command')}"):
             lprint(f"ERROR: Could not start server with screen: {self.screen_name}")

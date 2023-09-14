@@ -66,7 +66,10 @@ class World_Backups(commands.Cog):
         await backend.send_command(f"save-all")
         await asyncio.sleep(config.get_config('save_world_wait_time'))
 
-        if new_backup := await backend.new_backup(name, mode='world'):
+        response = await backend.new_backup(name, mode='world')
+        if response is None:
+            await backend.send_msg(f"**ERROR:** New backup created, however, not all world folders were backed up. Check bot log for more.")
+        elif new_backup := response:
             await backend.send_msg(f"**New World Backup:** `{new_backup}`")
             await ctx.invoke(self.bot.get_command('worldbackupslist'))
             lprint(ctx, "New world backup: " + new_backup)
@@ -115,7 +118,10 @@ class World_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        if not await backend.restore_backup(fetched_restore, join(config.get_config('server_path'), 'world')):
+        response = await backend.restore_backup(fetched_restore, 'world')
+        if response is None:
+            await backend.send_msg(f"**Error:** Some world folders were restored, but some were not. Check bot log for more.")
+        elif not response:
             await backend.send_msg(f"**Error:** Issue restoring world: {fetched_restore}")
             lprint(ctx, "ERROR: World restore: " + fetched_restore)
             return
@@ -290,7 +296,7 @@ class Server_Backups(commands.Cog):
             await asyncio.sleep(5)
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
-        try: await backend.restore_backup(fetched_restore, config.get_config('server_path'))
+        try: await backend.restore_backup(fetched_restore, 'server')
         except:
             await backend.send_msg("**ERROR:** Could not restore server!")
             lprint(ctx, "ERROR: Server restore: " + fetched_restore)

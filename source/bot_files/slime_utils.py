@@ -351,14 +351,19 @@ class File_Utils:
 
     def copy_dir(self, path: str, new_path: str) -> bool:
         """
+        Copy directory to path.
 
         Args:
-            path:
-            new_path:
+            path str: Source path.
+            new_path str: Destination path.
 
         Returns:
-
+            bool: If successful.
         """
+
+        if not self.test_dir(path):
+            lprint(f"ERROR: Could not copy folder, does not exist: {path}")
+            return False
 
         try:
             shutil.copytree(path, new_path)
