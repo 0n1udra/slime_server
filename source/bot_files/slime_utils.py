@@ -299,7 +299,8 @@ class File_Utils:
             if flag:
                 component_data = [item, item, False, index]
                 # For control panel in Server mode, need to show server description in select component options.
-                if 's' in mode and item in config.servers:
+                if 's' in mode:
+                    if item not in config.servers: continue
                     component_data[-1] = config.servers[item]['server_description']
                 # For world/server backup mode in control panel, need to be return the index of selected.
                 if 'b' in mode:
