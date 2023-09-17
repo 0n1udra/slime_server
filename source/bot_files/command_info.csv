@@ -9,6 +9,7 @@ Autosave, `?autosave [on/off/minutes]` `?asave`, Turn on/off autosave function, 
 Say, `?say <message>` `?s`, Server sends message to all active players.
 Whisper, `?tell <player> <message>` `?t`, Whispers message to player.
 Chat Log, `?chatlog [lines] [filter]` `?chat 10` `?chat wubba lubba`, User chat logs, not include whispers. Can also filter for specific keyword(s).
+Set Channel, `?setchannel` `?sc`, Set channel_id variable to allow bot to send messages to channel.
 Server Scan, `?serverscan` `?sscan`, Scans and creates configs for new servers found in the 'servers' directory.
 Server Status, `?check`, Checks if server is active or not. The `?check` and `?stats` commands are the only ones that will actually check server status.
 Server Command, `?command <command>` `?c`, Send command directly to server, use `?log` to get more server output lines. e.g.: `?/ time set day`
