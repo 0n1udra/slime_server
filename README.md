@@ -33,10 +33,11 @@ Scroll down for requirements, setup instructions and screenshots.
 3. Update `slime_vars.py` variables.  
 4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
   `python3 run_bot.py setup` - Create required folders.  
-  `python3 run_bot.py starttmux startboth attachtmux` - Starts tmux session, bot and MC server, then attaches to tmux session.
-5. Use `?setchannel` command to set channel id, so you get important bot/server event updates.  
-6. Read through the help pages with `?help` or `?help2` in Discord.  
-7. Optionals:
+  `python3 run_bot.py startbot` - Starts bot.  
+  `python3 run_bot.py attachbot` - Use this, if you're using tmux or screen to host the bot, to attach to the session.  
+6. Use `?setchannel` or `?sc` command to set channel id. This is optional, any command issued to the bot will update the channel_id, however you may not see an output for that command until reissued.   
+7. Read through the help pages with `?help` or `?help2` in Discord.  
+8. Optionals:
    - Use `?serverscan` command to add servers you manually put in the 'servers' folder.
    - You can use `?update` to download latest .jar file (Downloads latest PaperMC by default, more details in `slime_vars.py` comments, line 63)
 
