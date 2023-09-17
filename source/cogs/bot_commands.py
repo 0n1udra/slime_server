@@ -67,7 +67,6 @@ class Slime_Bot_Commands(commands.Cog):
     async def botrestart(self, ctx):
         """Restart this bot."""
 
-        await comps.clear_current_comps()
         await backend.send_msg("***Rebooting Bot...*** :arrows_counterclockwise: ")
         lprint(ctx, "Restarting bot...")
 
