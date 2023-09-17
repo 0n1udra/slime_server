@@ -4,7 +4,7 @@ self.servers contains configs for each server.
 """
 
 __version__ = '9.0.3'
-__date__ = '07/08/2023'
+__date__ = '09/17/2023'
 __author__ = 'github.com/0n1udra'
 __license__ = 'GPL 3'
 __status__ = 'Development'
