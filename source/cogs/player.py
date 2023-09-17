@@ -1,10 +1,14 @@
-import asyncio, discord
+import os
+import asyncio
+
+import discord
 from discord.ext import commands
-from bot_files.backend_functions import send_command, format_args, server_status, lprint
-import bot_files.backend_functions as backend
-import bot_files.components as components
-import bot_files.slime_vars as slime_vars
-from bot_files.extra import convert_to_bytes
+
+from bot_files.slime_backend import backend
+from bot_files.slime_config import config
+from bot_files.slime_utils import lprint, file_utils, utils
+from bot_files.discord_components import comps
+
 
 # ========== Player: gamemode, kill, tp, etc
 class Player(commands.Cog):
@@ -27,29 +31,32 @@ class Player(commands.Cog):
             ?p location
         """
 
-        await ctx.send("***Fetching Player List...***")
+        await backend.send_msg("***Fetching Player List...***")
+
         player_list = await backend.get_players()
-        if player_list is False:
-            await ctx.send("**Error:** Unable to fetch player list.")
+
+        if player_list is None:
+            await backend.send_msg("No players online. ¯\_(ツ)_/¯")
+            return
+        elif not player_list:
+            await backend.send_msg("**Error:** Unable to fetch player list.")
             return
 
-        if not player_list:
-            await ctx.send(f"No players online. ¯\_(ツ)_/¯")
-        else:
-            _player_list = []
-            for i in player_list[0]:
-                if 'location' in args:
-                    player_location = await backend.get_coords(i)
-                    _player_list.append(f'{i.strip()} {player_location if player_location else "Location N/A"}\n')
-                else: _player_list.append(f'{i.strip()}, ')
+        _player_list = []
+        for i in player_list[0]:
+            if 'location' in args:  # Get xyz coords for each player.
+                player_location = await backend.get_coords(i)
+                _player_list.append(f'{i.strip()} {player_location if player_location else "Location N/A"}\n')
+            else: _player_list.append(f'{i.strip()}, ')
 
-            # Combines 'There are X of a max of X players online' text with player names.
-            output = player_list[1].strip() + '\n' + ''.join(_player_list)
-            if 'location' in args:
-                await ctx.send(file=discord.File(convert_to_bytes(output), 'online_player_locations.txt'))
-            else:
-                output = output[:-2]  # Removes trailing ','.
-                await ctx.send(output)
+        # Combines 'There are X of a max of X players online' text with player names.
+        output = player_list[1].strip() + '\n' + ''.join(_player_list)
+        if 'location' in args:
+            # Returns file of players online and xyz coords.
+            await backend.send_msg(file=discord.File(utils.convert_to_bytes(output), 'online_player_locations.txt'))
+        else:
+            output = output[:-2]  # Removes trailing ','.
+            await backend.send_msg(output)
 
         lprint(ctx, "Fetched player list")
 
@@ -78,15 +85,15 @@ class Player(commands.Cog):
         """
 
         if not target:
-            await ctx.send("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
+            await backend.send_msg("Usage: `?kill <player> [reason]`\nExample: `?kill MysticFrogo 5 Because he killed my dog!`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}"): return
+        reason = utils.format_args(reason, return_no_reason=True)
+        if await backend.send_command(f"say ---WARNING--- {target} will be EXTERMINATED! : {reason}") is False: return
 
-        await send_command(f'kill {target}')
+        await backend.send_command(f'kill {target}')
 
-        await ctx.send(f"`{target}` :gun: assassinated!")
+        await backend.send_msg(f"`{target}` :gun: assassinated!")
         lprint(ctx, f"Killed: {target}")
 
     @commands.command(aliases=['delaykill', 'dkill', 'killwait','waitkill'])
@@ -105,18 +112,18 @@ class Player(commands.Cog):
             ?dkill Steve 15 - Waits for 15s instead of the default 5s.
         """
 
-        reason = format_args(reason, return_no_reason=True)
+        reason = utils.format_args(reason, return_no_reason=True)
         if not target:
-            await ctx.send("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
+            await backend.send_msg("Usage: `?killwait <player> <seconds> [reason]`\nExample: `?killwait MysticFrogo 5 Because he took my diamonds!`")
             return False
 
-        if not await send_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}"): return
+        if await backend.send_command(f"say ---WARNING--- {target} will self-destruct in {delay}s : {reason}") is False: return
 
-        await ctx.send(f"Killing {target} in {delay}s :bomb:")
+        await backend.send_msg(f"Killing {target} in {delay}s :bomb:")
         await asyncio.sleep(delay)
-        await send_command(f'kill {target}')
+        await backend.send_command(f'kill {target}')
 
-        await ctx.send(f"`{target}` soul has been freed.")
+        await backend.send_msg(f"`{target}` soul has been freed.")
         lprint(ctx, f"Delay killed: {target}")
 
     # ===== Teleportation and location
@@ -139,7 +146,7 @@ class Player(commands.Cog):
         """
 
         try: target = target.strip()
-        except: await ctx.send("**ERROR:** Issue getting player list.")
+        except: await backend.send_msg("**ERROR:** Issue getting player list.")
 
         # Allows you to teleport to coordinates.
         try: destination = ' '.join(destination)
@@ -150,13 +157,13 @@ class Player(commands.Cog):
             await ctx.invoke(self.bot.get_command('teleportpanel'), target)
             return
 
-        if not await send_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s"): return
-        await ctx.send(f"***Teleporting in 5s...***")
+        if await backend.send_command(f"say ---INFO--- Teleporting {target} to {destination} in 5s") is False: return
+        await backend.send_msg(f"***Teleporting in 5s...***")
 
         # Saves current coordinates of target player before teleporting them, so they may be returned.
         targets_coords = await backend.get_coords(target)
-        try: components.data('teleport_return', targets_coords.replace(',', ''))
-        except: components.data('teleport_return', 0)
+        try: comps.get_data('teleport_return', targets_coords.replace(',', ''))
+        except: comps.set_data('teleport_return', 0)
 
         # Gets coordinates for target and destination.
         target_info = f'{target} ~ {targets_coords}'
@@ -168,16 +175,16 @@ class Player(commands.Cog):
             destination_info = f'{destination}{" ~ " + dest_coord if dest_coord else ""}'
 
         await asyncio.sleep(5)
-        await send_command(f"tp {target} {destination}")
+        await backend.send_command(f"tp {target} {destination}")
 
-        await ctx.send(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
+        await backend.send_msg(f"**Teleported:** `{target_info}` to `{destination_info}` :zap:")
         lprint(ctx, f"Teleported: ({target_info}) to ({destination_info})")
 
     @commands.command(aliases=['tpreturn', 'tpr', 'return'])
     async def teleportreturn(self, ctx):
         """Returns last teleported player with bot to original location."""
 
-        await ctx.invoke(self.bot.get_command('teleport'), components.data('teleport_target'), components.data('teleport_return'))
+        await ctx.invoke(self.bot.get_command('teleport'), comps.get_data('teleport_target'), comps.get_data('teleport_return'))
 
     # ===== Game mode
     @commands.command(aliases=['gm'])
@@ -196,15 +203,15 @@ class Player(commands.Cog):
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send(f"Usage: `?gamemode <name> <mode> [reason]`\nExample: `?gamemode MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
+            await backend.send_msg(f"Usage: `?gamemode <name> <mode> [reason]`\nExample: `?gamemode MysticFrogo creative`, `?gm R3diculous survival Back to being mortal!`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f"say {player} now in {mode} : {reason}"): return
+        reason = utils.format_args(reason, return_no_reason=True)
+        if await backend.send_command(f"say {player} now in {mode} : {reason}") is False: return
 
-        await send_command(f"gamemode {mode} {player}")
+        await backend.send_command(f"gamemode {mode} {player}")
 
-        await ctx.send(f"`{player}` is now in `{mode.upper()}` indefinitely.")
+        await backend.send_msg(f"`{player}` is now in `{mode.upper()}` indefinitely.")
         lprint(ctx, f"Set {player} to: {mode}")
 
     @commands.command(aliases=['gamemodetimelimit', 'timedgm', 'gmtimed', 'gmt'])
@@ -224,23 +231,23 @@ class Player(commands.Cog):
         """
 
         if not player or mode not in ['survival', 'creative', 'spectator', 'adventure']:
-            await ctx.send("Usage: `?gamemodetimed <player> <mode> <seconds> [reason]`\nExample: `?gamemodetimed MysticFrogo spectator 120 Needs a time out`")
+            await backend.send_msg("Usage: `?gamemodetimed <player> <mode> <seconds> [reason]`\nExample: `?gamemodetimed MysticFrogo spectator 120 Needs a time out`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}"): return
+        reason = utils.format_args(reason, return_no_reason=True)
+        if await backend.send_command(f"say ---INFO--- {player.upper()} set to {mode} for {duration}s : {reason}") is False: return
 
-        await send_command(f"gamemode {mode} {player}")
-        await ctx.send(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
+        await backend.send_command(f"gamemode {mode} {player}")
+        await backend.send_msg(f"`{player}` set to `{mode}` for `{duration}s` :hourglass:")
         lprint(ctx, f"Set gamemode: {player} for {duration}s")
 
         await asyncio.sleep(duration)
-        await send_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
-        await send_command(f"gamemode survival {player}")
-        await ctx.send(f"`{player}` is back to survival.")
+        await backend.send_command(f"say ---INFO--- Times up! {player} is now back to SURVIVAL.")
+        await backend.send_command(f"gamemode survival {player}")
+        await backend.send_msg(f"`{player}` is back to survival.")
 
     # ===== Inventory
-    @commands.command(aliases=['clear'])
+    @commands.command(aliases=['clearinv', 'invclear'])
     async def clearinventory(self, ctx, target):
         """
         Clears player inventory.
@@ -253,14 +260,14 @@ class Player(commands.Cog):
         """
 
         if not target:
-            await ctx.send("Usage: `?clear <player>")
+            await backend.send_msg("Usage: `?clear <player>")
             return False
 
-        if not await send_command(f"say ---WARNING--- {target} will lose everything!"): return
+        if await backend.send_command(f"say ---WARNING--- {target} will lose everything!") is False: return
 
-        await send_command(f'clear {target}')
+        await backend.send_command(f'clear {target}')
 
-        await ctx.send(f"`{target}` inventory cleared")
+        await backend.send_msg(f"`{target}` inventory cleared")
         lprint(ctx, f"Cleared: {target}")
 
     @commands.command(aliases=['playerlocation', 'locateplayer', 'locate', 'location', 'playercoordinates'])
@@ -276,11 +283,11 @@ class Player(commands.Cog):
         """
 
         if location := await backend.get_coords(player):
-            await ctx.send(f"Located `{player}`: `{location}`")
+            await backend.send_msg(f"Located `{player}`: `{location}`")
             lprint(ctx, f"Located {player}: {location}")
             return location
 
-        await ctx.send(f"**ERROR:** Could not get location.")
+        await backend.send_msg(f"**ERROR:** Could not get location.")
 
 # ========== Permissions: Ban, whitelist, Kick, OP.
 class Permissions(commands.Cog):
@@ -302,16 +309,16 @@ class Permissions(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?kick <player> [reason]`\nExample: `?kick R3diculous Trolling too much`")
+            await backend.send_msg("Usage: `?kick <player> [reason]`\nExample: `?kick R3diculous Trolling too much`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}'): return
+        reason = utils.format_args(reason, return_no_reason=True)
+        if not await backend.send_command(f'say ---WARNING--- {player} will be ejected from server in 5s : {reason}'): return
 
         await asyncio.sleep(5)
-        await send_command(f"kick {player}")
+        await backend.send_command(f"kick {player}")
 
-        await ctx.send(f"`{player}` is outta here :wave:")
+        await backend.send_msg(f"`{player}` is outta here :wave:")
         lprint(ctx, f"Kicked: {player}")
 
     @commands.command(aliases=['exile', 'banish'])
@@ -328,18 +335,20 @@ class Permissions(commands.Cog):
             ?ban Jesse
         """
         if not player:
-            await ctx.send("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
+            await backend.send_msg("Usage: `?ban <player> [reason]`\nExample: `?ban MysticFrogo Bad troll`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}"):
+        await backend.send_msg("***Banning player in 5s...***")
+        reason = utils.format_args(reason, return_no_reason=True)
+        if await backend.send_command(f"say ---WARNING--- Banishing {player} in 5s : {reason}") is False:
+            await backend.send_msg("**ERROR:** Issue banning player.")
             return
 
         await asyncio.sleep(5)
 
-        await send_command(f"ban {player} {reason}")
+        await backend.send_command(f"ban {player} {reason}")
 
-        await ctx.send(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
+        await backend.send_msg(f"Dropkicked and exiled: `{player}` :no_entry_sign:")
         lprint(ctx, f"Banned {player} : {reason}")
 
     @commands.command(aliases=['unban'])
@@ -356,15 +365,15 @@ class Permissions(commands.Cog):
             ?unban Jesse
         """
         if not player:
-            await ctx.send("Usage: `?pardon <player> [reason]`\nExample: `?ban R3diculous He has been forgiven`")
+            await backend.send_msg("Usage: `?pardon <player> [reason]`\nExample: `?ban R3diculous He has been forgiven`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not await send_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:"):return
+        reason = utils.format_args(reason, return_no_reason=True)
+        if await backend.send_command(f"say ---INFO--- {player} has been vindicated: {reason} :tada:") is False: return
 
-        await send_command(f"pardon {player}")
+        await backend.send_command(f"pardon {player}")
 
-        await ctx.send(f"Cleansed `{player}` :flag_white:")
+        await backend.send_msg(f"Cleansed `{player}` :flag_white:")
         lprint(ctx, f"Pardoned {player} : {reason}")
 
     @commands.command(aliases=['bl', 'bans'])
@@ -372,29 +381,20 @@ class Permissions(commands.Cog):
         """Show list of current bans."""
 
         banned_players = ''
-        response = await send_command("banlist")
-        if not response: return
-        log_data = backend.server_log(log_mode=True, stopgap_str=response[1])
+        await backend.send_command("banlist")
+        log_data = await backend.get_command_output(extra_lines=20, all_lines=True)
+        if not log_data:
+            await backend.send_msg("Unable to get ban list.")
+            return
 
-        if slime_vars.server_use_rcon is True:
-            if 'There are no bans' in log_data:
+        if config.get_config('server_use_rcon'):
+            if 'There are no bans' in log_data[0]:
                 banned_players = 'No exiles!'
             else:
-                data = log_data.split(':', 1)
-                for line in data[1].split('.'):
-                    line = backend.remove_ansi(line)
-                    line = line.split(':')
-                    reason = backend.remove_ansi(line[-1].strip())  # Sometimes you'll get ansi escape chars in your reason.
-                    player = line[0].split(' ')[0].strip()
-                    banner = line[0].split(' ')[-1].strip()
-                    if len(player) < 2:
-                        continue
-                    banned_players += f"**{player}** banned by `{banner}` : `{reason}`\n"
-
-                banned_players += data[0].strip() + '.'  # Gets line that says 'There are x bans'.
+                banned_players = '\n'.join(i for i in utils.remove_ansi(log_data[0]).split('.'))
 
         else:
-            for line in filter(None, log_data.split('\n')):  # Filters out blank lines you sometimes get.
+            for line in log_data:
                 if 'was banned by' in line:  # finds log lines that shows banned players.
                     # Gets relevant data from current log line, and formats it for Discord output.
                     # E.g. [16:42:53] [Server thread/INFO] [minecraft/DedicatedServer]: Slime was banned by Server: No reason given
@@ -409,11 +409,11 @@ class Permissions(commands.Cog):
                     break
 
         if not banned_players:
-            ctx.send('**ERROR:** Trouble fetching ban list.')
+            backend.send_msg('**ERROR:** Trouble fetching ban list.')
             lprint(ctx, f"ERROR: Fetching ban list")
             return
 
-        await ctx.send(banned_players)
+        await backend.send_msg(banned_players)
         lprint(ctx, f"Fetched ban list")
 
     @commands.command(aliases=['wl', 'wlist'])
@@ -443,42 +443,42 @@ class Permissions(commands.Cog):
         """
 
         # Checks if inputted any arguments.
-        if not arg: await ctx.send(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
+        if not arg: await backend.send_msg(f"\nUsage Examples: `?whitelist add MysticFrogo`, `?whitelist on`, `?whitelist enforce on`, use `?help whitelist` or `?help2` for more.")
 
         # Checks if server online.
-        if await server_status() is False:
-            await ctx.send("**ERROR:** Server offline.")
+        if await backend.server_status() is False:
+            await backend.send_msg("**ERROR:** Server offline.")
             return
 
         # Enable/disable whitelisting.
-        if arg.lower() in backend.enable_inputs:
-            await send_command('whitelist on')
-            await ctx.send("**Whitelist ACTIVE** ")
+        if arg.lower() in utils.enable_inputs:
+            await backend.send_command('whitelist on')
+            await backend.send_msg("**Whitelist ACTIVE** ")
             lprint(ctx, f"Whitelist: Enabled")
-        elif arg.lower() in backend.disable_inputs:
-            await send_command('whitelist off')
-            await ctx.send("**Whitelist INACTIVE**")
+        elif arg.lower() in utils.disable_inputs:
+            await backend.send_command('whitelist off')
+            await backend.send_msg("**Whitelist INACTIVE**")
             lprint(ctx, f"Whitelist: Disabled")
 
         # Add/remove user to whitelist (one at a time).
         elif arg == 'add' and arg2:
-            await send_command(f"whitelist {arg} {arg2}")
-            await ctx.send(f"Added `{arg2}` to whitelist  :page_with_curl::pen_fountain:")
+            await backend.send_command(f"whitelist {arg} {arg2}")
+            await backend.send_msg(f"Added `{arg2}` to whitelist  :page_with_curl::pen_fountain:")
             lprint(ctx, f"Added to whitelist: {arg2}")
         elif arg == 'remove' and arg2:
-            await send_command(f"whitelist {arg} {arg2}")
-            await ctx.send(f"Removed `{arg2}` from whitelist.")
+            await backend.send_command(f"whitelist {arg} {arg2}")
+            await backend.send_msg(f"Removed `{arg2}` from whitelist.")
             lprint(ctx, f"Removed from whitelist: {arg2}")
 
         # Reload server whitelisting feature.
         elif arg == 'reload':
-            await send_command('whitelist reload')
-            await ctx.send("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
+            await backend.send_command('whitelist reload')
+            await backend.send_msg("***Reloading Whitelist...***\nIf `enforce-whitelist` property is set to `true`, players not on whitelist will be kicked.")
 
         # Check/enable/disable whitelist enforce feature.
         elif arg == 'enforce' and (not arg2 or 'status' in arg2):  # Shows if passed in ?enforce-whitelist status.
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist')
-            await ctx.send(f"\nUsage Examples: `?whitelist enforce true`, `?whitelist enforce false`.")
+            await backend.send_msg(f"\nUsage Examples: `?whitelist enforce true`, `?whitelist enforce false`.")
             return False
         elif arg == 'enforce' and arg2 in ['true', 'on']:
             await ctx.invoke(self.bot.get_command('properties'), 'enforce-whitelist', 'true')
@@ -487,40 +487,43 @@ class Permissions(commands.Cog):
 
         # List whitelisted.
         elif not arg or arg == 'list':
-            if slime_vars.server_use_rcon:
-                log_data = await send_command('whitelist list')
-                log_data = log_data[1]
-                log_data = backend.remove_ansi(log_data).split(':')
+            if config.get_config('server_use_rcon'):
+                if await backend.send_command('whitelist list') is False:
+                    await backend.send_msg("**ERROR:** Unable to fetch whitelist.")
+                log_data = await backend.get_command_output()
+                log_data = utils.remove_ansi(log_data[0]).split(':')
             else:
-                _, rnumber = await send_command('whitelist list')
+                await backend.send_command('whitelist list')
                 # Parses log entry lines, separating 'There are x whitelisted players:' from the list of players.
                 match_list = ['whitelisted:', 'whitelisted player(s):']  # Varies depending on server version/type.
-                log_data = backend.server_log(match_list=match_list, filter_mode=True, stopgap_str=rnumber)
+                log_data = await backend.get_command_output(keywords=match_list)
+                if isinstance(log_data, list):
+                    log_data = '\n'.join(log_data)
                 if not log_data:
-                    await ctx.send('No whitelisted')
+                    await backend.send_msg('No whitelisted')
                     return
                 log_data = log_data.split(':')[-2:]
 
             # TODO: Make into file output
-            await ctx.send('**Whitelisted** :page_with_curl:')
-            await ctx.send(log_data[-1].strip())
-            await ctx.send("Note: Players with OP will bypass whitelisting.")
+            await backend.send_msg('**Whitelisted** :page_with_curl:')
+            await backend.send_msg(log_data[-1].strip())
+            await backend.send_msg("Note: Players with OP will bypass whitelisting.")
             return False
-        else: await ctx.send("**ERROR:** Something went wrong.")
+        else: await backend.send_msg("**ERROR:** Something went wrong.")
 
+    # ===== OP
     @commands.command(aliases=['ol', 'ops', 'listops'])
     async def oplist(self, ctx):
         """Show list of server operators."""
 
-        op_players = [f"`{i['server_name']}`" for i in backend.read_json(slime_vars.server_path + '/' + 'ops.json')]
+        op_players = [f"`{i['name']}`" for i in file_utils.read_json(os.path.join(config.get_config('server_path'),'ops.json'))]
         if op_players:
-            await ctx.send(f"**OP List** :scroll:")
-            await ctx.send('\n'.join(op_players))
-        else: await ctx.send("No players are OP.")
+            await backend.send_msg(f"**OP List** :scroll:")
+            await backend.send_msg('\n'.join(op_players))
+        else: await backend.send_msg("No players are OP.")
 
         lprint(ctx, f"Fetched server operators list")
 
-    # ===== OP
     @commands.command(aliases=['op', 'addop'])
     async def opadd(self, ctx, player='', *reason):
         """
@@ -536,25 +539,26 @@ class Permissions(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
+            await backend.send_msg("Usage: `?op <player> [reason]`\nExample: `?op R3diculous Need to be a God!`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        if not reason: return
+        if not await backend.send_command(f"op {player}"):
+            return False
 
-        if slime_vars.server_use_rcon:
-            command_success = await send_command(f"op {player}")
-            command_success = command_success[0]
-        else:
-            # Checks if successful op by looking for certain keywords in log.
-            response = await send_command(f"op {player}")
-            command_success = backend.server_log(player, stopgap_str=response[1])
+        reason = utils.format_args(reason, return_no_reason=True)
 
-        if command_success:
-            await send_command(f"say ---INFO--- {player} is now OP : {reason}")
-            await ctx.send(f"**New OP Player:** `{player}`")
-        else: await ctx.send("**ERROR:** Problem setting OP status.")
-        lprint(ctx, f"New server op: {player}")
+        response = utils.parse_opadd_output('\n'.join(await backend.get_command_output()), player)
+        if response is False:
+            await backend.send_msg("**ERROR:** Problem setting OP status.")
+            lprint(ctx, f"ERROR: Couldn't OP: {player}")
+            return False
+        elif response is None:
+            await backend.send_msg(f'`{player}` Already Operator, nothing changed.')
+            return None
+
+        await backend.send_command(f"say ---INFO--- {player} is now OP : {reason}")
+        await backend.send_msg(f"**New OP Player:** `{player}`")
+        lprint(ctx, f"New server OP: {player}")
 
     @commands.command(aliases=['oprm', 'rmop', 'deop', 'removeop'])
     async def opremove(self, ctx, player='', *reason):
@@ -571,26 +575,26 @@ class Permissions(commands.Cog):
         """
 
         if not player:
-            await ctx.send("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
+            await backend.send_msg("Usage: `?deop <player> [reason]`\nExample: `?op MysticFrogo Was abusing God powers!`")
             return False
 
-        reason = format_args(reason, return_no_reason=True)
-        command_success = False
+        if not await backend.send_command(f"deop {player}"):
+            return False
 
-        if slime_vars.server_use_rcon:
-            command_success = await send_command(f"deop {player}")
-            command_success = command_success[0]
-        else:
-            if response := await send_command(f"deop {player}"):
-                command_success = backend.server_log(player, stopgap_str=response[1])
+        reason = utils.format_args(reason, return_no_reason=True)
 
-        if command_success:
-            await send_command(f"say ---INFO--- {player} no longer OP : {reason}")
-            await ctx.send(f"**Player OP Removed:** `{player}`")
-            lprint(ctx, f"Removed server OP: {player}")
-        else:
-            await ctx.send("**ERROR:** Problem removing OP status.")
+        response = utils.parse_deop_output('\n'.join(await backend.get_command_output()), player)
+        if response is False:
+            await backend.send_msg("**ERROR:** Problem removing OP status.")
             lprint(ctx, f"ERROR: Removing server OP: {player}")
+            return False
+        if response is None:
+            await backend.send_msg(f'`{player}` Was not Operator, nothing changed.')
+            return None
+
+        await backend.send_command(f"say ---INFO--- {player} no longer OP : {reason}")
+        await backend.send_msg(f"**Player OP Removed:** `{player}`")
+        lprint(ctx, f"Removed Server OP: {player}")
 
     @commands.command(aliases=['optime', 'opt', 'optimedlimit'])
     async def optimed(self, ctx, player='', time_limit=60, *reason):
@@ -608,16 +612,12 @@ class Permissions(commands.Cog):
             ?top Steve - 60s
         """
 
-        if await server_status() is False:
-            await ctx.send("Server is unreachable.")
-            return
-
         if not player:
-            await ctx.send("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
+            await backend.send_msg("Usage: `?optimed <player> <minutes> [reason]`\nExample: `?optimed R3diculous Testing purposes`")
             return False
 
-        await send_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
-        await ctx.send(f"***Temporary OP:*** `{player}` for {time_limit}m :hourglass:")
+        await backend.send_command(f"say ---INFO--- {player} granted OP for {time_limit}m : {reason}")
+        await backend.send_msg(f"***Temporary OP:*** `{player}` for {time_limit}m :hourglass:")
         lprint(ctx, f"Temporary OP: {player} for {time_limit}m")
         await ctx.invoke(self.bot.get_command('opadd'), player, *reason)
         await asyncio.sleep(time_limit)
