@@ -40,7 +40,8 @@ class Config():
         self._win_mode = False
         self._win_config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
 
-        self.failed_ping_limit = 3  # Prevent clogging bot log with failed ping messages.
+        self.failed_ping_limit = 1  # Prevent clogging bot log with failed ping messages.
+        self.failed_pings = 0
 
     def initialize_configs(self, mc_path: str = None) -> None:
         """Initiates config with correct data and paths, optionally use data from config_prompts() from run_bot.py"""

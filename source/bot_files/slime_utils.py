@@ -13,6 +13,7 @@ import socket
 import shutil
 import psutil
 import random
+import asyncio
 import inspect
 import requests
 import datetime
@@ -694,16 +695,18 @@ class Utils:
         Returns:
             bool: If successful.
         """
-
         try:
             start_time = time.time()
-            with socket.create_connection((address, 80), timeout=2) as sock:
-                config.failed_ping_limit = 3
-                return str((time.time() - start_time) * 10)
+            reader, writer = await asyncio.open_connection(address, 80)
+            writer.close()
+            await writer.wait_closed()
+            elapsed_time = (time.time() - start_time) * 10
+            config.failed_pings = 0
+            return str(elapsed_time)
         except (socket.timeout, ConnectionError):
-            if config.failed_ping_limit > 0:
+            if config.failed_pings < config.failed_ping_limit:
                 lprint(f"ERROR: Failed to ping: {address}")
-                config.failed_ping_limit -= 1
+                config.failed_pings += 1
 
         return False
 
