@@ -27,11 +27,29 @@ Scroll down for requirements, setup instructions and screenshots.
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
-# Setup
-1. Create Discord bot using this [portal](https://discord.com/developers/applications).  
-2. Setup Python venv and install libraries.
-3. Update `slime_vars.py` variables.  
-4. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
+# Setup  
+1. Create Discord bot using Discord Developer Portal.    
+  1.1. Go to: [portal](https://discord.com/developers/applications).  
+  1.2. Create New App:  
+    <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/fdcbfbd3-dc44-4d0e-ba4c-f896cc2f94c8">   
+  1.2. Go to OAUTH > URL Generator section to create invite link for the bot:   
+    <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/1bf4ab7f-8a5c-4f26-8af1-238862980944">   
+  Set the permissions:  
+    <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/f09bd87e-ac82-443e-acc5-ef7f44ea1cac">  
+  Invite bot to your server:  
+    <img width=20% height=20% src="https://github.com/0n1udra/slime_server/assets/15573136/acdb4fda-f77a-4de0-b811-9ca4778e0c09">   
+  1.3. Go to Bot section and get the token if you haven't already:  
+    <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/aafdcc20-d622-429d-9551-f25b532657ed">  
+  1.4. While in the Bot section, scroll down and enable Message Content Intents:  
+    <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/ab480973-151e-4817-bb71-ba973a962cd2">   
+
+
+  
+
+   
+3. Setup Python venv and install libraries.
+4. Update `slime_vars.py` variables.  
+5. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.  
   `python3 run_bot.py setup` - Create required folders.  
   `python3 run_bot.py startbot` - Starts bot.  
   `python3 run_bot.py attachbot` - Use this, if you're using tmux or screen to host the bot, to attach to the session.  
