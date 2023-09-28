@@ -4,7 +4,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - Join Discord server for bot help: https://discord.gg/s58XgzhE3U
 - See releases: https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
-- Jump to: [Guide](#setup), [Screenshots](#screenshots)
+- Jump to: [Guide](#setup), [Screenshots](#screenshots), [Support me](#support-me)  
 
 ### Features
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -89,6 +89,10 @@ pip install -r requirements.txt
 # Screenshots
 <img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">  
 <img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">  
-<img width="1362" alt="Screen Shot 2022-04-12 at 6 59 20 PM" src="https://user-images.githubusercontent.com/15573136/196075059-da4cc813-9a75-438e-9d6a-629a45fa4764.png">  
+<img width="1362" alt="Screen Shot 2022-04-12 at 6 59 20 PM" src="https://user-images.githubusercontent.com/15573136/196075059-da4cc813-9a75-438e-9d6a-629a45fa4764.png">   
 
+# Support me
+- PayPal [@dxzt](https://www.paypal.me/dxzt)  
+- Venmo [@dxzt550](https://venmo.com/u/dxzt550)  
+- Cash App [$DXZT550](https://cash.app/$DXZT550)  
 
