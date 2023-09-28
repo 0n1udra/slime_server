@@ -302,7 +302,7 @@ Show Custom Status  {config.get_config('check_before_command')} - {config.get_co
 
         if config.get_config('bot_use_tmux'): vars_msg += f"""
 Bot Tmux:
-Session and pane    {self.tmux}
+Name and pane       {self.tmux}
         """
 
         if config.get_config('bot_use_screen'): vars_msg += f"""
@@ -324,7 +324,7 @@ Subprocess          {config.get_config('server_use_subprocess')}
 
         if config.get_config('server_use_tmux'): vars_msg += f"""
 Server Tmux:        
-Session and name    {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')}
+Name and pane       {config.get_config('server_tmux_name')}:{config.get_config('server_tmux_pane')}
             """
 
         if config.get_config('server_use_screen'): vars_msg += f"""
