@@ -4,6 +4,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - Join Discord server for bot help: https://discord.gg/s58XgzhE3U
 - See releases: https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
+- Jump to: [Guide](#setup), [Screenshots](#screenshots)
 
 ### Features
 - Basic commands: say, kick, teleport, save, weather, and gamemode.
@@ -32,16 +33,15 @@ Scroll down for requirements, setup instructions and screenshots.
 - [beautifulsoup4](https://pypi.org/project/beautifulsoup4/) (For `?serverupdate` feature)
 
 
-# Setup  
-1. Create Discord bot in Discord Developer Portal. Scroll down for Instructions or click [here](#create-discord-bot)
-3. Setup Python venv (if using) and install libraries. Scroll down for more.
-4. Update settings by editing `user_config.json` variables.
+# Setup
+1. Create Discord bot in Discord Developer Portal. Scroll down for instructions or click [here](#create-discord-bot)
+3. Setup Python venv (if using) and install libraries. Scroll down for instructions or click [here](#using-virtualenv-or-venv).
+4. Update settings by editing `user_config.json` variables. Scroll down for more or click [here](#user-configs)
 5. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
   - `python3 run_bot.py setup` - Create required folders if starting from scratch.
   - `python3 run_bot.py startbot` - Starts bot.
   - `python3 run_bot.py attachbot` - Attach to tmux/screen if using.
   - `python3 run_bot.py startbot attachtmux`
-
 6. Use `?setchannel` or `?sc` command to set channel id. This is optional, any command issued to the bot will update the channel_id, however you may not see an output for that command until reissued.
 7. Read through the help pages with `?help` or `?help2` in Discord.
 8. Optionals:
@@ -49,7 +49,7 @@ Scroll down for requirements, setup instructions and screenshots.
   - You can use `?update` to download latest .jar file (Downloads latest PaperMC by default, more details in `slime_vars.py` comments, line 63)
 
 
-### user_configs.json
+### User Configs
 - use_pyenv:
 
 
