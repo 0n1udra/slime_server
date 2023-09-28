@@ -174,8 +174,8 @@ class Config():
                 'useful_websites': {
                     'Minecraft Download': 'https://www.minecraft.net/en-us/download',
                     'Modern HD Resource Pack': 'https://minecraftred.com/modern-hd-resource-pack/',
-                    'Minecraft Server Commands': 'https://minecraft.gamepedia.com/Commands#List_and_summary_of_commands',
-                    'Minecraft /gamerule Commands': 'https://minecraft.gamepedia.com/Game_rule',
+                    'Minecraft Server Commands': 'https://minecraft.wiki/w/Commands#List_and_summary_of_commands',
+                    'Minecraft /gamerule Commands': 'https://minecraft.wiki/w/Commands/gamerule',
                 },
 
                 # Will be updated by get_public_ip() function in backend_functions.py on bot startup.
