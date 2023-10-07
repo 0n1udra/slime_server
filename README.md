@@ -50,8 +50,52 @@ Scroll down for requirements, setup instructions and screenshots.
 
 
 ### User Configs
-- use_pyenv:
-
+#### Bot Configs:  
+- `use_pyenv`, `pyenv_activate_command` - If using python virtual environment.  
+- `bot_launch_command` - Set custom arguments when launching bot.  
+- `show_sensitive_info` - Show or hide sensitive info in launch banner.  
+- `bot_token_filepath` - Path to Discord token file.  
+- `command_prefix`, `case_insensitive` - Discord command prefix, and command case insensitivity.  
+- `players_custom_status`, `custom_status_interval` - Show players online and server ping in bot's custom status section.  
+  - `use_custom_ping_address`, `custom_ping_address` - Set a custom address for the ping section.  
+- `bot_use_tmux`, `bot_tmux_name`, `bot_tmux_pane` - Run bot in a Tmux session. 
+  - NOTE: Set `bot_tmux_name` and `server_tmux_name` to the same to run them both in the same session.
+    currently only supports the bot and one Minecraft server.  
+- `bot_use_screen`, `bot_screen_name` - Run bot in a Screen session.  
+- `home_path`, `bot_source_path`, `mc_path`, `servers_path` - Used for setting default configs for bot and servers.  
+- `user_config_filepath`, `bot_filepath`, `bot_log_filepath` - Miscellaneous variables needed for bot.  
+- `windows_compatibility` - Bot will automatically detect if running on Windows system.
+  This is Needed to adapt some commands to work for Windows, like starting Minecraft server.  
+- `windows_cmdline_start` - Bot will prefix this to `server_launch_command` to start server.  
+- `selected_server`, `init` - More miscellaneous configs needed for bot functionality.   
+#### Server Configs:
+- `server_name`, `server_description`, `server_version` - Basic server info.  
+  - NOTE: Bot will try to detect server version. If it doesn't work, you can set it manually. however, it might be overridden by the bot if it successfully detects a version.  
+- `server_address`, `server_port` - Server domain/IP and port. Not needed, but some features may not work properly.  
+- `server_files_access` - If you are running the bot on the same system as the server, and it can access server files.  
+  - Needed for some features like world/server backup and restore, editing server.properties file, etc.  
+- `server_use_rcon`, `rcon_pass`, `rcon_port` - RCON configs. Uses `server_address`.  
+- `server_use_tmux`, `server_tmux_name`, `server_tmux_pane` - Run server in a Tmux session.  
+- `server_use_screen`, `server_screen_name` - Run server using Screen.  
+- `server_use_subprocess` - Run server using Python's subprocess module.  
+  - NOTE: The server will stop if the bot process is interrupted or killed.  
+- `server_launch_command` - Command used to start server. 
+- `server_launch_path` - Optionally set a custom path to the server executable (usually a `.jar` file).  
+- `startup_wait_time` - This is just used to send a Discord message notifying how long the server takes to start.  
+- `save_world_wait_time` - Set how long it takes for the server to save the world after sending a `save-all` command.  
+- `check_before_command` - Only used if `server_files_access` is true. Sends a command to the server to check if it's reachable before sending actual command.  
+  - NOTE: This will clog your logs up. However, disabling this will mean the bot will not be sure if the server is reachable and if commands issued were successful or not.
+  - `status_checker_command"` - The command that will be sent to server with a random number, then bot will check server logs to see if it was received.
+  E.g. `xp 0.123463246`.
+- `command_buffer_time` - The time it takes for the server to run commands. Change this if your server is slower.  
+- `enable_autosave`, `autosave_interval` - Send `save-all` command at specified minutes interval.  
+- `log_lines_limit` - Set limit to how many log lines bot can read for some commands, like `?chatlog`.  
+- `server_path`, `world_backups_path`, `server_backups_path`, `server_logs_path`, `server_log_filepath`, `server_properties_filepath` - Bot will automatically set these based on `mc_path`. 
+  You can manually update them.  
+- `world_folders` - Specify what world folders to backup.  
+- `useful_websites` - For `?links` command, which shows a Discord embed of these links.  
+- `server_ip` - Bot will automatically set this if `server_address` is set.  
+  
 
 ### Create Discord bot
   1. Go to: https://discord.com/developers/applications.  
