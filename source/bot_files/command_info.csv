@@ -19,7 +19,7 @@ Server Status, `?status`, Shows server's running status, version, motd, and onli
 Server Start, `?start`, Starts Minecraft server up.
 Server Stop, `?stop [now]`, `?stop now` will immediately stop server. `?stop`, Messages all players the server will be halted in 15s. Then will halt server.
 Server Restart, `?restart [now]` `?reboot`, if passed in now arg, uses `?stop now` else uses the `?stop` command first, then `?start` command.
-Server Version, `?version`, Get Minecraft Server version.
+Server Version, `?version` `?version 1.20.1`, Get and set Minecraft Server version.
 Server Log, `?serverlog [lines]`, Shows server log. Optionally specify how many most recent lines to show, max 20 lines, by default shows 5 most recent.
 Server Log Download, `?getlogs` `?glogs`, Download server log files. Bot will unzip .gz files.
 Server Connections Log, `?connectionlog`, `?clog`, Shows connect/disconnect log lines.

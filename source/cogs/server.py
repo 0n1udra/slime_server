@@ -466,16 +466,22 @@ class Server(commands.Cog):
         lprint(ctx, f"Fetched Connection Log: {lines}")
 
     @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
-    async def serverversion(self, ctx):
+    async def serverversion(self, ctx, version=None):
         """Gets Minecraft server version."""
+
+        if version:
+            if config.set_config('server_version', version):
+                await backend.send_msg("Server version set.")
+            else: await backend.send_msg("**ERROR** Problem setting server version.")
 
         response = await backend.get_server_version(force_check=True)
         if response is False:
             await backend.send_msg("**ERROR:** Could not get server version")
             lprint("ERROR: Couldn't get server version.")
-            return
-        await backend.send_msg(f"Current version: `{response}`")
+        else: await backend.send_msg(f"Current version: `{response}`")
         lprint(ctx, f"Fetched Minecraft server version: {response}")
+
+        if not version: await backend.send_msg("Usage: `?version` - Get server version. `?version 1.20.1` Set version.")
 
     # === Properties
     @commands.command(aliases=['property', 'pr'])
