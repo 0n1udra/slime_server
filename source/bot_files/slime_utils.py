@@ -52,7 +52,7 @@ def lprint(arg1: Union[Any, str], arg2:str = None) -> None:
     print(output)
 
     # Logs output.
-    with open(config.get_config('bot_log_filepath'), 'a') as file:
+    with open(config.get_config('bot_log_filepath'), 'a+') as file:
         file.write(output + '\n')
 
 
