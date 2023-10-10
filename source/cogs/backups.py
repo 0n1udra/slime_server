@@ -13,7 +13,10 @@ from bot_files.discord_components import comps
 start_button = [['Start Server', 'serverstart', '\U0001F680']]
 
 class World_Backups(commands.Cog):
-    def __init__(self, bot): self.bot = bot
+    def __init__(self, bot):
+        self.bot = bot
+        self.world_backup_success = None
+        self.server_backup_success = None
 
     @commands.command(aliases=['worldbackupslist', 'backuplist' 'backupslist', 'wbl'])
     async def worldbackups(self, ctx, amount=10):
@@ -66,16 +69,15 @@ class World_Backups(commands.Cog):
         await backend.send_command(f"save-all")
         await asyncio.sleep(config.get_config('save_world_wait_time'))
 
-        response = await backend.new_backup(name, mode='world')
-        if response is None:
-            await backend.send_msg(f"**ERROR:** New backup created, however, not all world folders were backed up. Check bot log for more.")
-        elif new_backup := response:
+        if new_backup := await backend.new_backup(name, mode='world'):
             await backend.send_msg(f"**New World Backup:** `{new_backup}`")
             await ctx.invoke(self.bot.get_command('worldbackupslist'))
             lprint(ctx, "New world backup: " + new_backup)
+            self.world_backup_success = True
         else:
             await backend.send_msg("**ERROR:** Problem saving the world! || it's doomed!||")
             lprint(ctx, "ERROR: Could not world backup: " + name)
+            self.world_backup_success = False
             return
 
         if comps.get_data('server_panel_components'):
@@ -181,6 +183,11 @@ class World_Backups(commands.Cog):
         Note: This will not make a backup beforehand, suggest doing so with ?backup command.
         """
 
+        await ctx.invoke(self.bot.get_command('worldbackupdate'))
+        if not self.world_backup_success:
+            await backend.send_msg("**ERROR:** Could create world backup. Stopping reset.")
+            return
+
         if await backend.send_command("say ---WARNING--- Project Rebirth will commence in T-5s!"):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
 
@@ -252,9 +259,11 @@ class Server_Backups(commands.Cog):
             await backend.send_msg(f"**New Server Backup:** `{new_backup}`")
             await ctx.invoke(self.bot.get_command('serverbackupslist'))
             lprint(ctx, "New server backup: " + new_backup)
+            self.server_backup_success = True
         else:
             await backend.send_msg("**ERROR:** Server backup failed! :interrobang:")
             lprint(ctx, "ERROR: Could not server backup: " + name)
+            self.server_backup_success = False
             return
 
         if comps.get_data('server_panel_components'):
