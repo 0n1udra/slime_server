@@ -86,3 +86,5 @@ async def setup(bot: commands.Bot) -> None:
                 exit()
 
 
+    for command in config.get_config('disabled_commands'):
+        bot.remove_command(command)

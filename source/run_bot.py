@@ -298,6 +298,7 @@ Command Prefix      {config.get_config('command_prefix')}
 Case Insensitive    {config.get_config('case_insensitive')}
 Channel ID          {config.get_config('channel_id') if nono else no}
 Show Custom Status  {config.get_config('check_before_command')} - {config.get_config('custom_status_interval')}min
+Disabled Commands   {', '.join(config.get_config('disabled_commands'))}
         """
 
         if config.get_config('bot_use_tmux'): vars_msg += f"""
