@@ -34,9 +34,11 @@ Scroll down for requirements, setup instructions and screenshots.
 
 
 # Setup
-1. Create Discord bot in Discord Developer Portal. Scroll down for instructions or click [here](#create-discord-bot)
-3. Setup Python venv (if using) and install libraries. Scroll down for instructions or click [here](#using-virtualenv-or-venv).
-4. Update settings by editing `user_config.json` variables. Scroll down for more or click [here](#user-configs)
+1. Create Discord bot in Discord Developer Portal. Scroll down for instructions or click [here](#create-discord-bot)  
+3. Setup Python venv (if using) and install libraries. Scroll down for instructions or click [here](#using-virtualenv-or-venv).  
+4. Update settings by editing `user_config.json` variables. Scroll down for more or click [here](#user-configs)  
+    - NOTE: JSON file uses double quotes for strings.  
+    - Also, Do NOT edit the `example` server config entry.  
 5. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
   - `python3 run_bot.py setup` - Create required folders if starting from scratch.
   - `python3 run_bot.py startbot` - Starts bot.
@@ -54,6 +56,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - `use_pyenv`, `pyenv_activate_command` - If using python virtual environment.  
 - `bot_launch_command` - Set custom arguments when launching bot.  
 - `show_sensitive_info` - Show or hide sensitive info in launch banner.  
+- `disabled_commands` - Disable specific commands. Must put original command name not aliases if you want to completely disable it.  
 - `bot_token_filepath` - Path to Discord token file.  
 - `command_prefix`, `case_insensitive` - Discord command prefix, and command case insensitivity.  
 - `players_custom_status`, `custom_status_interval` - Show players online and server ping in bot's custom status section.  

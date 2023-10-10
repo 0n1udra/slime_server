@@ -54,13 +54,13 @@ class Config():
             'pyenv_activate_command': f'source {self.home_path}//pyenvs//slime_server//bin//activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",
-            # Disable specific commands.
-            'disabled_commands': [],
 
             # Shows sensitive info in bot launch output. Discord token, Server URL, RCON Data, etc...
             'show_sensitive_info': False,
 
             # ===== Discord config
+            # Disable specific commands.
+            'disabled_commands': [],
             # Set location of Discord bot token using double back slashes '//'
             # Get Discord bot token at: https://discord.com/developers/applications
             'bot_token_filepath': f'{self.home_path}//keys//slime_bot.token',
