@@ -241,7 +241,7 @@ class Discord_Components_Funcs(commands.Cog):
         on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
         await backend.send_msg('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
-    @commands.command(aliases=['player', 'ppanel', 'pp'])
+    @commands.command(aliases=['ppanel', 'pp'])
     async def playerpanel(self, ctx, player=''):
         """
         Select player from list (or all, random) and use quick action buttons.
