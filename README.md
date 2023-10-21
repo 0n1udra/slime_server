@@ -41,7 +41,7 @@ Scroll down for requirements, setup instructions and screenshots.
     - NOTE: JSON file uses double quotes for strings.  
     - Also, Do NOT edit the `example` server config entry.  
 5. Run `python3 run_bot.py help`, shows commands to setup tmux and/or run bot.
-  - `python3 run_bot.py setup` - Create required folders if starting from scratch.
+  - `python3 run_bot.py makefolders` - Create required folders if starting from scratch.
   - `python3 run_bot.py startbot` - Starts bot.
   - `python3 run_bot.py attachbot` - Attach to tmux/screen if using.
   - `python3 run_bot.py startbot attachtmux`
@@ -54,7 +54,7 @@ Scroll down for requirements, setup instructions and screenshots.
 
 ### User Configs
 #### File Structure:
-- Either use `python3 run_bot.py setup` to create these folders or create your own and update the paths in configs.  
+- Either use `python3 run_bot.py makefolders` to create these folders or create your own and update the paths in configs.  
   - Above command will create `Games` folder in your home directory if it doesn't exist. Then `Minecraft`, `servers`, `world_backups`, and `server_backups` inside.   
   
 Example folder structure:
