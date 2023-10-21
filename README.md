@@ -17,6 +17,7 @@ Scroll down for requirements, setup instructions and screenshots.
 - Discord user and role specific permissions for certain commands and/or command groups.
 - Be able to setup and change bot and server settings without having to edit user_config.json file.
 - Show command usage for more commands.
+ 
 
 ### Requirements
 - [Python 3.8+](https://www.python.org/)
@@ -52,6 +53,28 @@ Scroll down for requirements, setup instructions and screenshots.
 
 
 ### User Configs
+#### File Structure:
+- Either use `python3 run_bot.py setup` to create these folders or create your own and update the paths in configs.  
+  - Above command will create `Games` folder in your home directory if it doesn't exist. Then `Minecraft`, `servers`, `world_backups`, and `server_backups` inside.   
+  
+Example folder structure:
+```
+Home (e.g. ~/ or C:\Users\0n1udra)
+└─ Games
+    └─ Minecraft
+       ├─ servers (e.g. ~/Games/Minecraft/servers/)
+       │  ├─ papernc
+       │  │  └─ server.jar
+       │  └─ vanilla
+       │     └─ server.jar
+       ├─ server_backups
+       │  ├─ papermc
+       │  └─ vanilla
+       └─ world_backups
+          ├─ papermc
+          └─ vanilla
+ ```
+
 #### Bot Configs:  
 - `use_pyenv`, `pyenv_activate_command` - If using python virtual environment.  
 - `bot_launch_command` - Set custom arguments when launching bot.  
@@ -71,6 +94,7 @@ Scroll down for requirements, setup instructions and screenshots.
   This is Needed to adapt some commands to work for Windows, like starting Minecraft server.  
 - `windows_cmdline_start` - Bot will prefix this to `server_launch_command` to start server.  
 - `selected_server`, `init` - More miscellaneous configs needed for bot functionality.   
+ 
 #### Server Configs:
 - `server_name`, `server_description`, `server_version` - Basic server info.  
   - NOTE: Bot will try to detect server version. If it doesn't work, you can set it manually. however, it might be overridden by the bot if it successfully detects a version.  
@@ -115,6 +139,7 @@ Scroll down for requirements, setup instructions and screenshots.
   4. While in the Bot section, scroll down and enable Message Content Intents:  
     <img width=50% height=50% src="https://github.com/0n1udra/slime_server/assets/15573136/ab480973-151e-4817-bb71-ba973a962cd2">   
 
+
 ### Using Virtualenv or venv
 Install Python3 venv:
 ```bash
@@ -133,10 +158,12 @@ Install required Python modules:
 pip install -r requirements.txt
 ```
 
+
 # Screenshots
 <img width="800" alt="Screen Shot 2021-12-04 at 22 33 54" src="https://user-images.githubusercontent.com/15573136/144732439-82c696df-56c9-4024-b93b-30d78958cfa3.png">  
 <img width="800" alt="Screen Shot 2021-12-04 at 22 57 41" src="https://user-images.githubusercontent.com/15573136/144732861-278016b7-e3f8-44ba-8352-10a9f1d3438e.png">  
 <img width="1362" alt="Screen Shot 2022-04-12 at 6 59 20 PM" src="https://user-images.githubusercontent.com/15573136/196075059-da4cc813-9a75-438e-9d6a-629a45fa4764.png">   
+
 
 # Support me
 - PayPal [@dxzt](https://www.paypal.me/dxzt)  

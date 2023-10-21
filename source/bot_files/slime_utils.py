@@ -395,12 +395,11 @@ class File_Utils:
         """Create necessary directories, servers, world_backups, server_backups."""
 
         # Creates Server folder, folder for world backups, and folder for server backups.
-        os.makedirs(config.get_config('servers_path'))
-        lprint("INFO: Created: " + config.get_config('servers_path'))
-        os.makedirs(config.get_config('world_backups_path'))
-        lprint("INFO: Created: " + config.get_config('world_backups_path'))
-        os.makedirs(config.get_config('server_backups_path'))
-        lprint("INFO: Created: " + config.get_config('server_backups_path'))
+        self.new_dir(f"{config.get_config('home_path')}//Games")
+        self.new_dir(config.get_config('mc_path'))
+        self.new_dir(config.get_config('servers_path'))
+        self.new_dir(f"{config.get_config('mc_path')}//server_backups")
+        self.new_dir(f"{config.get_config('mc_path')}//world_backups")
 
 
 class Proc_Utils:

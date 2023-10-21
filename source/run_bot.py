@@ -40,21 +40,19 @@ class Slime_Bot:
     def parse_runtime_args(self):
         # The order of the if statements is important.
 
+        # Hides banner
+        if 'hidebanner' not in sys.argv:
+            self.show_banner()
+
         # Use custom token and configs.
         if self.dev_mode:
             config.set_config('bot_token_filepath', f"{config.get_config('home_path')}//keys//slime_bot_beta.token", save=False)
             lprint("INFO: Using dev mode.")
 
         # Setup needed folders: servers, server_backups, world_backups
-        if 'setup' in sys.argv:
-            if config.get_config('server_files_access'):
-                file_utils.setup_directories()
-            if config.get_config('server_use_rcon'):
-                lprint("INFO: RCON Enabled. Make sure relevant variables are set properly in backend.py.")
-
-        # Hides banner
-        if 'hidebanner' not in sys.argv:
-            self.show_banner()
+        if 'makefolders' in sys.argv:
+            file_utils.setup_directories()
+            return
 
         if 'startbot' in sys.argv:
             self.start_bot()
@@ -287,6 +285,7 @@ NOTE: More config info in README.md or read comments in slime_config.py file in 
 Bot:
 Version             {__version__} - {__date__}
 Python Env          {config.get_config('pyenv_activate_command') if config.get_config('use_pyenv') else 'None'}
+Config File:        {config.get_config('user_config_filepath')}
 Bot Log             {config.get_config('bot_log_filepath')}
 Tmux                {config.get_config('bot_use_tmux')}
 Screen              {config.get_config('bot_use_screen')}
