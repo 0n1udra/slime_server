@@ -110,7 +110,7 @@ class Config():
                 'server_description': 'example server used as template',
 
                 # For compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...
-                'server_version': None,
+                'server_version': '1.20',
 
                 # Server domain or IP address. Used for server_ping(), ping_address(), etc,.
                 'server_address': 'localhost',  # Leave '' for blank instead of None or False
