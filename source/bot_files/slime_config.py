@@ -79,7 +79,7 @@ class Config():
 
             # Use Tmux to send commands to server.
             'bot_use_tmux': False,
-            'bot_tmux_name': 'slime_bot',
+            'bot_tmux_name': 'slime_server',
             'bot_tmux_pane': '0.0',
 
             # Use Screen to run bot. NOTE: Tmux takes priority of both are set to True.
