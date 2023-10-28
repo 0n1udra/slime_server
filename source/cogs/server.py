@@ -265,6 +265,9 @@ class Server(commands.Cog):
             await ctx.invoke(self.bot.get_command('serverstop'), now=now)
         await asyncio.sleep(5)
 
+        # Creates backup first.
+        await ctx.invoke(self.bot.get_command('serverbackup'), '')
+
         await backend.send_msg(f"***Downloading latest server jar...***")
         url, version = await backend.server_api.server_update()  # Updates server.jar file.
         if version:
