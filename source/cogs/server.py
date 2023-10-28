@@ -12,7 +12,7 @@ from bot_files.discord_components import comps
 
 
 # ========== Server: autosave, Start/stop, Status, edit property, backup/restore.
-class Server(commands.Cog):
+class Server_Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -232,16 +232,6 @@ class Server(commands.Cog):
         else:
             await ctx.invoke(self.bot.get_command('serverselect'))  # Shows all servers in Discord embed
 
-    # ===== Version
-    @commands.command(aliases=['lversion', 'lver', 'lv', 'checklatest', 'checkupdate'])
-    async def latestversion(self, ctx):
-        """Gets latest Minecraft server version number from official website."""
-
-        await ctx.send("***Fetching latest vanilla server version...***")
-        version = await backend.server_api.check_latest_version()
-        await backend.send_msg(f"Latest version: `{version}`")
-        lprint(ctx, f"Fetched latest Minecraft server version: {version}")
-
     @commands.command(aliases=['updateserver', 'su', 'update'])
     async def serverupdate(self, ctx, now=''):
         """
@@ -275,17 +265,6 @@ class Server(commands.Cog):
             await asyncio.sleep(3)
         else: await backend.send_msg("**ERROR:** Updating server failed. Possible incompatibility.\nSuggest restoring from a backup if updating corrupted any files.")
         lprint(ctx, "Server Updated")
-
-    # ===== Save/Autosave
-    @commands.command(aliases=['sa', 'save-all'])
-    async def saveall(self, ctx):
-        """Save current world using server save-all command."""
-
-        if await backend.send_command('save-all') is False: return
-
-        await backend.send_msg("World Saved  :floppy_disk:")
-        await backend.send_msg("**NOTE:** This is not the same as making a backup using `?backup`.")
-        lprint(ctx, "Saved World")
 
     @commands.command()
     async def autosaveon(self, ctx):
@@ -354,138 +333,6 @@ class Server(commands.Cog):
         if await backend.send_command('save-all'):
             lprint(f"Autosaved (interval: {config.get_config('autosave_interval')}m)")
 
-    # ===== Status/Info
-    @commands.command(aliases=['pingserver', 'ping'])
-    async def serverping(self, ctx):
-        """Uses ping command to see if server_address is reachable."""
-
-        await backend.send_msg('***Pinging Server...***')
-        try: ping = f"{await backend.server_ping()}ms"
-        except: ping = ''
-        if ping:
-            await backend.send_msg(ping)
-        else: await backend.send_msg("Unable to get ping.")
-
-    @commands.command(aliases=['queryserver', 'pingquery', 'queryping', 'query'])
-    async def serverquery(self, ctx):
-        """
-        Uses mctools library to get basic server info from server query.
-        NOTE: Must have enable-query=true in server.properties for this to work.
-        """
-
-        await backend.send_msg("***Attempting Server Query...***")
-        if response := await backend.server_ping_query():
-            if 'favicon' in response: response['favicon'] = 'N/A'
-            # Formats data to look nicer with indents, and also removes any unwanted escape characters.
-            await backend.send_msg(f'```json\n{utils.remove_ansi(utils.print_dict_data(response)).strip()}```')
-        else:
-            await backend.send_msg("**ERROR:** Query ping failed.")
-
-    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
-    async def servercheck(self, ctx):
-        """Checks if server is online."""
-
-        await backend.send_msg('***Checking Server Status...***')
-        response = await backend.server_status()
-        if response:
-            await backend.send_msg("**Server ACTIVE** :green_circle:")
-        elif response is None:
-            await backend.send_msg("**ERROR:** Unable to check server status.")
-        else: await backend.send_msg("**Server INACTIVE** :red_circle:")
-
-    @commands.command(aliases=['stat', 'stats', 'status', 'info'])
-    async def serverstatus(self, ctx):
-        """Shows server active status, version, motd, and online players"""
-
-        sstatus = await backend.server_status()
-        if sstatus: status = '**ACTIVE** :green_circle:'
-        elif sstatus is False: status = '**INACTIVE** :red_circle:'
-        else: status = 'N/A'
-        fields = [
-            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version(force_check=True)}\nMOTD: {await backend.get_motd()}"],
-            ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
-            ['Address', f"Address: ||`{config.get_config('server_address')}:{config.get_config('server_part')}`|| ({'Working' if await backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken)"],
-            ['Location', f"`{config.get_config('server_path')}`"],
-            ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
-        ]
-        await backend.send_msg(embed=comps.new_embed(fields, 'Server Status'))
-
-        if status is not False:  # Only fetches players list if server online.
-            await ctx.invoke(self.bot.get_command('players'))
-        await ctx.invoke(self.bot.get_command('bannermsg'))
-        lprint(ctx, "Fetched server status")
-
-    @commands.command(aliases=['log', 'mlog', 'slog'])
-    async def serverlog(self, ctx, lines=20, match=None):
-        """
-        Show server log.
-
-        Args:
-            lines optional default(5): How many latest lines to show or how many matches to show if using 'match' argument.
-            match optional: Filter lines, only show lines containing this. Must provide lines argument if using this one.
-
-        Usage:
-            ?serverlog - Defaults ot showing 5 lines
-            ?log 10
-            ?log 10 my coordinates - Gets 10 most recent lines containing 'my coordinates'.
-
-        Note: When using the match argument, like '?log 5 hello', this doesn't mean it'll get the latest 5 lines and check
-        if those lines contains 'hello'. Instead, it'll keep going through 'latest.log' until it finds 5 matches (or until the file ends).
-        """
-
-        await backend.send_msg(f"***Fetching {lines} Minecraft Log...*** :tools:")
-        log_data = await backend.read_server_log(search=match, lines=lines, find_all=True)
-        if log_data:
-            await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'server.log'))
-            lprint(ctx, f"Fetched Minecraft Log: {lines}")
-        else:
-            await backend.send_msg("**Error:** Problem fetching data.")
-            lprint(ctx, "ERROR: Issue getting minecraft log data")
-
-    @commands.command(aliases=['sclog', 'connectionlog', 'connectionslog', 'conlog', 'joinlog', 'loginlog'])
-    async def serverconnectionslog(self, ctx, lines=20):
-        """
-        Shows log lines relating to connections (joining, disconnects, kicks, etc).
-
-        Args:
-            lines optional default(5): Number of lines to show.
-
-        Usage:
-            ?clogs - Shows recent 5 lines
-            ?clogs 10
-        """
-
-        await backend.send_msg(f"***Fetching {lines} Connection Log...*** :satellite:")
-
-        match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
-        # Get only log lines that are connection related.
-        log_data = await backend.read_server_log(search=match_list, lines=lines, find_all=True)
-        if not log_data:
-            await backend.send_msg("**ERROR:** Could not get chat log.")
-            lprint(ctx, "ERROR: Problem fetching connections log.")
-            return
-
-        await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'connections_log.log'))
-        lprint(ctx, f"Fetched Connection Log: {lines}")
-
-    @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
-    async def serverversion(self, ctx, version=None):
-        """Gets Minecraft server version."""
-
-        if version:
-            if config.set_config('server_version', version):
-                await backend.send_msg("Server version set.")
-            else: await backend.send_msg("**ERROR** Problem setting server version.")
-
-        response = await backend.get_server_version(force_check=True)
-        if response is False:
-            await backend.send_msg("**ERROR:** Could not get server version")
-            lprint("ERROR: Couldn't get server version.")
-        else: await backend.send_msg(f"Current version: `{response}`")
-        lprint(ctx, f"Fetched Minecraft server version: {response}")
-
-        if not version: await backend.send_msg("Usage: `?version` - Get server version. `?version 1.20.1` Set version.")
-
     # === Properties
     @commands.command(aliases=['property', 'pr'])
     async def properties(self, ctx, target_property='', *value):
@@ -506,7 +353,7 @@ class Server(commands.Cog):
 
         if not target_property:
             await backend.send_msg("Usage: `?property <property_name> [new_value]`\nExample: `?property motd`, `?p motd Hello World!`\n"
-                           "Show all properties using `?properties all` or `?pa`")
+                                   "Show all properties using `?properties all` or `?pa`")
             return False
 
         # Parse value from *value tuple.
@@ -700,5 +547,171 @@ class Server(commands.Cog):
         await asyncio.sleep(3)
         await ctx.invoke(self.bot.get_command('serverstart'))
 
+
+class Server(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(aliases=['lversion', 'lver', 'lv', 'checklatest', 'checkupdate'])
+    async def latestversion(self, ctx):
+        """Gets latest Minecraft server version number from official website."""
+
+        await ctx.send("***Fetching latest vanilla server version...***")
+        version = await backend.server_api.check_latest_version()
+        await backend.send_msg(f"Latest version: `{version}`")
+        lprint(ctx, f"Fetched latest Minecraft server version: {version}")
+
+    # ===== Save/Autosave
+    @commands.command(aliases=['sa', 'save-all'])
+    async def saveall(self, ctx):
+        """Save current world using server save-all command."""
+
+        if await backend.send_command('save-all') is False: return
+
+        await backend.send_msg("World Saved  :floppy_disk:")
+        await backend.send_msg("**NOTE:** This is not the same as making a backup using `?backup`.")
+        lprint(ctx, "Saved World")
+
+    # ===== Status/Info
+    @commands.command(aliases=['pingserver', 'ping'])
+    async def serverping(self, ctx):
+        """Uses ping command to see if server_address is reachable."""
+
+        await backend.send_msg('***Pinging Server...***')
+        try: ping = f"{await backend.server_ping()}ms"
+        except: ping = ''
+        if ping:
+            await backend.send_msg(ping)
+        else: await backend.send_msg("Unable to get ping.")
+
+    @commands.command(aliases=['queryserver', 'pingquery', 'queryping', 'query'])
+    async def serverquery(self, ctx):
+        """
+        Uses mctools library to get basic server info from server query.
+        NOTE: Must have enable-query=true in server.properties for this to work.
+        """
+
+        await backend.send_msg("***Attempting Server Query...***")
+        if response := await backend.server_ping_query():
+            if 'favicon' in response: response['favicon'] = 'N/A'
+            # Formats data to look nicer with indents, and also removes any unwanted escape characters.
+            await backend.send_msg(f'```json\n{utils.remove_ansi(utils.print_dict_data(response)).strip()}```')
+        else:
+            await backend.send_msg("**ERROR:** Query ping failed.")
+
+    @commands.command(aliases=['check', 'checkstatus', 'statuscheck', 'active', 'refresh'])
+    async def servercheck(self, ctx):
+        """Checks if server is online."""
+
+        await backend.send_msg('***Checking Server Status...***')
+        response = await backend.server_status()
+        if response:
+            await backend.send_msg("**Server ACTIVE** :green_circle:")
+        elif response is None:
+            await backend.send_msg("**ERROR:** Unable to check server status.")
+        else: await backend.send_msg("**Server INACTIVE** :red_circle:")
+
+    @commands.command(aliases=['stat', 'stats', 'status', 'info'])
+    async def serverstatus(self, ctx):
+        """Shows server active status, version, motd, and online players"""
+
+        sstatus = await backend.server_status()
+        if sstatus: status = '**ACTIVE** :green_circle:'
+        elif sstatus is False: status = '**INACTIVE** :red_circle:'
+        else: status = 'N/A'
+        fields = [
+            ['Current Server', f"Status: {status}\nServer: {config.get_config('server_name')}\nDescription: {config.get_config('server_description')}\nVersion: {await backend.get_server_version(force_check=True)}\nMOTD: {await backend.get_motd()}"],
+            ['Autosave', f"{'Enabled' if config.get_config('enable_autosave') else 'Disabled'} ({config.get_config('autosave_interval')}min)"],
+            ['Address', f"Address: ||`{config.get_config('server_address')}:{config.get_config('server_part')}`|| ({'Working' if await backend.server_ping() else 'Broken'})\nIP: ||`{utils.get_public_ip()}`|| (Use if Address broken)"],
+            ['Location', f"`{config.get_config('server_path')}`"],
+            ['Launch Command', f"`{config.get_config('server_launch_command')}`"]
+        ]
+        await backend.send_msg(embed=comps.new_embed(fields, 'Server Status'))
+
+        if status is not False:  # Only fetches players list if server online.
+            await ctx.invoke(self.bot.get_command('players'))
+        await ctx.invoke(self.bot.get_command('bannermsg'))
+        lprint(ctx, "Fetched server status")
+
+    @commands.command(aliases=['log', 'mlog', 'slog'])
+    async def serverlog(self, ctx, lines=20, match=None):
+        """
+        Show server log.
+
+        Args:
+            lines optional default(5): How many latest lines to show or how many matches to show if using 'match' argument.
+            match optional: Filter lines, only show lines containing this. Must provide lines argument if using this one.
+
+        Usage:
+            ?serverlog - Defaults ot showing 5 lines
+            ?log 10
+            ?log 10 my coordinates - Gets 10 most recent lines containing 'my coordinates'.
+
+        Note: When using the match argument, like '?log 5 hello', this doesn't mean it'll get the latest 5 lines and check
+        if those lines contains 'hello'. Instead, it'll keep going through 'latest.log' until it finds 5 matches (or until the file ends).
+        """
+
+        await backend.send_msg(f"***Fetching {lines} Minecraft Log...*** :tools:")
+        log_data = await backend.read_server_log(search=match, lines=lines, find_all=True)
+        if log_data:
+            await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'server.log'))
+            lprint(ctx, f"Fetched Minecraft Log: {lines}")
+        else:
+            await backend.send_msg("**Error:** Problem fetching data.")
+            lprint(ctx, "ERROR: Issue getting minecraft log data")
+
+    @commands.command(aliases=['sclog', 'connectionlog', 'connectionslog', 'conlog', 'joinlog', 'loginlog'])
+    async def serverconnectionslog(self, ctx, lines=20):
+        """
+        Shows log lines relating to connections (joining, disconnects, kicks, etc).
+
+        Args:
+            lines optional default(5): Number of lines to show.
+
+        Usage:
+            ?clogs - Shows recent 5 lines
+            ?clogs 10
+        """
+
+        await backend.send_msg(f"***Fetching {lines} Connection Log...*** :satellite:")
+
+        match_list = ['joined the game', 'logged in with entity id', 'left the game', 'lost connection:', 'Kicked by an operator', ]
+        # Get only log lines that are connection related.
+        log_data = await backend.read_server_log(search=match_list, lines=lines, find_all=True)
+        if not log_data:
+            await backend.send_msg("**ERROR:** Could not get chat log.")
+            lprint(ctx, "ERROR: Problem fetching connections log.")
+            return
+
+        await backend.send_msg(file=discord.File(utils.convert_to_bytes('\n'.join(log_data)), 'connections_log.log'))
+        lprint(ctx, f"Fetched Connection Log: {lines}")
+
+    @commands.command(aliases=['minecraftversion', 'mversion', 'version'])
+    async def serverversion(self, ctx, version=None):
+        """Get and set Minecraft server version.
+
+        Args:
+            version optional: Version number to set.
+
+        Usage:
+        ?version -  Show current version set.
+        ?version 1.20.1 - Set version.
+        """
+
+        if version:
+            if config.set_config('server_version', version):
+                await backend.send_msg("Server version set.")
+            else: await backend.send_msg("**ERROR** Problem setting server version.")
+
+        response = await backend.get_server_version(force_check=True)
+        if response is False:
+            await backend.send_msg("**ERROR:** Could not get server version")
+            lprint("ERROR: Couldn't get server version.")
+        else: await backend.send_msg(f"Current version: `{response}`")
+        lprint(ctx, f"Fetched Minecraft server version: {response}")
+
+        if not version: await backend.send_msg("Usage: `?version` - Get server version. `?version 1.20.1` Set version.")
+
 async def setup(bot):
     await bot.add_cog(Server(bot))
+    await bot.add_cog(Server_Admin(bot))
