@@ -52,6 +52,25 @@ Scroll down for requirements, setup instructions and screenshots.
   - You can use `?update` to download latest .jar file (Downloads latest PaperMC by default, more details in `slime_vars.py` comments, line 63)
 
 
+### Commands  
+- `?help`, `?help2` - Help pages. First one is my custom embed layout, second one is default discord.py format.  
+- `?start`, `?stop`, `?restart` - Start/stop Minecraft server.  
+- `?check` - Check if server is online, and if console is reachable, if able.  
+- `?status` - Server information: status, version, motd, address/IP, players online, etc.  
+- `?players` - Show names of online players.  
+- `?playerpanel` - Common bot commands and functionality using discord.py components.  
+- `?teleportpanel` - Easy to use teleport panel. Includes return button to return teleported player to previous position.  
+- `?playerlocate` - Get xyz coords of player.   
+- `?serverproperties` - Show or edit properties in server.properties file.  
+- `?worldbackup`, `?worldrestore`, `?serverbackup`, `?serverrestore` - Manage world and server backups.  
+- `?serverlog`, `?chatlog`, `?connectionlog`, `?botlog` - Show logs for: server, just player chats, server connections and bot.  
+- `?update` - Update server .jar file.   
+  - The bot checks the server name and description configs to determine what flavor of server to get.  
+    E.g. If `papermc` is in the server description, it'll get the latest PaperMC jar from official site.  
+  - Currently working: vanilla, papermc  
+- `?botupdate` - Uses Git CLI to pull the latest update from Master branch.   
+   Note: Will not work if there's local changes. Either stash them or use `git restore .` in source folder.  
+
 ### User Configs
 #### File Structure:
 - Either use `python3 run_bot.py makefolders` to create these folders or create your own and update the paths in configs.  

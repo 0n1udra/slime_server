@@ -28,7 +28,7 @@ Player Locations, `?p location` `?pl`, Gets location coordinates for all online 
 Player Locate, `?locate <player>`, Get player coordinates.
 Teleport, `?teleport [target_player] [destination] [reason]` `?tp`, "After 5s teleports player to targeted player or xyz coords. Use without arguments or provide only select_user to bring up panel."
 Teleport Return, `?teleportreturn` `?return` `?tpr`, Returns last teleported player with bot to original location.
-Invenotry Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
+Inventory Clear, `?clearinventory <player>` `?clear Frogo`, Clears player inventory.
 Kill, `?kill <target> [reason]` `?pk`, Kill player, default reason 'No reason given'.
 Kill Delayed, `?killwait <target> <seconds> [reason]` `?dw`, Kills target after waiting for x seconds.
 Game Mode, `?gamemode <player> <mode> [reason]` `?gm`, Set player's game mode.
@@ -61,7 +61,7 @@ Server Restore, `?serverbackuprestore <index>` '?serverrestore` `?restoreserver`
 Server Update, `?serverupdate [now]` `?su`, Updates server.jar from official Minecraft website.
 Server Properties, `?property <all/property name> [new value]` `?pr`, Check and change server server.properties file.
 Server Update, `?serverupdate` `?su`, Downloads and installs latest server version. Supports: Vanilla, PaperMC).
-Check Latest Version, `?latestversion` `?lv`, Checks what's the latest minecraft version. See Update Server for suported versions)
+Check Latest Version, `?latestversion` `?lv`, Checks what's the latest minecraft version. See Update Server for supported versions)
 Set Online Mode, `?onlinemode [true/false]`, Set online mode to true or false, restart needed to apply change.
 Set RCON, `?rcon [true/false]`, Enables or Disables RCON feature, no argument to check RCON status else make sure true or false argument is all lowercase. Currently have to set other RCON properties with `?property`.
 Bot Log, `?botlog [lines]`, Get Discord bot logs, max of 20 lines, default is 5.
