@@ -34,35 +34,6 @@ async def on_ready():
             on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
             await backend.send_msg('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
-# TODO fix
-command_config = {
-    'permissions': {
-        "admin": ["", "Moderator"],
-        "basic_controls": ["Admin"],
-    }
-}
-
-#@bot.event
-async def on_command(ctx):
-    # Get the command name from the invoked context
-    command_name = ctx.command.name
-    print(command_name)
-
-    # Get the allowed roles for the command from the JSON configuration
-    allowed_roles = command_config.get('roles', {}).get(command_name, [])
-
-    # Check if the user has any of the allowed roles
-    if any(role.name in allowed_roles for role in ctx.author.roles):
-        # User has permission, continue with executing the command
-        await bot.process_commands(ctx)
-    else:
-        # User does not have permission, send a message or perform other actions
-        await ctx.send('You do not have permission to use this command.')
-
-
-@bot.event
-async def on_command(ctx):
-    backend.set_discord_channel(ctx)
 
 async def setup(bot: commands.Bot) -> None:
     """

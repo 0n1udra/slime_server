@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+__version__ = '9.0.3'
+__date__ = '02/11/2023'
+__license__ = 'GPL 3'
+__author__ = 'github.com/0n1udra'
+__discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
+
 import os
 import sys
 import platform
@@ -188,7 +194,7 @@ class Slime_Bot:
             sys.exit()
 
         from bot_files.slime_bot import bot
-        bot.run(TOKEN)
+        bot.run(TOKEN, reconnect=True)
 
     def start_bot_tmux(self) -> bool:
         """Start bot in tmux session."""

@@ -3,13 +3,6 @@ self.bot_configs contain all bot related settings.
 self.servers contains configs for each server.
 """
 
-__version__ = '9.0.3'
-__date__ = '09/17/2023'
-__author__ = 'github.com/0n1udra'
-__license__ = 'GPL 3'
-__status__ = 'Development'
-__discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm online :)
-
 import os
 import re
 import json
