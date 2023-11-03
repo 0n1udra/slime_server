@@ -462,7 +462,7 @@ class Server_Admin(commands.Cog):
         """
 
         if state in ['true', 'false', '']:
-            response = backend.edit_file('enable-rcon', state)
+            response = backend.update_property('enable-rcon', state)
             await backend.send_msg(f"`{response[0]}`")
         else: await backend.send_msg("Need a true or false argument (in lowercase).")
 
