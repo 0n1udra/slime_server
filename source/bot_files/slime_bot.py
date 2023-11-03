@@ -6,9 +6,10 @@ from discord import Activity, Intents
 from discord.ext import commands
 
 from bot_files.slime_backend import backend
-from bot_files.slime_config import __version__, config
+from bot_files.slime_config import config
 from bot_files.slime_utils import lprint
 from bot_files.discord_components import comps
+from run_bot import __version__
 
 intents = Intents.default()  # Default: discord.Intents.default()
 intents.message_content = True  # Default: True

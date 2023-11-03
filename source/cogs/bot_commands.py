@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands, tasks
 
 from bot_files.slime_backend import backend
-from bot_files.slime_config import __version__, __date__, __author__, config
+from run_bot import __version__, __date__, __author__, config
 from bot_files.slime_utils import lprint, file_utils, utils
 from bot_files.discord_components import comps, buttons_dict
 

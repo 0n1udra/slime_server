@@ -10,7 +10,7 @@ import os
 import sys
 import platform
 
-from bot_files.slime_config import config, __version__, __date__
+from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
 
 watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
