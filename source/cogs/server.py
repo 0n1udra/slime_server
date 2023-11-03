@@ -584,7 +584,7 @@ class Server(commands.Cog):
             await backend.send_msg(ping)
         else: await backend.send_msg("Unable to get ping.")
 
-    @commands.command(aliases=['queryserver', 'pingquery', 'queryping', 'query'])
+    @commands.command(aliases=['queryserver', 'pingquery', 'queryping', 'query', 'sq'])
     async def serverquery(self, ctx):
         """
         Uses mctools library to get basic server info from server query.

@@ -16,6 +16,7 @@ Project Structure:
 """
 
 import os
+import asyncio
 import fileinput
 from os.path import join
 from typing import Union, Dict, Tuple, List
@@ -265,7 +266,9 @@ class Backend():
             return False
 
         try:
-            ping = mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port'))
+            ping = await asyncio.wait_for(
+                mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port')),
+                timeout=1)
             stats = ping.get_stats()
             ping.stop()
         except:
