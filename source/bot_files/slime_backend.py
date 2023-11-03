@@ -265,10 +265,11 @@ class Backend():
             lprint("ERROR: Server port issue.")
             return False
 
+        return await asyncio.wait_for(self._ping_query(), timeout=1)
+
+    async def _ping_query(self):
         try:
-            ping = await asyncio.wait_for(
-                mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port')),
-                timeout=1)
+            ping = mctools.PINGClient(config.get_config('server_address'), config.get_config('server_port'))
             stats = ping.get_stats()
             ping.stop()
         except:
