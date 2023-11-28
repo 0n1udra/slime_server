@@ -78,19 +78,19 @@ Scroll down for requirements, setup instructions and screenshots.
   
 Example folder structure:
 ```
-Home (e.g. ~/ or C:\Users\0n1udra)
+Home (home_path, e.g. ~/ or C:\Users\0n1udra)
 └─ Games
-    └─ Minecraft
-       ├─ servers (e.g. ~/Games/Minecraft/servers/)
-       │  ├─ papernc
+    └─ Minecraft (mc_path)
+       ├─ servers (servers_path)
+       │  ├─ papernc (server_path, e.g. ~/Games/Minecraft/servers/papermc)
        │  │  └─ server.jar
        │  └─ vanilla
        │     └─ server.jar
        ├─ server_backups
-       │  ├─ papermc
+       │  ├─ papermc (server_backups_path)
        │  └─ vanilla
        └─ world_backups
-          ├─ papermc
+          ├─ papermc (world_backups_path)
           └─ vanilla
  ```
 
