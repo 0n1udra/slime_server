@@ -108,7 +108,7 @@ Home (home_path, e.g. ~/ or C:\Users\0n1udra)
     currently only supports the bot and one Minecraft server.  
 - `bot_use_screen`, `bot_screen_name` - Run bot in a Screen session.  
 - `home_path`, `bot_source_path`, `mc_path`, `servers_path` - Used for setting default configs for bot and servers.  
-- `user_config_filepath`, `bot_filepath`, `bot_log_filepath` - Miscellaneous variables needed for bot.  
+- `user_config_filepath`, `bot_log_filepath` - Miscellaneous variables needed for bot.  
 - `windows_compatibility` - Bot will automatically detect if running on Windows system.
   This is Needed to adapt some commands to work for Windows, like starting Minecraft server.  
 - `windows_cmdline_start` - Bot will prefix this to `server_launch_command` to start server.  

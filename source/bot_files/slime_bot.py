@@ -35,6 +35,9 @@ async def on_ready():
             on_ready_buttons = [['Control Panel', 'controlpanel', '\U0001F39B'], ['Buttons', 'buttonspanel', '\U0001F518'], ['Minecraft Status', 'serverstatus', '\U00002139']]
             await backend.send_msg('Use `?cp` for Minecraft Control Panel. `?mstat` Minecraft Status page. `?help`/`help2` for all commands.', view=comps.new_buttons(on_ready_buttons))
 
+@bot.event
+async def on_command(ctx):
+    backend.set_discord_channel(ctx)
 
 async def setup(bot: commands.Bot) -> None:
     """

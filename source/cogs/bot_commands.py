@@ -132,7 +132,7 @@ class Slime_Bot_Commands(commands.Cog):
             return discord.Embed(title=f'Help Page {page}/{pages} :question:')
 
         embed = new_embed(embed_page)
-        for command in file_utils.read_csv('command_info.csv'):
+        for command in file_utils.read_csv(f"{config.bot_source_path}//bot_files//command_info.csv"):
             if not command: continue
 
             embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
