@@ -85,7 +85,6 @@ class Config():
             'mc_path': self.mc_path,
             'servers_path': f'{self.mc_path}//servers',
             'user_config_filepath': f'{self.bot_source_path}//user_config.json',
-            'bot_filepath': f'{self.bot_source_path}//bot_files',
             'bot_log_filepath': f'{self.bot_source_path}//slime_bot.log',
 
             # Use cmd commands. E.g. 'start' command when starting a server only if platform.systems() == 'Windows'.

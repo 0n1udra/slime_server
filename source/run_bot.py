@@ -265,7 +265,7 @@ python3 run_bot.py setup download startboth            --  Create required folde
 python3 run_bot.py tmuxstart startboth tmuxattach      --  Start Tmux session, start server and bot, then attaches to Tmux session.
 
 help            - Shows this help page.
-setup           - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
+makefolders     - Create necessary folders. Starts Tmux session in detached mode with 2 panes.
 startbot        - Creates tmux or screen session and launches Discord bot.
 stopbot         - Stops Discord bot.
 attachbot       - Attaches to session containing bot (tmux or screen).
