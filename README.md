@@ -1,17 +1,24 @@
 ## Control Minecraft server with Discord bot.  
-Scroll down for requirements, setup instructions and screenshots.  
+- Configure depending on if bot is on the same computer as server, or using RCON for remote control.  
+- Interface with server using RCON, Tmux/Screen or subprocess. Some features are disabled if using RCON or Subprocess.  
+  - NOTE: Some features will not work if on Windows, you can use something like [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).  
+  - Optionally run the bot and server inside the same or different Tmux/Screen sessions.  
+  - The bot can use Tmux/Screen to send commands to the server, or use the Python subprocess module to run and manage the server.  
+  - Some features depend on if you have read/write access to server files (server.jar, logs, property files, etc).  
+  - If using Tmux/Screen or subprocess to control the server, the bot has to send a `xp` command with a randomly generated number so the bot can read the output properly.  
+    - NOTE: This is disabled when using RCON.  
+    - If you have better ways so it doesn't clog up the logs, lmk!  
+- Basic commands: say, kick, teleport, save, weather, and gamemode.  
+- Show connection history, chat log, online players, banned, OP list, and whitelist.  
+- World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files.  
+- Server autosave, start, stop, status, version, log, update server.jar (only with Vanilla or PaperMC), and edit server.properties.  
+
+---
 
 - Join Discord server for bot help: https://discord.gg/s58XgzhE3U
 - See releases (may not have latest code): https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
 - Jump to: [Guide](#setup), [Screenshots](#screenshots), [Support me](#support-me)  
-
-### Features
-- Basic commands: say, kick, teleport, save, weather, and gamemode.
-- Show connection history, chat log, online players, banned, OP list, and whitelist.
-- World save backup and restore system. Also has server folder backup/restore feature. These features need direct access to server files.
-- Server autosave, start, stop, status, version, log, update server.jar (only with Vanilla or PaperMC), and edit server.properties
-- Interface via RCON, Tmux or subprocess. Some features and command may be disabled if using RCON or Subprocess.
 
 ### TODO List
 - Discord user and role specific permissions for certain commands and/or command groups.
@@ -21,9 +28,9 @@ Scroll down for requirements, setup instructions and screenshots.
 
 ### Requirements
 - [Python 3.8+](https://www.python.org/)
-- [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If hosting Minecraft server)
-- [Tmux](https://github.com/tmux/tmux/wiki) (If hosting Minecraft server)
-- [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (If on Windows)
+- [Java 64bit](https://www.java.com/en/download/linux_manual.jsp) (If bot starting Minecraft server)
+- [Tmux](https://github.com/tmux/tmux/wiki)/[Screen](https://www.gnu.org/software/screen/) (Optional)
+- [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Optional if on Windows)
 
 ### Python Modules
 - [discord.py 2.0](https://github.com/Rapptz/discord.py)
