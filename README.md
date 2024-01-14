@@ -118,6 +118,8 @@ Home (home_path, e.g. ~/ or C:\Users\0n1udra)
 - `server_name`, `server_description`, `server_version` - Basic server info.  
   - NOTE: Bot will try to detect server version. If it doesn't work, you can set it manually. however, it might be overridden by the bot if it successfully detects a version.  
 - `server_address`, `server_port` - Server domain/IP and port. Not needed, but some features may not work properly.  
+- `server_use_essentialsx` - EssentialX plugin compatibility.   
+  - NOTE: Bot will use `pong` command instead of `xp`. See `status_checker_command` below for more.  
 - `server_files_access` - If you are running the bot on the same system as the server, and it can access server files.  
   - Needed for some features like world/server backup and restore, editing server.properties file, etc.  
 - `server_use_rcon`, `rcon_pass`, `rcon_port` - RCON configs. Uses `server_address`.  

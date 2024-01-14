@@ -103,6 +103,7 @@ class Config():
 
                 # For compatibility. e.g. From 1.12 to 1.13+ the /list command output is different, /data get entity doesn't work, etc...
                 'server_version': '1.20',
+                'server_use_essentialsx': False,
 
                 # Server domain or IP address. Used for server_ping(), ping_address(), etc,.
                 'server_address': 'localhost',  # Leave '' for blank instead of None or False
@@ -143,6 +144,7 @@ class Config():
                 # Only send command after sending unique number to console to check status.
                 'check_before_command': True,
                 # The command sent to server to check if responsive. send_command() will send something like 'xp 0.64356...'.
+                # If server_use_essentialsx is True, the bot will use /pong command instead.
                 'status_checker_command': 'xp',
                 # Wait time (in seconds) between sending command to MC server and reading server logs for output.
                 # Time between receiving command and logging output varies depending on PC specs, MC server type (papermc, vanilla, forge, etc), and how many mods.

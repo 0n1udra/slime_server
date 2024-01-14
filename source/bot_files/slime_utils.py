@@ -506,6 +506,16 @@ class Utils:
             except:
                 return None
         else:
+            if config.get_config('server_use_essentialsx'):
+                text = output[-1].split(':')[-1].strip()  # There are 2 of a max of 20 players online
+                player_names = []
+                for line in output[:-1]:
+                    names_section = line.split(':')[-1].strip()
+                    player_names += [i.strip() for i in names_section.split(',')]
+                    print("LINE", player_names)
+                    return player_names, text
+            else: return False
+
             # TODO make get_command_output be able to take command
             try:
                 reaesc = re.compile(r'\x1b[^m]*m')
@@ -550,13 +560,17 @@ class Utils:
     # Get command and unique number used to check if server console reachable.
     def get_check_command(self) -> Tuple:
         """
+        Creates command containing random number to send to console, to use as a stopgap when reading log file.
 
         Returns:
-
+            str, str: Command to send, and the random number generated.
         """
 
         random_number = str(random.random())
-        status_check_command = config.get_config('status_checker_command') + ' ' + random_number
+        command = config.get_config('status_checker_command')
+        if config.get_config('server_use_essentialsx'):
+            command = 'ping'
+        status_check_command = f'{command} {random_number}'
         return status_check_command, random_number
 
     def get_parameter(self, arg, nrg_msg: bool = False, key: str = 'second_selected', **kwargs) -> str:
