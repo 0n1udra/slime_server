@@ -11,12 +11,17 @@ import math
 import time
 import socket
 import shutil
-import psutil
 import random
 import asyncio
 import inspect
-import requests
 import datetime
+try:
+    import psutil, requests
+except Exception as e:
+    print("ERROR: Missing modules")
+    print(e)
+    exit()
+
 from os import listdir
 from os.path import isdir, isfile, join, exists
 
