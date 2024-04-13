@@ -15,12 +15,6 @@ import random
 import asyncio
 import inspect
 import datetime
-try:
-    import psutil, requests
-except Exception as e:
-    print("ERROR: Missing modules")
-    print(e)
-    exit()
 
 from os import listdir
 from os.path import isdir, isfile, join, exists
@@ -29,6 +23,13 @@ from typing import Union, Any, Tuple, List, Dict, Generator
 
 from bot_files.slime_config import config
 
+if config.get_config('use_pyenv'):
+    try:
+        import psutil, requests
+    except Exception as e:
+        print("ERROR: Missing modules")
+        print(e)
+    else: import psutil, requests
 
 slime_proc = slime_pid = None  # If using nohup to run bot in background.
 slime_proc_name, slime_proc_cmdline = 'python3',  'slime_bot.py'  # Needed to find correct process if multiple python process exists.

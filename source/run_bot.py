@@ -9,6 +9,7 @@ __discord__ = 'https://discord.gg/s58XgzhE3U'  # Join for bot help (if i'm onlin
 import os
 import sys
 import platform
+import subprocess
 
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
@@ -48,7 +49,10 @@ class Slime_Bot:
 
         # Hides banner
         if 'hidebanner' not in sys.argv:
-            self.show_banner()
+            if config.get_config('use_pyenv'):
+                if sys.prefix == sys.base_prefix:
+                    self.show_banner()
+            else: self.show_banner()
 
         # Use custom token and configs.
         if self.dev_mode:
@@ -181,8 +185,15 @@ class Slime_Bot:
                 return
         else: self._start_bot()
 
-    def _start_bot(self) -> None:
+    def _start_bot(self, launch=None) -> None:
         """Starts Discord bot. This is a separate function incase you want to run the bot inline."""
+
+        # If using virtual environment
+        if config.get_config('use_pyenv'):
+            # Runs run_bot.py _startbot if not already in venv.
+            if sys.prefix == sys.base_prefix:
+                subprocess.run(['/home/secr/pyenvs/slime_server/bin/python3', f"{config.get_config('bot_source_path')}/run_bot.py", "_startbot"])
+                sys.exit()
 
         if os.path.isfile(config.get_config('bot_token_filepath')):
             with open(config.get_config('bot_token_filepath'), 'r') as file:
@@ -206,7 +217,7 @@ class Slime_Bot:
             lprint(f"ERROR: Changing directory {config.get_config('bot_source_path')}")
             return False
 
-        # If using python environment.
+        # If using virtual environment
         if config.get_config('use_pyenv'):
             pyenv = config.get_config('pyenv_activate_command')
             if os.system(f"tmux send-keys -t {self.tmux} '{pyenv}' ENTER"):
