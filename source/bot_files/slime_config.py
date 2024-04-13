@@ -44,6 +44,8 @@ class Config():
         self.bot_configs = {
             # Use python virtual environment
             'use_pyenv': False,
+            # Path to venv python3 executable to use to launch bot (when using _startbot runtime arg)
+            'pyenv_python_path': f"{self.home_path}//pyenvs//slime_server//bin//python3",
             'pyenv_activate_command': f'source {self.home_path}//pyenvs//slime_server//bin//activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",

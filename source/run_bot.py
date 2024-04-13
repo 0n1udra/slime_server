@@ -192,7 +192,7 @@ class Slime_Bot:
         if config.get_config('use_pyenv'):
             # Runs run_bot.py _startbot if not already in venv.
             if sys.prefix == sys.base_prefix:
-                subprocess.run(['/home/secr/pyenvs/slime_server/bin/python3', f"{config.get_config('bot_source_path')}/run_bot.py", "_startbot"])
+                subprocess.run([config.get_config('pyenv_python_path'), f"{config.get_config('bot_source_path')}/run_bot.py", "_startbot"])
                 sys.exit()
 
         if os.path.isfile(config.get_config('bot_token_filepath')):
