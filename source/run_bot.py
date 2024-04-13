@@ -128,12 +128,12 @@ class Slime_Bot:
                         print("Using default:", default_value)
             return new_configs
 
-        # Some questions can be skipped, like how pyenv_activate_command prompt will only show if user says yes to use_pyenv.
+        # Some questions can be skipped, like how pyenv_python_path prompt will only show if user says yes to use_pyenv.
         # Add the config with colon, and get_input() will split the prompt and check the prior received inputs. Order of prompts is important.
         # A ! means skip prompt if specified config was answered. E.g. !bot_use_screen will be skipped if bot_use_tmux is True.
         bot_config_promptss = {
             'use_pyenv': "Use Python env (y/n)",
-            'pyenv_activate_command': 'use_pyenv: Command to use to activate/source pyenv if using one',
+            'pyenv_python_path': 'use_pyenv: Path to python3 executable (e.g. .../venv/slime/bin/python3)',
             'bot_token_filepath': "!use_pyenv: Discord bot token filepath",
             'command_prefix': "Discord command prefix",
             'bot_use_tmux': "Run bot using Tmux (y/n)",
@@ -217,14 +217,6 @@ class Slime_Bot:
             lprint(f"ERROR: Changing directory {config.get_config('bot_source_path')}")
             return False
 
-        # If using virtual environment
-        if config.get_config('use_pyenv'):
-            pyenv = config.get_config('pyenv_activate_command')
-            if os.system(f"tmux send-keys -t {self.tmux} '{pyenv}' ENTER"):
-                lprint(f"ERROR: Couldn't use pyenv: {pyenv}")
-                return False
-            else: lprint(f"INFO: Activated pyenv: {pyenv}")
-
         if os.system(f"tmux send-keys -t {self.tmux} '{config.get_config('bot_launch_command')} {self.dev_mode}' ENTER"):
             lprint("ERROR: Could not start bot in tmux.")
             return False
@@ -301,7 +293,7 @@ Instead run 'python3 tmuxstart startboth tmuxattach', start Tmux session then st
 NOTE: More config info in README.md or read comments in slime_config.py file in bot_files.
 Bot:
 Version             {__version__} - {__date__}
-Python Env          {config.get_config('pyenv_activate_command') if config.get_config('use_pyenv') else 'None'}
+Python Env          {config.get_config('pyenv_python_path') if config.get_config('use_pyenv') else 'None'}
 Config File:        {config.get_config('user_config_filepath')}
 Bot Log             {config.get_config('bot_log_filepath')}
 Tmux                {config.get_config('bot_use_tmux')}

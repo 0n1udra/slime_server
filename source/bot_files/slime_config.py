@@ -46,7 +46,6 @@ class Config():
             'use_pyenv': False,
             # Path to venv python3 executable to use to launch bot (when using _startbot runtime arg)
             'pyenv_python_path': f"{self.home_path}//pyenvs//slime_server//bin//python3",
-            'pyenv_activate_command': f'source {self.home_path}//pyenvs//slime_server//bin//activate',
             # How run_bot.py script launches the Discord bot.
             'bot_launch_command': "python3 run_bot.py _startbot",
 
@@ -248,7 +247,7 @@ class Config():
 
         config_data = config_data.copy()
         for k, v in config_data.items():
-            to_change = ['path', 'pyenv_activate_command']
+            to_change = ['path']
             if any(i in k for i in to_change) and isinstance(v, str):  # Replaces SELECTED_SERVER only if key has 'path' in it.
                 # Makes sure all paths uses double slashes '//' for windows and linux compatibility
                 v = re.sub(r'(?<!/)/(?![/])', '//', v).replace('\\', '//')
