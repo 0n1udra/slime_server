@@ -15,6 +15,7 @@ import random
 import asyncio
 import inspect
 import datetime
+import traceback
 
 from os import listdir
 from os.path import isdir, isfile, join, exists
@@ -331,6 +332,8 @@ class File_Utils:
 
         try: shutil.rmtree(path)
         except:
+            lprint(f"ERROR: Issue deleting folder: {path}")
+            traceback.print_exc()
             return False
 
         return True
@@ -353,6 +356,7 @@ class File_Utils:
             os.mkdir(path)
         except:
             lprint(f"ERROR: Issue creating new folder: {path}")
+            traceback.print_exc()
             return False
         lprint(f"INFO: New folder: {path}")
         return True
@@ -377,6 +381,7 @@ class File_Utils:
             shutil.copytree(path, new_path)
         except:
             lprint(f"ERROR: Issue copying folder: {path} > {new_path}")
+            traceback.print_exc()
             return False
         lprint(f"INFO: Copied folder: {path} > {new_path}")
         return True

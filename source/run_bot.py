@@ -14,10 +14,11 @@ import subprocess
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils, proc_utils
 
-watch_interval = 1  # How often to update log file. watch -n X tail bot_log.txt
 
 class Slime_Bot:
     def __init__(self):
+        self.watch_interval = 1  # for log runtime arg. watch -n X tail bot_log.txt
+
         self.dev_mode = ''
         if 'dev' in sys.argv:
             self.dev_mode = 'dev'
@@ -258,7 +259,7 @@ class Slime_Bot:
     def show_log(self) -> None:
         """Use watch + tail command on bot log."""
 
-        os.system(f"watch -n {watch_interval} tail {config.get_config('bot_log_filepath')}")
+        os.system(f"watch -n {self.watch_interval} tail {config.get_config('bot_log_filepath')}")
 
     def script_help(self) -> None:
         """Shows help page for run_bot.py"""

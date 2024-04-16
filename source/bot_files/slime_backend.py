@@ -28,7 +28,7 @@ from bot_files.server_api import Server_API, Server_API_Screen, Server_API_Subpr
 from bot_files.slime_config import config
 from bot_files.slime_utils import lprint, utils, file_utils
 
-class Backend():
+class Backend:
     # The order of this dictionary determines the priority of which API to use if multiple are enabled in configs.
     server_api_types = {
         'server_use_rcon': Server_API_Rcon,
@@ -73,7 +73,7 @@ class Backend():
         Updates discord_channel with Discord channel object wtih channel_id config, so you can use send_channel_msg func.
 
         Args:
-            bot: Needs discord.ext.commands.bot object to send message to find channel by ID.
+            ctx: Needs discord.ext.commands.bot object to send message to find channel by ID.
 
         Returns:
             bool: Successfully found Discord chanel by set channel_id config.
@@ -595,7 +595,7 @@ class Backend():
 
         if 'server' in mode:
             if file_utils.delete_dir(server_path):
-                if file_utils.cop_dir(src, server_path):
+                if file_utils.copy_dir(src, server_path):
                     return True
 
         return False
