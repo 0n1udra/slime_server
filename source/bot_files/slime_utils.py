@@ -15,6 +15,7 @@ import random
 import asyncio
 import inspect
 import datetime
+import requests
 import traceback
 
 from os import listdir
