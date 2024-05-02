@@ -214,6 +214,7 @@ class File_Utils:
                 outfile.write(json.dumps(data, indent=4))
         except:
             lprint(f"ERROR: Problem writing to json file: {file_path}")
+            traceback.print_exc()
             return False
         return True
 
@@ -253,6 +254,7 @@ class File_Utils:
             with open(file_path, 'w') as file:
                 csv.writer(file).writerows(data)
         except:
+            traceback.print_exc()
             return False
 
         return True

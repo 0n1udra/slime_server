@@ -124,7 +124,6 @@ class Slime_Bot_Commands(commands.Cog):
     async def help2(self, ctx):
         """Shows help page with embed format, using reactions to navigate pages."""
 
-        lprint(ctx, "Fetched help page")
         current_command, embed_page, contents = 0, 1, []
         pages, current_page, page_limit = 8, 1, 10
 
@@ -132,7 +131,13 @@ class Slime_Bot_Commands(commands.Cog):
             return discord.Embed(title=f'Help Page {page}/{pages} :question:')
 
         embed = new_embed(embed_page)
-        for command in file_utils.read_csv(f"{config.bot_source_path}//bot_files//command_info.csv"):
+        commands = file_utils.read_csv(f"{config.bot_source_path}//bot_files//command_info.csv")
+        if not commands:
+            lprint(ctx, "ERROR: Issue reading command help file.")
+            backend.send_msg("**ERROR:** Issue fetching help pages. You can also use `?help`.")
+            return
+        lprint(ctx, "Fetched help page")
+        for command in commands:
             if not command: continue
 
             embed.add_field(name=command[0], value=f"{command[1]}\n{', '.join(command[2:])}", inline=False)
