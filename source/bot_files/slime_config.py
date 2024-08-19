@@ -24,14 +24,14 @@ class Config():
         self.initialize_configs()
         self.initial_example_configs = {}
         self.example_server_configs = self.servers['example']
-        self.server_configs = self.servers['example']  # Will be updated with currently selected server
-        self.server_name = self.server_configs['server_name']
+        self.server_configs = self.servers['example']  # Currently selected server configs, will change during bot usage.
+        self.server_name = self.server_configs['server_name'] # Currently selected server's name.
 
         # TODO self.config var
         #self.config_file = self.get_
         # Personal variable, not for public use.
         self._win_mode = False
-        self._win_config_file = "C://Users//0n1udra//git//slime_server//source//user_config_win.json"
+        self._win_config_file = "C://Users//Secr//git//slime_server//source//user_config_win.json"
 
         self.failed_ping_limit = 1  # Prevent clogging bot log with failed ping messages.
         self.failed_pings = 0
@@ -188,7 +188,7 @@ class Config():
         """Update needed instance variables, and also adds any newly added server configs."""
 
         self.example_server_configs = self.servers['example']
-        self.server_configs = self.servers['example']  # Will be updated with currently selected server
+        self.server_configs = self.servers['example']
         self.server_name = self.server_configs['server_name']
 
     def get_config(self, config_key: str, default_return: Any = None) -> Union[Any, None]:
@@ -292,7 +292,9 @@ class Config():
         if server_name in self.servers:
             return False
 
-        self.servers[server_name] = config_data.copy() if config_data else self.example_server_configs.copy()
+        self.servers[server_name] = {**self.example_server_configs,
+                                     **(config_data if isinstance(config_data, dict) else {})}
+
         self.servers[server_name]['server_name'] = server_name
         # Adds default configs for the ones not set, and updates config json file.
         self.update_all_configs()
