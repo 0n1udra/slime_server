@@ -526,9 +526,8 @@ class Utils:
                 for line in output[:-1]:
                     names_section = line.split(':')[-1].strip()
                     player_names += [i.strip() for i in names_section.split(',')]
-                    print("LINE", player_names)
+                    #print("LINE", player_names)
                     return player_names, text
-            else: return False
 
             # TODO make get_command_output be able to take command
             try:
