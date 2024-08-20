@@ -54,7 +54,7 @@ class Server_Admin(commands.Cog):
             await backend.send_msg(f"Use `?serverselect` to list, or `?ss [server]` to switch.")
         elif name in config.servers:
             if not config.get_config('players_custom_status'):
-                await self.bot.change_presence(activity=discord.Activity(name=f"- {config.server_configs['server_name']}", type=1))
+                await self.bot.change_presence(activity=discord.Game(name=f"- {config.server_configs['server_name']}"))
             await backend.select_server(name)
             await backend.send_msg(f"**Selected Server:** {name}")
         else: await backend.send_msg("**ERROR:** Server not found.")

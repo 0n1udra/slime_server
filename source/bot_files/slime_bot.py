@@ -2,7 +2,7 @@ import os
 import sys
 import datetime
 
-from discord import Activity, Intents
+from discord import Game, Intents
 from discord.ext import commands
 
 from bot_files.slime_backend import backend
@@ -22,7 +22,7 @@ async def on_ready():
     await bot.wait_until_ready()
     await setup(bot)
     await backend.update_bot_object(bot)
-    await bot.change_presence(activity=Activity(name=f"- {config.server_configs['server_name']}", type=1))
+    await bot.change_presence(activity=Game(name=f"- {config.server_configs['server_name']}"))
 
     lprint(f"Bot PRIMED (v{__version__})")  # Logs event to bot_log.txt.
 

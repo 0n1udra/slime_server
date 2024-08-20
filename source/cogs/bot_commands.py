@@ -45,7 +45,7 @@ class Slime_Bot_Commands(commands.Cog):
 
         # Will show: Playing - X | Ping - X
         # TODO fallback on using public website for ping?
-        await self.bot.change_presence(activity=discord.Activity(name=f"- {players_online} | Ping - {ping}ms", type=1))
+        await self.bot.change_presence(activity=discord.Game(name=f"- {players_online} | Ping - {ping}ms"))
 
     @commands.command(aliases=['set', 'channel', 'sc'])
     async def setchannel(self, ctx):
