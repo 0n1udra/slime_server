@@ -15,7 +15,6 @@
 
 ---
 
-- Join Discord server for bot help: https://discord.gg/s58XgzhE3U
 - See releases (may not have latest code): https://github.com/0n1udra/slime_server/releases  
 - Download latest commit (.zip): https://github.com/0n1udra/slime_server/archive/refs/heads/master.zip
 - Jump to: [Guide](#setup), [Screenshots](#screenshots), [Support me](#support-me)  
